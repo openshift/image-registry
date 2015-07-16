@@ -658,7 +658,7 @@ func (app *App) dispatcher(dispatch dispatchFunc, nameRequired nameRequiredFunc,
 		context := app.context(w, r)
 
 		if err := app.authorized(w, r, context, nameRequired, accessRecords(r)); err != nil {
-			ctxu.GetLogger(context).Errorf("error authorizing context: %v", err)
+			ctxu.GetLogger(context).Warnf("error authorizing context: %v", err)
 			return
 		}
 
