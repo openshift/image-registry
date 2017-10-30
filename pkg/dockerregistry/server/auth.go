@@ -17,9 +17,9 @@ import (
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	"github.com/openshift/origin/pkg/util/httprequest"
 
-	"github.com/openshift/origin/pkg/dockerregistry/server/audit"
-	"github.com/openshift/origin/pkg/dockerregistry/server/client"
-	"github.com/openshift/origin/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 )
 
 type deferredErrors map[string]error
