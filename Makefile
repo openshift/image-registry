@@ -38,7 +38,7 @@ JUNIT_REPORT ?= true
 #   make all
 #   make all WHAT=cmd/oc GOFLAGS=-v
 all build:
-	hack/build-go.sh $(WHAT) $(GOFLAGS)
+	hack/build-go.sh cmd/dockerregistry $(GOFLAGS)
 .PHONY: all build
 
 # Build the test binaries.
@@ -53,7 +53,7 @@ build-tests:
 # Example:
 #   make check
 check: | build verify
-	$(MAKE) test-unit test-cmd -o build -o verify
+	$(MAKE) test-unit -o build -o verify
 .PHONY: check
 
 

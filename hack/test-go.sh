@@ -99,6 +99,7 @@ function list_test_packages_under() {
               -o -path '*.git'                \
               -o -path '*openshift.local.*'   \
               -o -path '*vendor/*'            \
+              -o -path '*tools/*'            \
         \) -prune                             \
     \) -name '*_test.go' | xargs -n1 dirname | sort -u | xargs -n1 printf "${OS_GO_PACKAGE}/%s\n"
 }
@@ -133,27 +134,6 @@ else
     # If no packages are given to test, we need to generate a list of all packages with unit tests
     openshift_test_packages="$(list_test_packages_under '*')"
     test_packages="${openshift_test_packages}"
-
-    kubernetes_path="vendor/k8s.io/kubernetes"
-
-    if [[ -n "${test_kube}" ]]; then
-        # we need to find all of the kubernetes test suites, excluding those we directly whitelisted before, the end-to-end suite, and
-        # the go2idl tests which we currently do not support
-        # etcd3 isn't supported yet and that test flakes upstream
-        optional_kubernetes_packages="$(find -L vendor/k8s.io/{apimachinery,apiserver,client-go,kube-aggregator,kubernetes} -not \( \
-          \(                                                                                          \
-            -path "${kubernetes_path}/staging"                                                        \
-            -o -path "${kubernetes_path}/test"                                                        \
-            -o -path "${kubernetes_path}/cmd/libs/go2idl/client-gen/testoutput/testgroup/unversioned" \
-            -o -path "${kubernetes_path}/pkg/storage/etcd3"                                           \
-            -o -path "${kubernetes_path}/third_party/golang/go/build"                                 \
-          \) -prune                                                                                   \
-        \) -name '*_test.go' | cut -f 2- -d / | xargs -n1 dirname | sort -u | xargs -n1 printf "./vendor/%s\n")"
-
-        test_packages="${test_packages} ${optional_kubernetes_packages}"
-    else
-        test_packages="${test_packages}"
-    fi
 fi
 
 if [[ -n "${dry_run}" ]]; then

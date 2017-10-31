@@ -42,4 +42,3 @@ fi
 OS_BUILD_PLATFORMS=("${OS_BUILD_PLATFORMS[@]:-${platform}}")
 os::build::build_binaries "${build_targets[@]}"
 os::build::place_bins "${build_targets[@]}"
-os::build::make_openshift_binary_symlinks
