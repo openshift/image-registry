@@ -22,6 +22,7 @@ import (
 	kapi "k8s.io/kubernetes/pkg/api"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	imageadmission "github.com/openshift/origin/pkg/image/admission"
 )
 
@@ -33,7 +34,7 @@ const (
 // timeout. Caches will only be initialized if the given ttl is positive. Options are gathered from
 // configuration file and will be overridden by enforceQuota and projectCacheTTL environment variable values.
 func newQuotaEnforcingConfig(ctx context.Context, enforceQuota, projectCacheTTL string, options map[string]interface{}) *quotaEnforcingConfig {
-	enforce, err := getBoolOption(EnforceQuotaEnvVar, "enforcequota", false, options)
+	enforce, err := configuration.GetBoolOption(EnforceQuotaEnvVar, "enforcequota", false, options)
 	if err != nil {
 		context.GetLogger(ctx).Error(err)
 	}
@@ -43,7 +44,7 @@ func newQuotaEnforcingConfig(ctx context.Context, enforceQuota, projectCacheTTL 
 		return &quotaEnforcingConfig{}
 	}
 
-	ttl, err := getDurationOption(ProjectCacheTTLEnvVar, "projectcachettl", defaultProjectCacheTTL, options)
+	ttl, err := configuration.GetDurationOption(ProjectCacheTTLEnvVar, "projectcachettl", defaultProjectCacheTTL, options)
 	if err != nil {
 		context.GetLogger(ctx).Error(err)
 	}
