@@ -4,6 +4,7 @@
 
 # os::build::release::check_for_rpms checks that an RPM release has been built
 function os::build::release::check_for_rpms() {
+echo "#### 20a ${OS_OUTPUT_RPMPATH}"
 	if [[ ! -d "${OS_OUTPUT_RPMPATH}" || ! -s "${OS_OUTPUT_RELEASEPATH}/CHECKSUM" ]]; then
 		relative_release_path="$( os::util::repository_relative_path "${OS_OUTPUT_RELEASEPATH}" )"
 		relative_bin_path="$( os::util::repository_relative_path "${OS_OUTPUT_BINPATH}" )"
