@@ -10,12 +10,12 @@
 # %commit and %os_git_vars are intended to be set by tito custom builders provided
 # in the .tito/lib directory. The values in this spec file will not be kept up to date.
 %{!?commit:
-%global commit c01409b8bb6baf308b703c0d48e828d4eeca2558
+%global commit 4fe3b9995614e8792fc3524cbf06416f4ac9ae22
 }
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 # os_git_vars needed to run hack scripts during rpm builds
 %{!?os_git_vars:
-%global os_git_vars OS_GIT_COMMIT=c01409b8 OS_GIT_VERSION=v3.7.0-0.0.rc.0.4.4ba92a6.1.49f5dbf+c01409b OS_GIT_MAJOR=3 OS_GIT_MINOR=7+ OS_GIT_TREE_STATE=clean
+%global os_git_vars OS_GIT_COMMIT=4fe3b999 OS_GIT_VERSION=v3.7.0-0.0.0.rc.0.4.4ba92a6.1.49f5dbf.0.c01409b+4fe3b99 OS_GIT_MAJOR=3 OS_GIT_MINOR=7+ OS_GIT_TREE_STATE=clean
 }
 
 %if 0%{?skip_build}
@@ -48,7 +48,7 @@ Name:           %{package_name}
 # Version is not kept up to date and is intended to be set by tito custom
 # builders provided in the .tito/lib directory of this project
 Version:        3.7.0
-Release:        0.0.0.rc.0.4.4ba92a6.1.49f5dbf.0.c01409b
+Release:        0.0.0.0.rc.0.4.4ba92a6.1.49f5dbf.0.c01409b.0.4fe3b99
 Summary:        Docker Registry v2 for %{product_name}
 License:        ASL 2.0
 URL:            https://%{import_path}
@@ -91,7 +91,7 @@ on a unified cluster.
 %if 0%{do_build}
 %if 0%{make_redistributable}
 # Create Binaries for all supported arches
-%{os_git_vars} hack/build-cross.sh
+%{os_git_vars} hack/build-go.sh cmd/dockerregistry
 %else
 # Create Binaries only for building arch
 %ifarch x86_64
@@ -109,7 +109,7 @@ on a unified cluster.
 %ifarch s390x
   BUILD_PLATFORM="linux/s390x"
 %endif
-OS_ONLY_BUILD_PLATFORMS="${BUILD_PLATFORM}" %{os_git_vars} hack/build-cross.sh
+OS_ONLY_BUILD_PLATFORMS="${BUILD_PLATFORM}" %{os_git_vars} hack/build-go.sh cmd/dockerregistry
 %endif
 %endif
 
