@@ -16,7 +16,7 @@
 #  - OS_RPM_ARCHITECTURE
 function os::build::rpm::get_nvra_vars() {
 	# the package name can be overwritten but is normally 'origin'
-	OS_RPM_NAME="${OS_RPM_NAME:-"origin"}"
+	OS_RPM_NAME="${OS_RPM_NAME:-"origin-image-registry"}"
 	OS_RPM_ARCHITECTURE="$(uname -i)"
 
 	# we can extract the pacakge version from the build version
