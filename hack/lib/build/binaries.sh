@@ -329,13 +329,8 @@ function os::build::export_targets() {
     fi
   done
 
-  if [[ ${#targets[@]} -eq 0 ]]; then
-    echo "No targets to export!"
-    exit 1
-  fi
-        echo "#### 11b ${targets[@]}"
 
-  binaries=($(os::build::binaries_from_targets "${targets[@]}"))
+  binaries=($(os::build::binaries_from_targets))
 
   platforms=("${OS_BUILD_PLATFORMS[@]:+${OS_BUILD_PLATFORMS[@]}}")
 }
