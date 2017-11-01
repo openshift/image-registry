@@ -25,8 +25,6 @@ else
 	make_redistributable=1
 fi
 
-os::build::version::openshift_vars
-
 os::log::info 'Building Origin release RPMs with tito...'
 os::build::rpm::get_nvra_vars
 tito tag --use-version="${OS_RPM_VERSION}" \
