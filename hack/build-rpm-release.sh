@@ -27,16 +27,23 @@ fi
 
 os::log::info 'Building Origin release RPMs with tito...'
 os::build::rpm::get_nvra_vars
+echo "#### 1a"
 tito tag --use-version="${OS_RPM_VERSION}" \
          --use-release="${OS_RPM_RELEASE}" \
          --no-auto-changelog --offline
+echo "#### 1b"
 tito_tmp_dir="${BASETMPDIR}/tito"
+echo "#### 1c"
 mkdir -p "${tito_tmp_dir}"
+echo "#### 1d"
 tito build --offline --srpm --rpmbuild-options="--define 'dist .el7'" --output="${tito_tmp_dir}"
+echo "#### 1e"
 tito build --output="${tito_tmp_dir}" --rpm --no-cleanup --quiet --offline \
            --rpmbuild-options="--define 'make_redistributable ${make_redistributable}' ${RPM_BUILD_OPTS:-}"
+echo "#### 1f"
 tito tag --undo --offline
 
+echo "#### 1g"
 os::log::info 'Unpacking tito artifacts for reuse...'
 output_directories=( $( find "${tito_tmp_dir}" -type d -name "rpmbuild-${OS_RPM_NAME}*" ) )
 if [[ "${#output_directories[@]}" -eq 0 ]]; then
