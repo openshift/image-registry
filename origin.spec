@@ -10,12 +10,12 @@
 # %commit and %os_git_vars are intended to be set by tito custom builders provided
 # in the .tito/lib directory. The values in this spec file will not be kept up to date.
 %{!?commit:
-%global commit 49f5dbf0e4b1bc57d64b7fae7fc1bd0b9b85d594
+%global commit c01409b8bb6baf308b703c0d48e828d4eeca2558
 }
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 # os_git_vars needed to run hack scripts during rpm builds
 %{!?os_git_vars:
-%global os_git_vars OS_GIT_COMMIT=49f5dbf0 OS_GIT_VERSION=v3.7.0-0.rc.0.4.4ba92a6+49f5dbf-1 OS_GIT_MAJOR=3 OS_GIT_MINOR=7+ OS_GIT_TREE_STATE=clean
+%global os_git_vars OS_GIT_COMMIT=c01409b8 OS_GIT_VERSION=v3.7.0-0.0.rc.0.4.4ba92a6.1.49f5dbf+c01409b OS_GIT_MAJOR=3 OS_GIT_MINOR=7+ OS_GIT_TREE_STATE=clean
 }
 
 %if 0%{?skip_build}
@@ -48,7 +48,7 @@ Name:           %{package_name}
 # Version is not kept up to date and is intended to be set by tito custom
 # builders provided in the .tito/lib directory of this project
 Version:        3.7.0
-Release:        0.0.rc.0.4.4ba92a6.1.49f5dbf
+Release:        0.0.0.rc.0.4.4ba92a6.1.49f5dbf.0.c01409b
 Summary:        Docker Registry v2 for %{product_name}
 License:        ASL 2.0
 URL:            https://%{import_path}
