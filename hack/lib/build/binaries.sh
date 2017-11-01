@@ -7,9 +7,10 @@
 # full go package to be built
 function os::build::binaries_from_targets() {
   local target
-  for target; do
-    echo "${OS_GO_PACKAGE}/${target}"
-  done
+#  for target; do
+#    echo "${OS_GO_PACKAGE}/${target}"
+#  done
+  echo "github.com/openshift/image-registry/cmd/dockerregistry"
 }
 readonly -f os::build::binaries_from_targets
 
@@ -189,7 +190,8 @@ os::build::internal::build_binaries() {
 
     local -a nonstatics=()
     local -a tests=()
-    for binary in "${binaries[@]}"; do
+        echo "#### 10b ${binaries[@]}"
+  for binary in "${binaries[@]}"; do
       if [[ "${binary}" =~ ".test"$ ]]; then
         tests+=($binary)
       else
@@ -225,6 +227,7 @@ os::build::internal::build_binaries() {
       fi
 
       if [[ ${#nonstatics[@]} -gt 0 ]]; then
+      echo "#### 10a ${nonstatics[@]}"
         GOOS=${platform%/*} GOARCH=${platform##*/} go install \
           -pkgdir "${OS_OUTPUT_PKGDIR}/${platform}" \
           -tags "${OS_GOFLAGS_TAGS-} ${!platform_gotags_envvar:-}" \
@@ -330,6 +333,7 @@ function os::build::export_targets() {
     echo "No targets to export!"
     exit 1
   fi
+        echo "#### 11b ${targets[@]}"
 
   binaries=($(os::build::binaries_from_targets "${targets[@]}"))
 
