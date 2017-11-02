@@ -91,6 +91,10 @@ func StartTestRegistry(t *testing.T, kubeConfigPath string) (string, error) {
 		KubeConfig: kubeConfigPath,
 	}
 
+	if err := registryconfig.InitExtraConfig(dockerConfig, extraConfig); err != nil {
+		return "", fmt.Errorf("unable to init registry config: %v", err)
+	}
+
 	go func() {
 		ctx := context.Background()
 		ctx = registrytest.WithTestLogger(ctx, t)

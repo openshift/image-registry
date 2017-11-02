@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/docker/distribution"
+	dockercfg "github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest"
@@ -26,6 +27,7 @@ import (
 	kapi "k8s.io/kubernetes/pkg/api"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
@@ -40,6 +42,15 @@ const (
 func TestRepositoryBlobStat(t *testing.T) {
 	backgroundCtx := context.Background()
 	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
+
+	cfg := &configuration.Configuration{
+		Server: &configuration.Server{
+			Addr: "localhost:5000",
+		},
+	}
+	if err := configuration.InitExtraConfig(&dockercfg.Configuration{}, cfg); err != nil {
+		t.Fatal(err)
+	}
 	// this driver holds all the testing blobs in memory during the whole test run
 	driver := inmemory.New()
 	// generate two images and store their blobs in the driver
@@ -300,7 +311,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 			}
 		}
 
-		reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, defaultBlobRepositoryCacheTTL, tc.pullthrough, true)
+		reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, cfg.Cache.BlobRepositoryTTL, tc.pullthrough, true)
 		if err != nil {
 			t.Errorf("[%s] unexpected error: %v", tc.name, err)
 			continue

@@ -165,7 +165,6 @@ func Execute(configFile io.Reader) {
 
 // Start runs the Docker registry. Start always returns a non-nil error.
 func Start(ctx context.Context, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) error {
-	setDefaultMiddleware(dockerConfig)
 	setDefaultLogParameters(dockerConfig)
 
 	context.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
@@ -372,30 +371,6 @@ func panicHandler(handler http.Handler) http.Handler {
 		}()
 		handler.ServeHTTP(w, r)
 	})
-}
-
-func setDefaultMiddleware(config *configuration.Configuration) {
-	// Default to openshift middleware for relevant types
-	// This allows custom configs based on old default configs to continue to work
-	if config.Middleware == nil {
-		config.Middleware = map[string][]configuration.Middleware{}
-	}
-	for _, middlewareType := range []string{"registry", "repository", "storage"} {
-		found := false
-		for _, middleware := range config.Middleware[middlewareType] {
-			if middleware.Name == "openshift" {
-				found = true
-				break
-			}
-		}
-		if found {
-			continue
-		}
-		config.Middleware[middlewareType] = append(config.Middleware[middlewareType], configuration.Middleware{
-			Name: "openshift",
-		})
-		log.Errorf("obsolete configuration detected, please add openshift %s middleware into registry config file", middlewareType)
-	}
 }
 
 func setDefaultLogParameters(config *configuration.Configuration) {
