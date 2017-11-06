@@ -1,5 +1,5 @@
-hash: ceac212de93aa1d04c09354d486966319cbbdefeb938b38c627aa04ab812170f
-updated: 2017-10-31T10:56:34.114083362-04:00
+hash: 5053a6e9ba1ffba466c36da7582ec4da62105ee56aa0baa459e1f3fee431e803
+updated: 2017-11-07T15:18:20.882635708+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -8,6 +8,8 @@ imports:
   subpackages:
   - compute/metadata
   - internal
+- name: github.com/apcera/gssapi
+  version: b28cfdd5220f7ebe15d8372ac81a7f41cc35ab32
 - name: github.com/aws/aws-sdk-go
   version: 63ce630574a5ec05ecd8e8de5cea16332a5a684d
   subpackages:
@@ -52,23 +54,13 @@ imports:
   - service/s3/s3manager/s3manageriface
   - service/sts
 - name: github.com/Azure/azure-sdk-for-go
-  version: 786cc84138518bf7fd6d60e92fad1ac9d1a117ad
+  version: 0b5fe2abe0271ba07049eacaa65922d67c319543
   subpackages:
-  - arm/compute
-  - arm/containerregistry
-  - arm/disk
-  - arm/network
-  - arm/storage
   - storage
-- name: github.com/Azure/go-autorest
-  version: 58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d
+- name: github.com/Azure/go-ansiterm
+  version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
   subpackages:
-  - autorest
-  - autorest/adal
-  - autorest/azure
-  - autorest/date
-  - autorest/to
-  - autorest/validation
+  - winterm
 - name: github.com/beorn7/perks
   version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
   subpackages:
@@ -90,8 +82,6 @@ imports:
   - common
   - oss
   - util
-- name: github.com/dgrijalva/jwt-go
-  version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/docker/distribution
   version: 1e2bbed6e09c6c8047f52af965a6e301f346d04e
   repo: git@github.com:openshift/docker-distribution
@@ -139,6 +129,29 @@ imports:
   - registry/storage/driver/swift
   - uuid
   - version
+- name: github.com/docker/docker
+  version: b9f10c951893f9a00865890a5232e85d770c1087
+  subpackages:
+  - builder/dockerfile/command
+  - builder/dockerfile/parser
+  - cliconfig
+  - opts
+  - pkg/archive
+  - pkg/fileutils
+  - pkg/homedir
+  - pkg/idtools
+  - pkg/ioutils
+  - pkg/jsonlog
+  - pkg/jsonmessage
+  - pkg/longpath
+  - pkg/mount
+  - pkg/pools
+  - pkg/promise
+  - pkg/stdcopy
+  - pkg/symlink
+  - pkg/system
+  - pkg/term
+  - pkg/term/windows
 - name: github.com/docker/engine-api
   version: dea108d3aa0c67d7162a3fd8aa65f38a430019fd
   subpackages:
@@ -165,6 +178,10 @@ imports:
   version: e30f1e79f3cd72542f2026ceec18d3bd67ab859c
 - name: github.com/docker/libtrust
   version: c54fbb67c1f1e68d7d6f8d2ad7c9360404616a41
+- name: github.com/docker/spdystream
+  version: 449fdfce4d962303d702fec724ef0ad181c92528
+  subpackages:
+  - spdy
 - name: github.com/emicklei/go-restful
   version: ff4f55a206334ef123e4f79bbf348980da81ca46
   subpackages:
@@ -172,12 +189,8 @@ imports:
 - name: github.com/emicklei/go-restful-swagger12
   version: 885875a92c2ab7d6222e257e41f6ca2c1f010b4e
   repo: https://github.com/openshift/emicklei-go-restful-swagger12
-- name: github.com/evanphx/json-patch
-  version: ba18e35c5c1b36ef6334cad706eb681153d2d379
 - name: github.com/exponent-io/jsonpath
   version: d6023ce2651d8eafb5c75bb0c7167536102ec9f5
-- name: github.com/fatih/camelcase
-  version: f6a740d52f961c60348ebb109adde9f4635d7540
 - name: github.com/fsouza/go-dockerclient
   version: 3f9370a4738ba8d0ed6eea63582ca6db5eb48032
   subpackages:
@@ -266,34 +279,6 @@ imports:
   - ptypes/any
   - ptypes/duration
   - ptypes/timestamp
-- name: github.com/gonum/blas
-  version: 80dca99229cccca259b550ae3f755cf79c65a224
-  subpackages:
-  - blas64
-  - native
-  - native/internal/math32
-- name: github.com/gonum/graph
-  version: bde6d0fbd9dec5a997e906611fe0364001364c41
-  subpackages:
-  - concrete
-  - encoding/dot
-  - internal
-  - path
-  - topo
-  - traverse
-- name: github.com/gonum/internal
-  version: 5b84ddfb9d3e72d73b8de858c97650be140935c0
-  subpackages:
-  - asm
-- name: github.com/gonum/lapack
-  version: 88ec467285859a6cd23900147d250a8af1f38b10
-  subpackages:
-  - lapack64
-  - native
-- name: github.com/gonum/matrix
-  version: fb1396264e2e259ff714a408a7b0142d238b198d
-  subpackages:
-  - mat64
 - name: github.com/google/cadvisor
   version: c683567ed073eb6bcab81cccee79cd64a0e33811
   repo: git@github.com:openshift/google-cadvisor
@@ -308,6 +293,10 @@ imports:
   version: 4ef72b2795a418935d497c8db213080be06f8850
 - name: github.com/gorilla/mux
   version: 8096f47503459bcc74d1f4c487b7e6e42e5746b5
+- name: github.com/gorilla/securecookie
+  version: 1b0c7f6e9ab3d7f500fd7d50c7ad835ff428139b
+- name: github.com/gorilla/sessions
+  version: aa5e036e6c44aec69a32eb41097001978b29ad31
 - name: github.com/hashicorp/golang-lru
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
   subpackages:
@@ -316,8 +305,6 @@ imports:
   version: bf9dde6d0d2c004a008c27aaee91170c786f6db8
 - name: github.com/imdario/mergo
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
-- name: github.com/inconshreveable/mousetrap
-  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
   version: 3433f3ea46d9f8019119e7dd41274e112a2359a9
 - name: github.com/juju/ratelimit
@@ -328,12 +315,12 @@ imports:
   - buffer
   - jlexer
   - jwriter
-- name: github.com/MakeNowJust/heredoc
-  version: 1d91351acdc1cb2f2c995864674b754134b86ca7
 - name: github.com/matttproud/golang_protobuf_extensions
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
   - pbutil
+- name: github.com/mitchellh/go-wordwrap
+  version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/mitchellh/mapstructure
   version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/ncw/swift
@@ -341,65 +328,29 @@ imports:
 - name: github.com/openshift/origin
   version: 1daa267d0a1fdbd0569ce490c904391b4e77c70d
   subpackages:
-  - pkg/api
   - pkg/api/apihelpers
-  - pkg/api/graph
-  - pkg/api/graph/graphview
-  - pkg/api/kubegraph
-  - pkg/api/kubegraph/analysis
-  - pkg/api/kubegraph/nodes
-  - pkg/api/latest
   - pkg/api/legacy
-  - pkg/apps/apis/apps
-  - pkg/apps/apis/apps/install
-  - pkg/apps/apis/apps/v1
-  - pkg/apps/client/internalversion
-  - pkg/apps/cmd
-  - pkg/apps/generated/internalclientset
-  - pkg/apps/generated/internalclientset/scheme
-  - pkg/apps/generated/internalclientset/typed/apps/internalversion
-  - pkg/apps/graph
-  - pkg/apps/graph/analysis
-  - pkg/apps/graph/nodes
-  - pkg/apps/util
+  - pkg/auth/api
+  - pkg/auth/authenticator
+  - pkg/auth/oauth/handlers
+  - pkg/auth/prometheus
+  - pkg/auth/server/csrf
+  - pkg/auth/server/errorpage
+  - pkg/auth/server/headers
+  - pkg/auth/server/login
+  - pkg/auth/server/session
+  - pkg/auth/server/tokenrequest
+  - pkg/auth/userregistry/identitymapper
   - pkg/authorization/apis/authorization
-  - pkg/authorization/apis/authorization/install
   - pkg/authorization/apis/authorization/internal/serviceaccount
-  - pkg/authorization/apis/authorization/rbacconversion
   - pkg/authorization/apis/authorization/v1
-  - pkg/authorization/generated/internalclientset
-  - pkg/authorization/generated/internalclientset/scheme
-  - pkg/authorization/generated/internalclientset/typed/authorization/internalversion
-  - pkg/authorization/reaper
-  - pkg/build/apis/build
-  - pkg/build/apis/build/install
-  - pkg/build/apis/build/v1
-  - pkg/build/client/internalversion
-  - pkg/build/cmd
-  - pkg/build/generated/internalclientset
-  - pkg/build/generated/internalclientset/scheme
-  - pkg/build/generated/internalclientset/typed/build/internalversion
-  - pkg/build/generated/listers/build/internalversion
-  - pkg/build/graph
-  - pkg/build/graph/analysis
-  - pkg/build/graph/nodes
-  - pkg/build/util
-  - pkg/cmd/dockerregistry
-  - pkg/cmd/flagtypes
-  - pkg/cmd/server/crypto
-  - pkg/cmd/util
-  - pkg/cmd/util/clientcmd
-  - pkg/cmd/util/prefixwriter
+  - pkg/authorization/authorizer
+  - pkg/authorization/authorizer/scope
+  - pkg/authorization/generated/clientset/scheme
+  - pkg/authorization/generated/clientset/typed/authorization/v1
   - pkg/cmd/util/serviceability
-  - pkg/config/cmd
-  - pkg/dockerregistry/server
-  - pkg/dockerregistry/server/api
-  - pkg/dockerregistry/server/audit
-  - pkg/dockerregistry/server/client
-  - pkg/dockerregistry/server/configuration
-  - pkg/dockerregistry/server/maxconnections
-  - pkg/dockerregistry/server/metrics
-  - pkg/dockerregistry/server/prune
+  - pkg/cmd/util/term
+  - pkg/cmd/util/tokencmd
   - pkg/image/admission
   - pkg/image/apis/image
   - pkg/image/apis/image/docker10
@@ -411,112 +362,39 @@ imports:
   - pkg/image/generated/clientset/scheme
   - pkg/image/generated/clientset/typed/image/v1
   - pkg/image/generated/clientset/typed/image/v1/fake
-  - pkg/image/generated/internalclientset
-  - pkg/image/generated/internalclientset/scheme
-  - pkg/image/generated/internalclientset/typed/image/internalversion
-  - pkg/image/graph
-  - pkg/image/graph/nodes
   - pkg/image/importer
   - pkg/image/importer/dockerv1client
   - pkg/image/util
-  - pkg/network/apis/network
-  - pkg/network/apis/network/install
-  - pkg/network/apis/network/v1
-  - pkg/network/generated/internalclientset
-  - pkg/network/generated/internalclientset/scheme
-  - pkg/network/generated/internalclientset/typed/network/internalversion
   - pkg/oauth/apis/oauth
-  - pkg/oauth/apis/oauth/install
-  - pkg/oauth/apis/oauth/v1
-  - pkg/oauth/generated/internalclientset
-  - pkg/oauth/generated/internalclientset/scheme
-  - pkg/oauth/generated/internalclientset/typed/oauth/internalversion
-  - pkg/oc/cli/cmd/errors
-  - pkg/oc/cli/config
-  - pkg/oc/cli/describe
-  - pkg/oc/errors
+  - pkg/oauth/apis/oauth/validation
+  - pkg/oauth/scope
+  - pkg/oauth/server/osinserver
+  - pkg/oauth/util
   - pkg/project/apis/project
-  - pkg/project/apis/project/helpers
-  - pkg/project/apis/project/install
   - pkg/project/apis/project/v1
-  - pkg/project/generated/internalclientset
-  - pkg/project/generated/internalclientset/scheme
-  - pkg/project/generated/internalclientset/typed/project/internalversion
-  - pkg/quota/apis/quota
-  - pkg/quota/apis/quota/install
-  - pkg/quota/apis/quota/v1
-  - pkg/quota/generated/internalclientset
-  - pkg/quota/generated/internalclientset/scheme
-  - pkg/quota/generated/internalclientset/typed/quota/internalversion
+  - pkg/project/generated/clientset/scheme
+  - pkg/project/generated/clientset/typed/project/v1
   - pkg/quota/util
-  - pkg/route/apis/route
-  - pkg/route/apis/route/install
-  - pkg/route/apis/route/v1
-  - pkg/route/generated/internalclientset
-  - pkg/route/generated/internalclientset/scheme
-  - pkg/route/generated/internalclientset/typed/route/internalversion
-  - pkg/route/generator
-  - pkg/route/graph
-  - pkg/route/graph/analysis
-  - pkg/route/graph/nodes
-  - pkg/security/apis/security
-  - pkg/security/apis/security/install
-  - pkg/security/apis/security/v1
-  - pkg/security/generated/internalclientset
-  - pkg/security/generated/internalclientset/scheme
-  - pkg/security/generated/internalclientset/typed/security/internalversion
-  - pkg/security/securitycontextconstraints/util
-  - pkg/template/apis/template
-  - pkg/template/apis/template/install
-  - pkg/template/apis/template/v1
-  - pkg/template/generated/internalclientset
-  - pkg/template/generated/internalclientset/scheme
-  - pkg/template/generated/internalclientset/typed/template/internalversion
+  - pkg/user
   - pkg/user/apis/user
   - pkg/user/apis/user/install
   - pkg/user/apis/user/v1
   - pkg/user/apis/user/validation
   - pkg/user/generated/clientset/scheme
   - pkg/user/generated/clientset/typed/user/v1
-  - pkg/user/generated/internalclientset
   - pkg/user/generated/internalclientset/scheme
   - pkg/user/generated/internalclientset/typed/user/internalversion
-  - pkg/user/reaper
-  - pkg/util
-  - pkg/util/dot
-  - pkg/util/errors
   - pkg/util/httprequest
-  - pkg/util/parallel
   - pkg/version
-- name: github.com/openshift/source-to-image
-  version: aaa1d47a1eccb19859d6a64e64def7da734d95ef
-  subpackages:
-  - pkg/api
-  - pkg/api/describe
-  - pkg/api/validation
-  - pkg/build
-  - pkg/build/strategies
-  - pkg/build/strategies/layered
-  - pkg/build/strategies/onbuild
-  - pkg/build/strategies/sti
-  - pkg/docker
-  - pkg/errors
-  - pkg/ignore
-  - pkg/scm
-  - pkg/scm/downloaders/empty
-  - pkg/scm/downloaders/file
-  - pkg/scm/downloaders/git
-  - pkg/scm/git
-  - pkg/scripts
-  - pkg/tar
-  - pkg/util
-  - pkg/util/cmd
-  - pkg/util/cygpath
-  - pkg/util/fs
-  - pkg/util/glog
-  - pkg/util/interrupt
-  - pkg/util/status
-  - pkg/util/user
+  - tools/junitreport/pkg/api
+  - tools/junitreport/pkg/builder
+  - tools/junitreport/pkg/builder/flat
+  - tools/junitreport/pkg/builder/nested
+  - tools/junitreport/pkg/cmd
+  - tools/junitreport/pkg/parser
+  - tools/junitreport/pkg/parser/gotest
+  - tools/junitreport/pkg/parser/oscmd
+  - tools/junitreport/pkg/parser/stack
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pkg/profile
@@ -544,17 +422,15 @@ imports:
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
-- name: github.com/satori/uuid
-  version: 5bf94b69c6b68ee1b541973bb8e1144db23a194b
+- name: github.com/RangelReale/osin
+  version: 1c1a533224dd9c631fdd8df8851b167d24cabe96
+- name: github.com/RangelReale/osincli
+  version: fababb0555f21315d1a34af6615a16eaab44396b
 - name: github.com/Sirupsen/logrus
-  version: aaf92c95712104318fc35409745f1533aa5ff327
+  version: 55eb11d21d2a31a3cc93838241d04800f52e823d
 - name: github.com/skynetservices/skydns
   version: 30763c4e568fe411f1663af553c063cec8879929
   repo: https://github.com/openshift/skynetservices-skydns
-- name: github.com/spf13/cobra
-  version: 7c674d9e72017ed25f6d2b5e497a1368086b6a6f
-  subpackages:
-  - doc
 - name: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.com/stevvooe/resumable
@@ -699,7 +575,6 @@ imports:
   - pkg/apimachinery
   - pkg/apimachinery/announced
   - pkg/apimachinery/registered
-  - pkg/apis/meta/internalversion
   - pkg/apis/meta/v1
   - pkg/apis/meta/v1/unstructured
   - pkg/apis/meta/v1/validation
@@ -725,15 +600,17 @@ imports:
   - pkg/util/diff
   - pkg/util/errors
   - pkg/util/framer
+  - pkg/util/httpstream
+  - pkg/util/httpstream/spdy
   - pkg/util/intstr
   - pkg/util/json
   - pkg/util/mergepatch
   - pkg/util/net
   - pkg/util/rand
+  - pkg/util/remotecommand
   - pkg/util/runtime
   - pkg/util/sets
   - pkg/util/strategicpatch
-  - pkg/util/uuid
   - pkg/util/validation
   - pkg/util/validation/field
   - pkg/util/wait
@@ -752,43 +629,18 @@ imports:
   - pkg/apis/apiserver/install
   - pkg/apis/apiserver/v1alpha1
   - pkg/apis/audit
-  - pkg/authentication/authenticator
-  - pkg/authentication/request/x509
   - pkg/authentication/serviceaccount
   - pkg/authentication/user
   - pkg/authorization/authorizer
   - pkg/endpoints/request
   - pkg/features
   - pkg/util/feature
-  - pkg/util/flag
 - name: k8s.io/client-go
   version: 3d67de025cad32b5bc37097b9474d9a518d79923
   repo: git@github.com:openshift/kubernetes-client-go
   subpackages:
   - discovery
-  - dynamic
-  - kubernetes
   - kubernetes/scheme
-  - kubernetes/typed/admissionregistration/v1alpha1
-  - kubernetes/typed/apps/v1beta1
-  - kubernetes/typed/authentication/v1
-  - kubernetes/typed/authentication/v1beta1
-  - kubernetes/typed/authorization/v1
-  - kubernetes/typed/authorization/v1beta1
-  - kubernetes/typed/autoscaling/v1
-  - kubernetes/typed/autoscaling/v2alpha1
-  - kubernetes/typed/batch/v1
-  - kubernetes/typed/batch/v2alpha1
-  - kubernetes/typed/certificates/v1beta1
-  - kubernetes/typed/core/v1
-  - kubernetes/typed/extensions/v1beta1
-  - kubernetes/typed/networking/v1
-  - kubernetes/typed/policy/v1beta1
-  - kubernetes/typed/rbac/v1alpha1
-  - kubernetes/typed/rbac/v1beta1
-  - kubernetes/typed/settings/v1alpha1
-  - kubernetes/typed/storage/v1
-  - kubernetes/typed/storage/v1beta1
   - pkg/api
   - pkg/api/v1
   - pkg/api/v1/ref
@@ -827,14 +679,9 @@ imports:
   - pkg/util
   - pkg/util/parsers
   - pkg/version
-  - plugin/pkg/client/auth
-  - plugin/pkg/client/auth/azure
-  - plugin/pkg/client/auth/gcp
-  - plugin/pkg/client/auth/oidc
   - rest
   - rest/watch
   - testing
-  - third_party/forked/golang/template
   - tools/auth
   - tools/cache
   - tools/clientcmd
@@ -843,13 +690,13 @@ imports:
   - tools/clientcmd/api/v1
   - tools/metrics
   - tools/record
+  - tools/remotecommand
   - transport
   - util/cert
+  - util/exec
   - util/flowcontrol
   - util/homedir
   - util/integer
-  - util/jsonpath
-  - util/workqueue
 - name: k8s.io/code-generator
   version: 8e2ed57c056fe9bbed8d461e341d0ec7509e8b2c
   repo: git@github.com:openshift/kubernetes-code-generator
@@ -860,31 +707,15 @@ imports:
   version: 10838bd084127ed5189128e1abdc5078ede7ffbd
   repo: git@github.com:openshift/kubernetes
   subpackages:
-  - cmd/kubeadm/app/apis/kubeadm
-  - federation/apis/federation
-  - federation/apis/federation/install
-  - federation/apis/federation/v1beta1
-  - federation/client/clientset_generated/federation_internalclientset
-  - federation/client/clientset_generated/federation_internalclientset/scheme
-  - federation/client/clientset_generated/federation_internalclientset/typed/autoscaling/internalversion
-  - federation/client/clientset_generated/federation_internalclientset/typed/batch/internalversion
-  - federation/client/clientset_generated/federation_internalclientset/typed/core/internalversion
-  - federation/client/clientset_generated/federation_internalclientset/typed/extensions/internalversion
-  - federation/client/clientset_generated/federation_internalclientset/typed/federation/internalversion
   - pkg/api
-  - pkg/api/events
   - pkg/api/helper
-  - pkg/api/helper/qos
   - pkg/api/install
-  - pkg/api/pod
   - pkg/api/ref
-  - pkg/api/resource
   - pkg/api/service
   - pkg/api/util
   - pkg/api/v1
   - pkg/api/v1/helper
   - pkg/api/v1/helper/qos
-  - pkg/api/v1/pod
   - pkg/api/v1/ref
   - pkg/api/validation
   - pkg/apis/admissionregistration
@@ -933,7 +764,6 @@ imports:
   - pkg/apis/settings/v1alpha1
   - pkg/apis/storage
   - pkg/apis/storage/install
-  - pkg/apis/storage/util
   - pkg/apis/storage/v1
   - pkg/apis/storage/v1beta1
   - pkg/capabilities
@@ -975,10 +805,6 @@ imports:
   - pkg/client/clientset_generated/internalclientset/typed/rbac/internalversion
   - pkg/client/clientset_generated/internalclientset/typed/settings/internalversion
   - pkg/client/clientset_generated/internalclientset/typed/storage/internalversion
-  - pkg/client/informers/informers_generated/externalversions/apps/v1beta1
-  - pkg/client/informers/informers_generated/externalversions/core/v1
-  - pkg/client/informers/informers_generated/externalversions/extensions/v1beta1
-  - pkg/client/informers/informers_generated/externalversions/internalinterfaces
   - pkg/client/informers/informers_generated/internalversion
   - pkg/client/informers/informers_generated/internalversion/admissionregistration
   - pkg/client/informers/informers_generated/internalversion/admissionregistration/internalversion
@@ -1008,76 +834,36 @@ imports:
   - pkg/client/leaderelection/resourcelock
   - pkg/client/listers/admissionregistration/internalversion
   - pkg/client/listers/apps/internalversion
-  - pkg/client/listers/apps/v1beta1
   - pkg/client/listers/autoscaling/internalversion
   - pkg/client/listers/batch/internalversion
   - pkg/client/listers/certificates/internalversion
   - pkg/client/listers/core/internalversion
-  - pkg/client/listers/core/v1
   - pkg/client/listers/extensions/internalversion
-  - pkg/client/listers/extensions/v1beta1
   - pkg/client/listers/networking/internalversion
   - pkg/client/listers/policy/internalversion
   - pkg/client/listers/rbac/internalversion
   - pkg/client/listers/settings/internalversion
   - pkg/client/listers/storage/internalversion
-  - pkg/client/retry
-  - pkg/client/unversioned
-  - pkg/controller
-  - pkg/controller/daemon
-  - pkg/controller/daemon/util
-  - pkg/controller/deployment/util
   - pkg/credentialprovider
   - pkg/features
-  - pkg/fieldpath
   - pkg/kubeapiserver/admission
-  - pkg/kubectl
-  - pkg/kubectl/cmd/util
-  - pkg/kubectl/cmd/util/openapi
-  - pkg/kubectl/plugins
-  - pkg/kubectl/resource
-  - pkg/kubectl/util
   - pkg/kubelet/apis
   - pkg/kubelet/qos
   - pkg/kubelet/types
   - pkg/master/ports
-  - pkg/printers
-  - pkg/printers/internalversion
   - pkg/quota
   - pkg/registry/rbac/validation
   - pkg/security/apparmor
-  - pkg/serviceaccount
   - pkg/util
-  - pkg/util/exec
-  - pkg/util/hash
-  - pkg/util/labels
+  - pkg/util/interrupt
   - pkg/util/logs
-  - pkg/util/metrics
-  - pkg/util/mount
   - pkg/util/net/sets
-  - pkg/util/node
   - pkg/util/parsers
-  - pkg/util/slice
+  - pkg/util/term
   - pkg/version
-  - pkg/volume/util
   - plugin/pkg/admission/limitranger
-  - plugin/pkg/scheduler/algorithm
-  - plugin/pkg/scheduler/algorithm/predicates
-  - plugin/pkg/scheduler/algorithm/priorities/util
-  - plugin/pkg/scheduler/api
-  - plugin/pkg/scheduler/schedulercache
-  - plugin/pkg/scheduler/util
+  - plugin/pkg/auth/authorizer/rbac
 - name: k8s.io/metrics
   version: 67ed722b2a355b8491321b834eaaf00faf007eff
   repo: git@github.com:openshift/kubernetes-metrics
-  subpackages:
-  - pkg/apis/metrics
-  - pkg/apis/metrics/v1alpha1
-  - pkg/client/clientset_generated/clientset
-  - pkg/client/clientset_generated/clientset/scheme
-  - pkg/client/clientset_generated/clientset/typed/metrics/v1alpha1
-- name: vbom.ml/util
-  version: db5cfe13f5cc80a4990d98e2e1b0707a4d1a5394
-  subpackages:
-  - sortorder
 testImports: []
