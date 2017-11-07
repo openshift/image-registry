@@ -22,10 +22,10 @@ import (
 	userapi "github.com/openshift/origin/pkg/user/apis/user"
 	authorizationapi "k8s.io/kubernetes/pkg/apis/authorization/v1"
 
-	"github.com/openshift/image-registry/pkg/clientcmd"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/dockerregistry/testutil"
+	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
 )
 
 var scheme = runtime.NewScheme()

@@ -5,7 +5,7 @@ import (
 	authclientv1 "k8s.io/kubernetes/pkg/client/clientset_generated/clientset/typed/authorization/v1"
 	kcoreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 
-	"github.com/openshift/image-registry/pkg/clientcmd"
+	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
 	imageclientv1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
 	userclientv1 "github.com/openshift/origin/pkg/user/generated/clientset/typed/user/v1"
 )

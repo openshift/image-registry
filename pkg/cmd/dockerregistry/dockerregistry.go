@@ -40,16 +40,16 @@ import (
 
 	kubeversion "k8s.io/kubernetes/pkg/version"
 
-	"github.com/openshift/origin/pkg/cmd/server/crypto"
 	"github.com/openshift/origin/pkg/version"
 
-	"github.com/openshift/image-registry/pkg/clientcmd"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/prune"
+	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
+	"github.com/openshift/image-registry/pkg/origin-common/crypto"
 )
 
 var pruneMode = flag.String("prune", "", "prune blobs from the storage and exit (check, delete)")

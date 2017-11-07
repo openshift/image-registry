@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -13,19 +14,25 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	kclientcmd "k8s.io/client-go/tools/clientcmd"
 	kclientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-
-	"github.com/openshift/origin/pkg/cmd/flagtypes"
-	"github.com/openshift/origin/pkg/cmd/util"
-	"github.com/openshift/origin/pkg/oc/cli/config"
+	"k8s.io/client-go/util/homedir"
 )
+
+// getEnv returns an environment value if specified.
+func getEnv(key string) (string, bool) {
+	val := os.Getenv(key)
+	if len(val) == 0 {
+		return "", false
+	}
+	return val, true
+}
 
 // Config contains all the necessary bits for client configuration
 type Config struct {
 	// MasterAddr is the address the master can be reached on (host, host:port, or URL).
-	MasterAddr flagtypes.Addr
+	MasterAddr Addr
 	// KubernetesAddr is the address of the Kubernetes server (host, host:port, or URL).
 	// If omitted defaults to the master.
-	KubernetesAddr flagtypes.Addr
+	KubernetesAddr Addr
 	// CommonConfig is the shared base config for both the OpenShift config and Kubernetes config
 	CommonConfig restclient.Config
 	// Namespace is the namespace to act in
@@ -40,11 +47,21 @@ type Config struct {
 // NewConfig returns a new configuration
 func NewConfig() *Config {
 	return &Config{
-		MasterAddr:     flagtypes.Addr{Value: "localhost:8080", DefaultScheme: "http", DefaultPort: 8080, AllowPrefix: true}.Default(),
-		KubernetesAddr: flagtypes.Addr{Value: "localhost:8080", DefaultScheme: "http", DefaultPort: 8080}.Default(),
+		MasterAddr:     Addr{Value: "localhost:8080", DefaultScheme: "http", DefaultPort: 8080, AllowPrefix: true}.Default(),
+		KubernetesAddr: Addr{Value: "localhost:8080", DefaultScheme: "http", DefaultPort: 8080}.Default(),
 		CommonConfig:   restclient.Config{},
 	}
 }
+
+// github.com/openshift/origin/pkg/oc/cli/config
+const (
+	openShiftConfigPathEnvVar      = "KUBECONFIG"
+	openShiftConfigHomeDir         = ".kube"
+	openShiftConfigHomeFileName    = "config"
+	openShiftConfigHomeDirFileName = openShiftConfigHomeDir + "/" + openShiftConfigHomeFileName
+)
+
+var recommendedHomeFile = path.Join(homedir.HomeDir(), openShiftConfigHomeDirFileName)
 
 func (cfg *Config) BindToFile(configPath string) *Config {
 	defaultOverrides := &kclientcmd.ConfigOverrides{
@@ -54,12 +71,12 @@ func (cfg *Config) BindToFile(configPath string) *Config {
 	}
 
 	chain := []string{}
-	if envVarFile := os.Getenv(config.OpenShiftConfigPathEnvVar); len(envVarFile) != 0 {
+	if envVarFile := os.Getenv(openShiftConfigPathEnvVar); len(envVarFile) != 0 {
 		chain = append(chain, filepath.SplitList(envVarFile)...)
 	} else if len(configPath) != 0 {
 		chain = append(chain, configPath)
 	} else {
-		chain = append(chain, config.RecommendedHomeFile)
+		chain = append(chain, recommendedHomeFile)
 	}
 
 	defaultClientConfig := kclientcmd.NewDefaultClientConfig(kclientcmdapi.Config{}, defaultOverrides)
@@ -87,7 +104,7 @@ func (cfg *Config) bindEnv() error {
 	// callers may not use the config file if they have specified a master directly, for backwards
 	// compatibility with components that used to use env, switch to service account token, and have
 	// config defined in env.
-	_, masterSet := util.GetEnv("OPENSHIFT_MASTER")
+	_, masterSet := getEnv("OPENSHIFT_MASTER")
 	specifiedMaster := masterSet || cfg.MasterAddr.Provided
 
 	if cfg.clientConfig != nil && !specifiedMaster {
@@ -111,16 +128,16 @@ func (cfg *Config) bindEnv() error {
 	}
 
 	// Legacy path - preserve env vars set on pods that previously were honored.
-	if value, ok := util.GetEnv("KUBERNETES_MASTER"); ok && !cfg.KubernetesAddr.Provided {
+	if value, ok := getEnv("KUBERNETES_MASTER"); ok && !cfg.KubernetesAddr.Provided {
 		cfg.KubernetesAddr.Set(value)
 	}
-	if value, ok := util.GetEnv("OPENSHIFT_MASTER"); ok && !cfg.MasterAddr.Provided {
+	if value, ok := getEnv("OPENSHIFT_MASTER"); ok && !cfg.MasterAddr.Provided {
 		cfg.MasterAddr.Set(value)
 	}
-	if value, ok := util.GetEnv("BEARER_TOKEN"); ok && len(cfg.CommonConfig.BearerToken) == 0 {
+	if value, ok := getEnv("BEARER_TOKEN"); ok && len(cfg.CommonConfig.BearerToken) == 0 {
 		cfg.CommonConfig.BearerToken = value
 	}
-	if value, ok := util.GetEnv("BEARER_TOKEN_FILE"); ok && len(cfg.CommonConfig.BearerToken) == 0 {
+	if value, ok := getEnv("BEARER_TOKEN_FILE"); ok && len(cfg.CommonConfig.BearerToken) == 0 {
 		if tokenData, tokenErr := ioutil.ReadFile(value); tokenErr == nil {
 			cfg.CommonConfig.BearerToken = strings.TrimSpace(string(tokenData))
 			if len(cfg.CommonConfig.BearerToken) == 0 {
@@ -131,25 +148,25 @@ func (cfg *Config) bindEnv() error {
 		}
 	}
 
-	if value, ok := util.GetEnv("OPENSHIFT_CA_FILE"); ok && len(cfg.CommonConfig.CAFile) == 0 {
+	if value, ok := getEnv("OPENSHIFT_CA_FILE"); ok && len(cfg.CommonConfig.CAFile) == 0 {
 		cfg.CommonConfig.CAFile = value
-	} else if value, ok := util.GetEnv("OPENSHIFT_CA_DATA"); ok && len(cfg.CommonConfig.CAData) == 0 {
+	} else if value, ok := getEnv("OPENSHIFT_CA_DATA"); ok && len(cfg.CommonConfig.CAData) == 0 {
 		cfg.CommonConfig.CAData = []byte(value)
 	}
 
-	if value, ok := util.GetEnv("OPENSHIFT_CERT_FILE"); ok && len(cfg.CommonConfig.CertFile) == 0 {
+	if value, ok := getEnv("OPENSHIFT_CERT_FILE"); ok && len(cfg.CommonConfig.CertFile) == 0 {
 		cfg.CommonConfig.CertFile = value
-	} else if value, ok := util.GetEnv("OPENSHIFT_CERT_DATA"); ok && len(cfg.CommonConfig.CertData) == 0 {
+	} else if value, ok := getEnv("OPENSHIFT_CERT_DATA"); ok && len(cfg.CommonConfig.CertData) == 0 {
 		cfg.CommonConfig.CertData = []byte(value)
 	}
 
-	if value, ok := util.GetEnv("OPENSHIFT_KEY_FILE"); ok && len(cfg.CommonConfig.KeyFile) == 0 {
+	if value, ok := getEnv("OPENSHIFT_KEY_FILE"); ok && len(cfg.CommonConfig.KeyFile) == 0 {
 		cfg.CommonConfig.KeyFile = value
-	} else if value, ok := util.GetEnv("OPENSHIFT_KEY_DATA"); ok && len(cfg.CommonConfig.KeyData) == 0 {
+	} else if value, ok := getEnv("OPENSHIFT_KEY_DATA"); ok && len(cfg.CommonConfig.KeyData) == 0 {
 		cfg.CommonConfig.KeyData = []byte(value)
 	}
 
-	if value, ok := util.GetEnv("OPENSHIFT_INSECURE"); ok && len(value) != 0 {
+	if value, ok := getEnv("OPENSHIFT_INSECURE"); ok && len(value) != 0 {
 		cfg.CommonConfig.Insecure = value == "true"
 	}
 

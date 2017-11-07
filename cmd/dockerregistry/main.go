@@ -14,7 +14,6 @@ import (
 	"k8s.io/kubernetes/pkg/util/logs"
 
 	"github.com/openshift/image-registry/pkg/cmd/dockerregistry"
-	cmdutil "github.com/openshift/origin/pkg/cmd/util"
 	"github.com/openshift/origin/pkg/cmd/util/serviceability"
 )
 
@@ -53,12 +52,20 @@ func main() {
 	dockerregistry.Execute(configFile)
 }
 
+func env(key string, defaultValue string) string {
+	val := os.Getenv(key)
+	if len(val) == 0 {
+		return defaultValue
+	}
+	return val
+}
+
 func startProfiler() {
-	if cmdutil.Env("OPENSHIFT_PROFILE", "") == "web" {
+	if env("OPENSHIFT_PROFILE", "") == "web" {
 		go func() {
 			runtime.SetBlockProfileRate(1)
-			profilePort := cmdutil.Env("OPENSHIFT_PROFILE_PORT", "6060")
-			profileHost := cmdutil.Env("OPENSHIFT_PROFILE_HOST", "127.0.0.1")
+			profilePort := env("OPENSHIFT_PROFILE_PORT", "6060")
+			profileHost := env("OPENSHIFT_PROFILE_HOST", "127.0.0.1")
 			log.Infof(fmt.Sprintf("Starting profiling endpoint at http://%s:%s/debug/pprof/", profileHost, profilePort))
 			log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", profileHost, profilePort), nil))
 		}()
