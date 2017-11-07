@@ -6,7 +6,10 @@
 #
 FROM openshift/origin-base
 
-ADD bin/dockerregistry /usr/bin/dockerregistry
+RUN INSTALL_PKGS="origin-dockerregistry" && \
+    yum --enablerepo=origin-local-release install -y ${INSTALL_PKGS} && \
+    rpm -V ${INSTALL_PKGS} && \
+    yum clean all
 
 COPY config.yml ${REGISTRY_CONFIGURATION_PATH}
 
