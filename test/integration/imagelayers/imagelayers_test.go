@@ -1,163 +1,27 @@
 package integration
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
-	"strconv"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/tools/clientcmd"
-	kapi "k8s.io/kubernetes/pkg/api/v1"
 
-	authorizationapiv1 "github.com/openshift/origin/pkg/authorization/apis/authorization/v1"
-	authorizationv1 "github.com/openshift/origin/pkg/authorization/generated/clientset/typed/authorization/v1"
 	"github.com/openshift/origin/pkg/cmd/util/tokencmd"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
-	projectapiv1 "github.com/openshift/origin/pkg/project/apis/project/v1"
-	projectv1 "github.com/openshift/origin/pkg/project/generated/clientset/typed/project/v1"
 
-	"github.com/openshift/image-registry/pkg/cmd/dockerregistry"
-	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
+	"github.com/openshift/image-registry/pkg/testframework"
 )
-
-// FindFreeLocalPort returns the number of an available port number on
-// the loopback interface.  Useful for determining the port to launch
-// a server on.  Error handling required - there is a non-zero chance
-// that the returned port number will be bound by another process
-// after this function returns.
-//
-// k8s.io/kubernetes/test/integration/framework.FindFreeLocalPort
-func FindFreeLocalPort() (int, error) {
-	l, err := net.Listen("tcp", ":0")
-	if err != nil {
-		return 0, err
-	}
-	defer l.Close()
-	_, portStr, err := net.SplitHostPort(l.Addr().String())
-	if err != nil {
-		return 0, err
-	}
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		return 0, err
-	}
-	return port, nil
-}
-
-func waitTCP(addr string) error {
-	var lastErr error
-	err := wait.Poll(500*time.Millisecond, wait.ForeverTestTimeout, func() (done bool, err error) {
-		conn, err := net.DialTimeout("tcp", addr, 200*time.Millisecond)
-		if err != nil {
-			lastErr = err
-			return false, nil
-		}
-		_ = conn.Close()
-		return true, nil
-	})
-	if err != nil {
-		return fmt.Errorf("wait for %s: %v", addr, lastErr)
-	}
-	return nil
-}
-
-func waitHTTP(rt http.RoundTripper, url string) error {
-	var lastErr error
-	httpClient := &http.Client{
-		Transport: rt,
-	}
-	err := wait.Poll(500*time.Millisecond, wait.ForeverTestTimeout, func() (done bool, err error) {
-		resp, err := httpClient.Get(url)
-		if err != nil {
-			lastErr = err
-			return false, nil
-		}
-		_ = resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			lastErr = fmt.Errorf("%s", resp.Status)
-			return false, nil
-		}
-		return true, nil
-	})
-	if err != nil {
-		return fmt.Errorf("wait for %s: %v", url, lastErr)
-	}
-	return nil
-}
-
-func StartTestRegistry(t *testing.T, kubeConfigPath string) (string, error) {
-	port, err := FindFreeLocalPort()
-	if err != nil {
-		return "", fmt.Errorf("unable to find a free local port for the registry: %v", err)
-	}
-
-	// FIXME(dmage): the port can be claimed by someone else before the registry is started.
-	registryAddr := fmt.Sprintf("127.0.0.1:%d", port)
-
-	dockerConfig := &configuration.Configuration{
-		Version: "0.1",
-		Storage: configuration.Storage{
-			"inmemory": configuration.Parameters{},
-		},
-		Auth: configuration.Auth{
-			"openshift": configuration.Parameters{},
-		},
-		Middleware: map[string][]configuration.Middleware{
-			"registry": {{
-				Name: "openshift",
-			}},
-			"repository": {{
-				Name: "openshift",
-				Options: configuration.Parameters{
-					"dockerregistryurl":      registryAddr,
-					"acceptschema2":          true,
-					"pullthrough":            true,
-					"enforcequota":           false,
-					"projectcachettl":        "1m",
-					"blobrepositorycachettl": "10m",
-				},
-			}},
-			"storage": {{
-				Name: "openshift",
-			}},
-		},
-	}
-	dockerConfig.Log.Level = "debug"
-	dockerConfig.HTTP.Addr = registryAddr
-
-	extraConfig := &registryconfig.Configuration{
-		KubeConfig: kubeConfigPath,
-	}
-
-	go func() {
-		ctx := context.Background()
-		ctx = registrytest.WithTestLogger(ctx, t)
-		err := dockerregistry.Start(ctx, dockerConfig, extraConfig)
-		// We cannot call t.Fatal here, because it's a different goroutine.
-		panic(fmt.Errorf("failed to start the image registry: %v", err))
-	}()
-
-	return registryAddr, waitTCP(registryAddr)
-}
 
 // uploadImageWithSchema2Manifest creates a random image with a schema 2
 // manifest and uploads it to the repository.
@@ -231,35 +95,6 @@ func getSchema1Manifest(transport http.RoundTripper, baseURL, repoName, tag stri
 	return m, err
 }
 
-type InspectResult struct {
-	State struct {
-		Status string
-	}
-	NetworkSettings struct {
-		IPAddress string
-	}
-}
-
-func Inspect(containerID string) (*InspectResult, error) {
-	cmd := exec.Command("docker", "inspect", containerID)
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	if err := cmd.Start(); err != nil {
-		return nil, err
-	}
-
-	var v []*InspectResult
-	if err := json.NewDecoder(stdout).Decode(&v); err != nil {
-		return nil, err
-	}
-
-	return v[0], cmd.Wait()
-}
-
 // TestImageLayers tests that the integrated registry handles schema 1
 // manifests and schema 2 manifests consistently and it produces similar Image
 // resources for them.
@@ -273,111 +108,38 @@ func TestImageLayers(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	configDir := path.Join(tmpDir, "config")
-	caBundlePath := path.Join(configDir, "master", "ca-bundle.crt")
 	adminKubeConfigPath := path.Join(configDir, "master", "admin.kubeconfig")
 
-	masterContainerIDRaw, err := exec.Command(
-		"docker", "run", "-d",
-		"docker.io/openshift/origin", "start", "master",
-	).Output()
+	masterContainer, err := testframework.StartMasterContainer(configDir)
 	if err != nil {
-		t.Fatalf("failed to run the origin container: %v", err)
+		t.Fatal(err)
 	}
-	masterContainerID := strings.TrimSpace(string(masterContainerIDRaw))
 	defer func() {
-		if err := exec.Command("docker", "rm", "-f", "-v", masterContainerID).Run(); err != nil {
-			t.Logf("failed to remove the master container %s: %v", masterContainerID, err)
+		if err := masterContainer.Stop(); err != nil {
+			t.Log(err)
 		}
 	}()
 
-	masterContainer, err := Inspect(masterContainerID)
+	clusterAdminClientConfig, err := testframework.ConfigFromFile(adminKubeConfigPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if err := waitTCP(masterContainer.NetworkSettings.IPAddress + ":8443"); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", masterContainerID, "/var/lib/origin/openshift.local.config"), configDir).Run(); err != nil {
-		t.Fatalf("failed to get configs from the master container %s: %v", masterContainerID, err)
-	}
-
-	caBundle, err := ioutil.ReadFile(caBundlePath)
-	if err != nil {
-		t.Fatalf("failed to read CA bundle: %v", err)
-	}
-
-	rootCAs := x509.NewCertPool()
-	rootCAs.AppendCertsFromPEM(caBundle)
-	tlsConfig := &tls.Config{
-		RootCAs: rootCAs,
-	}
-	rt := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		TLSClientConfig:       tlsConfig,
-	}
-
-	if err := waitHTTP(rt, fmt.Sprintf("https://%s:8443/healthz", masterContainer.NetworkSettings.IPAddress)); err != nil {
-		t.Fatal(err)
-	}
-
-	adminConfig, err := clientcmd.LoadFromFile(adminKubeConfigPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	adminClientConfig, err := clientcmd.NewDefaultClientConfig(*adminConfig, &clientcmd.ConfigOverrides{}).ClientConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	imageClient := imagev1.NewForConfigOrDie(adminClientConfig)
 
 	namespace := "image-registry-test-integration"
 	imageStreamName := "test-imagelayers"
 	user := "testuser"
 	password := "testp@ssw0rd"
 
-	projectClient := projectv1.NewForConfigOrDie(adminClientConfig)
-	_, err = projectClient.ProjectRequests().Create(&projectapiv1.ProjectRequest{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
-		},
-	})
-	if err != nil {
+	if err := testframework.CreateProject(clusterAdminClientConfig, namespace, user); err != nil {
 		t.Fatal(err)
 	}
 
-	authorizationClient := authorizationv1.NewForConfigOrDie(adminClientConfig)
-	_, err = authorizationClient.RoleBindings(namespace).Update(&authorizationapiv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "admin",
-		},
-		UserNames: []string{user},
-		RoleRef: kapi.ObjectReference{
-			Name: "admin",
-		},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	token, err := tokencmd.RequestToken(adminClientConfig, nil, user, password)
+	token, err := tokencmd.RequestToken(clusterAdminClientConfig, nil, user, password)
 	if err != nil {
 		t.Fatalf("error requesting token: %v", err)
 	}
 
-	registryAddr, err := StartTestRegistry(t, adminKubeConfigPath)
+	registryAddr, err := testframework.StartTestRegistry(t, adminKubeConfigPath)
 	if err != nil {
 		t.Fatalf("start registry: %v", err)
 	}
@@ -415,6 +177,8 @@ func TestImageLayers(t *testing.T) {
 	if err := registrytest.UploadManifest(ctx, repo, schema1Tag, schema1Manifest); err != nil {
 		t.Fatalf("upload schema 1 manifest: %v", err)
 	}
+
+	imageClient := imagev1.NewForConfigOrDie(clusterAdminClientConfig)
 
 	schema1ISTag, err := imageClient.ImageStreamTags(namespace).Get(imageStreamName+":"+schema1Tag, metav1.GetOptions{})
 	if err != nil {
