@@ -51,13 +51,9 @@ type MasterContainer struct {
 }
 
 func StartMasterContainer(configDir string) (*MasterContainer, error) {
-	// TODO(dmage): randomize for each test
-	port := 8443
-
 	masterContainerIDRaw, err := exec.Command(
 		"docker", "run",
 		"-d",
-		"--net=host",
 		"--entrypoint", "/bin/sh",
 		"docker.io/openshift/origin",
 		"-ec", `
@@ -72,7 +68,7 @@ func StartMasterContainer(configDir string) (*MasterContainer, error) {
 
 	c := &MasterContainer{
 		ID:   strings.TrimSpace(string(masterContainerIDRaw)),
-		Port: port,
+		Port: 8443,
 	}
 
 	c.InspectResult, err = Inspect(c.ID)
@@ -80,8 +76,6 @@ func StartMasterContainer(configDir string) (*MasterContainer, error) {
 		c.Stop()
 		return c, err
 	}
-
-	c.InspectResult.NetworkSettings.IPAddress = "127.0.0.1" // --net=host
 
 	if err := WaitTCP(c.NetworkSettings.IPAddress + ":" + strconv.Itoa(c.Port)); err != nil {
 		c.Stop()
