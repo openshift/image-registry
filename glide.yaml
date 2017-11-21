@@ -44,3 +44,7 @@ import:
   version: 0.7.3
 - package: github.com/Azure/azure-sdk-for-go
   version: 0b5fe2abe0271ba07049eacaa65922d67c319543
+- package: google.golang.org/cloud
+  version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
+- package: google.golang.org/api
+  version: 9bf6e6e569ff057f75d9604a46c52928f17d2b54
