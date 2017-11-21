@@ -235,7 +235,8 @@ func DecodeKey(encoded string) (*Key, error) {
 	if err := proto.Unmarshal(b, pKey); err != nil {
 		return nil, err
 	}
-	return protoToKey(pKey)
+
+	return protoToKey(pKey), nil
 }
 
 // NewIncompleteKey creates a new incomplete key.
@@ -272,5 +273,5 @@ func (c *Client) AllocateIDs(ctx context.Context, keys []*Key) ([]*Key, error) {
 		return nil, err
 	}
 
-	return multiProtoToKey(res.Key)
+	return multiProtoToKey(res.Key), nil
 }

@@ -1,5 +1,5 @@
-hash: 5053a6e9ba1ffba466c36da7582ec4da62105ee56aa0baa459e1f3fee431e803
-updated: 2017-11-07T15:18:20.882635708+01:00
+hash: 440af28ccf237bddd1c68450eff50ee59b796b13af38b438839c558a34d18bcd
+updated: 2017-11-21T17:15:08.698030825+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -283,7 +283,7 @@ imports:
   version: c683567ed073eb6bcab81cccee79cd64a0e33811
   repo: git@github.com:openshift/google-cadvisor
 - name: github.com/google/certificate-transparency
-  version: a85d8bf28a950826bf6bc0693caf384ab4c6bec9
+  version: f9b891ace55b3d45f6c40d313b3b7a5fc258f96b
   repo: git@github.com:openshift/google-certificate-transparency
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
@@ -510,19 +510,11 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/api
-  version: e3824ed33c72bf7e81da0286772c34b987520914
+  version: 9bf6e6e569ff057f75d9604a46c52928f17d2b54
   subpackages:
-  - cloudmonitoring/v2beta2
-  - compute/v0.beta
-  - compute/v1
-  - container/v1
-  - dns/v1
   - gensupport
   - googleapi
   - googleapi/internal/uritemplates
-  - logging/v2beta1
-  - monitoring/v3
-  - pubsub/v1
   - storage/v1
 - name: google.golang.org/appengine
   version: 12d5545dc1cfa6047a286d5e853841b6471f4c19
@@ -537,11 +529,10 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/cloud
-  version: eb47ba841d53d93506cfbfbc03927daf9cc48f88
+  version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
   subpackages:
   - internal
   - internal/opts
-  - internal/transport
   - storage
 - name: google.golang.org/grpc
   version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
@@ -698,7 +689,7 @@ imports:
   - util/homedir
   - util/integer
 - name: k8s.io/code-generator
-  version: 8e2ed57c056fe9bbed8d461e341d0ec7509e8b2c
+  version: 9967634becba425c39f1ac5fb4084bfb5df48526
   repo: git@github.com:openshift/kubernetes-code-generator
 - name: k8s.io/kube-aggregator
   version: 482fa3f0826c4341ea0e0c599361d7401d3ee54c

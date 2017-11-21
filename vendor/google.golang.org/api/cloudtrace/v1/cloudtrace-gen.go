@@ -1,6 +1,6 @@
-// Package cloudtrace provides access to the Stackdriver Trace API.
+// Package cloudtrace provides access to the Google Cloud Trace API.
 //
-// See https://cloud.google.com/trace
+// See https://cloud.google.com/tools/cloud-trace
 //
 // Usage example:
 //
@@ -49,12 +49,6 @@ const basePath = "https://cloudtrace.googleapis.com/"
 const (
 	// View and manage your data across Google Cloud Platform services
 	CloudPlatformScope = "https://www.googleapis.com/auth/cloud-platform"
-
-	// Write Trace data for a project or application
-	TraceAppendScope = "https://www.googleapis.com/auth/trace.append"
-
-	// Read Trace data for a project or application
-	TraceReadonlyScope = "https://www.googleapis.com/auth/trace.readonly"
 )
 
 func New(client *http.Client) (*Service, error) {
@@ -103,17 +97,11 @@ type ProjectsTracesService struct {
 }
 
 // Empty: A generic empty message that you can re-use to avoid defining
-// duplicated
-// empty messages in your APIs. A typical example is to use it as the
-// request
-// or the response type of an API method. For instance:
-//
-//     service Foo {
-//       rpc Bar(google.protobuf.Empty) returns
-// (google.protobuf.Empty);
-//     }
-//
-// The JSON representation for `Empty` is empty JSON object `{}`.
+// duplicated empty messages in your APIs. A typical example is to use
+// it as the request or the response type of an API method. For
+// instance: service Foo { rpc Bar(google.protobuf.Empty) returns
+// (google.protobuf.Empty); } The JSON representation for `Empty` is
+// empty JSON object `{}`.
 type Empty struct {
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
@@ -123,10 +111,8 @@ type Empty struct {
 // ListTracesResponse: The response message for the `ListTraces` method.
 type ListTracesResponse struct {
 	// NextPageToken: If defined, indicates that there are more traces that
-	// match the request
-	// and that this value should be passed to the next request to
-	// continue
-	// retrieving additional traces.
+	// match the request and that this value should be passed to the next
+	// request to continue retrieving additional traces.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
 	// Traces: List of trace records returned.
@@ -143,27 +129,17 @@ type ListTracesResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ListTracesResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListTracesResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Trace: A trace describes how long it takes for an application to
-// perform an
-// operation. It consists of a set of spans, each of which represent a
-// single
-// timed event within the operation.
+// perform an operation. It consists of a set of spans, each of which
+// represent a single timed event within the operation.
 type Trace struct {
 	// ProjectId: Project ID of the Cloud project where the trace data is
 	// stored.
@@ -173,8 +149,7 @@ type Trace struct {
 	Spans []*TraceSpan `json:"spans,omitempty"`
 
 	// TraceId: Globally unique identifier for the trace. This identifier is
-	// a 128-bit
-	// numeric value formatted as a 32-byte hex string.
+	// a 128-bit numeric value formatted as a 32-byte hex string.
 	TraceId string `json:"traceId,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -188,108 +163,50 @@ type Trace struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ProjectId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Trace) MarshalJSON() ([]byte, error) {
 	type noMethod Trace
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TraceSpan: A span represents a single timed event within a trace.
-// Spans can be nested
-// and form a trace tree. Often, a trace contains a root span that
-// describes the
-// end-to-end latency of an operation and, optionally, one or more
-// subspans for
-// its suboperations. Spans do not need to be contiguous. There may be
-// gaps
-// between spans in a trace.
+// Spans can be nested and form a trace tree. Often, a trace contains a
+// root span that describes the end-to-end latency of an operation and,
+// optionally, one or more subspans for its suboperations. Spans do not
+// need to be contiguous. There may be gaps between spans in a trace.
 type TraceSpan struct {
 	// EndTime: End time of the span in nanoseconds from the UNIX epoch.
 	EndTime string `json:"endTime,omitempty"`
 
 	// Kind: Distinguishes between spans generated in a particular context.
-	// For example,
-	// two spans with the same name may be distinguished using
-	// `RPC_CLIENT`
-	// and `RPC_SERVER` to identify queueing latency associated with the
-	// span.
+	// For example, two spans with the same name may be distinguished using
+	// `RPC_CLIENT` and `RPC_SERVER` to identify queueing latency associated
+	// with the span.
 	//
 	// Possible values:
-	//   "SPAN_KIND_UNSPECIFIED" - Unspecified.
-	//   "RPC_SERVER" - Indicates that the span covers server-side handling
-	// of an RPC or other
-	// remote network request.
-	//   "RPC_CLIENT" - Indicates that the span covers the client-side
-	// wrapper around an RPC or
-	// other remote request.
+	//   "SPAN_KIND_UNSPECIFIED"
+	//   "RPC_SERVER"
+	//   "RPC_CLIENT"
 	Kind string `json:"kind,omitempty"`
 
-	// Labels: Collection of labels associated with the span. Label keys
-	// must be less than
-	// 128 bytes. Label values must be less than 16 kilobytes (10MB
-	// for
-	// `/stacktrace` values).
-	//
-	// Some predefined label keys exist, or you may create your own. When
-	// creating
-	// your own, we recommend the following formats:
-	//
-	// * `/category/product/key` for agents of well-known products (e.g.
-	//   `/db/mongodb/read_size`).
-	// * `short_host/path/key` for domain-specific keys (e.g.
-	//   `foo.com/myproduct/bar`)
-	//
-	// Predefined labels include:
-	//
-	// *   `/agent`
-	// *   `/component`
-	// *   `/error/message`
-	// *   `/error/name`
-	// *   `/http/client_city`
-	// *   `/http/client_country`
-	// *   `/http/client_protocol`
-	// *   `/http/client_region`
-	// *   `/http/host`
-	// *   `/http/method`
-	// *   `/http/redirected_url`
-	// *   `/http/request/size`
-	// *   `/http/response/size`
-	// *   `/http/status_code`
-	// *   `/http/url`
-	// *   `/http/user_agent`
-	// *   `/pid`
-	// *   `/stacktrace`
-	// *   `/tid`
+	// Labels: Collection of labels associated with the span.
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Name: Name of the span. Must be less than 128 bytes. The span name is
-	// sanitized
-	// and displayed in the Stackdriver Trace tool in the
-	// {% dynamic print site_values.console_name %}.
-	// The name may be a method name or some other per-call site name.
-	// For the same executable and the same call point, a best practice
-	// is
-	// to use a consistent name, which makes it easier to
-	// correlate
-	// cross-trace spans.
+	// Name: Name of the trace. The trace name is sanitized and displayed in
+	// the Cloud Trace tool in the Google Developers Console. The name may
+	// be a method name or some other per-call site name. For the same
+	// executable and the same call point, a best practice is to use a
+	// consistent name, which makes it easier to correlate cross-trace
+	// spans.
 	Name string `json:"name,omitempty"`
 
 	// ParentSpanId: ID of the parent span, if any. Optional.
 	ParentSpanId uint64 `json:"parentSpanId,omitempty,string"`
 
-	// SpanId: Identifier for the span. Must be a 64-bit integer other than
-	// 0 and
-	// unique within a trace.
+	// SpanId: Identifier for the span. This identifier must be unique
+	// within a trace.
 	SpanId uint64 `json:"spanId,omitempty,string"`
 
 	// StartTime: Start time of the span in nanoseconds from the UNIX epoch.
@@ -302,20 +219,12 @@ type TraceSpan struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "EndTime") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TraceSpan) MarshalJSON() ([]byte, error) {
 	type noMethod TraceSpan
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Traces: List of new or updated traces.
@@ -330,20 +239,12 @@ type Traces struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Traces") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Traces) MarshalJSON() ([]byte, error) {
 	type noMethod Traces
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "cloudtrace.projects.patchTraces":
@@ -354,18 +255,14 @@ type ProjectsPatchTracesCall struct {
 	traces     *Traces
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
-// PatchTraces: Sends new traces to Stackdriver Trace or updates
-// existing traces. If the ID
-// of a trace that you send matches that of an existing trace, any
-// fields
-// in the existing trace and its spans are overwritten by the provided
-// values,
-// and any new fields provided are merged with the existing trace data.
-// If the
-// ID does not match, a new trace is created.
+// PatchTraces: Sends new traces to Cloud Trace or updates existing
+// traces. If the ID of a trace that you send matches that of an
+// existing trace, any fields in the existing trace and its spans are
+// overwritten by the provided values, and any new fields provided are
+// merged with the existing trace data. If the ID does not match, a new
+// trace is created.
 func (r *ProjectsService) PatchTraces(projectId string, traces *Traces) *ProjectsPatchTracesCall {
 	c := &ProjectsPatchTracesCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.projectId = projectId
@@ -389,36 +286,26 @@ func (c *ProjectsPatchTracesCall) Context(ctx context.Context) *ProjectsPatchTra
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsPatchTracesCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsPatchTracesCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.traces)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/traces")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudtrace.projects.patchTraces" call.
@@ -453,14 +340,12 @@ func (c *ProjectsPatchTracesCall) Do(opts ...googleapi.CallOption) (*Empty, erro
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Sends new traces to Stackdriver Trace or updates existing traces. If the ID\nof a trace that you send matches that of an existing trace, any fields\nin the existing trace and its spans are overwritten by the provided values,\nand any new fields provided are merged with the existing trace data. If the\nID does not match, a new trace is created.",
-	//   "flatPath": "v1/projects/{projectId}/traces",
+	//   "description": "Sends new traces to Cloud Trace or updates existing traces. If the ID of a trace that you send matches that of an existing trace, any fields in the existing trace and its spans are overwritten by the provided values, and any new fields provided are merged with the existing trace data. If the ID does not match, a new trace is created.",
 	//   "httpMethod": "PATCH",
 	//   "id": "cloudtrace.projects.patchTraces",
 	//   "parameterOrder": [
@@ -482,8 +367,7 @@ func (c *ProjectsPatchTracesCall) Do(opts ...googleapi.CallOption) (*Empty, erro
 	//     "$ref": "Empty"
 	//   },
 	//   "scopes": [
-	//     "https://www.googleapis.com/auth/cloud-platform",
-	//     "https://www.googleapis.com/auth/trace.append"
+	//     "https://www.googleapis.com/auth/cloud-platform"
 	//   ]
 	// }
 
@@ -498,7 +382,6 @@ type ProjectsTracesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets a single trace by its ID.
@@ -535,35 +418,24 @@ func (c *ProjectsTracesGetCall) Context(ctx context.Context) *ProjectsTracesGetC
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsTracesGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsTracesGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/traces/{traceId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 		"traceId":   c.traceId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudtrace.projects.traces.get" call.
@@ -598,14 +470,12 @@ func (c *ProjectsTracesGetCall) Do(opts ...googleapi.CallOption) (*Trace, error)
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
 	//   "description": "Gets a single trace by its ID.",
-	//   "flatPath": "v1/projects/{projectId}/traces/{traceId}",
 	//   "httpMethod": "GET",
 	//   "id": "cloudtrace.projects.traces.get",
 	//   "parameterOrder": [
@@ -631,8 +501,7 @@ func (c *ProjectsTracesGetCall) Do(opts ...googleapi.CallOption) (*Trace, error)
 	//     "$ref": "Trace"
 	//   },
 	//   "scopes": [
-	//     "https://www.googleapis.com/auth/cloud-platform",
-	//     "https://www.googleapis.com/auth/trace.readonly"
+	//     "https://www.googleapis.com/auth/cloud-platform"
 	//   ]
 	// }
 
@@ -646,7 +515,6 @@ type ProjectsTracesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Returns of a list of traces that match the specified filter
@@ -657,109 +525,60 @@ func (r *ProjectsTracesService) List(projectId string) *ProjectsTracesListCall {
 	return c
 }
 
-// EndTime sets the optional parameter "endTime": End of the time
-// interval (inclusive) during which the trace data was
-// collected from the application.
+// EndTime sets the optional parameter "endTime": Start of the time
+// interval (inclusive) during which the trace data was collected from
+// the application.
 func (c *ProjectsTracesListCall) EndTime(endTime string) *ProjectsTracesListCall {
 	c.urlParams_.Set("endTime", endTime)
 	return c
 }
 
-// Filter sets the optional parameter "filter": An optional filter
-// against labels for the request.
-//
-// By default, searches use prefix matching. To specify exact match,
-// prepend
-// a plus symbol (`+`) to the search term.
-// Multiple terms are ANDed. Syntax:
-//
-// *   `root:NAME_PREFIX` or `NAME_PREFIX`: Return traces where any
-// root
-//     span starts with `NAME_PREFIX`.
-// *   `+root:NAME` or `+NAME`: Return traces where any root span's name
-// is
-//     exactly `NAME`.
-// *   `span:NAME_PREFIX`: Return traces where any span starts with
-//     `NAME_PREFIX`.
-// *   `+span:NAME`: Return traces where any span's name is exactly
-//     `NAME`.
-// *   `latency:DURATION`: Return traces whose overall latency is
-//     greater or equal to than `DURATION`. Accepted units are
-// nanoseconds
-//     (`ns`), milliseconds (`ms`), and seconds (`s`). Default is `ms`.
-// For
-//     example, `latency:24ms` returns traces whose overall latency
-//     is greater than or equal to 24 milliseconds.
-// *   `label:LABEL_KEY`: Return all traces containing the specified
-//     label key (exact match, case-sensitive) regardless of the
-// key:value
-//     pair's value (including empty values).
-// *   `LABEL_KEY:VALUE_PREFIX`: Return all traces containing the
-// specified
-//     label key (exact match, case-sensitive) whose value starts with
-//     `VALUE_PREFIX`. Both a key and a value must be specified.
-// *   `+LABEL_KEY:VALUE`: Return all traces containing a key:value
-// pair
-//     exactly matching the specified text. Both a key and a value must
-// be
-//     specified.
-// *   `method:VALUE`: Equivalent to `/http/method:VALUE`.
-// *   `url:VALUE`: Equivalent to `/http/url:VALUE`.
+// Filter sets the optional parameter "filter": An optional filter for
+// the request.
 func (c *ProjectsTracesListCall) Filter(filter string) *ProjectsTracesListCall {
 	c.urlParams_.Set("filter", filter)
 	return c
 }
 
 // OrderBy sets the optional parameter "orderBy": Field used to sort the
-// returned traces.
-// Can be one of the following:
-//
-// *   `trace_id`
-// *   `name` (`name` field of root span in the trace)
-// *   `duration` (difference between `end_time` and `start_time` fields
-// of
-//      the root span)
-// *   `start` (`start_time` field of the root span)
-//
-// Descending order can be specified by appending `desc` to the sort
-// field
-// (for example, `name desc`).
-//
-// Only one sort field is permitted.
+// returned traces.  Can be one of the following: * `trace_id` * `name`
+// (`name` field of root span in the trace) * `duration` (difference
+// between `end_time` and `start_time` fields of the root span) *
+// `start` (`start_time` field of the root span) Descending order can be
+// specified by appending `desc` to the sort field (for example, `name
+// desc`). Only one sort field is permitted.
 func (c *ProjectsTracesListCall) OrderBy(orderBy string) *ProjectsTracesListCall {
 	c.urlParams_.Set("orderBy", orderBy)
 	return c
 }
 
 // PageSize sets the optional parameter "pageSize": Maximum number of
-// traces to return. If not specified or <= 0, the
-// implementation selects a reasonable value.  The implementation
-// may
-// return fewer traces than the requested page size.
+// traces to return. If not specified or <= 0, the implementation
+// selects a reasonable value. The implementation may return fewer
+// traces than the requested page size.
 func (c *ProjectsTracesListCall) PageSize(pageSize int64) *ProjectsTracesListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
 }
 
 // PageToken sets the optional parameter "pageToken": Token identifying
-// the page of results to return. If provided, use the
-// value of the `next_page_token` field from a previous request.
+// the page of results to return. If provided, use the value of the
+// `next_page_token` field from a previous request.
 func (c *ProjectsTracesListCall) PageToken(pageToken string) *ProjectsTracesListCall {
 	c.urlParams_.Set("pageToken", pageToken)
 	return c
 }
 
-// StartTime sets the optional parameter "startTime": Start of the time
-// interval (inclusive) during which the trace data was
-// collected from the application.
+// StartTime sets the optional parameter "startTime": End of the time
+// interval (inclusive) during which the trace data was collected from
+// the application.
 func (c *ProjectsTracesListCall) StartTime(startTime string) *ProjectsTracesListCall {
 	c.urlParams_.Set("startTime", startTime)
 	return c
 }
 
 // View sets the optional parameter "view": Type of data returned for
-// traces in the list.  Default is
-// `MINIMAL`.
+// traces in the list.  Default is `MINIMAL`.
 //
 // Possible values:
 //   "VIEW_TYPE_UNSPECIFIED"
@@ -797,34 +616,23 @@ func (c *ProjectsTracesListCall) Context(ctx context.Context) *ProjectsTracesLis
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsTracesListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsTracesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/traces")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudtrace.projects.traces.list" call.
@@ -859,14 +667,12 @@ func (c *ProjectsTracesListCall) Do(opts ...googleapi.CallOption) (*ListTracesRe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
 	//   "description": "Returns of a list of traces that match the specified filter conditions.",
-	//   "flatPath": "v1/projects/{projectId}/traces",
 	//   "httpMethod": "GET",
 	//   "id": "cloudtrace.projects.traces.list",
 	//   "parameterOrder": [
@@ -874,29 +680,28 @@ func (c *ProjectsTracesListCall) Do(opts ...googleapi.CallOption) (*ListTracesRe
 	//   ],
 	//   "parameters": {
 	//     "endTime": {
-	//       "description": "End of the time interval (inclusive) during which the trace data was\ncollected from the application.",
-	//       "format": "google-datetime",
+	//       "description": "Start of the time interval (inclusive) during which the trace data was collected from the application.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "filter": {
-	//       "description": "An optional filter against labels for the request.\n\nBy default, searches use prefix matching. To specify exact match, prepend\na plus symbol (`+`) to the search term.\nMultiple terms are ANDed. Syntax:\n\n*   `root:NAME_PREFIX` or `NAME_PREFIX`: Return traces where any root\n    span starts with `NAME_PREFIX`.\n*   `+root:NAME` or `+NAME`: Return traces where any root span's name is\n    exactly `NAME`.\n*   `span:NAME_PREFIX`: Return traces where any span starts with\n    `NAME_PREFIX`.\n*   `+span:NAME`: Return traces where any span's name is exactly\n    `NAME`.\n*   `latency:DURATION`: Return traces whose overall latency is\n    greater or equal to than `DURATION`. Accepted units are nanoseconds\n    (`ns`), milliseconds (`ms`), and seconds (`s`). Default is `ms`. For\n    example, `latency:24ms` returns traces whose overall latency\n    is greater than or equal to 24 milliseconds.\n*   `label:LABEL_KEY`: Return all traces containing the specified\n    label key (exact match, case-sensitive) regardless of the key:value\n    pair's value (including empty values).\n*   `LABEL_KEY:VALUE_PREFIX`: Return all traces containing the specified\n    label key (exact match, case-sensitive) whose value starts with\n    `VALUE_PREFIX`. Both a key and a value must be specified.\n*   `+LABEL_KEY:VALUE`: Return all traces containing a key:value pair\n    exactly matching the specified text. Both a key and a value must be\n    specified.\n*   `method:VALUE`: Equivalent to `/http/method:VALUE`.\n*   `url:VALUE`: Equivalent to `/http/url:VALUE`.",
+	//       "description": "An optional filter for the request.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "orderBy": {
-	//       "description": "Field used to sort the returned traces. Optional.\nCan be one of the following:\n\n*   `trace_id`\n*   `name` (`name` field of root span in the trace)\n*   `duration` (difference between `end_time` and `start_time` fields of\n     the root span)\n*   `start` (`start_time` field of the root span)\n\nDescending order can be specified by appending `desc` to the sort field\n(for example, `name desc`).\n\nOnly one sort field is permitted.",
+	//       "description": "Field used to sort the returned traces. Optional. Can be one of the following: * `trace_id` * `name` (`name` field of root span in the trace) * `duration` (difference between `end_time` and `start_time` fields of the root span) * `start` (`start_time` field of the root span) Descending order can be specified by appending `desc` to the sort field (for example, `name desc`). Only one sort field is permitted.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "pageSize": {
-	//       "description": "Maximum number of traces to return. If not specified or \u003c= 0, the\nimplementation selects a reasonable value.  The implementation may\nreturn fewer traces than the requested page size. Optional.",
+	//       "description": "Maximum number of traces to return. If not specified or \u003c= 0, the implementation selects a reasonable value. The implementation may return fewer traces than the requested page size. Optional.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
 	//     },
 	//     "pageToken": {
-	//       "description": "Token identifying the page of results to return. If provided, use the\nvalue of the `next_page_token` field from a previous request. Optional.",
+	//       "description": "Token identifying the page of results to return. If provided, use the value of the `next_page_token` field from a previous request. Optional.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -907,13 +712,12 @@ func (c *ProjectsTracesListCall) Do(opts ...googleapi.CallOption) (*ListTracesRe
 	//       "type": "string"
 	//     },
 	//     "startTime": {
-	//       "description": "Start of the time interval (inclusive) during which the trace data was\ncollected from the application.",
-	//       "format": "google-datetime",
+	//       "description": "End of the time interval (inclusive) during which the trace data was collected from the application.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "view": {
-	//       "description": "Type of data returned for traces in the list. Optional. Default is\n`MINIMAL`.",
+	//       "description": "Type of data returned for traces in the list. Optional. Default is `MINIMAL`.",
 	//       "enum": [
 	//         "VIEW_TYPE_UNSPECIFIED",
 	//         "MINIMAL",
@@ -929,8 +733,7 @@ func (c *ProjectsTracesListCall) Do(opts ...googleapi.CallOption) (*ListTracesRe
 	//     "$ref": "ListTracesResponse"
 	//   },
 	//   "scopes": [
-	//     "https://www.googleapis.com/auth/cloud-platform",
-	//     "https://www.googleapis.com/auth/trace.readonly"
+	//     "https://www.googleapis.com/auth/cloud-platform"
 	//   ]
 	// }
 

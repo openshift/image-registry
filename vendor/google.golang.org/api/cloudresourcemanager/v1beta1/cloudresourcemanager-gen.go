@@ -99,229 +99,27 @@ type ProjectsService struct {
 	s *Service
 }
 
-// Ancestor: Identifying information for a single ancestor of a project.
-type Ancestor struct {
-	// ResourceId: Resource id of the ancestor.
-	ResourceId *ResourceId `json:"resourceId,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "ResourceId") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ResourceId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *Ancestor) MarshalJSON() ([]byte, error) {
-	type noMethod Ancestor
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// AuditConfig: Specifies the audit configuration for a service.
-// The configuration determines which permission types are logged, and
-// what
-// identities, if any, are exempted from logging.
-// An AuditConfig must have one or more AuditLogConfigs.
-//
-// If there are AuditConfigs for both `allServices` and a specific
-// service,
-// the union of the two AuditConfigs is used for that service: the
-// log_types
-// specified in each AuditConfig are enabled, and the exempted_members
-// in each
-// AuditConfig are exempted.
-//
-// Example Policy with multiple AuditConfigs:
-//
-//     {
-//       "audit_configs": [
-//         {
-//           "service": "allServices"
-//           "audit_log_configs": [
-//             {
-//               "log_type": "DATA_READ",
-//               "exempted_members": [
-//                 "user:foo@gmail.com"
-//               ]
-//             },
-//             {
-//               "log_type": "DATA_WRITE",
-//             },
-//             {
-//               "log_type": "ADMIN_READ",
-//             }
-//           ]
-//         },
-//         {
-//           "service": "fooservice.googleapis.com"
-//           "audit_log_configs": [
-//             {
-//               "log_type": "DATA_READ",
-//             },
-//             {
-//               "log_type": "DATA_WRITE",
-//               "exempted_members": [
-//                 "user:bar@gmail.com"
-//               ]
-//             }
-//           ]
-//         }
-//       ]
-//     }
-//
-// For fooservice, this policy enables DATA_READ, DATA_WRITE and
-// ADMIN_READ
-// logging. It also exempts foo@gmail.com from DATA_READ logging,
-// and
-// bar@gmail.com from DATA_WRITE logging.
-type AuditConfig struct {
-	// AuditLogConfigs: The configuration for logging of each type of
-	// permission.
-	// Next ID: 4
-	AuditLogConfigs []*AuditLogConfig `json:"auditLogConfigs,omitempty"`
-
-	// Service: Specifies a service that will be enabled for audit
-	// logging.
-	// For example, `storage.googleapis.com`,
-	// `cloudsql.googleapis.com`.
-	// `allServices` is a special value that covers all services.
-	Service string `json:"service,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "AuditLogConfigs") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AuditLogConfigs") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *AuditConfig) MarshalJSON() ([]byte, error) {
-	type noMethod AuditConfig
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// AuditLogConfig: Provides the configuration for logging a type of
-// permissions.
-// Example:
-//
-//     {
-//       "audit_log_configs": [
-//         {
-//           "log_type": "DATA_READ",
-//           "exempted_members": [
-//             "user:foo@gmail.com"
-//           ]
-//         },
-//         {
-//           "log_type": "DATA_WRITE",
-//         }
-//       ]
-//     }
-//
-// This enables 'DATA_READ' and 'DATA_WRITE' logging, while
-// exempting
-// foo@gmail.com from DATA_READ logging.
-type AuditLogConfig struct {
-	// ExemptedMembers: Specifies the identities that do not cause logging
-	// for this type of
-	// permission.
-	// Follows the same format of Binding.members.
-	ExemptedMembers []string `json:"exemptedMembers,omitempty"`
-
-	// LogType: The log type that this config enables.
-	//
-	// Possible values:
-	//   "LOG_TYPE_UNSPECIFIED" - Default case. Should never be this.
-	//   "ADMIN_READ" - Admin reads. Example: CloudIAM getIamPolicy
-	//   "DATA_WRITE" - Data writes. Example: CloudSQL Users create
-	//   "DATA_READ" - Data reads. Example: CloudSQL Users list
-	LogType string `json:"logType,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "ExemptedMembers") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ExemptedMembers") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *AuditLogConfig) MarshalJSON() ([]byte, error) {
-	type noMethod AuditLogConfig
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
 // Binding: Associates `members` with a `role`.
 type Binding struct {
 	// Members: Specifies the identities requesting access for a Cloud
-	// Platform resource.
-	// `members` can have the following values:
-	//
-	// * `allUsers`: A special identifier that represents anyone who is
-	//    on the internet; with or without a Google account.
-	//
-	// * `allAuthenticatedUsers`: A special identifier that represents
-	// anyone
-	//    who is authenticated with a Google account or a service
-	// account.
-	//
-	// * `user:{emailid}`: An email address that represents a specific
-	// Google
-	//    account. For example, `alice@gmail.com` or `joe@example.com`.
-	//
-	//
-	// * `serviceAccount:{emailid}`: An email address that represents a
-	// service
-	//    account. For example,
-	// `my-other-app@appspot.gserviceaccount.com`.
-	//
-	// * `group:{emailid}`: An email address that represents a Google
-	// group.
-	//    For example, `admins@example.com`.
-	//
-	// * `domain:{domain}`: A Google Apps domain name that represents all
-	// the
-	//    users of that domain. For example, `google.com` or
-	// `example.com`.
-	//
-	//
+	// Platform resource. `members` can have the following values: *
+	// `allUsers`: A special identifier that represents anyone who is on the
+	// internet; with or without a Google account. *
+	// `allAuthenticatedUsers`: A special identifier that represents anyone
+	// who is authenticated with a Google account or a service account. *
+	// `user:{emailid}`: An email address that represents a specific Google
+	// account. For example, `alice@gmail.com` or `joe@example.com`. *
+	// `serviceAccount:{emailid}`: An email address that represents a
+	// service account. For example,
+	// `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`: An
+	// email address that represents a Google group. For example,
+	// `admins@example.com`. * `domain:{domain}`: A Google Apps domain name
+	// that represents all the users of that domain. For example,
+	// `google.com` or `example.com`.
 	Members []string `json:"members,omitempty"`
 
-	// Role: Role that is assigned to `members`.
-	// For example, `roles/viewer`, `roles/editor`, or
-	// `roles/owner`.
-	// Required
+	// Role: Role that is assigned to `members`. For example,
+	// `roles/viewer`, `roles/editor`, or `roles/owner`. Required
 	Role string `json:"role,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Members") to
@@ -331,178 +129,24 @@ type Binding struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Members") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Binding) MarshalJSON() ([]byte, error) {
 	type noMethod Binding
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Empty: A generic empty message that you can re-use to avoid defining
-// duplicated
-// empty messages in your APIs. A typical example is to use it as the
-// request
-// or the response type of an API method. For instance:
-//
-//     service Foo {
-//       rpc Bar(google.protobuf.Empty) returns
-// (google.protobuf.Empty);
-//     }
-//
-// The JSON representation for `Empty` is empty JSON object `{}`.
+// duplicated empty messages in your APIs. A typical example is to use
+// it as the request or the response type of an API method. For
+// instance: service Foo { rpc Bar(google.protobuf.Empty) returns
+// (google.protobuf.Empty); } The JSON representation for `Empty` is
+// empty JSON object `{}`.
 type Empty struct {
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
 	googleapi.ServerResponse `json:"-"`
-}
-
-// FolderOperation: Metadata describing a long running folder operation
-type FolderOperation struct {
-	// DestinationParent: The resource name of the folder or organization we
-	// are either creating
-	// the folder under or moving the folder to.
-	DestinationParent string `json:"destinationParent,omitempty"`
-
-	// DisplayName: The display name of the folder.
-	DisplayName string `json:"displayName,omitempty"`
-
-	// OperationType: The type of this operation.
-	//
-	// Possible values:
-	//   "OPERATION_TYPE_UNSPECIFIED" - Operation type not specified.
-	//   "CREATE" - A create folder operation.
-	//   "MOVE" - A move folder operation.
-	OperationType string `json:"operationType,omitempty"`
-
-	// SourceParent: The resource name of the folder's parent.
-	// Only applicable when the operation_type is MOVE.
-	SourceParent string `json:"sourceParent,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "DestinationParent")
-	// to unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DestinationParent") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *FolderOperation) MarshalJSON() ([]byte, error) {
-	type noMethod FolderOperation
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// FolderOperationError: A classification of the Folder Operation error.
-type FolderOperationError struct {
-	// ErrorMessageId: The type of operation error experienced.
-	//
-	// Possible values:
-	//   "ERROR_TYPE_UNSPECIFIED" - The error type was unrecognized or
-	// unspecified.
-	//   "FOLDER_HEIGHT_VIOLATION" - The attempted action would violate the
-	// max folder depth constraint.
-	//   "MAX_CHILD_FOLDERS_VIOLATION" - The attempted action would violate
-	// the max child folders constraint.
-	//   "FOLDER_NAME_UNIQUENESS_VIOLATION" - The attempted action would
-	// violate the locally-unique folder
-	// display_name constraint.
-	//   "RESOURCE_DELETED" - The resource being moved has been deleted.
-	//   "PARENT_DELETED" - The resource a folder was being added to has
-	// been deleted.
-	//   "CYCLE_INTRODUCED_ERROR" - The attempted action would introduce
-	// cycle in resource path.
-	//   "FOLDER_BEING_MOVED" - The attempted action would move a folder
-	// that is already being moved.
-	//   "FOLDER_TO_DELETE_NON_EMPTY" - The folder the caller is trying to
-	// delete contains active resources.
-	//   "DELETED_FOLDER_HEIGHT_VIOLATION" - The attempted action would
-	// violate the max deleted folder depth
-	// constraint.
-	ErrorMessageId string `json:"errorMessageId,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "ErrorMessageId") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ErrorMessageId") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *FolderOperationError) MarshalJSON() ([]byte, error) {
-	type noMethod FolderOperationError
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// GetAncestryRequest: The request sent to the
-// GetAncestry
-// method.
-type GetAncestryRequest struct {
-}
-
-// GetAncestryResponse: Response from the GetAncestry method.
-type GetAncestryResponse struct {
-	// Ancestor: Ancestors are ordered from bottom to top of the resource
-	// hierarchy. The
-	// first ancestor is the project itself, followed by the project's
-	// parent,
-	// etc.
-	Ancestor []*Ancestor `json:"ancestor,omitempty"`
-
-	// ServerResponse contains the HTTP response code and headers from the
-	// server.
-	googleapi.ServerResponse `json:"-"`
-
-	// ForceSendFields is a list of field names (e.g. "Ancestor") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Ancestor") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *GetAncestryResponse) MarshalJSON() ([]byte, error) {
-	type noMethod GetAncestryResponse
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
 // GetIamPolicyRequest: Request message for `GetIamPolicy` method.
@@ -513,14 +157,11 @@ type GetIamPolicyRequest struct {
 // `ListOrganizations` method.
 type ListOrganizationsResponse struct {
 	// NextPageToken: A pagination token to be used to retrieve the next
-	// page of results. If the
-	// result is too large to fit within the page size specified in the
-	// request,
-	// this field will be set with a token that can be used to fetch the
-	// next page
-	// of results. If this field is empty, it indicates that this
-	// response
-	// contains the last page of results.
+	// page of results. If the result is too large to fit within the page
+	// size specified in the request, this field will be set with a token
+	// that can be used to fetch the next page of results. If this field is
+	// empty, it indicates that this response contains the last page of
+	// results.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
 	// Organizations: The list of Organizations that matched the list query,
@@ -538,53 +179,30 @@ type ListOrganizationsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ListOrganizationsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListOrganizationsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
-// ListProjectsResponse: A page of the response received from
-// the
-// ListProjects
-// method.
-//
-// A paginated response where more pages are available
-// has
-// `next_page_token` set. This token can be used in a subsequent request
-// to
-// retrieve the next request page.
+// ListProjectsResponse: A page of the response received from the
+// ListProjects method. A paginated response where more pages are
+// available has `next_page_token` set. This token can be used in a
+// subsequent request to retrieve the next request page.
 type ListProjectsResponse struct {
-	// NextPageToken: Pagination token.
-	//
-	// If the result set is too large to fit in a single response, this
-	// token
-	// is returned. It encodes the position of the current result
-	// cursor.
-	// Feeding this value into a new list request with the `page_token`
-	// parameter
-	// gives the next page of the results.
-	//
-	// When `next_page_token` is not filled in, there is no next page
-	// and
-	// the list returned is the last page in the result set.
-	//
+	// NextPageToken: Pagination token. If the result set is too large to
+	// fit in a single response, this token is returned. It encodes the
+	// position of the current result cursor. Feeding this value into a new
+	// list request with the `page_token` parameter gives the next page of
+	// the results. When `next_page_token` is not filled in, there is no
+	// next page and the list returned is the last page in the result set.
 	// Pagination tokens have a limited lifetime.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
 	// Projects: The list of Projects that matched the list filter. This
-	// list can
-	// be paginated.
+	// list can be paginated.
 	Projects []*Project `json:"projects,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -598,69 +216,32 @@ type ListProjectsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ListProjectsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListProjectsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Organization: The root node in the resource hierarchy to which a
-// particular entity's
-// (e.g., company) resources belong.
+// particular entity's (e.g., company) resources belong.
 type Organization struct {
 	// CreationTime: Timestamp when the Organization was created. Assigned
-	// by the server.
-	// @OutputOnly
+	// by the server. @OutputOnly
 	CreationTime string `json:"creationTime,omitempty"`
 
 	// DisplayName: A friendly string to be used to refer to the
-	// Organization in the UI.
-	// Assigned by the server, set to the primary domain of the G
-	// Suite
-	// customer that owns the organization.
-	// @OutputOnly
+	// Organization in the UI. This field is required.
 	DisplayName string `json:"displayName,omitempty"`
 
-	// LifecycleState: The organization's current lifecycle state. Assigned
-	// by the server.
-	// @OutputOnly
-	//
-	// Possible values:
-	//   "LIFECYCLE_STATE_UNSPECIFIED" - Unspecified state.  This is only
-	// useful for distinguishing unset values.
-	//   "ACTIVE" - The normal and active state.
-	//   "DELETE_REQUESTED" - The organization has been marked for deletion
-	// by the user.
-	LifecycleState string `json:"lifecycleState,omitempty"`
-
-	// Name: Output Only. The resource name of the organization. This is
-	// the
-	// organization's relative path in the API. Its format
-	// is
-	// "organizations/[organization_id]". For example, "organizations/1234".
-	Name string `json:"name,omitempty"`
-
 	// OrganizationId: An immutable id for the Organization that is assigned
-	// on creation. This
-	// should be omitted when creating a new Organization.
+	// on creation. This should be omitted when creating a new Organization.
 	// This field is read-only.
-	// This field is deprecated and will be removed in v1. Use name instead.
 	OrganizationId string `json:"organizationId,omitempty"`
 
 	// Owner: The owner of this Organization. The owner should be specified
-	// on
-	// creation. Once set, it cannot be changed.
-	// This field is required.
+	// on creation. Once set, it cannot be changed. This field is required.
 	Owner *OrganizationOwner `json:"owner,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -674,29 +255,18 @@ type Organization struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CreationTime") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Organization) MarshalJSON() ([]byte, error) {
 	type noMethod Organization
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // OrganizationOwner: The entity that owns an Organization. The lifetime
-// of the Organization and
-// all of its descendants are bound to the `OrganizationOwner`. If
-// the
-// `OrganizationOwner` is deleted, the Organization and all its
-// descendants will
-// be deleted.
+// of the Organization and all of its descendants are bound to the
+// `OrganizationOwner`. If the `OrganizationOwner` is deleted, the
+// Organization and all its descendants will be deleted.
 type OrganizationOwner struct {
 	// DirectoryCustomerId: The Google for Work customer id used in the
 	// Directory API.
@@ -709,88 +279,42 @@ type OrganizationOwner struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DirectoryCustomerId") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *OrganizationOwner) MarshalJSON() ([]byte, error) {
 	type noMethod OrganizationOwner
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Policy: Defines an Identity and Access Management (IAM) policy. It is
-// used to
-// specify access control policies for Cloud Platform resources.
-//
-//
+// used to specify access control policies for Cloud Platform resources.
 // A `Policy` consists of a list of `bindings`. A `Binding` binds a list
-// of
-// `members` to a `role`, where the members can be user accounts, Google
-// groups,
-// Google domains, and service accounts. A `role` is a named list of
-// permissions
-// defined by IAM.
-//
-// **Example**
-//
-//     {
-//       "bindings": [
-//         {
-//           "role": "roles/owner",
-//           "members": [
-//             "user:mike@example.com",
-//             "group:admins@example.com",
-//             "domain:google.com",
-//
-// "serviceAccount:my-other-app@appspot.gserviceaccount.com",
-//           ]
-//         },
-//         {
-//           "role": "roles/viewer",
-//           "members": ["user:sean@example.com"]
-//         }
-//       ]
-//     }
-//
-// For a description of IAM and its features, see the
-// [IAM developer's guide](https://cloud.google.com/iam).
+// of `members` to a `role`, where the members can be user accounts,
+// Google groups, Google domains, and service accounts. A `role` is a
+// named list of permissions defined by IAM. **Example** { "bindings": [
+// { "role": "roles/owner", "members": [ "user:mike@example.com",
+// "group:admins@example.com", "domain:google.com",
+// "serviceAccount:my-other-app@appspot.gserviceaccount.com", ] }, {
+// "role": "roles/viewer", "members": ["user:sean@example.com"] } ] }
+// For a description of IAM and its features, see the [IAM developer's
+// guide](https://cloud.google.com/iam).
 type Policy struct {
-	// AuditConfigs: Specifies cloud audit logging configuration for this
-	// policy.
-	AuditConfigs []*AuditConfig `json:"auditConfigs,omitempty"`
-
-	// Bindings: Associates a list of `members` to a `role`.
-	// Multiple `bindings` must not be specified for the same
-	// `role`.
-	// `bindings` with no members will result in an error.
+	// Bindings: Associates a list of `members` to a `role`. Multiple
+	// `bindings` must not be specified for the same `role`. `bindings` with
+	// no members will result in an error.
 	Bindings []*Binding `json:"bindings,omitempty"`
 
 	// Etag: `etag` is used for optimistic concurrency control as a way to
-	// help
-	// prevent simultaneous updates of a policy from overwriting each
-	// other.
-	// It is strongly suggested that systems make use of the `etag` in
-	// the
-	// read-modify-write cycle to perform policy updates in order to avoid
-	// race
-	// conditions: An `etag` is returned in the response to `getIamPolicy`,
-	// and
-	// systems are expected to put that etag in the request to
-	// `setIamPolicy` to
-	// ensure that their change will be applied to the same version of the
-	// policy.
-	//
-	// If no `etag` is provided in the call to `setIamPolicy`, then the
-	// existing
-	// policy is overwritten blindly.
+	// help prevent simultaneous updates of a policy from overwriting each
+	// other. It is strongly suggested that systems make use of the `etag`
+	// in the read-modify-write cycle to perform policy updates in order to
+	// avoid race conditions: An `etag` is returned in the response to
+	// `getIamPolicy`, and systems are expected to put that etag in the
+	// request to `setIamPolicy` to ensure that their change will be applied
+	// to the same version of the policy. If no `etag` is provided in the
+	// call to `setIamPolicy`, then the existing policy is overwritten
+	// blindly.
 	Etag string `json:"etag,omitempty"`
 
 	// Version: Version of the `Policy`. The default version is 0.
@@ -800,117 +324,67 @@ type Policy struct {
 	// server.
 	googleapi.ServerResponse `json:"-"`
 
-	// ForceSendFields is a list of field names (e.g. "AuditConfigs") to
+	// ForceSendFields is a list of field names (e.g. "Bindings") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AuditConfigs") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Policy) MarshalJSON() ([]byte, error) {
 	type noMethod Policy
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
-// Project: A Project is a high-level Google Cloud Platform entity.  It
-// is a
-// container for ACLs, APIs, App Engine Apps, VMs, and other
-// Google Cloud Platform resources.
+// Project: A Project is a high-level Google Cloud Platform entity. It
+// is a container for ACLs, APIs, AppEngine Apps, VMs, and other Google
+// Cloud Platform resources.
 type Project struct {
-	// CreateTime: Creation time.
-	//
-	// Read-only.
+	// CreateTime: Creation time. Read-only.
 	CreateTime string `json:"createTime,omitempty"`
 
-	// Labels: The labels associated with this Project.
-	//
-	// Label keys must be between 1 and 63 characters long and must
-	// conform
-	// to the following regular expression:
-	// \[a-z\](\[-a-z0-9\]*\[a-z0-9\])?.
-	//
-	// Label values must be between 0 and 63 characters long and must
-	// conform
-	// to the regular expression (\[a-z\](\[-a-z0-9\]*\[a-z0-9\])?)?.
-	//
-	// No more than 256 labels can be associated with a given
-	// resource.
-	//
-	// Clients should store labels in a representation such as JSON that
-	// does not
-	// depend on specific characters being disallowed.
-	//
-	// Example: <code>"environment" : "dev"</code>
+	// Labels: The labels associated with this Project. Label keys must be
+	// between 1 and 63 characters long and must conform to the following
+	// regular expression: \[a-z\](\[-a-z0-9\]*\[a-z0-9\])?. Label values
+	// must be between 0 and 63 characters long and must conform to the
+	// regular expression (\[a-z\](\[-a-z0-9\]*\[a-z0-9\])?)?. No more than
+	// 256 labels can be associated with a given resource. Clients should
+	// store labels in a representation such as JSON that does not depend on
+	// specific characters being disallowed. Example: "environment" : "dev"
 	// Read-write.
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// LifecycleState: The Project lifecycle state.
-	//
-	// Read-only.
+	// LifecycleState: The Project lifecycle state. Read-only.
 	//
 	// Possible values:
-	//   "LIFECYCLE_STATE_UNSPECIFIED" - Unspecified state.  This is only
-	// used/useful for distinguishing
-	// unset values.
-	//   "ACTIVE" - The normal and active state.
-	//   "DELETE_REQUESTED" - The project has been marked for deletion by
-	// the user
-	// (by invoking DeleteProject)
-	// or by the system (Google Cloud Platform).
-	// This can generally be reversed by invoking UndeleteProject.
-	//   "DELETE_IN_PROGRESS" - This lifecycle state is no longer used and
-	// is not returned by the API.
+	//   "LIFECYCLE_STATE_UNSPECIFIED"
+	//   "ACTIVE"
+	//   "DELETE_REQUESTED"
+	//   "DELETE_IN_PROGRESS"
 	LifecycleState string `json:"lifecycleState,omitempty"`
 
-	// Name: The user-assigned display name of the Project.
-	// It must be 4 to 30 characters.
-	// Allowed characters are: lowercase and uppercase letters,
-	// numbers,
-	// hyphen, single-quote, double-quote, space, and exclamation
-	// point.
-	//
-	// Example: <code>My Project</code>
-	// Read-write.
+	// Name: The user-assigned name of the Project. It must be 4 to 30
+	// characters. Allowed characters are: lowercase and uppercase letters,
+	// numbers, hyphen, single-quote, double-quote, space, and exclamation
+	// point. Example: My Project Read-write.
 	Name string `json:"name,omitempty"`
 
-	// Parent: An optional reference to a parent Resource.
-	//
-	// The only supported parent type is "organization". Once set, the
-	// parent
-	// cannot be modified. The `parent` can be set on creation or using
-	// the
-	// `UpdateProject` method; the end user must have
-	// the
-	// `resourcemanager.projects.create` permission on the
-	// parent.
-	//
-	// Read-write.
+	// Parent: An optional reference to a parent Resource. The only
+	// supported parent type is "organization". Once set, the parent cannot
+	// be modified. Read-write.
 	Parent *ResourceId `json:"parent,omitempty"`
 
-	// ProjectId: The unique, user-assigned ID of the Project.
-	// It must be 6 to 30 lowercase letters, digits, or hyphens.
-	// It must start with a letter.
-	// Trailing hyphens are prohibited.
-	//
-	// Example: <code>tokyo-rain-123</code>
+	// ProjectId: The unique, user-assigned ID of the Project. It must be 6
+	// to 30 lowercase letters, digits, or hyphens. It must start with a
+	// letter. Trailing hyphens are prohibited. Example: tokyo-rain-123
 	// Read-only after creation.
 	ProjectId string `json:"projectId,omitempty"`
 
-	// ProjectNumber: The number uniquely identifying the project.
-	//
-	// Example: <code>415104041262</code>
-	// Read-only.
+	// ProjectNumber: The number uniquely identifying the project. Example:
+	// 415104041262 Read-only.
 	ProjectNumber int64 `json:"projectNumber,omitempty,string"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -924,80 +398,26 @@ type Project struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CreateTime") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Project) MarshalJSON() ([]byte, error) {
 	type noMethod Project
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// ProjectCreationStatus: A status object which is used as the
-// `metadata` field for the Operation
-// returned by CreateProject. It provides insight for when significant
-// phases of
-// Project creation have completed.
-type ProjectCreationStatus struct {
-	// CreateTime: Creation time of the project creation workflow.
-	CreateTime string `json:"createTime,omitempty"`
-
-	// Gettable: True if the project can be retrieved using GetProject. No
-	// other operations
-	// on the project are guaranteed to work until the project creation
-	// is
-	// complete.
-	Gettable bool `json:"gettable,omitempty"`
-
-	// Ready: True if the project creation process is complete.
-	Ready bool `json:"ready,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "CreateTime") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CreateTime") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *ProjectCreationStatus) MarshalJSON() ([]byte, error) {
-	type noMethod ProjectCreationStatus
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ResourceId: A container to reference an id for any resource type. A
-// `resource` in Google
-// Cloud Platform is a generic term for something you (a developer) may
-// want to
-// interact with through one of our API's. Some examples are an App
-// Engine app,
-// a Compute Engine instance, a Cloud SQL database, and so on.
+// `resource` in Google Cloud Platform is a generic term for something
+// you (a developer) may want to interact with through one of our API's.
+// Some examples are an AppEngine app, a Compute Engine instance, a
+// Cloud SQL database, and so on.
 type ResourceId struct {
 	// Id: Required field for the type-specific id. This should correspond
-	// to the id
-	// used in the type-specific API's.
+	// to the id used in the type-specific API's.
 	Id string `json:"id,omitempty"`
 
-	// Type: Required field representing the resource type this id is
-	// for.
-	// At present, the valid types are "project" and "organization".
+	// Type: Required field representing the resource type this id is for.
+	// At present, the only valid type is "organization".
 	Type string `json:"type,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Id") to
@@ -1007,40 +427,21 @@ type ResourceId struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Id") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ResourceId) MarshalJSON() ([]byte, error) {
 	type noMethod ResourceId
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // SetIamPolicyRequest: Request message for `SetIamPolicy` method.
 type SetIamPolicyRequest struct {
 	// Policy: REQUIRED: The complete policy to be applied to the
-	// `resource`. The size of
-	// the policy is limited to a few 10s of KB. An empty policy is a
-	// valid policy but certain Cloud Platform services (such as
-	// Projects)
-	// might reject them.
+	// `resource`. The size of the policy is limited to a few 10s of KB. An
+	// empty policy is a valid policy but certain Cloud Platform services
+	// (such as Projects) might reject them.
 	Policy *Policy `json:"policy,omitempty"`
-
-	// UpdateMask: OPTIONAL: A FieldMask specifying which fields of the
-	// policy to modify. Only
-	// the fields in the mask will be modified. If no mask is provided,
-	// the
-	// following default mask is used:
-	// paths: "bindings, etag"
-	// This field is only used by Cloud IAM.
-	UpdateMask string `json:"updateMask,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Policy") to
 	// unconditionally include in API requests. By default, fields with
@@ -1049,32 +450,20 @@ type SetIamPolicyRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Policy") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *SetIamPolicyRequest) MarshalJSON() ([]byte, error) {
 	type noMethod SetIamPolicyRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TestIamPermissionsRequest: Request message for `TestIamPermissions`
 // method.
 type TestIamPermissionsRequest struct {
 	// Permissions: The set of permissions to check for the `resource`.
-	// Permissions with
-	// wildcards (such as '*' or 'storage.*') are not allowed. For
-	// more
-	// information see
-	// [IAM
-	// Overview](https://cloud.google.com/iam/docs/overview#permissions).
+	// Permissions with wildcards (such as '*' or 'storage.*') are not
+	// allowed. For more information see IAM Overview.
 	Permissions []string `json:"permissions,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Permissions") to
@@ -1084,28 +473,19 @@ type TestIamPermissionsRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Permissions") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TestIamPermissionsRequest) MarshalJSON() ([]byte, error) {
 	type noMethod TestIamPermissionsRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TestIamPermissionsResponse: Response message for `TestIamPermissions`
 // method.
 type TestIamPermissionsResponse struct {
 	// Permissions: A subset of `TestPermissionsRequest.permissions` that
-	// the caller is
-	// allowed.
+	// the caller is allowed.
 	Permissions []string `json:"permissions,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -1119,24 +499,15 @@ type TestIamPermissionsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Permissions") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TestIamPermissionsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod TestIamPermissionsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
-// UndeleteProjectRequest: The request sent to the
-// UndeleteProject
+// UndeleteProjectRequest: The request sent to the UndeleteProject
 // method.
 type UndeleteProjectRequest struct {
 }
@@ -1144,27 +515,18 @@ type UndeleteProjectRequest struct {
 // method id "cloudresourcemanager.organizations.get":
 
 type OrganizationsGetCall struct {
-	s            *Service
-	name         string
-	urlParams_   gensupport.URLParams
-	ifNoneMatch_ string
-	ctx_         context.Context
-	header_      http.Header
+	s              *Service
+	organizationId string
+	urlParams_     gensupport.URLParams
+	ifNoneMatch_   string
+	ctx_           context.Context
 }
 
 // Get: Fetches an Organization resource identified by the specified
-// resource name.
-func (r *OrganizationsService) Get(name string) *OrganizationsGetCall {
+// `organization_id`.
+func (r *OrganizationsService) Get(organizationId string) *OrganizationsGetCall {
 	c := &OrganizationsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	c.name = name
-	return c
-}
-
-// OrganizationId sets the optional parameter "organizationId": The id
-// of the Organization resource to fetch.
-// This field is deprecated and will be removed in v1. Use name instead.
-func (c *OrganizationsGetCall) OrganizationId(organizationId string) *OrganizationsGetCall {
-	c.urlParams_.Set("organizationId", organizationId)
+	c.organizationId = organizationId
 	return c
 }
 
@@ -1194,34 +556,23 @@ func (c *OrganizationsGetCall) Context(ctx context.Context) *OrganizationsGetCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *OrganizationsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *OrganizationsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+name}")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/organizations/{organizationId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
-		"name": c.name,
+		"organizationId": c.organizationId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.organizations.get" call.
@@ -1256,34 +607,26 @@ func (c *OrganizationsGetCall) Do(opts ...googleapi.CallOption) (*Organization, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Fetches an Organization resource identified by the specified resource name.",
-	//   "flatPath": "v1beta1/organizations/{organizationsId}",
+	//   "description": "Fetches an Organization resource identified by the specified `organization_id`.",
 	//   "httpMethod": "GET",
 	//   "id": "cloudresourcemanager.organizations.get",
 	//   "parameterOrder": [
-	//     "name"
+	//     "organizationId"
 	//   ],
 	//   "parameters": {
-	//     "name": {
-	//       "description": "The resource name of the Organization to fetch, e.g. \"organizations/1234\".",
-	//       "location": "path",
-	//       "pattern": "^organizations/[^/]+$",
-	//       "required": true,
-	//       "type": "string"
-	//     },
 	//     "organizationId": {
-	//       "description": "The id of the Organization resource to fetch.\nThis field is deprecated and will be removed in v1. Use name instead.",
-	//       "location": "query",
+	//       "description": "The id of the Organization resource to fetch.",
+	//       "location": "path",
+	//       "required": true,
 	//       "type": "string"
 	//     }
 	//   },
-	//   "path": "v1beta1/{+name}",
+	//   "path": "v1beta1/organizations/{organizationId}",
 	//   "response": {
 	//     "$ref": "Organization"
 	//   },
@@ -1303,14 +646,10 @@ type OrganizationsGetIamPolicyCall struct {
 	getiampolicyrequest *GetIamPolicyRequest
 	urlParams_          gensupport.URLParams
 	ctx_                context.Context
-	header_             http.Header
 }
 
 // GetIamPolicy: Gets the access control policy for an Organization
-// resource. May be empty
-// if no such policy or resource exists. The `resource` field should be
-// the
-// organization's resource name, e.g. "organizations/123".
+// resource. May be empty if no such policy or resource exists.
 func (r *OrganizationsService) GetIamPolicy(resource string, getiampolicyrequest *GetIamPolicyRequest) *OrganizationsGetIamPolicyCall {
 	c := &OrganizationsGetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.resource = resource
@@ -1334,36 +673,26 @@ func (c *OrganizationsGetIamPolicyCall) Context(ctx context.Context) *Organizati
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *OrganizationsGetIamPolicyCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *OrganizationsGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.getiampolicyrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:getIamPolicy")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/organizations/{resource}:getIamPolicy")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"resource": c.resource,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.organizations.getIamPolicy" call.
@@ -1398,14 +727,12 @@ func (c *OrganizationsGetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Polic
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Gets the access control policy for an Organization resource. May be empty\nif no such policy or resource exists. The `resource` field should be the\norganization's resource name, e.g. \"organizations/123\".",
-	//   "flatPath": "v1beta1/organizations/{organizationsId}:getIamPolicy",
+	//   "description": "Gets the access control policy for an Organization resource. May be empty if no such policy or resource exists.",
 	//   "httpMethod": "POST",
 	//   "id": "cloudresourcemanager.organizations.getIamPolicy",
 	//   "parameterOrder": [
@@ -1413,14 +740,13 @@ func (c *OrganizationsGetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Polic
 	//   ],
 	//   "parameters": {
 	//     "resource": {
-	//       "description": "REQUIRED: The resource for which the policy is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "description": "REQUIRED: The resource for which the policy is being requested. `resource` is usually specified as a path, such as `projects/*project*/zones/*zone*/disks/*disk*`. The format for the path specified in this value is resource specific and is specified in the `getIamPolicy` documentation.",
 	//       "location": "path",
-	//       "pattern": "^organizations/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
 	//   },
-	//   "path": "v1beta1/{+resource}:getIamPolicy",
+	//   "path": "v1beta1/organizations/{resource}:getIamPolicy",
 	//   "request": {
 	//     "$ref": "GetIamPolicyRequest"
 	//   },
@@ -1442,56 +768,42 @@ type OrganizationsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists Organization resources that are visible to the user and
-// satisfy
-// the specified filter. This method returns Organizations in an
-// unspecified
-// order. New Organizations do not necessarily appear at the end of the
-// list.
+// satisfy the specified filter. This method returns Organizations in an
+// unspecified order. New Organizations do not necessarily appear at the
+// end of the list.
 func (r *OrganizationsService) List() *OrganizationsListCall {
 	c := &OrganizationsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	return c
 }
 
 // Filter sets the optional parameter "filter": An optional query string
-// used to filter the Organizations to return in
-// the response. Filter rules are case-insensitive.
-//
-//
-// Organizations may be filtered by `owner.directoryCustomerId` or
-// by
-// `domain`, where the domain is a Google for Work domain, for
-// example:
-//
-// |Filter|Description|
+// used to filter the Organizations to return in the response. Filter
+// rules are case-insensitive. Organizations may be filtered by
+// `owner.directoryCustomerId` or by `domain`, where the domain is a
+// Google for Work domain, for example: |Filter|Description|
 // |------|-----------|
-// |owner.directorycu
-// stomerid:123456789|Organizations with `owner.directory_customer_id`
-// equal to `123456789`.|
+// |owner.directorycustomerid:123456789|Organizations with
+// `owner.directory_customer_id` equal to `123456789`.|
 // |domain:google.com|Organizations corresponding to the domain
-// `google.com`.|
-//
-// This field is optional.
+// `google.com`.| This field is optional.
 func (c *OrganizationsListCall) Filter(filter string) *OrganizationsListCall {
 	c.urlParams_.Set("filter", filter)
 	return c
 }
 
 // PageSize sets the optional parameter "pageSize": The maximum number
-// of Organizations to return in the response.
-// This field is optional.
+// of Organizations to return in the response. This field is optional.
 func (c *OrganizationsListCall) PageSize(pageSize int64) *OrganizationsListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
 }
 
 // PageToken sets the optional parameter "pageToken": A pagination token
-// returned from a previous call to `ListOrganizations`
-// that indicates from where listing should continue.
-// This field is optional.
+// returned from a previous call to `ListOrganizations` that indicates
+// from where listing should continue. This field is optional.
 func (c *OrganizationsListCall) PageToken(pageToken string) *OrganizationsListCall {
 	c.urlParams_.Set("pageToken", pageToken)
 	return c
@@ -1523,31 +835,21 @@ func (c *OrganizationsListCall) Context(ctx context.Context) *OrganizationsListC
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *OrganizationsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *OrganizationsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/organizations")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.organizations.list" call.
@@ -1582,31 +884,28 @@ func (c *OrganizationsListCall) Do(opts ...googleapi.CallOption) (*ListOrganizat
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists Organization resources that are visible to the user and satisfy\nthe specified filter. This method returns Organizations in an unspecified\norder. New Organizations do not necessarily appear at the end of the list.",
-	//   "flatPath": "v1beta1/organizations",
+	//   "description": "Lists Organization resources that are visible to the user and satisfy the specified filter. This method returns Organizations in an unspecified order. New Organizations do not necessarily appear at the end of the list.",
 	//   "httpMethod": "GET",
 	//   "id": "cloudresourcemanager.organizations.list",
-	//   "parameterOrder": [],
 	//   "parameters": {
 	//     "filter": {
-	//       "description": "An optional query string used to filter the Organizations to return in\nthe response. Filter rules are case-insensitive.\n\n\nOrganizations may be filtered by `owner.directoryCustomerId` or by\n`domain`, where the domain is a Google for Work domain, for example:\n\n|Filter|Description|\n|------|-----------|\n|owner.directorycustomerid:123456789|Organizations with `owner.directory_customer_id` equal to `123456789`.|\n|domain:google.com|Organizations corresponding to the domain `google.com`.|\n\nThis field is optional.",
+	//       "description": "An optional query string used to filter the Organizations to return in the response. Filter rules are case-insensitive. Organizations may be filtered by `owner.directoryCustomerId` or by `domain`, where the domain is a Google for Work domain, for example: |Filter|Description| |------|-----------| |owner.directorycustomerid:123456789|Organizations with `owner.directory_customer_id` equal to `123456789`.| |domain:google.com|Organizations corresponding to the domain `google.com`.| This field is optional.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "pageSize": {
-	//       "description": "The maximum number of Organizations to return in the response.\nThis field is optional.",
+	//       "description": "The maximum number of Organizations to return in the response. This field is optional.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
 	//     },
 	//     "pageToken": {
-	//       "description": "A pagination token returned from a previous call to `ListOrganizations`\nthat indicates from where listing should continue.\nThis field is optional.",
+	//       "description": "A pagination token returned from a previous call to `ListOrganizations` that indicates from where listing should continue. This field is optional.",
 	//       "location": "query",
 	//       "type": "string"
 	//     }
@@ -1652,14 +951,10 @@ type OrganizationsSetIamPolicyCall struct {
 	setiampolicyrequest *SetIamPolicyRequest
 	urlParams_          gensupport.URLParams
 	ctx_                context.Context
-	header_             http.Header
 }
 
 // SetIamPolicy: Sets the access control policy on an Organization
-// resource. Replaces any
-// existing policy. The `resource` field should be the organization's
-// resource
-// name, e.g. "organizations/123".
+// resource. Replaces any existing policy.
 func (r *OrganizationsService) SetIamPolicy(resource string, setiampolicyrequest *SetIamPolicyRequest) *OrganizationsSetIamPolicyCall {
 	c := &OrganizationsSetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.resource = resource
@@ -1683,36 +978,26 @@ func (c *OrganizationsSetIamPolicyCall) Context(ctx context.Context) *Organizati
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *OrganizationsSetIamPolicyCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *OrganizationsSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.setiampolicyrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:setIamPolicy")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/organizations/{resource}:setIamPolicy")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"resource": c.resource,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.organizations.setIamPolicy" call.
@@ -1747,14 +1032,12 @@ func (c *OrganizationsSetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Polic
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Sets the access control policy on an Organization resource. Replaces any\nexisting policy. The `resource` field should be the organization's resource\nname, e.g. \"organizations/123\".",
-	//   "flatPath": "v1beta1/organizations/{organizationsId}:setIamPolicy",
+	//   "description": "Sets the access control policy on an Organization resource. Replaces any existing policy.",
 	//   "httpMethod": "POST",
 	//   "id": "cloudresourcemanager.organizations.setIamPolicy",
 	//   "parameterOrder": [
@@ -1762,14 +1045,13 @@ func (c *OrganizationsSetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Polic
 	//   ],
 	//   "parameters": {
 	//     "resource": {
-	//       "description": "REQUIRED: The resource for which the policy is being specified.\nSee the operation documentation for the appropriate value for this field.",
+	//       "description": "REQUIRED: The resource for which the policy is being specified. `resource` is usually specified as a path, such as `projects/*project*/zones/*zone*/disks/*disk*`. The format for the path specified in this value is resource specific and is specified in the `setIamPolicy` documentation.",
 	//       "location": "path",
-	//       "pattern": "^organizations/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
 	//   },
-	//   "path": "v1beta1/{+resource}:setIamPolicy",
+	//   "path": "v1beta1/organizations/{resource}:setIamPolicy",
 	//   "request": {
 	//     "$ref": "SetIamPolicyRequest"
 	//   },
@@ -1791,13 +1073,10 @@ type OrganizationsTestIamPermissionsCall struct {
 	testiampermissionsrequest *TestIamPermissionsRequest
 	urlParams_                gensupport.URLParams
 	ctx_                      context.Context
-	header_                   http.Header
 }
 
 // TestIamPermissions: Returns permissions that a caller has on the
 // specified Organization.
-// The `resource` field should be the organization's resource name,
-// e.g. "organizations/123".
 func (r *OrganizationsService) TestIamPermissions(resource string, testiampermissionsrequest *TestIamPermissionsRequest) *OrganizationsTestIamPermissionsCall {
 	c := &OrganizationsTestIamPermissionsCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.resource = resource
@@ -1821,36 +1100,26 @@ func (c *OrganizationsTestIamPermissionsCall) Context(ctx context.Context) *Orga
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *OrganizationsTestIamPermissionsCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *OrganizationsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.testiampermissionsrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+resource}:testIamPermissions")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/organizations/{resource}:testIamPermissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"resource": c.resource,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.organizations.testIamPermissions" call.
@@ -1885,14 +1154,12 @@ func (c *OrganizationsTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Returns permissions that a caller has on the specified Organization.\nThe `resource` field should be the organization's resource name,\ne.g. \"organizations/123\".",
-	//   "flatPath": "v1beta1/organizations/{organizationsId}:testIamPermissions",
+	//   "description": "Returns permissions that a caller has on the specified Organization.",
 	//   "httpMethod": "POST",
 	//   "id": "cloudresourcemanager.organizations.testIamPermissions",
 	//   "parameterOrder": [
@@ -1900,14 +1167,13 @@ func (c *OrganizationsTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (
 	//   ],
 	//   "parameters": {
 	//     "resource": {
-	//       "description": "REQUIRED: The resource for which the policy detail is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "description": "REQUIRED: The resource for which the policy detail is being requested. `resource` is usually specified as a path, such as `projects/*project*/zones/*zone*/disks/*disk*`. The format for the path specified in this value is resource specific and is specified in the `testIamPermissions` documentation.",
 	//       "location": "path",
-	//       "pattern": "^organizations/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
 	//   },
-	//   "path": "v1beta1/{+resource}:testIamPermissions",
+	//   "path": "v1beta1/organizations/{resource}:testIamPermissions",
 	//   "request": {
 	//     "$ref": "TestIamPermissionsRequest"
 	//   },
@@ -1925,19 +1191,18 @@ func (c *OrganizationsTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (
 // method id "cloudresourcemanager.organizations.update":
 
 type OrganizationsUpdateCall struct {
-	s            *Service
-	name         string
-	organization *Organization
-	urlParams_   gensupport.URLParams
-	ctx_         context.Context
-	header_      http.Header
+	s              *Service
+	organizationId string
+	organization   *Organization
+	urlParams_     gensupport.URLParams
+	ctx_           context.Context
 }
 
 // Update: Updates an Organization resource identified by the specified
-// resource name.
-func (r *OrganizationsService) Update(name string, organization *Organization) *OrganizationsUpdateCall {
+// `organization_id`.
+func (r *OrganizationsService) Update(organizationId string, organization *Organization) *OrganizationsUpdateCall {
 	c := &OrganizationsUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	c.name = name
+	c.organizationId = organizationId
 	c.organization = organization
 	return c
 }
@@ -1958,36 +1223,26 @@ func (c *OrganizationsUpdateCall) Context(ctx context.Context) *OrganizationsUpd
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *OrganizationsUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *OrganizationsUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.organization)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/{+name}")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/organizations/{organizationId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
-		"name": c.name,
+		"organizationId": c.organizationId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.organizations.update" call.
@@ -2022,29 +1277,26 @@ func (c *OrganizationsUpdateCall) Do(opts ...googleapi.CallOption) (*Organizatio
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Updates an Organization resource identified by the specified resource name.",
-	//   "flatPath": "v1beta1/organizations/{organizationsId}",
+	//   "description": "Updates an Organization resource identified by the specified `organization_id`.",
 	//   "httpMethod": "PUT",
 	//   "id": "cloudresourcemanager.organizations.update",
 	//   "parameterOrder": [
-	//     "name"
+	//     "organizationId"
 	//   ],
 	//   "parameters": {
-	//     "name": {
-	//       "description": "Output Only. The resource name of the organization. This is the\norganization's relative path in the API. Its format is\n\"organizations/[organization_id]\". For example, \"organizations/1234\".",
+	//     "organizationId": {
+	//       "description": "An immutable id for the Organization that is assigned on creation. This should be omitted when creating a new Organization. This field is read-only.",
 	//       "location": "path",
-	//       "pattern": "^organizations/[^/]+$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
 	//   },
-	//   "path": "v1beta1/{+name}",
+	//   "path": "v1beta1/organizations/{organizationId}",
 	//   "request": {
 	//     "$ref": "Organization"
 	//   },
@@ -2065,30 +1317,16 @@ type ProjectsCreateCall struct {
 	project    *Project
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
-// Create: Creates a Project resource.
-//
-// Initially, the Project resource is owned by its creator
-// exclusively.
-// The creator can later grant permission to others to read or update
-// the
-// Project.
-//
-// Several APIs are activated automatically for the Project,
-// including
-// Google Cloud Storage.
+// Create: Creates a Project resource. Initially, the Project resource
+// is owned by its creator exclusively. The creator can later grant
+// permission to others to read or update the Project. Several APIs are
+// activated automatically for the Project, including Google Cloud
+// Storage.
 func (r *ProjectsService) Create(project *Project) *ProjectsCreateCall {
 	c := &ProjectsCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.project = project
-	return c
-}
-
-// UseLegacyStack sets the optional parameter "useLegacyStack": A safety
-// hatch to opt out of the new reliable project creation process.
-func (c *ProjectsCreateCall) UseLegacyStack(useLegacyStack bool) *ProjectsCreateCall {
-	c.urlParams_.Set("useLegacyStack", fmt.Sprint(useLegacyStack))
 	return c
 }
 
@@ -2108,33 +1346,24 @@ func (c *ProjectsCreateCall) Context(ctx context.Context) *ProjectsCreateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsCreateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.project)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.create" call.
@@ -2169,24 +1398,14 @@ func (c *ProjectsCreateCall) Do(opts ...googleapi.CallOption) (*Project, error) 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates a Project resource.\n\nInitially, the Project resource is owned by its creator exclusively.\nThe creator can later grant permission to others to read or update the\nProject.\n\nSeveral APIs are activated automatically for the Project, including\nGoogle Cloud Storage.",
-	//   "flatPath": "v1beta1/projects",
+	//   "description": "Creates a Project resource. Initially, the Project resource is owned by its creator exclusively. The creator can later grant permission to others to read or update the Project. Several APIs are activated automatically for the Project, including Google Cloud Storage.",
 	//   "httpMethod": "POST",
 	//   "id": "cloudresourcemanager.projects.create",
-	//   "parameterOrder": [],
-	//   "parameters": {
-	//     "useLegacyStack": {
-	//       "description": "A safety hatch to opt out of the new reliable project creation process.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     }
-	//   },
 	//   "path": "v1beta1/projects",
 	//   "request": {
 	//     "$ref": "Project"
@@ -2208,36 +1427,21 @@ type ProjectsDeleteCall struct {
 	projectId  string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
-// Delete: Marks the Project identified by the specified
-// `project_id` (for example, `my-project-123`) for deletion.
-// This method will only affect the Project if the following criteria
-// are met:
-//
-// + The Project does not have a billing account associated with it.
-// + The Project has a lifecycle state of
-// ACTIVE.
-//
-// This method changes the Project's lifecycle state from
-// ACTIVE
-// to DELETE_REQUESTED.
-// The deletion starts at an unspecified time, at which point the
-// project is
-// no longer accessible.
-//
-// Until the deletion completes, you can check the lifecycle
-// state
-// checked by retrieving the Project with GetProject,
-// and the Project remains visible to ListProjects.
-// However, you cannot update the project.
-//
-// After the deletion completes, the Project is not retrievable by
-// the  GetProject and
-// ListProjects methods.
-//
-// The caller must have modify permissions for this Project.
+// Delete: Marks the Project identified by the specified `project_id`
+// (for example, `my-project-123`) for deletion. This method will only
+// affect the Project if the following criteria are met: + The Project
+// does not have a billing account associated with it. + The Project has
+// a lifecycle state of ACTIVE. This method changes the Project's
+// lifecycle state from ACTIVE to DELETE_REQUESTED. The deletion starts
+// at an unspecified time, at which point the lifecycle state changes to
+// DELETE_IN_PROGRESS. Until the deletion completes, you can check the
+// lifecycle state checked by retrieving the Project with GetProject,
+// and the Project remains visible to ListProjects. However, you cannot
+// update the project. After the deletion completes, the Project is not
+// retrievable by the GetProject and ListProjects methods. The caller
+// must have modify permissions for this Project.
 func (r *ProjectsService) Delete(projectId string) *ProjectsDeleteCall {
 	c := &ProjectsDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.projectId = projectId
@@ -2260,31 +1464,20 @@ func (c *ProjectsDeleteCall) Context(ctx context.Context) *ProjectsDeleteCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsDeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects/{projectId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.delete" call.
@@ -2319,14 +1512,12 @@ func (c *ProjectsDeleteCall) Do(opts ...googleapi.CallOption) (*Empty, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Marks the Project identified by the specified\n`project_id` (for example, `my-project-123`) for deletion.\nThis method will only affect the Project if the following criteria are met:\n\n+ The Project does not have a billing account associated with it.\n+ The Project has a lifecycle state of\nACTIVE.\n\nThis method changes the Project's lifecycle state from\nACTIVE\nto DELETE_REQUESTED.\nThe deletion starts at an unspecified time, at which point the project is\nno longer accessible.\n\nUntil the deletion completes, you can check the lifecycle state\nchecked by retrieving the Project with GetProject,\nand the Project remains visible to ListProjects.\nHowever, you cannot update the project.\n\nAfter the deletion completes, the Project is not retrievable by\nthe  GetProject and\nListProjects methods.\n\nThe caller must have modify permissions for this Project.",
-	//   "flatPath": "v1beta1/projects/{projectId}",
+	//   "description": "Marks the Project identified by the specified `project_id` (for example, `my-project-123`) for deletion. This method will only affect the Project if the following criteria are met: + The Project does not have a billing account associated with it. + The Project has a lifecycle state of ACTIVE. This method changes the Project's lifecycle state from ACTIVE to DELETE_REQUESTED. The deletion starts at an unspecified time, at which point the lifecycle state changes to DELETE_IN_PROGRESS. Until the deletion completes, you can check the lifecycle state checked by retrieving the Project with GetProject, and the Project remains visible to ListProjects. However, you cannot update the project. After the deletion completes, the Project is not retrievable by the GetProject and ListProjects methods. The caller must have modify permissions for this Project.",
 	//   "httpMethod": "DELETE",
 	//   "id": "cloudresourcemanager.projects.delete",
 	//   "parameterOrder": [
@@ -2334,7 +1525,7 @@ func (c *ProjectsDeleteCall) Do(opts ...googleapi.CallOption) (*Empty, error) {
 	//   ],
 	//   "parameters": {
 	//     "projectId": {
-	//       "description": "The Project ID (for example, `foo-bar-123`).\n\nRequired.",
+	//       "description": "The Project ID (for example, `foo-bar-123`). Required.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -2359,13 +1550,11 @@ type ProjectsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
-// Get: Retrieves the Project identified by the specified
-// `project_id` (for example, `my-project-123`).
-//
-// The caller must have read permissions for this Project.
+// Get: Retrieves the Project identified by the specified `project_id`
+// (for example, `my-project-123`). The caller must have read
+// permissions for this Project.
 func (r *ProjectsService) Get(projectId string) *ProjectsGetCall {
 	c := &ProjectsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.projectId = projectId
@@ -2398,34 +1587,23 @@ func (c *ProjectsGetCall) Context(ctx context.Context) *ProjectsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects/{projectId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.get" call.
@@ -2460,14 +1638,12 @@ func (c *ProjectsGetCall) Do(opts ...googleapi.CallOption) (*Project, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Retrieves the Project identified by the specified\n`project_id` (for example, `my-project-123`).\n\nThe caller must have read permissions for this Project.",
-	//   "flatPath": "v1beta1/projects/{projectId}",
+	//   "description": "Retrieves the Project identified by the specified `project_id` (for example, `my-project-123`). The caller must have read permissions for this Project.",
 	//   "httpMethod": "GET",
 	//   "id": "cloudresourcemanager.projects.get",
 	//   "parameterOrder": [
@@ -2475,7 +1651,7 @@ func (c *ProjectsGetCall) Do(opts ...googleapi.CallOption) (*Project, error) {
 	//   ],
 	//   "parameters": {
 	//     "projectId": {
-	//       "description": "The Project ID (for example, `my-project-123`).\n\nRequired.",
+	//       "description": "The Project ID (for example, `my-project-123`). Required.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -2493,146 +1669,6 @@ func (c *ProjectsGetCall) Do(opts ...googleapi.CallOption) (*Project, error) {
 
 }
 
-// method id "cloudresourcemanager.projects.getAncestry":
-
-type ProjectsGetAncestryCall struct {
-	s                  *Service
-	projectId          string
-	getancestryrequest *GetAncestryRequest
-	urlParams_         gensupport.URLParams
-	ctx_               context.Context
-	header_            http.Header
-}
-
-// GetAncestry: Gets a list of ancestors in the resource hierarchy for
-// the Project
-// identified by the specified `project_id` (for example,
-// `my-project-123`).
-//
-// The caller must have read permissions for this Project.
-func (r *ProjectsService) GetAncestry(projectId string, getancestryrequest *GetAncestryRequest) *ProjectsGetAncestryCall {
-	c := &ProjectsGetAncestryCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	c.projectId = projectId
-	c.getancestryrequest = getancestryrequest
-	return c
-}
-
-// Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
-func (c *ProjectsGetAncestryCall) Fields(s ...googleapi.Field) *ProjectsGetAncestryCall {
-	c.urlParams_.Set("fields", googleapi.CombineFields(s))
-	return c
-}
-
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
-func (c *ProjectsGetAncestryCall) Context(ctx context.Context) *ProjectsGetAncestryCall {
-	c.ctx_ = ctx
-	return c
-}
-
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsGetAncestryCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
-func (c *ProjectsGetAncestryCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	var body io.Reader = nil
-	body, err := googleapi.WithoutDataWrapper.JSONReader(c.getancestryrequest)
-	if err != nil {
-		return nil, err
-	}
-	reqHeaders.Set("Content-Type", "application/json")
-	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects/{projectId}:getAncestry")
-	urls += "?" + c.urlParams_.Encode()
-	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	googleapi.Expand(req.URL, map[string]string{
-		"projectId": c.projectId,
-	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
-}
-
-// Do executes the "cloudresourcemanager.projects.getAncestry" call.
-// Exactly one of *GetAncestryResponse or error will be non-nil. Any
-// non-2xx status code is an error. Response headers are in either
-// *GetAncestryResponse.ServerResponse.Header or (if a response was
-// returned at all) in error.(*googleapi.Error).Header. Use
-// googleapi.IsNotModified to check whether the returned error was
-// because http.StatusNotModified was returned.
-func (c *ProjectsGetAncestryCall) Do(opts ...googleapi.CallOption) (*GetAncestryResponse, error) {
-	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
-	if res != nil && res.StatusCode == http.StatusNotModified {
-		if res.Body != nil {
-			res.Body.Close()
-		}
-		return nil, &googleapi.Error{
-			Code:   res.StatusCode,
-			Header: res.Header,
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	defer googleapi.CloseBody(res)
-	if err := googleapi.CheckResponse(res); err != nil {
-		return nil, err
-	}
-	ret := &GetAncestryResponse{
-		ServerResponse: googleapi.ServerResponse{
-			Header:         res.Header,
-			HTTPStatusCode: res.StatusCode,
-		},
-	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
-		return nil, err
-	}
-	return ret, nil
-	// {
-	//   "description": "Gets a list of ancestors in the resource hierarchy for the Project\nidentified by the specified `project_id` (for example, `my-project-123`).\n\nThe caller must have read permissions for this Project.",
-	//   "flatPath": "v1beta1/projects/{projectId}:getAncestry",
-	//   "httpMethod": "POST",
-	//   "id": "cloudresourcemanager.projects.getAncestry",
-	//   "parameterOrder": [
-	//     "projectId"
-	//   ],
-	//   "parameters": {
-	//     "projectId": {
-	//       "description": "The Project ID (for example, `my-project-123`).\n\nRequired.",
-	//       "location": "path",
-	//       "required": true,
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "v1beta1/projects/{projectId}:getAncestry",
-	//   "request": {
-	//     "$ref": "GetAncestryRequest"
-	//   },
-	//   "response": {
-	//     "$ref": "GetAncestryResponse"
-	//   },
-	//   "scopes": [
-	//     "https://www.googleapis.com/auth/cloud-platform",
-	//     "https://www.googleapis.com/auth/cloud-platform.read-only"
-	//   ]
-	// }
-
-}
-
 // method id "cloudresourcemanager.projects.getIamPolicy":
 
 type ProjectsGetIamPolicyCall struct {
@@ -2641,12 +1677,11 @@ type ProjectsGetIamPolicyCall struct {
 	getiampolicyrequest *GetIamPolicyRequest
 	urlParams_          gensupport.URLParams
 	ctx_                context.Context
-	header_             http.Header
 }
 
 // GetIamPolicy: Returns the IAM access control policy for the specified
-// Project.
-// Permission is denied if the policy or the resource does not exist.
+// Project. Permission is denied if the policy or the resource does not
+// exist.
 func (r *ProjectsService) GetIamPolicy(resource string, getiampolicyrequest *GetIamPolicyRequest) *ProjectsGetIamPolicyCall {
 	c := &ProjectsGetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.resource = resource
@@ -2670,36 +1705,26 @@ func (c *ProjectsGetIamPolicyCall) Context(ctx context.Context) *ProjectsGetIamP
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsGetIamPolicyCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.getiampolicyrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects/{resource}:getIamPolicy")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"resource": c.resource,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.getIamPolicy" call.
@@ -2734,14 +1759,12 @@ func (c *ProjectsGetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Policy, er
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Returns the IAM access control policy for the specified Project.\nPermission is denied if the policy or the resource does not exist.",
-	//   "flatPath": "v1beta1/projects/{resource}:getIamPolicy",
+	//   "description": "Returns the IAM access control policy for the specified Project. Permission is denied if the policy or the resource does not exist.",
 	//   "httpMethod": "POST",
 	//   "id": "cloudresourcemanager.projects.getIamPolicy",
 	//   "parameterOrder": [
@@ -2749,7 +1772,7 @@ func (c *ProjectsGetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Policy, er
 	//   ],
 	//   "parameters": {
 	//     "resource": {
-	//       "description": "REQUIRED: The resource for which the policy is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "description": "REQUIRED: The resource for which the policy is being requested. `resource` is usually specified as a path, such as `projects/*project*/zones/*zone*/disks/*disk*`. The format for the path specified in this value is resource specific and is specified in the `getIamPolicy` documentation.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -2777,62 +1800,44 @@ type ProjectsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
-// List: Lists Projects that are visible to the user and satisfy
-// the
+// List: Lists Projects that are visible to the user and satisfy the
 // specified filter. This method returns Projects in an unspecified
-// order.
-// New Projects do not necessarily appear at the end of the list.
+// order. New Projects do not necessarily appear at the end of the list.
 func (r *ProjectsService) List() *ProjectsListCall {
 	c := &ProjectsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	return c
 }
 
 // Filter sets the optional parameter "filter": An expression for
-// filtering the results of the request.  Filter rules are
-// case insensitive. The fields eligible for filtering are:
-//
-// + `name`
-// + `id`
-// + <code>labels.<em>key</em></code> where *key* is the name of a
-// label
-//
-// Some examples of using labels as
-// filters:
-//
-// |Filter|Description|
-// |------|-----------|
-// |name:how*|The project's name starts with "how".|
-// |name:Howl|The project's name is `Howl` or
-// `howl`.|
-// |name:HOWL|Equivalent to above.|
-// |NAME:howl|Equivalent to above.|
-// |labels.color:*|The project has the label
-// `color`.|
-// |labels.color:red|The project's label `color` has the value
-// `red`.|
-// |labels.color:red&nbsp;labels.size:big|The project's label `color`
-// has the
-// value `red` and its label `size` has the value `big`.
+// filtering the results of the request. Filter rules are case
+// insensitive. The fields eligible for filtering are: + `name` + `id` +
+// labels.key where *key* is the name of a label Some examples of using
+// labels as filters: |Filter|Description| |------|-----------|
+// |name:*|The project has a name.| |name:Howl|The project's name is
+// `Howl` or `howl`.| |name:HOWL|Equivalent to above.|
+// |NAME:howl|Equivalent to above.| |labels.color:*|The project has the
+// label `color`.| |labels.color:red|The project's label `color` has the
+// value `red`.| |labels.color:red label.size:big|The project's label
+// `color` has the value `red` and its label `size` has the value `big`.
 func (c *ProjectsListCall) Filter(filter string) *ProjectsListCall {
 	c.urlParams_.Set("filter", filter)
 	return c
 }
 
 // PageSize sets the optional parameter "pageSize": The maximum number
-// of Projects to return in the response.
-// The server can return fewer Projects than requested.
-// If unspecified, server picks an appropriate default.
+// of Projects to return in the response. The server can return fewer
+// Projects than requested. If unspecified, server picks an appropriate
+// default.
 func (c *ProjectsListCall) PageSize(pageSize int64) *ProjectsListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
 }
 
 // PageToken sets the optional parameter "pageToken": A pagination token
-// returned from a previous call to ListProjects
-// that indicates from where listing should continue.
+// returned from a previous call to ListProjects that indicates from
+// where listing should continue.
 func (c *ProjectsListCall) PageToken(pageToken string) *ProjectsListCall {
 	c.urlParams_.Set("pageToken", pageToken)
 	return c
@@ -2864,31 +1869,21 @@ func (c *ProjectsListCall) Context(ctx context.Context) *ProjectsListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.list" call.
@@ -2923,31 +1918,28 @@ func (c *ProjectsListCall) Do(opts ...googleapi.CallOption) (*ListProjectsRespon
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists Projects that are visible to the user and satisfy the\nspecified filter. This method returns Projects in an unspecified order.\nNew Projects do not necessarily appear at the end of the list.",
-	//   "flatPath": "v1beta1/projects",
+	//   "description": "Lists Projects that are visible to the user and satisfy the specified filter. This method returns Projects in an unspecified order. New Projects do not necessarily appear at the end of the list.",
 	//   "httpMethod": "GET",
 	//   "id": "cloudresourcemanager.projects.list",
-	//   "parameterOrder": [],
 	//   "parameters": {
 	//     "filter": {
-	//       "description": "An expression for filtering the results of the request.  Filter rules are\ncase insensitive. The fields eligible for filtering are:\n\n+ `name`\n+ `id`\n+ \u003ccode\u003elabels.\u003cem\u003ekey\u003c/em\u003e\u003c/code\u003e where *key* is the name of a label\n\nSome examples of using labels as filters:\n\n|Filter|Description|\n|------|-----------|\n|name:how*|The project's name starts with \"how\".|\n|name:Howl|The project's name is `Howl` or `howl`.|\n|name:HOWL|Equivalent to above.|\n|NAME:howl|Equivalent to above.|\n|labels.color:*|The project has the label `color`.|\n|labels.color:red|The project's label `color` has the value `red`.|\n|labels.color:red\u0026nbsp;labels.size:big|The project's label `color` has the\nvalue `red` and its label `size` has the value `big`.\n\nOptional.",
+	//       "description": "An expression for filtering the results of the request. Filter rules are case insensitive. The fields eligible for filtering are: + `name` + `id` + labels.key where *key* is the name of a label Some examples of using labels as filters: |Filter|Description| |------|-----------| |name:*|The project has a name.| |name:Howl|The project's name is `Howl` or `howl`.| |name:HOWL|Equivalent to above.| |NAME:howl|Equivalent to above.| |labels.color:*|The project has the label `color`.| |labels.color:red|The project's label `color` has the value `red`.| |labels.color:red label.size:big|The project's label `color` has the value `red` and its label `size` has the value `big`. Optional.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "pageSize": {
-	//       "description": "The maximum number of Projects to return in the response.\nThe server can return fewer Projects than requested.\nIf unspecified, server picks an appropriate default.\n\nOptional.",
+	//       "description": "The maximum number of Projects to return in the response. The server can return fewer Projects than requested. If unspecified, server picks an appropriate default. Optional.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
 	//     },
 	//     "pageToken": {
-	//       "description": "A pagination token returned from a previous call to ListProjects\nthat indicates from where listing should continue.\n\nOptional.",
+	//       "description": "A pagination token returned from a previous call to ListProjects that indicates from where listing should continue. Optional.",
 	//       "location": "query",
 	//       "type": "string"
 	//     }
@@ -2993,63 +1985,22 @@ type ProjectsSetIamPolicyCall struct {
 	setiampolicyrequest *SetIamPolicyRequest
 	urlParams_          gensupport.URLParams
 	ctx_                context.Context
-	header_             http.Header
 }
 
 // SetIamPolicy: Sets the IAM access control policy for the specified
-// Project. Replaces
-// any existing policy.
-//
-// The following constraints apply when using `setIamPolicy()`:
-//
-// + Project does not support `allUsers` and `allAuthenticatedUsers`
-// as
-// `members` in a `Binding` of a `Policy`.
-//
-// + The owner role can be granted only to `user` and
-// `serviceAccount`.
-//
-// + Service accounts can be made owners of a project directly
-// without any restrictions. However, to be added as an owner, a user
-// must be
-// invited via Cloud Platform console and must accept the invitation.
-//
-// + A user cannot be granted the owner role using `setIamPolicy()`. The
-// user
-// must be granted the owner role using the Cloud Platform Console and
-// must
-// explicitly accept the invitation.
-//
-// + Invitations to grant the owner role cannot be sent
-// using
-// `setIamPolicy()`; they must be sent only using the Cloud Platform
-// Console.
-//
-// + Membership changes that leave the project without any owners that
-// have
-// accepted the Terms of Service (ToS) will be rejected.
-//
-// + There must be at least one owner who has accepted the Terms
-// of
-// Service (ToS) agreement in the policy. Calling `setIamPolicy()`
-// to
-// remove the last ToS-accepted owner from the policy will fail.
-// This
-// restriction also applies to legacy projects that no longer have
-// owners
-// who have accepted the ToS. Edits to IAM policies will be rejected
-// until
-// the lack of a ToS-accepting owner is rectified.
-//
-// + Calling this method requires enabling the App Engine Admin
-// API.
-//
-// Note: Removing service accounts from policies or changing their
-// roles
-// can render services completely inoperable. It is important to
-// understand
-// how the service account is being used before removing or updating
-// its
+// Project. Replaces any existing policy. The following constraints
+// apply when using `setIamPolicy()`: + Project currently supports only
+// `user:{emailid}` and `serviceAccount:{emailid}` members in a
+// `Binding` of a `Policy`. + To be added as an `owner`, a user must be
+// invited via Cloud Platform console and must accept the invitation. +
+// Members cannot be added to more than one role in the same policy. +
+// There must be at least one owner who has accepted the Terms of
+// Service (ToS) agreement in the policy. Calling `setIamPolicy()` to to
+// remove the last ToS-accepted owner from the policy will fail. +
+// Calling this method requires enabling the App Engine Admin API. Note:
+// Removing service accounts from policies or changing their roles can
+// render services completely inoperable. It is important to understand
+// how the service account is being used before removing or updating its
 // roles.
 func (r *ProjectsService) SetIamPolicy(resource string, setiampolicyrequest *SetIamPolicyRequest) *ProjectsSetIamPolicyCall {
 	c := &ProjectsSetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
@@ -3074,36 +2025,26 @@ func (c *ProjectsSetIamPolicyCall) Context(ctx context.Context) *ProjectsSetIamP
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsSetIamPolicyCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.setiampolicyrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects/{resource}:setIamPolicy")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"resource": c.resource,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.setIamPolicy" call.
@@ -3138,14 +2079,12 @@ func (c *ProjectsSetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Policy, er
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Sets the IAM access control policy for the specified Project. Replaces\nany existing policy.\n\nThe following constraints apply when using `setIamPolicy()`:\n\n+ Project does not support `allUsers` and `allAuthenticatedUsers` as\n`members` in a `Binding` of a `Policy`.\n\n+ The owner role can be granted only to `user` and `serviceAccount`.\n\n+ Service accounts can be made owners of a project directly\nwithout any restrictions. However, to be added as an owner, a user must be\ninvited via Cloud Platform console and must accept the invitation.\n\n+ A user cannot be granted the owner role using `setIamPolicy()`. The user\nmust be granted the owner role using the Cloud Platform Console and must\nexplicitly accept the invitation.\n\n+ Invitations to grant the owner role cannot be sent using\n`setIamPolicy()`; they must be sent only using the Cloud Platform Console.\n\n+ Membership changes that leave the project without any owners that have\naccepted the Terms of Service (ToS) will be rejected.\n\n+ There must be at least one owner who has accepted the Terms of\nService (ToS) agreement in the policy. Calling `setIamPolicy()` to\nremove the last ToS-accepted owner from the policy will fail. This\nrestriction also applies to legacy projects that no longer have owners\nwho have accepted the ToS. Edits to IAM policies will be rejected until\nthe lack of a ToS-accepting owner is rectified.\n\n+ Calling this method requires enabling the App Engine Admin API.\n\nNote: Removing service accounts from policies or changing their roles\ncan render services completely inoperable. It is important to understand\nhow the service account is being used before removing or updating its\nroles.",
-	//   "flatPath": "v1beta1/projects/{resource}:setIamPolicy",
+	//   "description": "Sets the IAM access control policy for the specified Project. Replaces any existing policy. The following constraints apply when using `setIamPolicy()`: + Project currently supports only `user:{emailid}` and `serviceAccount:{emailid}` members in a `Binding` of a `Policy`. + To be added as an `owner`, a user must be invited via Cloud Platform console and must accept the invitation. + Members cannot be added to more than one role in the same policy. + There must be at least one owner who has accepted the Terms of Service (ToS) agreement in the policy. Calling `setIamPolicy()` to to remove the last ToS-accepted owner from the policy will fail. + Calling this method requires enabling the App Engine Admin API. Note: Removing service accounts from policies or changing their roles can render services completely inoperable. It is important to understand how the service account is being used before removing or updating its roles.",
 	//   "httpMethod": "POST",
 	//   "id": "cloudresourcemanager.projects.setIamPolicy",
 	//   "parameterOrder": [
@@ -3153,7 +2092,7 @@ func (c *ProjectsSetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Policy, er
 	//   ],
 	//   "parameters": {
 	//     "resource": {
-	//       "description": "REQUIRED: The resource for which the policy is being specified.\nSee the operation documentation for the appropriate value for this field.",
+	//       "description": "REQUIRED: The resource for which the policy is being specified. `resource` is usually specified as a path, such as `projects/*project*/zones/*zone*/disks/*disk*`. The format for the path specified in this value is resource specific and is specified in the `setIamPolicy` documentation.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -3181,7 +2120,6 @@ type ProjectsTestIamPermissionsCall struct {
 	testiampermissionsrequest *TestIamPermissionsRequest
 	urlParams_                gensupport.URLParams
 	ctx_                      context.Context
-	header_                   http.Header
 }
 
 // TestIamPermissions: Returns permissions that a caller has on the
@@ -3209,36 +2147,26 @@ func (c *ProjectsTestIamPermissionsCall) Context(ctx context.Context) *ProjectsT
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsTestIamPermissionsCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.testiampermissionsrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects/{resource}:testIamPermissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"resource": c.resource,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.testIamPermissions" call.
@@ -3273,14 +2201,12 @@ func (c *ProjectsTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*Test
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
 	//   "description": "Returns permissions that a caller has on the specified Project.",
-	//   "flatPath": "v1beta1/projects/{resource}:testIamPermissions",
 	//   "httpMethod": "POST",
 	//   "id": "cloudresourcemanager.projects.testIamPermissions",
 	//   "parameterOrder": [
@@ -3288,7 +2214,7 @@ func (c *ProjectsTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*Test
 	//   ],
 	//   "parameters": {
 	//     "resource": {
-	//       "description": "REQUIRED: The resource for which the policy detail is being requested.\nSee the operation documentation for the appropriate value for this field.",
+	//       "description": "REQUIRED: The resource for which the policy detail is being requested. `resource` is usually specified as a path, such as `projects/*project*/zones/*zone*/disks/*disk*`. The format for the path specified in this value is resource specific and is specified in the `testIamPermissions` documentation.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -3317,18 +2243,14 @@ type ProjectsUndeleteCall struct {
 	undeleteprojectrequest *UndeleteProjectRequest
 	urlParams_             gensupport.URLParams
 	ctx_                   context.Context
-	header_                http.Header
 }
 
-// Undelete: Restores the Project identified by the
-// specified
-// `project_id` (for example, `my-project-123`).
-// You can only use this method for a Project that has a lifecycle state
-// of
-// DELETE_REQUESTED.
-// After deletion starts, the Project cannot be restored.
-//
-// The caller must have modify permissions for this Project.
+// Undelete: Restores the Project identified by the specified
+// `project_id` (for example, `my-project-123`). You can only use this
+// method for a Project that has a lifecycle state of DELETE_REQUESTED.
+// After deletion starts, as indicated by a lifecycle state of
+// DELETE_IN_PROGRESS, the Project cannot be restored. The caller must
+// have modify permissions for this Project.
 func (r *ProjectsService) Undelete(projectId string, undeleteprojectrequest *UndeleteProjectRequest) *ProjectsUndeleteCall {
 	c := &ProjectsUndeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.projectId = projectId
@@ -3352,36 +2274,26 @@ func (c *ProjectsUndeleteCall) Context(ctx context.Context) *ProjectsUndeleteCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsUndeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsUndeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.undeleteprojectrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects/{projectId}:undelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.undelete" call.
@@ -3416,14 +2328,12 @@ func (c *ProjectsUndeleteCall) Do(opts ...googleapi.CallOption) (*Empty, error) 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Restores the Project identified by the specified\n`project_id` (for example, `my-project-123`).\nYou can only use this method for a Project that has a lifecycle state of\nDELETE_REQUESTED.\nAfter deletion starts, the Project cannot be restored.\n\nThe caller must have modify permissions for this Project.",
-	//   "flatPath": "v1beta1/projects/{projectId}:undelete",
+	//   "description": "Restores the Project identified by the specified `project_id` (for example, `my-project-123`). You can only use this method for a Project that has a lifecycle state of DELETE_REQUESTED. After deletion starts, as indicated by a lifecycle state of DELETE_IN_PROGRESS, the Project cannot be restored. The caller must have modify permissions for this Project.",
 	//   "httpMethod": "POST",
 	//   "id": "cloudresourcemanager.projects.undelete",
 	//   "parameterOrder": [
@@ -3431,7 +2341,7 @@ func (c *ProjectsUndeleteCall) Do(opts ...googleapi.CallOption) (*Empty, error) 
 	//   ],
 	//   "parameters": {
 	//     "projectId": {
-	//       "description": "The project ID (for example, `foo-bar-123`).\n\nRequired.",
+	//       "description": "The project ID (for example, `foo-bar-123`). Required.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -3459,14 +2369,11 @@ type ProjectsUpdateCall struct {
 	project    *Project
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Update: Updates the attributes of the Project identified by the
-// specified
-// `project_id` (for example, `my-project-123`).
-//
-// The caller must have modify permissions for this Project.
+// specified `project_id` (for example, `my-project-123`). The caller
+// must have modify permissions for this Project.
 func (r *ProjectsService) Update(projectId string, project *Project) *ProjectsUpdateCall {
 	c := &ProjectsUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.projectId = projectId
@@ -3490,36 +2397,26 @@ func (c *ProjectsUpdateCall) Context(ctx context.Context) *ProjectsUpdateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.project)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta1/projects/{projectId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudresourcemanager.projects.update" call.
@@ -3554,14 +2451,12 @@ func (c *ProjectsUpdateCall) Do(opts ...googleapi.CallOption) (*Project, error) 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Updates the attributes of the Project identified by the specified\n`project_id` (for example, `my-project-123`).\n\nThe caller must have modify permissions for this Project.",
-	//   "flatPath": "v1beta1/projects/{projectId}",
+	//   "description": "Updates the attributes of the Project identified by the specified `project_id` (for example, `my-project-123`). The caller must have modify permissions for this Project.",
 	//   "httpMethod": "PUT",
 	//   "id": "cloudresourcemanager.projects.update",
 	//   "parameterOrder": [
@@ -3569,7 +2464,7 @@ func (c *ProjectsUpdateCall) Do(opts ...googleapi.CallOption) (*Project, error) 
 	//   ],
 	//   "parameters": {
 	//     "projectId": {
-	//       "description": "The project ID (for example, `my-project-123`).\n\nRequired.",
+	//       "description": "The project ID (for example, `my-project-123`). Required.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"

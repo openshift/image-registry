@@ -1,11 +1,11 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"jQLIOHBVnDZie4rQHGH1WJF-INE/0eE1-oXZzmJsWsHoXDgI_xuj0vA\"",
+ "etag": "\"ye6orv2F-1npMW3u9suM3a7C5Bo/UcR-fBYlWEXj2JrwS8u3wjdNZ58\"",
  "discoveryVersion": "v1",
  "id": "autoscaler:v1beta2",
  "name": "autoscaler",
  "version": "v1beta2",
- "revision": "20160511",
+ "revision": "20150213",
  "title": "Google Compute Engine Autoscaler API",
  "description": "The Google Compute Engine Autoscaler API provides autoscaling for groups of Cloud VMs.",
  "ownerDomain": "google.com",
@@ -157,7 +157,7 @@
     },
     "cpuUtilization": {
      "$ref": "AutoscalingPolicyCpuUtilization",
-     "description": "Configuration parameters of CPU based autoscaling policy."
+     "description": "Exactly one utilization policy should be provided. Configuration parameters of CPU based autoscaling policy."
     },
     "customMetricUtilizations": {
      "type": "array",
@@ -257,9 +257,6 @@
     "creationTimestamp": {
      "type": "string"
     },
-    "description": {
-     "type": "string"
-    },
     "endTime": {
      "type": "string"
     },
@@ -301,7 +298,7 @@
     },
     "kind": {
      "type": "string",
-     "description": "[Output Only] Type of the resource. Always compute#operation for Operation resources.",
+     "description": "[Output Only] Type of the resource. Always compute#Operation for Operation resources.",
      "default": "autoscaler#operation"
     },
     "name": {
@@ -417,8 +414,28 @@
     },
     "kind": {
      "type": "string",
-     "description": "[Output Only] Type of the resource. Always compute#zone for zones.",
+     "description": "[Output Only] Type of the resource. Always kind#zone for zones.",
      "default": "autoscaler#zone"
+    },
+    "maintenanceWindows": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "properties": {
+       "beginTime": {
+        "type": "string"
+       },
+       "description": {
+        "type": "string"
+       },
+       "endTime": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       }
+      }
+     }
     },
     "name": {
      "type": "string"
@@ -427,7 +444,8 @@
      "type": "string"
     },
     "selfLink": {
-     "type": "string"
+     "type": "string",
+     "description": "[Output Only] Server defined URL for the resource."
     },
     "status": {
      "type": "string"
@@ -457,7 +475,7 @@
     },
     "selfLink": {
      "type": "string",
-     "description": "[Output Only] Server-defined URL for this resource."
+     "description": "Server defined URL for this resource (output only)."
     }
    }
   }
@@ -829,7 +847,7 @@
    "methods": {
     "list": {
      "id": "autoscaler.zones.list",
-     "path": "zones",
+     "path": "{project}/zones",
      "httpMethod": "GET",
      "description": "",
      "parameters": {
@@ -851,10 +869,14 @@
       },
       "project": {
        "type": "string",
+       "required": true,
        "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?))",
-       "location": "query"
+       "location": "path"
       }
      },
+     "parameterOrder": [
+      "project"
+     ],
      "response": {
       "$ref": "ZoneList"
      },

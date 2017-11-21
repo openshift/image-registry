@@ -27,10 +27,6 @@
      }
     }
    }
-  },
-  "Property": {
-   "id": "Property",
-   "type": "object"
   }
  }
 }

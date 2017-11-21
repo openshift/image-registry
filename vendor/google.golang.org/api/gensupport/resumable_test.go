@@ -81,18 +81,10 @@ func (t *interruptibleTransport) RoundTrip(req *http.Request) (*http.Response, e
 
 	tc := &trackingCloser{unexpectedReader{}, t.bodies}
 	tc.Open()
-	h := http.Header{}
-	status := ev.responseStatus
-
-	// Support "X-GUploader-No-308" like Google:
-	if status == 308 && req.Header.Get("X-GUploader-No-308") == "yes" {
-		status = 200
-		h.Set("X-Http-Status-Code-Override", "308")
-	}
 
 	res := &http.Response{
-		StatusCode: status,
-		Header:     h,
+		StatusCode: ev.responseStatus,
+		Header:     http.Header{},
 		Body:       tc,
 	}
 	return res, nil
@@ -161,7 +153,7 @@ func TestInterruptedTransferChunks(t *testing.T) {
 		pr := progressRecorder{}
 		rx := &ResumableUpload{
 			Client:    &http.Client{Transport: tr},
-			Media:     NewMediaBuffer(media, tc.chunkSize),
+			Media:     NewResumableBuffer(media, tc.chunkSize),
 			MediaType: "text/plain",
 			Callback:  pr.ProgressUpdate,
 			Backoff:   NoPauseStrategy,
@@ -208,7 +200,7 @@ func TestCancelUploadFast(t *testing.T) {
 	pr := progressRecorder{}
 	rx := &ResumableUpload{
 		Client:    &http.Client{Transport: tr},
-		Media:     NewMediaBuffer(media, chunkSize),
+		Media:     NewResumableBuffer(media, chunkSize),
 		MediaType: "text/plain",
 		Callback:  pr.ProgressUpdate,
 		Backoff:   NoPauseStrategy,
@@ -257,7 +249,7 @@ func TestCancelUpload(t *testing.T) {
 
 	rx := &ResumableUpload{
 		Client:    &http.Client{Transport: tr},
-		Media:     NewMediaBuffer(media, chunkSize),
+		Media:     NewResumableBuffer(media, chunkSize),
 		MediaType: "text/plain",
 		Callback:  pr.ProgressUpdate,
 		Backoff:   NoPauseStrategy,

@@ -34,8 +34,6 @@ import (
 const prodAddr = "bigtable.googleapis.com:443"
 
 // Client is a client for reading and writing data to tables in a cluster.
-//
-// A Client is safe to use concurrently, except for its Close method.
 type Client struct {
 	conn   *grpc.ClientConn
 	client btspb.BigtableServiceClient
@@ -75,8 +73,6 @@ func (c *Client) fullTableName(table string) string {
 }
 
 // A Table refers to a table.
-//
-// A Table is safe to use concurrently.
 type Table struct {
 	c     *Client
 	table string
@@ -127,8 +123,6 @@ func (t *Table) ReadRows(ctx context.Context, arg RowRange, f func(Row) bool, op
 				cancel()
 				for {
 					if _, err := stream.Recv(); err != nil {
-						// The stream has ended. We don't return an error
-						// because the caller has intentionally interrupted the scan.
 						return nil
 					}
 				}

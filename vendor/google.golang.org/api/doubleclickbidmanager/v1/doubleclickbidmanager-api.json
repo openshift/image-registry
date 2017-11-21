@@ -1,19 +1,19 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"tbys6C40o18GZwyMen5GMkdK-3s/gruHatV5QkuL-Fye5CEQnrn6fLs\"",
+ "etag": "\"bRFOOrZKfO9LweMbPqu0kcu6De8/KhQlHpyUs8rKakqcULR3lepd_Vc\"",
  "discoveryVersion": "v1",
  "id": "doubleclickbidmanager:v1",
  "name": "doubleclickbidmanager",
  "canonicalName": "DoubleClick Bid Manager",
  "version": "v1",
- "revision": "20170224",
+ "revision": "20160225",
  "title": "DoubleClick Bid Manager API",
  "description": "API for viewing and managing your reports in DoubleClick Bid Manager.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
-  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
+  "x16": "http://www.google.com/images/icons/product/search-16.gif",
+  "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "documentationLink": "https://developers.google.com/bid-manager/",
  "labels": [
@@ -133,81 +133,6 @@
     }
    }
   },
-  "DownloadRequest": {
-   "id": "DownloadRequest",
-   "type": "object",
-   "description": "Request to fetch stored insertion orders, line items, TrueView ad groups and ads.",
-   "properties": {
-    "fileTypes": {
-     "type": "array",
-     "description": "File types that will be returned.",
-     "items": {
-      "type": "string",
-      "enum": [
-       "AD",
-       "AD_GROUP",
-       "INSERTION_ORDER",
-       "LINE_ITEM"
-      ],
-      "enumDescriptions": [
-       "",
-       "",
-       "",
-       ""
-      ]
-     }
-    },
-    "filterIds": {
-     "type": "array",
-     "description": "The IDs of the specified filter type. This is used to filter entities to fetch. At least one ID must be specified. Only one ID is allowed for the ADVERTISER_ID filter type. For INSERTION_ORDER_ID or LINE_ITEM_ID filter types, all IDs must be from the same Advertiser.",
-     "items": {
-      "type": "string",
-      "format": "int64"
-     }
-    },
-    "filterType": {
-     "type": "string",
-     "description": "Filter type used to filter line items to fetch.",
-     "enum": [
-      "ADVERTISER_ID",
-      "INSERTION_ORDER_ID",
-      "LINE_ITEM_ID"
-     ],
-     "enumDescriptions": [
-      "",
-      "",
-      ""
-     ]
-    },
-    "version": {
-     "type": "string",
-     "description": "SDF Version (column names, types, order) in which the entities will be returned. Default to 3."
-    }
-   }
-  },
-  "DownloadResponse": {
-   "id": "DownloadResponse",
-   "type": "object",
-   "description": "Download response.",
-   "properties": {
-    "adGroups": {
-     "type": "string",
-     "description": "Retrieved ad groups in SDF format."
-    },
-    "ads": {
-     "type": "string",
-     "description": "Retrieved ads in SDF format."
-    },
-    "insertionOrders": {
-     "type": "string",
-     "description": "Retrieved insertion orders in SDF format."
-    },
-    "lineItems": {
-     "type": "string",
-     "description": "Retrieved line items in SDF format."
-    }
-   }
-  },
   "FilterPair": {
    "id": "FilterPair",
    "type": "object",
@@ -230,7 +155,6 @@
       "FILTER_CARRIER",
       "FILTER_CHANNEL_ID",
       "FILTER_CITY",
-      "FILTER_COMPANION_CREATIVE_ID",
       "FILTER_CONVERSION_DELAY",
       "FILTER_COUNTRY",
       "FILTER_CREATIVE_HEIGHT",
@@ -255,7 +179,6 @@
       "FILTER_LINE_ITEM_DAILY_FREQUENCY",
       "FILTER_LINE_ITEM_LIFETIME_FREQUENCY",
       "FILTER_LINE_ITEM_TYPE",
-      "FILTER_MEDIA_PLAN",
       "FILTER_MOBILE_DEVICE_MAKE",
       "FILTER_MOBILE_DEVICE_MAKE_MODEL",
       "FILTER_MOBILE_DEVICE_TYPE",
@@ -266,7 +189,6 @@
       "FILTER_NIELSEN_COUNTRY_CODE",
       "FILTER_NIELSEN_DEVICE_ID",
       "FILTER_NIELSEN_GENDER",
-      "FILTER_NOT_SUPPORTED",
       "FILTER_ORDER_ID",
       "FILTER_OS",
       "FILTER_PAGE_CATEGORY",
@@ -279,41 +201,16 @@
       "FILTER_REGULAR_CHANNEL_ID",
       "FILTER_SITE_ID",
       "FILTER_SITE_LANGUAGE",
-      "FILTER_SKIPPABLE_SUPPORT",
       "FILTER_TARGETED_USER_LIST",
       "FILTER_TIME_OF_DAY",
       "FILTER_TRUEVIEW_AD_GROUP_AD_ID",
       "FILTER_TRUEVIEW_AD_GROUP_ID",
       "FILTER_TRUEVIEW_AGE",
-      "FILTER_TRUEVIEW_CATEGORY",
-      "FILTER_TRUEVIEW_CITY",
       "FILTER_TRUEVIEW_CONVERSION_TYPE",
-      "FILTER_TRUEVIEW_COUNTRY",
-      "FILTER_TRUEVIEW_CUSTOM_AFFINITY",
-      "FILTER_TRUEVIEW_DMA",
       "FILTER_TRUEVIEW_GENDER",
-      "FILTER_TRUEVIEW_IAR_AGE",
-      "FILTER_TRUEVIEW_IAR_CATEGORY",
-      "FILTER_TRUEVIEW_IAR_CITY",
-      "FILTER_TRUEVIEW_IAR_COUNTRY",
-      "FILTER_TRUEVIEW_IAR_GENDER",
-      "FILTER_TRUEVIEW_IAR_INTEREST",
-      "FILTER_TRUEVIEW_IAR_LANGUAGE",
-      "FILTER_TRUEVIEW_IAR_PARENTAL_STATUS",
-      "FILTER_TRUEVIEW_IAR_REGION",
-      "FILTER_TRUEVIEW_IAR_REMARKETING_LIST",
-      "FILTER_TRUEVIEW_IAR_TIME_OF_DAY",
-      "FILTER_TRUEVIEW_IAR_YOUTUBE_CHANNEL",
-      "FILTER_TRUEVIEW_IAR_YOUTUBE_VIDEO",
-      "FILTER_TRUEVIEW_IAR_ZIPCODE",
       "FILTER_TRUEVIEW_INTEREST",
-      "FILTER_TRUEVIEW_KEYWORD",
       "FILTER_TRUEVIEW_PARENTAL_STATUS",
-      "FILTER_TRUEVIEW_PLACEMENT",
-      "FILTER_TRUEVIEW_REGION",
       "FILTER_TRUEVIEW_REMARKETING_LIST",
-      "FILTER_TRUEVIEW_URL",
-      "FILTER_TRUEVIEW_ZIPCODE",
       "FILTER_UNKNOWN",
       "FILTER_USER_LIST",
       "FILTER_USER_LIST_FIRST_PARTY",
@@ -336,34 +233,6 @@
       "FILTER_ZIP_CODE"
      ],
      "enumDescriptions": [
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
       "",
       "",
       "",
@@ -499,6 +368,65 @@
     }
    }
   },
+  "Note": {
+   "id": "Note",
+   "type": "object",
+   "description": "Publisher comment from Rubicon.",
+   "properties": {
+    "id": {
+     "type": "string",
+     "description": "Note id.",
+     "format": "int64"
+    },
+    "message": {
+     "type": "string",
+     "description": "Message from publisher."
+    },
+    "source": {
+     "type": "string",
+     "description": "Equals \"publisher\" for notification from Rubicon."
+    },
+    "timestamp": {
+     "type": "string",
+     "description": "Time when the note was added, e.g. \"2015-12-16T17:25:35.000-08:00\"."
+    },
+    "username": {
+     "type": "string",
+     "description": "Publisher user name."
+    }
+   }
+  },
+  "NotifyProposalChangeRequest": {
+   "id": "NotifyProposalChangeRequest",
+   "type": "object",
+   "description": "NotifyProposalChange request.",
+   "properties": {
+    "action": {
+     "type": "string",
+     "description": "Action taken by publisher. One of: Accept, Decline, Append"
+    },
+    "href": {
+     "type": "string",
+     "description": "URL to access proposal detail."
+    },
+    "id": {
+     "type": "string",
+     "description": "Below are contents of notification from Rubicon. Proposal id.",
+     "format": "int64"
+    },
+    "notes": {
+     "type": "array",
+     "description": "Notes from publisher",
+     "items": {
+      "$ref": "Note"
+     }
+    },
+    "token": {
+     "type": "string",
+     "description": "Deal token, available when proposal is accepted by publisher."
+    }
+   }
+  },
   "Parameters": {
    "id": "Parameters",
    "type": "object",
@@ -530,7 +458,6 @@
        "FILTER_CARRIER",
        "FILTER_CHANNEL_ID",
        "FILTER_CITY",
-       "FILTER_COMPANION_CREATIVE_ID",
        "FILTER_CONVERSION_DELAY",
        "FILTER_COUNTRY",
        "FILTER_CREATIVE_HEIGHT",
@@ -555,7 +482,6 @@
        "FILTER_LINE_ITEM_DAILY_FREQUENCY",
        "FILTER_LINE_ITEM_LIFETIME_FREQUENCY",
        "FILTER_LINE_ITEM_TYPE",
-       "FILTER_MEDIA_PLAN",
        "FILTER_MOBILE_DEVICE_MAKE",
        "FILTER_MOBILE_DEVICE_MAKE_MODEL",
        "FILTER_MOBILE_DEVICE_TYPE",
@@ -566,7 +492,6 @@
        "FILTER_NIELSEN_COUNTRY_CODE",
        "FILTER_NIELSEN_DEVICE_ID",
        "FILTER_NIELSEN_GENDER",
-       "FILTER_NOT_SUPPORTED",
        "FILTER_ORDER_ID",
        "FILTER_OS",
        "FILTER_PAGE_CATEGORY",
@@ -579,41 +504,16 @@
        "FILTER_REGULAR_CHANNEL_ID",
        "FILTER_SITE_ID",
        "FILTER_SITE_LANGUAGE",
-       "FILTER_SKIPPABLE_SUPPORT",
        "FILTER_TARGETED_USER_LIST",
        "FILTER_TIME_OF_DAY",
        "FILTER_TRUEVIEW_AD_GROUP_AD_ID",
        "FILTER_TRUEVIEW_AD_GROUP_ID",
        "FILTER_TRUEVIEW_AGE",
-       "FILTER_TRUEVIEW_CATEGORY",
-       "FILTER_TRUEVIEW_CITY",
        "FILTER_TRUEVIEW_CONVERSION_TYPE",
-       "FILTER_TRUEVIEW_COUNTRY",
-       "FILTER_TRUEVIEW_CUSTOM_AFFINITY",
-       "FILTER_TRUEVIEW_DMA",
        "FILTER_TRUEVIEW_GENDER",
-       "FILTER_TRUEVIEW_IAR_AGE",
-       "FILTER_TRUEVIEW_IAR_CATEGORY",
-       "FILTER_TRUEVIEW_IAR_CITY",
-       "FILTER_TRUEVIEW_IAR_COUNTRY",
-       "FILTER_TRUEVIEW_IAR_GENDER",
-       "FILTER_TRUEVIEW_IAR_INTEREST",
-       "FILTER_TRUEVIEW_IAR_LANGUAGE",
-       "FILTER_TRUEVIEW_IAR_PARENTAL_STATUS",
-       "FILTER_TRUEVIEW_IAR_REGION",
-       "FILTER_TRUEVIEW_IAR_REMARKETING_LIST",
-       "FILTER_TRUEVIEW_IAR_TIME_OF_DAY",
-       "FILTER_TRUEVIEW_IAR_YOUTUBE_CHANNEL",
-       "FILTER_TRUEVIEW_IAR_YOUTUBE_VIDEO",
-       "FILTER_TRUEVIEW_IAR_ZIPCODE",
        "FILTER_TRUEVIEW_INTEREST",
-       "FILTER_TRUEVIEW_KEYWORD",
        "FILTER_TRUEVIEW_PARENTAL_STATUS",
-       "FILTER_TRUEVIEW_PLACEMENT",
-       "FILTER_TRUEVIEW_REGION",
        "FILTER_TRUEVIEW_REMARKETING_LIST",
-       "FILTER_TRUEVIEW_URL",
-       "FILTER_TRUEVIEW_ZIPCODE",
        "FILTER_UNKNOWN",
        "FILTER_USER_LIST",
        "FILTER_USER_LIST_FIRST_PARTY",
@@ -724,34 +624,6 @@
        "",
        "",
        "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
        ""
       ]
      }
@@ -766,30 +638,6 @@
      "items": {
       "type": "string",
       "enum": [
-       "METRIC_ACTIVE_VIEW_AUDIBLE_VISIBLE_ON_COMPLETE_IMPRESSIONS",
-       "METRIC_ACTIVE_VIEW_AVERAGE_VIEWABLE_TIME",
-       "METRIC_ACTIVE_VIEW_DISTRIBUTION_UNMEASURABLE",
-       "METRIC_ACTIVE_VIEW_DISTRIBUTION_UNVIEWABLE",
-       "METRIC_ACTIVE_VIEW_DISTRIBUTION_VIEWABLE",
-       "METRIC_ACTIVE_VIEW_ELIGIBLE_IMPRESSIONS",
-       "METRIC_ACTIVE_VIEW_MEASURABLE_IMPRESSIONS",
-       "METRIC_ACTIVE_VIEW_PCT_MEASURABLE_IMPRESSIONS",
-       "METRIC_ACTIVE_VIEW_PCT_VIEWABLE_IMPRESSIONS",
-       "METRIC_ACTIVE_VIEW_PERCENT_AUDIBLE_VISIBLE_AT_START",
-       "METRIC_ACTIVE_VIEW_PERCENT_AUDIBLE_VISIBLE_FIRST_QUAR",
-       "METRIC_ACTIVE_VIEW_PERCENT_AUDIBLE_VISIBLE_ON_COMPLETE",
-       "METRIC_ACTIVE_VIEW_PERCENT_AUDIBLE_VISIBLE_SECOND_QUAR",
-       "METRIC_ACTIVE_VIEW_PERCENT_AUDIBLE_VISIBLE_THIRD_QUAR",
-       "METRIC_ACTIVE_VIEW_PERCENT_VIEWABLE_FOR_TIME_THRESHOLD",
-       "METRIC_ACTIVE_VIEW_PERCENT_VISIBLE_AT_START",
-       "METRIC_ACTIVE_VIEW_PERCENT_VISIBLE_FIRST_QUAR",
-       "METRIC_ACTIVE_VIEW_PERCENT_VISIBLE_ON_COMPLETE",
-       "METRIC_ACTIVE_VIEW_PERCENT_VISIBLE_SECOND_QUAR",
-       "METRIC_ACTIVE_VIEW_PERCENT_VISIBLE_THIRD_QUAR",
-       "METRIC_ACTIVE_VIEW_UNMEASURABLE_IMPRESSIONS",
-       "METRIC_ACTIVE_VIEW_UNVIEWABLE_IMPRESSIONS",
-       "METRIC_ACTIVE_VIEW_VIEWABLE_FOR_TIME_THRESHOLD",
-       "METRIC_ACTIVE_VIEW_VIEWABLE_IMPRESSIONS",
        "METRIC_BID_REQUESTS",
        "METRIC_BILLABLE_COST_ADVERTISER",
        "METRIC_BILLABLE_COST_PARTNER",
@@ -958,7 +806,6 @@
        "METRIC_PROFIT_VIEWABLE_ECPM_ADVERTISER",
        "METRIC_PROFIT_VIEWABLE_ECPM_PARTNER",
        "METRIC_PROFIT_VIEWABLE_ECPM_USD",
-       "METRIC_REACH_COOKIE_REACH",
        "METRIC_REVENUE_ADVERTISER",
        "METRIC_REVENUE_ECPAPC_ADVERTISER",
        "METRIC_REVENUE_ECPAPC_PARTNER",
@@ -975,7 +822,6 @@
        "METRIC_REVENUE_ECPC_ADVERTISER",
        "METRIC_REVENUE_ECPC_PARTNER",
        "METRIC_REVENUE_ECPC_USD",
-       "METRIC_REVENUE_ECPIAVC_ADVERTISER",
        "METRIC_REVENUE_ECPM_ADVERTISER",
        "METRIC_REVENUE_ECPM_PARTNER",
        "METRIC_REVENUE_ECPM_USD",
@@ -1021,9 +867,6 @@
        "METRIC_TOTAL_MEDIA_COST_VIEWABLE_ECPM_ADVERTISER",
        "METRIC_TOTAL_MEDIA_COST_VIEWABLE_ECPM_PARTNER",
        "METRIC_TOTAL_MEDIA_COST_VIEWABLE_ECPM_USD",
-       "METRIC_TRUEVIEW_AVERAGE_CPE_ADVERTISER",
-       "METRIC_TRUEVIEW_AVERAGE_CPE_PARTNER",
-       "METRIC_TRUEVIEW_AVERAGE_CPE_USD",
        "METRIC_TRUEVIEW_CONVERSION_COST_MANY_PER_VIEW_ADVERTISER",
        "METRIC_TRUEVIEW_CONVERSION_COST_MANY_PER_VIEW_PARTNER",
        "METRIC_TRUEVIEW_CONVERSION_COST_MANY_PER_VIEW_USD",
@@ -1049,8 +892,6 @@
        "METRIC_TRUEVIEW_EARNED_SHARES",
        "METRIC_TRUEVIEW_EARNED_SUBSCRIBERS",
        "METRIC_TRUEVIEW_EARNED_VIEWS",
-       "METRIC_TRUEVIEW_ENGAGEMENTS",
-       "METRIC_TRUEVIEW_ENGAGEMENT_RATE",
        "METRIC_TRUEVIEW_IMPRESSION_SHARE",
        "METRIC_TRUEVIEW_LOST_IS_BUDGET",
        "METRIC_TRUEVIEW_LOST_IS_RANK",
@@ -1071,37 +912,6 @@
        "METRIC_VIDEO_COMPLETION_RATE"
       ],
       "enumDescriptions": [
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
-       "",
        "",
        "",
        "",
@@ -1406,7 +1216,6 @@
       "TYPE_PETRA_NIELSEN_ONLINE_GLOBAL_MARKET",
       "TYPE_PIXEL_LOAD",
       "TYPE_REACH_AND_FREQUENCY",
-      "TYPE_REACH_AUDIENCE",
       "TYPE_THIRD_PARTY_DATA_PROVIDER",
       "TYPE_TRUEVIEW",
       "TYPE_TRUEVIEW_IAR",
@@ -1414,7 +1223,6 @@
       "TYPE_YOUTUBE_VERTICAL"
      ],
      "enumDescriptions": [
-      "",
       "",
       "",
       "",
@@ -1517,12 +1325,10 @@
       "PREVIOUS_WEEK",
       "PREVIOUS_YEAR",
       "QUARTER_TO_DATE",
-      "TYPE_NOT_SUPPORTED",
       "WEEK_TO_DATE",
       "YEAR_TO_DATE"
      ],
      "enumDescriptions": [
-      "",
       "",
       "",
       "",
@@ -1858,12 +1664,10 @@
       "PREVIOUS_WEEK",
       "PREVIOUS_YEAR",
       "QUARTER_TO_DATE",
-      "TYPE_NOT_SUPPORTED",
       "WEEK_TO_DATE",
       "YEAR_TO_DATE"
      ],
      "enumDescriptions": [
-      "",
       "",
       "",
       "",
@@ -2097,18 +1901,15 @@
     }
    }
   },
-  "sdf": {
+  "rubicon": {
    "methods": {
-    "download": {
-     "id": "doubleclickbidmanager.sdf.download",
-     "path": "sdf/download",
+    "notifyproposalchange": {
+     "id": "doubleclickbidmanager.rubicon.notifyproposalchange",
+     "path": "rubicon/notifyproposalchange",
      "httpMethod": "POST",
-     "description": "Retrieves entities in SDF format.",
+     "description": "Update proposal upon actions of Rubicon publisher.",
      "request": {
-      "$ref": "DownloadRequest"
-     },
-     "response": {
-      "$ref": "DownloadResponse"
+      "$ref": "NotifyProposalChangeRequest"
      }
     }
    }
