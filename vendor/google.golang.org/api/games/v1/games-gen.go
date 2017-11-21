@@ -320,21 +320,12 @@ type AchievementDefinition struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AchievementType") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementDefinition) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementDefinition
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementDefinitionsListResponse: This is a JSON template for a
@@ -361,20 +352,12 @@ type AchievementDefinitionsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementDefinitionsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementDefinitionsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementIncrementResponse: This is a JSON template for an
@@ -403,20 +386,12 @@ type AchievementIncrementResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CurrentSteps") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementIncrementResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementIncrementResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementRevealResponse: This is a JSON template for an achievement
@@ -445,20 +420,12 @@ type AchievementRevealResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CurrentState") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementRevealResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementRevealResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementSetStepsAtLeastResponse: This is a JSON template for an
@@ -487,20 +454,12 @@ type AchievementSetStepsAtLeastResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CurrentSteps") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementSetStepsAtLeastResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementSetStepsAtLeastResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementUnlockResponse: This is a JSON template for an achievement
@@ -526,20 +485,12 @@ type AchievementUnlockResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementUnlockResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementUnlockResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementUpdateMultipleRequest: This is a JSON template for a list
@@ -559,20 +510,12 @@ type AchievementUpdateMultipleRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementUpdateMultipleRequest) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementUpdateMultipleRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementUpdateMultipleResponse: This is a JSON template for an
@@ -596,20 +539,12 @@ type AchievementUpdateMultipleResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementUpdateMultipleResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementUpdateMultipleResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementUpdateRequest: This is a JSON template for a request to
@@ -646,20 +581,12 @@ type AchievementUpdateRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AchievementId") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementUpdateRequest) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementUpdateRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementUpdateResponse: This is a JSON template for an achievement
@@ -699,20 +626,12 @@ type AchievementUpdateResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AchievementId") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementUpdateResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementUpdateResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AggregateStats: This is a JSON template for aggregate stats.
@@ -741,20 +660,12 @@ type AggregateStats struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Count") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AggregateStats) MarshalJSON() ([]byte, error) {
 	type noMethod AggregateStats
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AnonymousPlayer: This is a JSON template for an anonymous player
@@ -777,21 +688,12 @@ type AnonymousPlayer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AvatarImageUrl") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AnonymousPlayer) MarshalJSON() ([]byte, error) {
 	type noMethod AnonymousPlayer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Application: This is a JSON template for the Application resource.
@@ -854,21 +756,12 @@ type Application struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AchievementCount") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Application) MarshalJSON() ([]byte, error) {
 	type noMethod Application
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ApplicationCategory: This is a JSON template for an application
@@ -891,20 +784,12 @@ type ApplicationCategory struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ApplicationCategory) MarshalJSON() ([]byte, error) {
 	type noMethod ApplicationCategory
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ApplicationVerifyResponse: This is a JSON template for a third party
@@ -934,21 +819,12 @@ type ApplicationVerifyResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AlternatePlayerId") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ApplicationVerifyResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ApplicationVerifyResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Category: This is a JSON template for data related to individual game
@@ -971,20 +847,12 @@ type Category struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Category") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Category) MarshalJSON() ([]byte, error) {
 	type noMethod Category
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CategoryListResponse: This is a JSON template for a list of category
@@ -1011,20 +879,12 @@ type CategoryListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CategoryListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod CategoryListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventBatchRecordFailure: This is a JSON template for a batch update
@@ -1061,20 +921,12 @@ type EventBatchRecordFailure struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FailureCause") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventBatchRecordFailure) MarshalJSON() ([]byte, error) {
 	type noMethod EventBatchRecordFailure
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventChild: This is a JSON template for an event child relationship
@@ -1094,20 +946,12 @@ type EventChild struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ChildId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventChild) MarshalJSON() ([]byte, error) {
 	type noMethod EventChild
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventDefinition: This is a JSON template for an event definition
@@ -1151,20 +995,12 @@ type EventDefinition struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ChildEvents") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventDefinition) MarshalJSON() ([]byte, error) {
 	type noMethod EventDefinition
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventDefinitionListResponse: This is a JSON template for a
@@ -1191,20 +1027,12 @@ type EventDefinitionListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventDefinitionListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod EventDefinitionListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventPeriodRange: This is a JSON template for an event period time
@@ -1229,20 +1057,12 @@ type EventPeriodRange struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventPeriodRange) MarshalJSON() ([]byte, error) {
 	type noMethod EventPeriodRange
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventPeriodUpdate: This is a JSON template for an event period update
@@ -1265,20 +1085,12 @@ type EventPeriodUpdate struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventPeriodUpdate) MarshalJSON() ([]byte, error) {
 	type noMethod EventPeriodUpdate
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventRecordFailure: This is a JSON template for an event update
@@ -1306,20 +1118,12 @@ type EventRecordFailure struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "EventId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventRecordFailure) MarshalJSON() ([]byte, error) {
 	type noMethod EventRecordFailure
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventRecordRequest: This is a JSON template for an event period
@@ -1348,21 +1152,12 @@ type EventRecordRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CurrentTimeMillis") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventRecordRequest) MarshalJSON() ([]byte, error) {
 	type noMethod EventRecordRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventUpdateRequest: This is a JSON template for an event period
@@ -1386,20 +1181,12 @@ type EventUpdateRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DefinitionId") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventUpdateRequest) MarshalJSON() ([]byte, error) {
 	type noMethod EventUpdateRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventUpdateResponse: This is a JSON template for an event period
@@ -1430,20 +1217,12 @@ type EventUpdateResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BatchFailures") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventUpdateResponse) MarshalJSON() ([]byte, error) {
 	type noMethod EventUpdateResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GamesAchievementIncrement: This is a JSON template for the payload to
@@ -1467,20 +1246,12 @@ type GamesAchievementIncrement struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GamesAchievementIncrement) MarshalJSON() ([]byte, error) {
 	type noMethod GamesAchievementIncrement
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GamesAchievementSetStepsAtLeast: This is a JSON template for the
@@ -1500,20 +1271,12 @@ type GamesAchievementSetStepsAtLeast struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GamesAchievementSetStepsAtLeast) MarshalJSON() ([]byte, error) {
 	type noMethod GamesAchievementSetStepsAtLeast
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ImageAsset: This is a JSON template for an image asset object.
@@ -1541,20 +1304,12 @@ type ImageAsset struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Height") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ImageAsset) MarshalJSON() ([]byte, error) {
 	type noMethod ImageAsset
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Instance: This is a JSON template for the Instance resource.
@@ -1601,21 +1356,12 @@ type Instance struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AcquisitionUri") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Instance) MarshalJSON() ([]byte, error) {
 	type noMethod Instance
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // InstanceAndroidDetails: This is a JSON template for the Android
@@ -1643,21 +1389,12 @@ type InstanceAndroidDetails struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "EnablePiracyCheck") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *InstanceAndroidDetails) MarshalJSON() ([]byte, error) {
 	type noMethod InstanceAndroidDetails
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // InstanceIosDetails: This is a JSON template for the iOS details
@@ -1694,21 +1431,12 @@ type InstanceIosDetails struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BundleIdentifier") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *InstanceIosDetails) MarshalJSON() ([]byte, error) {
 	type noMethod InstanceIosDetails
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // InstanceWebDetails: This is a JSON template for the Web details
@@ -1732,20 +1460,12 @@ type InstanceWebDetails struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *InstanceWebDetails) MarshalJSON() ([]byte, error) {
 	type noMethod InstanceWebDetails
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Leaderboard: This is a JSON template for the Leaderboard resource.
@@ -1786,20 +1506,12 @@ type Leaderboard struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "IconUrl") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Leaderboard) MarshalJSON() ([]byte, error) {
 	type noMethod Leaderboard
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // LeaderboardEntry: This is a JSON template for the Leaderboard Entry
@@ -1849,21 +1561,12 @@ type LeaderboardEntry struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FormattedScore") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *LeaderboardEntry) MarshalJSON() ([]byte, error) {
 	type noMethod LeaderboardEntry
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // LeaderboardListResponse: This is a JSON template for a list of
@@ -1890,20 +1593,12 @@ type LeaderboardListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *LeaderboardListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod LeaderboardListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // LeaderboardScoreRank: This is a JSON template for a score rank in a
@@ -1933,21 +1628,12 @@ type LeaderboardScoreRank struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FormattedNumScores") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *LeaderboardScoreRank) MarshalJSON() ([]byte, error) {
 	type noMethod LeaderboardScoreRank
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // LeaderboardScores: This is a JSON template for a ListScores response.
@@ -1986,20 +1672,12 @@ type LeaderboardScores struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *LeaderboardScores) MarshalJSON() ([]byte, error) {
 	type noMethod LeaderboardScores
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // MetagameConfig: This is a JSON template for the metagame config
@@ -2028,21 +1706,12 @@ type MetagameConfig struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CurrentVersion") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *MetagameConfig) MarshalJSON() ([]byte, error) {
 	type noMethod MetagameConfig
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // NetworkDiagnostics: This is a JSON template for network diagnostics
@@ -2085,21 +1754,12 @@ type NetworkDiagnostics struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AndroidNetworkSubtype") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *NetworkDiagnostics) MarshalJSON() ([]byte, error) {
 	type noMethod NetworkDiagnostics
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ParticipantResult: This is a JSON template for a result for a match
@@ -2138,20 +1798,12 @@ type ParticipantResult struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ParticipantResult) MarshalJSON() ([]byte, error) {
 	type noMethod ParticipantResult
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PeerChannelDiagnostics: This is a JSON template for peer channel
@@ -2189,20 +1841,12 @@ type PeerChannelDiagnostics struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BytesReceived") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PeerChannelDiagnostics) MarshalJSON() ([]byte, error) {
 	type noMethod PeerChannelDiagnostics
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PeerSessionDiagnostics: This is a JSON template for peer session
@@ -2232,21 +1876,12 @@ type PeerSessionDiagnostics struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ConnectedTimestampMillis")
-	// to include in API requests with the JSON null value. By default,
-	// fields with empty values are omitted from API requests. However, any
-	// field with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PeerSessionDiagnostics) MarshalJSON() ([]byte, error) {
 	type noMethod PeerSessionDiagnostics
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Played: This is a JSON template for metadata about a player playing a
@@ -2271,20 +1906,12 @@ type Played struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AutoMatched") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Played) MarshalJSON() ([]byte, error) {
 	type noMethod Played
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Player: This is a JSON template for a Player resource.
@@ -2330,10 +1957,6 @@ type Player struct {
 	// PlayerId: The ID of the player.
 	PlayerId string `json:"playerId,omitempty"`
 
-	// ProfileSettings: The player's profile settings. Controls whether or
-	// not the player's profile is visible to other players.
-	ProfileSettings *ProfileSettings `json:"profileSettings,omitempty"`
-
 	// Title: The player's title rewarded for their game activities.
 	Title string `json:"title,omitempty"`
 
@@ -2348,21 +1971,12 @@ type Player struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AvatarImageUrl") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Player) MarshalJSON() ([]byte, error) {
 	type noMethod Player
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerName: An object representation of the individual components of
@@ -2383,20 +1997,12 @@ type PlayerName struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FamilyName") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerName) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerName
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerAchievement: This is a JSON template for an achievement object.
@@ -2439,21 +2045,12 @@ type PlayerAchievement struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AchievementState") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerAchievement) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerAchievement
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerAchievementListResponse: This is a JSON template for a list of
@@ -2480,20 +2077,12 @@ type PlayerAchievementListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerAchievementListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerAchievementListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerEvent: This is a JSON template for an event status resource.
@@ -2523,20 +2112,12 @@ type PlayerEvent struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DefinitionId") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerEvent) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerEvent
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerEventListResponse: This is a JSON template for a ListByPlayer
@@ -2563,20 +2144,12 @@ type PlayerEventListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerEventListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerEventListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerExperienceInfo: This is a JSON template for 1P/3P metadata
@@ -2609,21 +2182,12 @@ type PlayerExperienceInfo struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CurrentExperiencePoints")
-	// to include in API requests with the JSON null value. By default,
-	// fields with empty values are omitted from API requests. However, any
-	// field with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerExperienceInfo) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerExperienceInfo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerLeaderboardScore: This is a JSON template for a player
@@ -2673,20 +2237,12 @@ type PlayerLeaderboardScore struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerLeaderboardScore) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerLeaderboardScore
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerLeaderboardScoreListResponse: This is a JSON template for a
@@ -2716,20 +2272,12 @@ type PlayerLeaderboardScoreListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerLeaderboardScoreListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerLeaderboardScoreListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerLevel: This is a JSON template for 1P/3P metadata about a
@@ -2755,20 +2303,12 @@ type PlayerLevel struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerLevel) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerLevel
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerListResponse: This is a JSON template for a third party player
@@ -2795,20 +2335,12 @@ type PlayerListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerScore: This is a JSON template for a player score.
@@ -2842,21 +2374,12 @@ type PlayerScore struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FormattedScore") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerScore) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerScore
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerScoreListResponse: This is a JSON template for a list of score
@@ -2880,20 +2403,12 @@ type PlayerScoreListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerScoreListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerScoreListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerScoreResponse: This is a JSON template for a list of
@@ -2940,21 +2455,12 @@ type PlayerScoreResponse struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BeatenScoreTimeSpans") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerScoreResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerScoreResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerScoreSubmissionList: This is a JSON template for a list of
@@ -2974,53 +2480,12 @@ type PlayerScoreSubmissionList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerScoreSubmissionList) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerScoreSubmissionList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// ProfileSettings: This is a JSON template for profile settings
-type ProfileSettings struct {
-	// Kind: Uniquely identifies the type of this resource. Value is always
-	// the fixed string games#profileSettings.
-	Kind string `json:"kind,omitempty"`
-
-	// ProfileVisible: The player's current profile visibility. This field
-	// is visible to both 1P and 3P APIs.
-	ProfileVisible bool `json:"profileVisible,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "Kind") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *ProfileSettings) MarshalJSON() ([]byte, error) {
-	type noMethod ProfileSettings
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PushToken: This is a JSON template for a push token resource.
@@ -3051,21 +2516,12 @@ type PushToken struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ClientRevision") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PushToken) MarshalJSON() ([]byte, error) {
 	type noMethod PushToken
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PushTokenId: This is a JSON template for a push token ID resource.
@@ -3084,20 +2540,12 @@ type PushTokenId struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Ios") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PushTokenId) MarshalJSON() ([]byte, error) {
 	type noMethod PushTokenId
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PushTokenIdIos: A push token ID for iOS devices.
@@ -3118,21 +2566,12 @@ type PushTokenIdIos struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ApnsDeviceToken") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PushTokenIdIos) MarshalJSON() ([]byte, error) {
 	type noMethod PushTokenIdIos
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Quest: This is a JSON template for a Quest resource.
@@ -3219,21 +2658,12 @@ type Quest struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AcceptedTimestampMillis")
-	// to include in API requests with the JSON null value. By default,
-	// fields with empty values are omitted from API requests. However, any
-	// field with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Quest) MarshalJSON() ([]byte, error) {
 	type noMethod Quest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // QuestContribution: This is a JSON template for a Quest Criterion
@@ -3258,21 +2688,12 @@ type QuestContribution struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FormattedValue") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *QuestContribution) MarshalJSON() ([]byte, error) {
 	type noMethod QuestContribution
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // QuestCriterion: This is a JSON template for a Quest Criterion
@@ -3312,21 +2733,12 @@ type QuestCriterion struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CompletionContribution")
-	// to include in API requests with the JSON null value. By default,
-	// fields with empty values are omitted from API requests. However, any
-	// field with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *QuestCriterion) MarshalJSON() ([]byte, error) {
 	type noMethod QuestCriterion
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // QuestListResponse: This is a JSON template for a list of quest
@@ -3353,20 +2765,12 @@ type QuestListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *QuestListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod QuestListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // QuestMilestone: This is a JSON template for a Quest Milestone
@@ -3405,21 +2809,12 @@ type QuestMilestone struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CompletionRewardData") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *QuestMilestone) MarshalJSON() ([]byte, error) {
 	type noMethod QuestMilestone
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RevisionCheckResponse: This is a JSON template for the result of
@@ -3453,20 +2848,12 @@ type RevisionCheckResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ApiVersion") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RevisionCheckResponse) MarshalJSON() ([]byte, error) {
 	type noMethod RevisionCheckResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Room: This is a JSON template for a room resource object.
@@ -3545,20 +2932,12 @@ type Room struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ApplicationId") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Room) MarshalJSON() ([]byte, error) {
 	type noMethod Room
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomAutoMatchStatus: This is a JSON template for status of room
@@ -3579,20 +2958,12 @@ type RoomAutoMatchStatus struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomAutoMatchStatus) MarshalJSON() ([]byte, error) {
 	type noMethod RoomAutoMatchStatus
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomAutoMatchingCriteria: This is a JSON template for a room
@@ -3622,21 +2993,12 @@ type RoomAutoMatchingCriteria struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ExclusiveBitmask") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomAutoMatchingCriteria) MarshalJSON() ([]byte, error) {
 	type noMethod RoomAutoMatchingCriteria
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomClientAddress: This is a JSON template for the client address
@@ -3657,20 +3019,12 @@ type RoomClientAddress struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomClientAddress) MarshalJSON() ([]byte, error) {
 	type noMethod RoomClientAddress
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomCreateRequest: This is a JSON template for a room creation
@@ -3716,21 +3070,12 @@ type RoomCreateRequest struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AutoMatchingCriteria") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomCreateRequest) MarshalJSON() ([]byte, error) {
 	type noMethod RoomCreateRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomJoinRequest: This is a JSON template for a join room request.
@@ -3757,20 +3102,12 @@ type RoomJoinRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Capabilities") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomJoinRequest) MarshalJSON() ([]byte, error) {
 	type noMethod RoomJoinRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomLeaveDiagnostics: This is a JSON template for room leave
@@ -3817,21 +3154,12 @@ type RoomLeaveDiagnostics struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AndroidNetworkSubtype") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomLeaveDiagnostics) MarshalJSON() ([]byte, error) {
 	type noMethod RoomLeaveDiagnostics
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomLeaveRequest: This is a JSON template for a leave room request.
@@ -3876,20 +3204,12 @@ type RoomLeaveRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomLeaveRequest) MarshalJSON() ([]byte, error) {
 	type noMethod RoomLeaveRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomList: This is a JSON template for a list of rooms.
@@ -3915,20 +3235,12 @@ type RoomList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomList) MarshalJSON() ([]byte, error) {
 	type noMethod RoomList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomModification: This is a JSON template for room modification
@@ -3952,20 +3264,12 @@ type RoomModification struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomModification) MarshalJSON() ([]byte, error) {
 	type noMethod RoomModification
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomP2PStatus: This is a JSON template for an update on the status of
@@ -4017,21 +3321,12 @@ type RoomP2PStatus struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g.
-	// "ConnectionSetupLatencyMillis") to include in API requests with the
-	// JSON null value. By default, fields with empty values are omitted
-	// from API requests. However, any field with an empty value appearing
-	// in NullFields will be sent to the server as null. It is an error if a
-	// field in this list has a non-empty value. This may be used to include
-	// null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomP2PStatus) MarshalJSON() ([]byte, error) {
 	type noMethod RoomP2PStatus
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomP2PStatuses: This is a JSON template for an update on the status
@@ -4051,20 +3346,12 @@ type RoomP2PStatuses struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomP2PStatuses) MarshalJSON() ([]byte, error) {
 	type noMethod RoomP2PStatuses
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomParticipant: This is a JSON template for a participant in a room.
@@ -4139,20 +3426,12 @@ type RoomParticipant struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AutoMatched") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomParticipant) MarshalJSON() ([]byte, error) {
 	type noMethod RoomParticipant
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RoomStatus: This is a JSON template for the status of a room that the
@@ -4203,21 +3482,12 @@ type RoomStatus struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AutoMatchingStatus") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RoomStatus) MarshalJSON() ([]byte, error) {
 	type noMethod RoomStatus
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ScoreSubmission: This is a JSON template for a request to submit a
@@ -4249,20 +3519,12 @@ type ScoreSubmission struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ScoreSubmission) MarshalJSON() ([]byte, error) {
 	type noMethod ScoreSubmission
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Snapshot: This is a JSON template for an snapshot object.
@@ -4320,20 +3582,12 @@ type Snapshot struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CoverImage") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Snapshot) MarshalJSON() ([]byte, error) {
 	type noMethod Snapshot
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // SnapshotImage: This is a JSON template for an image of a snapshot.
@@ -4362,20 +3616,12 @@ type SnapshotImage struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Height") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *SnapshotImage) MarshalJSON() ([]byte, error) {
 	type noMethod SnapshotImage
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // SnapshotListResponse: This is a JSON template for a list of snapshot
@@ -4403,20 +3649,12 @@ type SnapshotListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *SnapshotListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod SnapshotListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedAutoMatchingCriteria: This is a JSON template for an
@@ -4446,21 +3684,12 @@ type TurnBasedAutoMatchingCriteria struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ExclusiveBitmask") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedAutoMatchingCriteria) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedAutoMatchingCriteria
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatch: This is a JSON template for a turn-based match
@@ -4572,20 +3801,12 @@ type TurnBasedMatch struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ApplicationId") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatch) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatch
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchCreateRequest: This is a JSON template for a turn-based
@@ -4620,21 +3841,12 @@ type TurnBasedMatchCreateRequest struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AutoMatchingCriteria") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchCreateRequest) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchCreateRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchData: This is a JSON template for a turn-based match
@@ -4660,20 +3872,12 @@ type TurnBasedMatchData struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Data") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchData) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchData
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchDataRequest: This is a JSON template for sending a
@@ -4694,20 +3898,12 @@ type TurnBasedMatchDataRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Data") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchDataRequest) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchDataRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchList: This is a JSON template for a list of turn-based
@@ -4734,20 +3930,12 @@ type TurnBasedMatchList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchList) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchModification: This is a JSON template for turn-based
@@ -4771,20 +3959,12 @@ type TurnBasedMatchModification struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchModification) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchModification
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchParticipant: This is a JSON template for a participant
@@ -4840,20 +4020,12 @@ type TurnBasedMatchParticipant struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AutoMatched") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchParticipant) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchParticipant
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchRematch: This is a JSON template for a rematch
@@ -4882,20 +4054,12 @@ type TurnBasedMatchRematch struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchRematch) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchRematch
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchResults: This is a JSON template for a turn-based match
@@ -4921,20 +4085,12 @@ type TurnBasedMatchResults struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Data") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchResults) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchResults
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchSync: This is a JSON template for a list of turn-based
@@ -4966,20 +4122,12 @@ type TurnBasedMatchSync struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchSync) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchSync
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TurnBasedMatchTurn: This is a JSON template for the object
@@ -5014,20 +4162,12 @@ type TurnBasedMatchTurn struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Data") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TurnBasedMatchTurn) MarshalJSON() ([]byte, error) {
 	type noMethod TurnBasedMatchTurn
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "games.achievementDefinitions.list":
@@ -5037,19 +4177,11 @@ type AchievementDefinitionsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists all the achievement definitions for your application.
 func (r *AchievementDefinitionsService) List() *AchievementDefinitionsListCall {
 	c := &AchievementDefinitionsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *AchievementDefinitionsListCall) ConsistencyToken(consistencyToken int64) *AchievementDefinitionsListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -5102,31 +4234,21 @@ func (c *AchievementDefinitionsListCall) Context(ctx context.Context) *Achieveme
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementDefinitionsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementDefinitionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.achievementDefinitions.list" call.
@@ -5162,8 +4284,7 @@ func (c *AchievementDefinitionsListCall) Do(opts ...googleapi.CallOption) (*Achi
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5172,12 +4293,6 @@ func (c *AchievementDefinitionsListCall) Do(opts ...googleapi.CallOption) (*Achi
 	//   "httpMethod": "GET",
 	//   "id": "games.achievementDefinitions.list",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -5237,7 +4352,6 @@ type AchievementsIncrementCall struct {
 	achievementId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Increment: Increments the steps of the achievement with the given ID
@@ -5246,13 +4360,6 @@ func (r *AchievementsService) Increment(achievementId string, stepsToIncrement i
 	c := &AchievementsIncrementCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.achievementId = achievementId
 	c.urlParams_.Set("stepsToIncrement", fmt.Sprint(stepsToIncrement))
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *AchievementsIncrementCall) ConsistencyToken(consistencyToken int64) *AchievementsIncrementCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -5281,31 +4388,20 @@ func (c *AchievementsIncrementCall) Context(ctx context.Context) *AchievementsIn
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsIncrementCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsIncrementCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/{achievementId}/increment")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"achievementId": c.achievementId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.achievements.increment" call.
@@ -5340,8 +4436,7 @@ func (c *AchievementsIncrementCall) Do(opts ...googleapi.CallOption) (*Achieveme
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5358,12 +4453,6 @@ func (c *AchievementsIncrementCall) Do(opts ...googleapi.CallOption) (*Achieveme
 	//       "description": "The ID of the achievement used by this method.",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "requestId": {
@@ -5401,7 +4490,6 @@ type AchievementsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists the progress for all your application's achievements for
@@ -5409,13 +4497,6 @@ type AchievementsListCall struct {
 func (r *AchievementsService) List(playerId string) *AchievementsListCall {
 	c := &AchievementsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.playerId = playerId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *AchievementsListCall) ConsistencyToken(consistencyToken int64) *AchievementsListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -5482,34 +4563,23 @@ func (c *AchievementsListCall) Context(ctx context.Context) *AchievementsListCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "players/{playerId}/achievements")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"playerId": c.playerId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.achievements.list" call.
@@ -5544,8 +4614,7 @@ func (c *AchievementsListCall) Do(opts ...googleapi.CallOption) (*PlayerAchievem
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5557,12 +4626,6 @@ func (c *AchievementsListCall) Do(opts ...googleapi.CallOption) (*PlayerAchievem
 	//     "playerId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -5645,7 +4708,6 @@ type AchievementsRevealCall struct {
 	achievementId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Reveal: Sets the state of the achievement with the given ID to
@@ -5653,13 +4715,6 @@ type AchievementsRevealCall struct {
 func (r *AchievementsService) Reveal(achievementId string) *AchievementsRevealCall {
 	c := &AchievementsRevealCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.achievementId = achievementId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *AchievementsRevealCall) ConsistencyToken(consistencyToken int64) *AchievementsRevealCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -5679,31 +4734,20 @@ func (c *AchievementsRevealCall) Context(ctx context.Context) *AchievementsRevea
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsRevealCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsRevealCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/{achievementId}/reveal")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"achievementId": c.achievementId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.achievements.reveal" call.
@@ -5738,8 +4782,7 @@ func (c *AchievementsRevealCall) Do(opts ...googleapi.CallOption) (*AchievementR
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5755,12 +4798,6 @@ func (c *AchievementsRevealCall) Do(opts ...googleapi.CallOption) (*AchievementR
 	//       "description": "The ID of the achievement used by this method.",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     }
 	//   },
@@ -5783,7 +4820,6 @@ type AchievementsSetStepsAtLeastCall struct {
 	achievementId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // SetStepsAtLeast: Sets the steps for the currently authenticated
@@ -5794,13 +4830,6 @@ func (r *AchievementsService) SetStepsAtLeast(achievementId string, steps int64)
 	c := &AchievementsSetStepsAtLeastCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.achievementId = achievementId
 	c.urlParams_.Set("steps", fmt.Sprint(steps))
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *AchievementsSetStepsAtLeastCall) ConsistencyToken(consistencyToken int64) *AchievementsSetStepsAtLeastCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -5820,31 +4849,20 @@ func (c *AchievementsSetStepsAtLeastCall) Context(ctx context.Context) *Achievem
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsSetStepsAtLeastCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsSetStepsAtLeastCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/{achievementId}/setStepsAtLeast")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"achievementId": c.achievementId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.achievements.setStepsAtLeast" call.
@@ -5880,8 +4898,7 @@ func (c *AchievementsSetStepsAtLeastCall) Do(opts ...googleapi.CallOption) (*Ach
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5898,12 +4915,6 @@ func (c *AchievementsSetStepsAtLeastCall) Do(opts ...googleapi.CallOption) (*Ach
 	//       "description": "The ID of the achievement used by this method.",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "steps": {
@@ -5934,7 +4945,6 @@ type AchievementsUnlockCall struct {
 	achievementId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Unlock: Unlocks this achievement for the currently authenticated
@@ -5942,13 +4952,6 @@ type AchievementsUnlockCall struct {
 func (r *AchievementsService) Unlock(achievementId string) *AchievementsUnlockCall {
 	c := &AchievementsUnlockCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.achievementId = achievementId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *AchievementsUnlockCall) ConsistencyToken(consistencyToken int64) *AchievementsUnlockCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -5968,31 +4971,20 @@ func (c *AchievementsUnlockCall) Context(ctx context.Context) *AchievementsUnloc
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsUnlockCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsUnlockCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/{achievementId}/unlock")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"achievementId": c.achievementId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.achievements.unlock" call.
@@ -6027,8 +5019,7 @@ func (c *AchievementsUnlockCall) Do(opts ...googleapi.CallOption) (*AchievementU
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6044,12 +5035,6 @@ func (c *AchievementsUnlockCall) Do(opts ...googleapi.CallOption) (*AchievementU
 	//       "description": "The ID of the achievement used by this method.",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     }
 	//   },
@@ -6072,7 +5057,6 @@ type AchievementsUpdateMultipleCall struct {
 	achievementupdatemultiplerequest *AchievementUpdateMultipleRequest
 	urlParams_                       gensupport.URLParams
 	ctx_                             context.Context
-	header_                          http.Header
 }
 
 // UpdateMultiple: Updates multiple achievements for the currently
@@ -6080,13 +5064,6 @@ type AchievementsUpdateMultipleCall struct {
 func (r *AchievementsService) UpdateMultiple(achievementupdatemultiplerequest *AchievementUpdateMultipleRequest) *AchievementsUpdateMultipleCall {
 	c := &AchievementsUpdateMultipleCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.achievementupdatemultiplerequest = achievementupdatemultiplerequest
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *AchievementsUpdateMultipleCall) ConsistencyToken(consistencyToken int64) *AchievementsUpdateMultipleCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -6106,33 +5083,24 @@ func (c *AchievementsUpdateMultipleCall) Context(ctx context.Context) *Achieveme
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsUpdateMultipleCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsUpdateMultipleCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.achievementupdatemultiplerequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/updateMultiple")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.achievements.updateMultiple" call.
@@ -6168,8 +5136,7 @@ func (c *AchievementsUpdateMultipleCall) Do(opts ...googleapi.CallOption) (*Achi
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6177,14 +5144,6 @@ func (c *AchievementsUpdateMultipleCall) Do(opts ...googleapi.CallOption) (*Achi
 	//   "description": "Updates multiple achievements for the currently authenticated player.",
 	//   "httpMethod": "POST",
 	//   "id": "games.achievements.updateMultiple",
-	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     }
-	//   },
 	//   "path": "achievements/updateMultiple",
 	//   "request": {
 	//     "$ref": "AchievementUpdateMultipleRequest"
@@ -6208,7 +5167,6 @@ type ApplicationsGetCall struct {
 	urlParams_    gensupport.URLParams
 	ifNoneMatch_  string
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Get: Retrieves the metadata of the application with the given ID. If
@@ -6218,13 +5176,6 @@ type ApplicationsGetCall struct {
 func (r *ApplicationsService) Get(applicationId string) *ApplicationsGetCall {
 	c := &ApplicationsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.applicationId = applicationId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *ApplicationsGetCall) ConsistencyToken(consistencyToken int64) *ApplicationsGetCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -6274,34 +5225,23 @@ func (c *ApplicationsGetCall) Context(ctx context.Context) *ApplicationsGetCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ApplicationsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ApplicationsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "applications/{applicationId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"applicationId": c.applicationId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.applications.get" call.
@@ -6336,8 +5276,7 @@ func (c *ApplicationsGetCall) Do(opts ...googleapi.CallOption) (*Application, er
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6353,12 +5292,6 @@ func (c *ApplicationsGetCall) Do(opts ...googleapi.CallOption) (*Application, er
 	//       "description": "The application ID from the Google Play developer console.",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "language": {
@@ -6400,20 +5333,12 @@ type ApplicationsPlayedCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Played: Indicate that the the currently authenticated user is playing
 // your application.
 func (r *ApplicationsService) Played() *ApplicationsPlayedCall {
 	c := &ApplicationsPlayedCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *ApplicationsPlayedCall) ConsistencyToken(consistencyToken int64) *ApplicationsPlayedCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -6433,28 +5358,18 @@ func (c *ApplicationsPlayedCall) Context(ctx context.Context) *ApplicationsPlaye
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ApplicationsPlayedCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ApplicationsPlayedCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "applications/played")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.applications.played" call.
@@ -6473,14 +5388,6 @@ func (c *ApplicationsPlayedCall) Do(opts ...googleapi.CallOption) error {
 	//   "description": "Indicate that the the currently authenticated user is playing your application.",
 	//   "httpMethod": "POST",
 	//   "id": "games.applications.played",
-	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     }
-	//   },
 	//   "path": "applications/played",
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/games",
@@ -6498,7 +5405,6 @@ type ApplicationsVerifyCall struct {
 	urlParams_    gensupport.URLParams
 	ifNoneMatch_  string
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Verify: Verifies the auth token provided with this request is for the
@@ -6507,13 +5413,6 @@ type ApplicationsVerifyCall struct {
 func (r *ApplicationsService) Verify(applicationId string) *ApplicationsVerifyCall {
 	c := &ApplicationsVerifyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.applicationId = applicationId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *ApplicationsVerifyCall) ConsistencyToken(consistencyToken int64) *ApplicationsVerifyCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -6543,34 +5442,23 @@ func (c *ApplicationsVerifyCall) Context(ctx context.Context) *ApplicationsVerif
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ApplicationsVerifyCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ApplicationsVerifyCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "applications/{applicationId}/verify")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"applicationId": c.applicationId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.applications.verify" call.
@@ -6605,8 +5493,7 @@ func (c *ApplicationsVerifyCall) Do(opts ...googleapi.CallOption) (*ApplicationV
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6622,12 +5509,6 @@ func (c *ApplicationsVerifyCall) Do(opts ...googleapi.CallOption) (*ApplicationV
 	//       "description": "The application ID from the Google Play developer console.",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     }
 	//   },
@@ -6650,20 +5531,12 @@ type EventsListByPlayerCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // ListByPlayer: Returns a list showing the current progress on events
 // in this application for the currently authenticated user.
 func (r *EventsService) ListByPlayer() *EventsListByPlayerCall {
 	c := &EventsListByPlayerCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *EventsListByPlayerCall) ConsistencyToken(consistencyToken int64) *EventsListByPlayerCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -6716,31 +5589,21 @@ func (c *EventsListByPlayerCall) Context(ctx context.Context) *EventsListByPlaye
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EventsListByPlayerCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *EventsListByPlayerCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "events")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.events.listByPlayer" call.
@@ -6775,8 +5638,7 @@ func (c *EventsListByPlayerCall) Do(opts ...googleapi.CallOption) (*PlayerEventL
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6785,12 +5647,6 @@ func (c *EventsListByPlayerCall) Do(opts ...googleapi.CallOption) (*PlayerEventL
 	//   "httpMethod": "GET",
 	//   "id": "games.events.listByPlayer",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -6850,20 +5706,12 @@ type EventsListDefinitionsCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // ListDefinitions: Returns a list of the event definitions in this
 // application.
 func (r *EventsService) ListDefinitions() *EventsListDefinitionsCall {
 	c := &EventsListDefinitionsCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *EventsListDefinitionsCall) ConsistencyToken(consistencyToken int64) *EventsListDefinitionsCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -6916,31 +5764,21 @@ func (c *EventsListDefinitionsCall) Context(ctx context.Context) *EventsListDefi
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EventsListDefinitionsCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *EventsListDefinitionsCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "eventDefinitions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.events.listDefinitions" call.
@@ -6975,8 +5813,7 @@ func (c *EventsListDefinitionsCall) Do(opts ...googleapi.CallOption) (*EventDefi
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6985,12 +5822,6 @@ func (c *EventsListDefinitionsCall) Do(opts ...googleapi.CallOption) (*EventDefi
 	//   "httpMethod": "GET",
 	//   "id": "games.events.listDefinitions",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -7050,7 +5881,6 @@ type EventsRecordCall struct {
 	eventrecordrequest *EventRecordRequest
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
-	header_            http.Header
 }
 
 // Record: Records a batch of changes to the number of times events have
@@ -7058,13 +5888,6 @@ type EventsRecordCall struct {
 func (r *EventsService) Record(eventrecordrequest *EventRecordRequest) *EventsRecordCall {
 	c := &EventsRecordCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.eventrecordrequest = eventrecordrequest
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *EventsRecordCall) ConsistencyToken(consistencyToken int64) *EventsRecordCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -7091,33 +5914,24 @@ func (c *EventsRecordCall) Context(ctx context.Context) *EventsRecordCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EventsRecordCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *EventsRecordCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.eventrecordrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "events")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.events.record" call.
@@ -7152,8 +5966,7 @@ func (c *EventsRecordCall) Do(opts ...googleapi.CallOption) (*EventUpdateRespons
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7162,12 +5975,6 @@ func (c *EventsRecordCall) Do(opts ...googleapi.CallOption) (*EventUpdateRespons
 	//   "httpMethod": "POST",
 	//   "id": "games.events.record",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -7197,20 +6004,12 @@ type LeaderboardsGetCall struct {
 	urlParams_    gensupport.URLParams
 	ifNoneMatch_  string
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Get: Retrieves the metadata of the leaderboard with the given ID.
 func (r *LeaderboardsService) Get(leaderboardId string) *LeaderboardsGetCall {
 	c := &LeaderboardsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.leaderboardId = leaderboardId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *LeaderboardsGetCall) ConsistencyToken(consistencyToken int64) *LeaderboardsGetCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -7247,34 +6046,23 @@ func (c *LeaderboardsGetCall) Context(ctx context.Context) *LeaderboardsGetCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *LeaderboardsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *LeaderboardsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "leaderboards/{leaderboardId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"leaderboardId": c.leaderboardId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.leaderboards.get" call.
@@ -7309,8 +6097,7 @@ func (c *LeaderboardsGetCall) Do(opts ...googleapi.CallOption) (*Leaderboard, er
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7322,12 +6109,6 @@ func (c *LeaderboardsGetCall) Do(opts ...googleapi.CallOption) (*Leaderboard, er
 	//     "leaderboardId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -7359,19 +6140,11 @@ type LeaderboardsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists all the leaderboard metadata for your application.
 func (r *LeaderboardsService) List() *LeaderboardsListCall {
 	c := &LeaderboardsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *LeaderboardsListCall) ConsistencyToken(consistencyToken int64) *LeaderboardsListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -7424,31 +6197,21 @@ func (c *LeaderboardsListCall) Context(ctx context.Context) *LeaderboardsListCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *LeaderboardsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *LeaderboardsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "leaderboards")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.leaderboards.list" call.
@@ -7483,8 +6246,7 @@ func (c *LeaderboardsListCall) Do(opts ...googleapi.CallOption) (*LeaderboardLis
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7493,12 +6255,6 @@ func (c *LeaderboardsListCall) Do(opts ...googleapi.CallOption) (*LeaderboardLis
 	//   "httpMethod": "GET",
 	//   "id": "games.leaderboards.list",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -7558,20 +6314,12 @@ type MetagameGetMetagameConfigCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // GetMetagameConfig: Return the metagame configuration data for the
 // calling application.
 func (r *MetagameService) GetMetagameConfig() *MetagameGetMetagameConfigCall {
 	c := &MetagameGetMetagameConfigCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *MetagameGetMetagameConfigCall) ConsistencyToken(consistencyToken int64) *MetagameGetMetagameConfigCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -7601,31 +6349,21 @@ func (c *MetagameGetMetagameConfigCall) Context(ctx context.Context) *MetagameGe
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *MetagameGetMetagameConfigCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *MetagameGetMetagameConfigCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "metagameConfig")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.metagame.getMetagameConfig" call.
@@ -7660,8 +6398,7 @@ func (c *MetagameGetMetagameConfigCall) Do(opts ...googleapi.CallOption) (*Metag
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7669,14 +6406,6 @@ func (c *MetagameGetMetagameConfigCall) Do(opts ...googleapi.CallOption) (*Metag
 	//   "description": "Return the metagame configuration data for the calling application.",
 	//   "httpMethod": "GET",
 	//   "id": "games.metagame.getMetagameConfig",
-	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     }
-	//   },
 	//   "path": "metagameConfig",
 	//   "response": {
 	//     "$ref": "MetagameConfig"
@@ -7698,7 +6427,6 @@ type MetagameListCategoriesByPlayerCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // ListCategoriesByPlayer: List play data aggregated per category for
@@ -7707,13 +6435,6 @@ func (r *MetagameService) ListCategoriesByPlayer(playerId string, collection str
 	c := &MetagameListCategoriesByPlayerCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.playerId = playerId
 	c.collection = collection
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *MetagameListCategoriesByPlayerCall) ConsistencyToken(consistencyToken int64) *MetagameListCategoriesByPlayerCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -7766,35 +6487,24 @@ func (c *MetagameListCategoriesByPlayerCall) Context(ctx context.Context) *Metag
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *MetagameListCategoriesByPlayerCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *MetagameListCategoriesByPlayerCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "players/{playerId}/categories/{collection}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"playerId":   c.playerId,
 		"collection": c.collection,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.metagame.listCategoriesByPlayer" call.
@@ -7829,8 +6539,7 @@ func (c *MetagameListCategoriesByPlayerCall) Do(opts ...googleapi.CallOption) (*
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7853,12 +6562,6 @@ func (c *MetagameListCategoriesByPlayerCall) Do(opts ...googleapi.CallOption) (*
 	//       ],
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "language": {
@@ -7927,7 +6630,6 @@ type PlayersGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Retrieves the Player resource with the given ID. To retrieve the
@@ -7935,13 +6637,6 @@ type PlayersGetCall struct {
 func (r *PlayersService) Get(playerId string) *PlayersGetCall {
 	c := &PlayersGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.playerId = playerId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *PlayersGetCall) ConsistencyToken(consistencyToken int64) *PlayersGetCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -7978,34 +6673,23 @@ func (c *PlayersGetCall) Context(ctx context.Context) *PlayersGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PlayersGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PlayersGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "players/{playerId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"playerId": c.playerId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.players.get" call.
@@ -8040,8 +6724,7 @@ func (c *PlayersGetCall) Do(opts ...googleapi.CallOption) (*Player, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8053,12 +6736,6 @@ func (c *PlayersGetCall) Do(opts ...googleapi.CallOption) (*Player, error) {
 	//     "playerId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -8091,7 +6768,6 @@ type PlayersListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Get the collection of players for the currently authenticated
@@ -8099,13 +6775,6 @@ type PlayersListCall struct {
 func (r *PlayersService) List(collection string) *PlayersListCall {
 	c := &PlayersListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.collection = collection
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *PlayersListCall) ConsistencyToken(consistencyToken int64) *PlayersListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -8158,34 +6827,23 @@ func (c *PlayersListCall) Context(ctx context.Context) *PlayersListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PlayersListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PlayersListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "players/me/players/{collection}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"collection": c.collection,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.players.list" call.
@@ -8220,8 +6878,7 @@ func (c *PlayersListCall) Do(opts ...googleapi.CallOption) (*PlayerListResponse,
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8249,12 +6906,6 @@ func (c *PlayersListCall) Do(opts ...googleapi.CallOption) (*PlayerListResponse,
 	//       ],
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "language": {
@@ -8316,7 +6967,6 @@ type PushtokensRemoveCall struct {
 	pushtokenid *PushTokenId
 	urlParams_  gensupport.URLParams
 	ctx_        context.Context
-	header_     http.Header
 }
 
 // Remove: Removes a push token for the current user and application.
@@ -8324,13 +6974,6 @@ type PushtokensRemoveCall struct {
 func (r *PushtokensService) Remove(pushtokenid *PushTokenId) *PushtokensRemoveCall {
 	c := &PushtokensRemoveCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.pushtokenid = pushtokenid
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *PushtokensRemoveCall) ConsistencyToken(consistencyToken int64) *PushtokensRemoveCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -8350,33 +6993,24 @@ func (c *PushtokensRemoveCall) Context(ctx context.Context) *PushtokensRemoveCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PushtokensRemoveCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PushtokensRemoveCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pushtokenid)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "pushtokens/remove")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.pushtokens.remove" call.
@@ -8395,14 +7029,6 @@ func (c *PushtokensRemoveCall) Do(opts ...googleapi.CallOption) error {
 	//   "description": "Removes a push token for the current user and application. Removing a non-existent push token will report success.",
 	//   "httpMethod": "POST",
 	//   "id": "games.pushtokens.remove",
-	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     }
-	//   },
 	//   "path": "pushtokens/remove",
 	//   "request": {
 	//     "$ref": "PushTokenId"
@@ -8422,20 +7048,12 @@ type PushtokensUpdateCall struct {
 	pushtoken  *PushToken
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Update: Registers a push token for the current user and application.
 func (r *PushtokensService) Update(pushtoken *PushToken) *PushtokensUpdateCall {
 	c := &PushtokensUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.pushtoken = pushtoken
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *PushtokensUpdateCall) ConsistencyToken(consistencyToken int64) *PushtokensUpdateCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -8455,33 +7073,24 @@ func (c *PushtokensUpdateCall) Context(ctx context.Context) *PushtokensUpdateCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PushtokensUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PushtokensUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pushtoken)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "pushtokens")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.pushtokens.update" call.
@@ -8500,14 +7109,6 @@ func (c *PushtokensUpdateCall) Do(opts ...googleapi.CallOption) error {
 	//   "description": "Registers a push token for the current user and application.",
 	//   "httpMethod": "PUT",
 	//   "id": "games.pushtokens.update",
-	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     }
-	//   },
 	//   "path": "pushtokens",
 	//   "request": {
 	//     "$ref": "PushToken"
@@ -8528,7 +7129,6 @@ type QuestMilestonesClaimCall struct {
 	milestoneId string
 	urlParams_  gensupport.URLParams
 	ctx_        context.Context
-	header_     http.Header
 }
 
 // Claim: Report that a reward for the milestone corresponding to
@@ -8539,13 +7139,6 @@ func (r *QuestMilestonesService) Claim(questId string, milestoneId string, reque
 	c.questId = questId
 	c.milestoneId = milestoneId
 	c.urlParams_.Set("requestId", fmt.Sprint(requestId))
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *QuestMilestonesClaimCall) ConsistencyToken(consistencyToken int64) *QuestMilestonesClaimCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -8565,32 +7158,21 @@ func (c *QuestMilestonesClaimCall) Context(ctx context.Context) *QuestMilestones
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *QuestMilestonesClaimCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *QuestMilestonesClaimCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "quests/{questId}/milestones/{milestoneId}/claim")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"questId":     c.questId,
 		"milestoneId": c.milestoneId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.questMilestones.claim" call.
@@ -8615,12 +7197,6 @@ func (c *QuestMilestonesClaimCall) Do(opts ...googleapi.CallOption) error {
 	//     "requestId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "milestoneId": {
 	//       "description": "The ID of the milestone.",
 	//       "location": "path",
@@ -8657,7 +7233,6 @@ type QuestsAcceptCall struct {
 	questId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Accept: Indicates that the currently authorized user will participate
@@ -8665,13 +7240,6 @@ type QuestsAcceptCall struct {
 func (r *QuestsService) Accept(questId string) *QuestsAcceptCall {
 	c := &QuestsAcceptCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.questId = questId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *QuestsAcceptCall) ConsistencyToken(consistencyToken int64) *QuestsAcceptCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -8698,31 +7266,20 @@ func (c *QuestsAcceptCall) Context(ctx context.Context) *QuestsAcceptCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *QuestsAcceptCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *QuestsAcceptCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "quests/{questId}/accept")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"questId": c.questId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.quests.accept" call.
@@ -8757,8 +7314,7 @@ func (c *QuestsAcceptCall) Do(opts ...googleapi.CallOption) (*Quest, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8770,12 +7326,6 @@ func (c *QuestsAcceptCall) Do(opts ...googleapi.CallOption) (*Quest, error) {
 	//     "questId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -8808,7 +7358,6 @@ type QuestsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Get a list of quests for your application and the currently
@@ -8816,13 +7365,6 @@ type QuestsListCall struct {
 func (r *QuestsService) List(playerId string) *QuestsListCall {
 	c := &QuestsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.playerId = playerId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *QuestsListCall) ConsistencyToken(consistencyToken int64) *QuestsListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -8876,34 +7418,23 @@ func (c *QuestsListCall) Context(ctx context.Context) *QuestsListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *QuestsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *QuestsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "players/{playerId}/quests")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"playerId": c.playerId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.quests.list" call.
@@ -8938,8 +7469,7 @@ func (c *QuestsListCall) Do(opts ...googleapi.CallOption) (*QuestListResponse, e
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8951,12 +7481,6 @@ func (c *QuestsListCall) Do(opts ...googleapi.CallOption) (*QuestListResponse, e
 	//     "playerId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -9022,20 +7546,12 @@ type RevisionsCheckCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Check: Checks whether the games client is out of date.
 func (r *RevisionsService) Check(clientRevision string) *RevisionsCheckCall {
 	c := &RevisionsCheckCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.urlParams_.Set("clientRevision", clientRevision)
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RevisionsCheckCall) ConsistencyToken(consistencyToken int64) *RevisionsCheckCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -9065,31 +7581,21 @@ func (c *RevisionsCheckCall) Context(ctx context.Context) *RevisionsCheckCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RevisionsCheckCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RevisionsCheckCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "revisions/check")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.revisions.check" call.
@@ -9124,8 +7630,7 @@ func (c *RevisionsCheckCall) Do(opts ...googleapi.CallOption) (*RevisionCheckRes
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9141,12 +7646,6 @@ func (c *RevisionsCheckCall) Do(opts ...googleapi.CallOption) (*RevisionCheckRes
 	//       "description": "The revision of the client SDK used by your application. Format:\n[PLATFORM_TYPE]:[VERSION_NUMBER]. Possible values of PLATFORM_TYPE are:\n \n- \"ANDROID\" - Client is running the Android SDK. \n- \"IOS\" - Client is running the iOS SDK. \n- \"WEB_APP\" - Client is running as a Web App.",
 	//       "location": "query",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     }
 	//   },
@@ -9169,7 +7668,6 @@ type RoomsCreateCall struct {
 	roomcreaterequest *RoomCreateRequest
 	urlParams_        gensupport.URLParams
 	ctx_              context.Context
-	header_           http.Header
 }
 
 // Create: Create a room. For internal use by the Games SDK only.
@@ -9177,13 +7675,6 @@ type RoomsCreateCall struct {
 func (r *RoomsService) Create(roomcreaterequest *RoomCreateRequest) *RoomsCreateCall {
 	c := &RoomsCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.roomcreaterequest = roomcreaterequest
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RoomsCreateCall) ConsistencyToken(consistencyToken int64) *RoomsCreateCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -9210,33 +7701,24 @@ func (c *RoomsCreateCall) Context(ctx context.Context) *RoomsCreateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsCreateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.roomcreaterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/create")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.rooms.create" call.
@@ -9271,8 +7753,7 @@ func (c *RoomsCreateCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9281,12 +7762,6 @@ func (c *RoomsCreateCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 	//   "httpMethod": "POST",
 	//   "id": "games.rooms.create",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -9315,7 +7790,6 @@ type RoomsDeclineCall struct {
 	roomId     string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Decline: Decline an invitation to join a room. For internal use by
@@ -9323,13 +7797,6 @@ type RoomsDeclineCall struct {
 func (r *RoomsService) Decline(roomId string) *RoomsDeclineCall {
 	c := &RoomsDeclineCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.roomId = roomId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RoomsDeclineCall) ConsistencyToken(consistencyToken int64) *RoomsDeclineCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -9356,31 +7823,20 @@ func (c *RoomsDeclineCall) Context(ctx context.Context) *RoomsDeclineCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsDeclineCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsDeclineCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/{roomId}/decline")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"roomId": c.roomId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.rooms.decline" call.
@@ -9415,8 +7871,7 @@ func (c *RoomsDeclineCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9428,12 +7883,6 @@ func (c *RoomsDeclineCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 	//     "roomId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -9465,7 +7914,6 @@ type RoomsDismissCall struct {
 	roomId     string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Dismiss: Dismiss an invitation to join a room. For internal use by
@@ -9473,13 +7921,6 @@ type RoomsDismissCall struct {
 func (r *RoomsService) Dismiss(roomId string) *RoomsDismissCall {
 	c := &RoomsDismissCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.roomId = roomId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RoomsDismissCall) ConsistencyToken(consistencyToken int64) *RoomsDismissCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -9499,31 +7940,20 @@ func (c *RoomsDismissCall) Context(ctx context.Context) *RoomsDismissCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsDismissCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsDismissCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/{roomId}/dismiss")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"roomId": c.roomId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.rooms.dismiss" call.
@@ -9546,12 +7976,6 @@ func (c *RoomsDismissCall) Do(opts ...googleapi.CallOption) error {
 	//     "roomId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "roomId": {
 	//       "description": "The ID of the room.",
 	//       "location": "path",
@@ -9576,20 +8000,12 @@ type RoomsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Get the data for a room.
 func (r *RoomsService) Get(roomId string) *RoomsGetCall {
 	c := &RoomsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.roomId = roomId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RoomsGetCall) ConsistencyToken(consistencyToken int64) *RoomsGetCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -9626,34 +8042,23 @@ func (c *RoomsGetCall) Context(ctx context.Context) *RoomsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/{roomId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"roomId": c.roomId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.rooms.get" call.
@@ -9688,8 +8093,7 @@ func (c *RoomsGetCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9701,12 +8105,6 @@ func (c *RoomsGetCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 	//     "roomId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -9739,7 +8137,6 @@ type RoomsJoinCall struct {
 	roomjoinrequest *RoomJoinRequest
 	urlParams_      gensupport.URLParams
 	ctx_            context.Context
-	header_         http.Header
 }
 
 // Join: Join a room. For internal use by the Games SDK only. Calling
@@ -9748,13 +8145,6 @@ func (r *RoomsService) Join(roomId string, roomjoinrequest *RoomJoinRequest) *Ro
 	c := &RoomsJoinCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.roomId = roomId
 	c.roomjoinrequest = roomjoinrequest
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RoomsJoinCall) ConsistencyToken(consistencyToken int64) *RoomsJoinCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -9781,36 +8171,26 @@ func (c *RoomsJoinCall) Context(ctx context.Context) *RoomsJoinCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsJoinCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsJoinCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.roomjoinrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/{roomId}/join")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"roomId": c.roomId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.rooms.join" call.
@@ -9845,8 +8225,7 @@ func (c *RoomsJoinCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9858,12 +8237,6 @@ func (c *RoomsJoinCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 	//     "roomId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -9899,7 +8272,6 @@ type RoomsLeaveCall struct {
 	roomleaverequest *RoomLeaveRequest
 	urlParams_       gensupport.URLParams
 	ctx_             context.Context
-	header_          http.Header
 }
 
 // Leave: Leave a room. For internal use by the Games SDK only. Calling
@@ -9908,13 +8280,6 @@ func (r *RoomsService) Leave(roomId string, roomleaverequest *RoomLeaveRequest) 
 	c := &RoomsLeaveCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.roomId = roomId
 	c.roomleaverequest = roomleaverequest
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RoomsLeaveCall) ConsistencyToken(consistencyToken int64) *RoomsLeaveCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -9941,36 +8306,26 @@ func (c *RoomsLeaveCall) Context(ctx context.Context) *RoomsLeaveCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsLeaveCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsLeaveCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.roomleaverequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/{roomId}/leave")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"roomId": c.roomId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.rooms.leave" call.
@@ -10005,8 +8360,7 @@ func (c *RoomsLeaveCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10018,12 +8372,6 @@ func (c *RoomsLeaveCall) Do(opts ...googleapi.CallOption) (*Room, error) {
 	//     "roomId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -10058,19 +8406,11 @@ type RoomsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Returns invitations to join rooms.
 func (r *RoomsService) List() *RoomsListCall {
 	c := &RoomsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RoomsListCall) ConsistencyToken(consistencyToken int64) *RoomsListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -10123,31 +8463,21 @@ func (c *RoomsListCall) Context(ctx context.Context) *RoomsListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.rooms.list" call.
@@ -10182,8 +8512,7 @@ func (c *RoomsListCall) Do(opts ...googleapi.CallOption) (*RoomList, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10192,12 +8521,6 @@ func (c *RoomsListCall) Do(opts ...googleapi.CallOption) (*RoomList, error) {
 	//   "httpMethod": "GET",
 	//   "id": "games.rooms.list",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -10258,7 +8581,6 @@ type RoomsReportStatusCall struct {
 	roomp2pstatuses *RoomP2PStatuses
 	urlParams_      gensupport.URLParams
 	ctx_            context.Context
-	header_         http.Header
 }
 
 // ReportStatus: Updates sent by a client reporting the status of peers
@@ -10268,13 +8590,6 @@ func (r *RoomsService) ReportStatus(roomId string, roomp2pstatuses *RoomP2PStatu
 	c := &RoomsReportStatusCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.roomId = roomId
 	c.roomp2pstatuses = roomp2pstatuses
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *RoomsReportStatusCall) ConsistencyToken(consistencyToken int64) *RoomsReportStatusCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -10301,36 +8616,26 @@ func (c *RoomsReportStatusCall) Context(ctx context.Context) *RoomsReportStatusC
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsReportStatusCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsReportStatusCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.roomp2pstatuses)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/{roomId}/reportstatus")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"roomId": c.roomId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.rooms.reportStatus" call.
@@ -10365,8 +8670,7 @@ func (c *RoomsReportStatusCall) Do(opts ...googleapi.CallOption) (*RoomStatus, e
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10378,12 +8682,6 @@ func (c *RoomsReportStatusCall) Do(opts ...googleapi.CallOption) (*RoomStatus, e
 	//     "roomId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -10421,7 +8719,6 @@ type ScoresGetCall struct {
 	urlParams_    gensupport.URLParams
 	ifNoneMatch_  string
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Get: Get high scores, and optionally ranks, in leaderboards for the
@@ -10435,13 +8732,6 @@ func (r *ScoresService) Get(playerId string, leaderboardId string, timeSpan stri
 	c.playerId = playerId
 	c.leaderboardId = leaderboardId
 	c.timeSpan = timeSpan
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *ScoresGetCall) ConsistencyToken(consistencyToken int64) *ScoresGetCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -10508,36 +8798,25 @@ func (c *ScoresGetCall) Context(ctx context.Context) *ScoresGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "players/{playerId}/leaderboards/{leaderboardId}/scores/{timeSpan}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"playerId":      c.playerId,
 		"leaderboardId": c.leaderboardId,
 		"timeSpan":      c.timeSpan,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.scores.get" call.
@@ -10573,8 +8852,7 @@ func (c *ScoresGetCall) Do(opts ...googleapi.CallOption) (*PlayerLeaderboardScor
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10588,12 +8866,6 @@ func (c *ScoresGetCall) Do(opts ...googleapi.CallOption) (*PlayerLeaderboardScor
 	//     "timeSpan"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "includeRankType": {
 	//       "description": "The types of ranks to return. If the parameter is omitted, no ranks will be returned.",
 	//       "enum": [
@@ -10700,7 +8972,6 @@ type ScoresListCall struct {
 	urlParams_    gensupport.URLParams
 	ifNoneMatch_  string
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // List: Lists the scores in a leaderboard, starting from the top.
@@ -10709,13 +8980,6 @@ func (r *ScoresService) List(leaderboardId string, collection string, timeSpan s
 	c.leaderboardId = leaderboardId
 	c.collection = collection
 	c.urlParams_.Set("timeSpan", timeSpan)
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *ScoresListCall) ConsistencyToken(consistencyToken int64) *ScoresListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -10768,35 +9032,24 @@ func (c *ScoresListCall) Context(ctx context.Context) *ScoresListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "leaderboards/{leaderboardId}/scores/{collection}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"leaderboardId": c.leaderboardId,
 		"collection":    c.collection,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.scores.list" call.
@@ -10831,8 +9084,7 @@ func (c *ScoresListCall) Do(opts ...googleapi.CallOption) (*LeaderboardScores, e
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10860,12 +9112,6 @@ func (c *ScoresListCall) Do(opts ...googleapi.CallOption) (*LeaderboardScores, e
 	//       ],
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "language": {
@@ -10951,7 +9197,6 @@ type ScoresListWindowCall struct {
 	urlParams_    gensupport.URLParams
 	ifNoneMatch_  string
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // ListWindow: Lists the scores in a leaderboard around (and including)
@@ -10961,13 +9206,6 @@ func (r *ScoresService) ListWindow(leaderboardId string, collection string, time
 	c.leaderboardId = leaderboardId
 	c.collection = collection
 	c.urlParams_.Set("timeSpan", timeSpan)
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *ScoresListWindowCall) ConsistencyToken(consistencyToken int64) *ScoresListWindowCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -11038,35 +9276,24 @@ func (c *ScoresListWindowCall) Context(ctx context.Context) *ScoresListWindowCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresListWindowCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresListWindowCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "leaderboards/{leaderboardId}/window/{collection}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"leaderboardId": c.leaderboardId,
 		"collection":    c.collection,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.scores.listWindow" call.
@@ -11101,8 +9328,7 @@ func (c *ScoresListWindowCall) Do(opts ...googleapi.CallOption) (*LeaderboardSco
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11130,12 +9356,6 @@ func (c *ScoresListWindowCall) Do(opts ...googleapi.CallOption) (*LeaderboardSco
 	//       ],
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
 	//       "type": "string"
 	//     },
 	//     "language": {
@@ -11230,7 +9450,6 @@ type ScoresSubmitCall struct {
 	leaderboardId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Submit: Submits a score to the specified leaderboard.
@@ -11238,13 +9457,6 @@ func (r *ScoresService) Submit(leaderboardId string, score int64) *ScoresSubmitC
 	c := &ScoresSubmitCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.leaderboardId = leaderboardId
 	c.urlParams_.Set("score", fmt.Sprint(score))
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *ScoresSubmitCall) ConsistencyToken(consistencyToken int64) *ScoresSubmitCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -11280,31 +9492,20 @@ func (c *ScoresSubmitCall) Context(ctx context.Context) *ScoresSubmitCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresSubmitCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresSubmitCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "leaderboards/{leaderboardId}/scores")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"leaderboardId": c.leaderboardId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.scores.submit" call.
@@ -11339,8 +9540,7 @@ func (c *ScoresSubmitCall) Do(opts ...googleapi.CallOption) (*PlayerScoreRespons
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11353,12 +9553,6 @@ func (c *ScoresSubmitCall) Do(opts ...googleapi.CallOption) (*PlayerScoreRespons
 	//     "score"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -11403,20 +9597,12 @@ type ScoresSubmitMultipleCall struct {
 	playerscoresubmissionlist *PlayerScoreSubmissionList
 	urlParams_                gensupport.URLParams
 	ctx_                      context.Context
-	header_                   http.Header
 }
 
 // SubmitMultiple: Submits multiple scores to leaderboards.
 func (r *ScoresService) SubmitMultiple(playerscoresubmissionlist *PlayerScoreSubmissionList) *ScoresSubmitMultipleCall {
 	c := &ScoresSubmitMultipleCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.playerscoresubmissionlist = playerscoresubmissionlist
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *ScoresSubmitMultipleCall) ConsistencyToken(consistencyToken int64) *ScoresSubmitMultipleCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -11443,33 +9629,24 @@ func (c *ScoresSubmitMultipleCall) Context(ctx context.Context) *ScoresSubmitMul
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresSubmitMultipleCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresSubmitMultipleCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.playerscoresubmissionlist)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "leaderboards/scores")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.scores.submitMultiple" call.
@@ -11504,8 +9681,7 @@ func (c *ScoresSubmitMultipleCall) Do(opts ...googleapi.CallOption) (*PlayerScor
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11514,12 +9690,6 @@ func (c *ScoresSubmitMultipleCall) Do(opts ...googleapi.CallOption) (*PlayerScor
 	//   "httpMethod": "POST",
 	//   "id": "games.scores.submitMultiple",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -11549,20 +9719,12 @@ type SnapshotsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Retrieves the metadata for a given snapshot ID.
 func (r *SnapshotsService) Get(snapshotId string) *SnapshotsGetCall {
 	c := &SnapshotsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.snapshotId = snapshotId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *SnapshotsGetCall) ConsistencyToken(consistencyToken int64) *SnapshotsGetCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -11599,34 +9761,23 @@ func (c *SnapshotsGetCall) Context(ctx context.Context) *SnapshotsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *SnapshotsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *SnapshotsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "snapshots/{snapshotId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"snapshotId": c.snapshotId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.snapshots.get" call.
@@ -11661,8 +9812,7 @@ func (c *SnapshotsGetCall) Do(opts ...googleapi.CallOption) (*Snapshot, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11674,12 +9824,6 @@ func (c *SnapshotsGetCall) Do(opts ...googleapi.CallOption) (*Snapshot, error) {
 	//     "snapshotId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -11713,7 +9857,6 @@ type SnapshotsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Retrieves a list of snapshots created by your application for
@@ -11721,13 +9864,6 @@ type SnapshotsListCall struct {
 func (r *SnapshotsService) List(playerId string) *SnapshotsListCall {
 	c := &SnapshotsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.playerId = playerId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *SnapshotsListCall) ConsistencyToken(consistencyToken int64) *SnapshotsListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -11780,34 +9916,23 @@ func (c *SnapshotsListCall) Context(ctx context.Context) *SnapshotsListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *SnapshotsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *SnapshotsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "players/{playerId}/snapshots")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"playerId": c.playerId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.snapshots.list" call.
@@ -11842,8 +9967,7 @@ func (c *SnapshotsListCall) Do(opts ...googleapi.CallOption) (*SnapshotListRespo
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11855,12 +9979,6 @@ func (c *SnapshotsListCall) Do(opts ...googleapi.CallOption) (*SnapshotListRespo
 	//     "playerId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -11927,20 +10045,12 @@ type TurnBasedMatchesCancelCall struct {
 	matchId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Cancel: Cancel a turn-based match.
 func (r *TurnBasedMatchesService) Cancel(matchId string) *TurnBasedMatchesCancelCall {
 	c := &TurnBasedMatchesCancelCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesCancelCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesCancelCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -11960,31 +10070,20 @@ func (c *TurnBasedMatchesCancelCall) Context(ctx context.Context) *TurnBasedMatc
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesCancelCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesCancelCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/cancel")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.cancel" call.
@@ -12007,12 +10106,6 @@ func (c *TurnBasedMatchesCancelCall) Do(opts ...googleapi.CallOption) error {
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "matchId": {
 	//       "description": "The ID of the match.",
 	//       "location": "path",
@@ -12036,20 +10129,12 @@ type TurnBasedMatchesCreateCall struct {
 	turnbasedmatchcreaterequest *TurnBasedMatchCreateRequest
 	urlParams_                  gensupport.URLParams
 	ctx_                        context.Context
-	header_                     http.Header
 }
 
 // Create: Create a turn-based match.
 func (r *TurnBasedMatchesService) Create(turnbasedmatchcreaterequest *TurnBasedMatchCreateRequest) *TurnBasedMatchesCreateCall {
 	c := &TurnBasedMatchesCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.turnbasedmatchcreaterequest = turnbasedmatchcreaterequest
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesCreateCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesCreateCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -12076,33 +10161,24 @@ func (c *TurnBasedMatchesCreateCall) Context(ctx context.Context) *TurnBasedMatc
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesCreateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.turnbasedmatchcreaterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/create")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.create" call.
@@ -12137,8 +10213,7 @@ func (c *TurnBasedMatchesCreateCall) Do(opts ...googleapi.CallOption) (*TurnBase
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12147,12 +10222,6 @@ func (c *TurnBasedMatchesCreateCall) Do(opts ...googleapi.CallOption) (*TurnBase
 	//   "httpMethod": "POST",
 	//   "id": "games.turnBasedMatches.create",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -12181,20 +10250,12 @@ type TurnBasedMatchesDeclineCall struct {
 	matchId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Decline: Decline an invitation to play a turn-based match.
 func (r *TurnBasedMatchesService) Decline(matchId string) *TurnBasedMatchesDeclineCall {
 	c := &TurnBasedMatchesDeclineCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesDeclineCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesDeclineCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -12221,31 +10282,20 @@ func (c *TurnBasedMatchesDeclineCall) Context(ctx context.Context) *TurnBasedMat
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesDeclineCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesDeclineCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/decline")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.decline" call.
@@ -12280,8 +10330,7 @@ func (c *TurnBasedMatchesDeclineCall) Do(opts ...googleapi.CallOption) (*TurnBas
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12293,12 +10342,6 @@ func (c *TurnBasedMatchesDeclineCall) Do(opts ...googleapi.CallOption) (*TurnBas
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -12330,7 +10373,6 @@ type TurnBasedMatchesDismissCall struct {
 	matchId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Dismiss: Dismiss a turn-based match from the match list. The match
@@ -12339,13 +10381,6 @@ type TurnBasedMatchesDismissCall struct {
 func (r *TurnBasedMatchesService) Dismiss(matchId string) *TurnBasedMatchesDismissCall {
 	c := &TurnBasedMatchesDismissCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesDismissCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesDismissCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -12365,31 +10400,20 @@ func (c *TurnBasedMatchesDismissCall) Context(ctx context.Context) *TurnBasedMat
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesDismissCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesDismissCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/dismiss")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.dismiss" call.
@@ -12412,12 +10436,6 @@ func (c *TurnBasedMatchesDismissCall) Do(opts ...googleapi.CallOption) error {
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "matchId": {
 	//       "description": "The ID of the match.",
 	//       "location": "path",
@@ -12442,7 +10460,6 @@ type TurnBasedMatchesFinishCall struct {
 	turnbasedmatchresults *TurnBasedMatchResults
 	urlParams_            gensupport.URLParams
 	ctx_                  context.Context
-	header_               http.Header
 }
 
 // Finish: Finish a turn-based match. Each player should make this call
@@ -12452,13 +10469,6 @@ func (r *TurnBasedMatchesService) Finish(matchId string, turnbasedmatchresults *
 	c := &TurnBasedMatchesFinishCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
 	c.turnbasedmatchresults = turnbasedmatchresults
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesFinishCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesFinishCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -12485,36 +10495,26 @@ func (c *TurnBasedMatchesFinishCall) Context(ctx context.Context) *TurnBasedMatc
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesFinishCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesFinishCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.turnbasedmatchresults)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/finish")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.finish" call.
@@ -12549,8 +10549,7 @@ func (c *TurnBasedMatchesFinishCall) Do(opts ...googleapi.CallOption) (*TurnBase
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12562,12 +10561,6 @@ func (c *TurnBasedMatchesFinishCall) Do(opts ...googleapi.CallOption) (*TurnBase
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -12603,20 +10596,12 @@ type TurnBasedMatchesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Get the data for a turn-based match.
 func (r *TurnBasedMatchesService) Get(matchId string) *TurnBasedMatchesGetCall {
 	c := &TurnBasedMatchesGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesGetCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesGetCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -12660,34 +10645,23 @@ func (c *TurnBasedMatchesGetCall) Context(ctx context.Context) *TurnBasedMatches
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.get" call.
@@ -12722,8 +10696,7 @@ func (c *TurnBasedMatchesGetCall) Do(opts ...googleapi.CallOption) (*TurnBasedMa
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12735,12 +10708,6 @@ func (c *TurnBasedMatchesGetCall) Do(opts ...googleapi.CallOption) (*TurnBasedMa
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "includeMatchData": {
 	//       "description": "Get match data along with metadata.",
 	//       "location": "query",
@@ -12777,20 +10744,12 @@ type TurnBasedMatchesJoinCall struct {
 	matchId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Join: Join a turn-based match.
 func (r *TurnBasedMatchesService) Join(matchId string) *TurnBasedMatchesJoinCall {
 	c := &TurnBasedMatchesJoinCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesJoinCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesJoinCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -12817,31 +10776,20 @@ func (c *TurnBasedMatchesJoinCall) Context(ctx context.Context) *TurnBasedMatche
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesJoinCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesJoinCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/join")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.join" call.
@@ -12876,8 +10824,7 @@ func (c *TurnBasedMatchesJoinCall) Do(opts ...googleapi.CallOption) (*TurnBasedM
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12889,12 +10836,6 @@ func (c *TurnBasedMatchesJoinCall) Do(opts ...googleapi.CallOption) (*TurnBasedM
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -12926,7 +10867,6 @@ type TurnBasedMatchesLeaveCall struct {
 	matchId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Leave: Leave a turn-based match when it is not the current player's
@@ -12934,13 +10874,6 @@ type TurnBasedMatchesLeaveCall struct {
 func (r *TurnBasedMatchesService) Leave(matchId string) *TurnBasedMatchesLeaveCall {
 	c := &TurnBasedMatchesLeaveCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesLeaveCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesLeaveCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -12967,31 +10900,20 @@ func (c *TurnBasedMatchesLeaveCall) Context(ctx context.Context) *TurnBasedMatch
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesLeaveCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesLeaveCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/leave")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.leave" call.
@@ -13026,8 +10948,7 @@ func (c *TurnBasedMatchesLeaveCall) Do(opts ...googleapi.CallOption) (*TurnBased
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13039,12 +10960,6 @@ func (c *TurnBasedMatchesLeaveCall) Do(opts ...googleapi.CallOption) (*TurnBased
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -13076,7 +10991,6 @@ type TurnBasedMatchesLeaveTurnCall struct {
 	matchId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // LeaveTurn: Leave a turn-based match during the current player's turn,
@@ -13085,13 +10999,6 @@ func (r *TurnBasedMatchesService) LeaveTurn(matchId string, matchVersion int64) 
 	c := &TurnBasedMatchesLeaveTurnCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
 	c.urlParams_.Set("matchVersion", fmt.Sprint(matchVersion))
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesLeaveTurnCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesLeaveTurnCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -13128,31 +11035,20 @@ func (c *TurnBasedMatchesLeaveTurnCall) Context(ctx context.Context) *TurnBasedM
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesLeaveTurnCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesLeaveTurnCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/leaveTurn")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.leaveTurn" call.
@@ -13187,8 +11083,7 @@ func (c *TurnBasedMatchesLeaveTurnCall) Do(opts ...googleapi.CallOption) (*TurnB
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13201,12 +11096,6 @@ func (c *TurnBasedMatchesLeaveTurnCall) Do(opts ...googleapi.CallOption) (*TurnB
 	//     "matchVersion"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -13250,19 +11139,11 @@ type TurnBasedMatchesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Returns turn-based matches the player is or was involved in.
 func (r *TurnBasedMatchesService) List() *TurnBasedMatchesListCall {
 	c := &TurnBasedMatchesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesListCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesListCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -13335,31 +11216,21 @@ func (c *TurnBasedMatchesListCall) Context(ctx context.Context) *TurnBasedMatche
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.list" call.
@@ -13394,8 +11265,7 @@ func (c *TurnBasedMatchesListCall) Do(opts ...googleapi.CallOption) (*TurnBasedM
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13404,12 +11274,6 @@ func (c *TurnBasedMatchesListCall) Do(opts ...googleapi.CallOption) (*TurnBasedM
 	//   "httpMethod": "GET",
 	//   "id": "games.turnBasedMatches.list",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "includeMatchData": {
 	//       "description": "True if match data should be returned in the response. Note that not all data will necessarily be returned if include_match_data is true; the server may decide to only return data for some of the matches to limit download size for the client. The remainder of the data for these matches will be retrievable on request.",
 	//       "location": "query",
@@ -13482,7 +11346,6 @@ type TurnBasedMatchesRematchCall struct {
 	matchId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Rematch: Create a rematch of a match that was previously completed,
@@ -13492,13 +11355,6 @@ type TurnBasedMatchesRematchCall struct {
 func (r *TurnBasedMatchesService) Rematch(matchId string) *TurnBasedMatchesRematchCall {
 	c := &TurnBasedMatchesRematchCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesRematchCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesRematchCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -13534,31 +11390,20 @@ func (c *TurnBasedMatchesRematchCall) Context(ctx context.Context) *TurnBasedMat
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesRematchCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesRematchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/rematch")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.rematch" call.
@@ -13593,8 +11438,7 @@ func (c *TurnBasedMatchesRematchCall) Do(opts ...googleapi.CallOption) (*TurnBas
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13606,12 +11450,6 @@ func (c *TurnBasedMatchesRematchCall) Do(opts ...googleapi.CallOption) (*TurnBas
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",
@@ -13649,7 +11487,6 @@ type TurnBasedMatchesSyncCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Sync: Returns turn-based matches the player is or was involved in
@@ -13658,13 +11495,6 @@ type TurnBasedMatchesSyncCall struct {
 // will have a status of MATCH_DELETED.
 func (r *TurnBasedMatchesService) Sync() *TurnBasedMatchesSyncCall {
 	c := &TurnBasedMatchesSyncCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesSyncCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesSyncCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -13737,31 +11567,21 @@ func (c *TurnBasedMatchesSyncCall) Context(ctx context.Context) *TurnBasedMatche
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesSyncCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesSyncCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/sync")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.sync" call.
@@ -13796,8 +11616,7 @@ func (c *TurnBasedMatchesSyncCall) Do(opts ...googleapi.CallOption) (*TurnBasedM
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13806,12 +11625,6 @@ func (c *TurnBasedMatchesSyncCall) Do(opts ...googleapi.CallOption) (*TurnBasedM
 	//   "httpMethod": "GET",
 	//   "id": "games.turnBasedMatches.sync",
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "includeMatchData": {
 	//       "description": "True if match data should be returned in the response. Note that not all data will necessarily be returned if include_match_data is true; the server may decide to only return data for some of the matches to limit download size for the client. The remainder of the data for these matches will be retrievable on request.",
 	//       "location": "query",
@@ -13885,7 +11698,6 @@ type TurnBasedMatchesTakeTurnCall struct {
 	turnbasedmatchturn *TurnBasedMatchTurn
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
-	header_            http.Header
 }
 
 // TakeTurn: Commit the results of a player turn.
@@ -13893,13 +11705,6 @@ func (r *TurnBasedMatchesService) TakeTurn(matchId string, turnbasedmatchturn *T
 	c := &TurnBasedMatchesTakeTurnCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.matchId = matchId
 	c.turnbasedmatchturn = turnbasedmatchturn
-	return c
-}
-
-// ConsistencyToken sets the optional parameter "consistencyToken": The
-// last-seen mutation timestamp.
-func (c *TurnBasedMatchesTakeTurnCall) ConsistencyToken(consistencyToken int64) *TurnBasedMatchesTakeTurnCall {
-	c.urlParams_.Set("consistencyToken", fmt.Sprint(consistencyToken))
 	return c
 }
 
@@ -13926,36 +11731,26 @@ func (c *TurnBasedMatchesTakeTurnCall) Context(ctx context.Context) *TurnBasedMa
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesTakeTurnCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesTakeTurnCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.turnbasedmatchturn)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/{matchId}/turn")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"matchId": c.matchId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "games.turnBasedMatches.takeTurn" call.
@@ -13990,8 +11785,7 @@ func (c *TurnBasedMatchesTakeTurnCall) Do(opts ...googleapi.CallOption) (*TurnBa
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -14003,12 +11797,6 @@ func (c *TurnBasedMatchesTakeTurnCall) Do(opts ...googleapi.CallOption) (*TurnBa
 	//     "matchId"
 	//   ],
 	//   "parameters": {
-	//     "consistencyToken": {
-	//       "description": "The last-seen mutation timestamp.",
-	//       "format": "int64",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "language": {
 	//       "description": "The preferred language to use for strings returned by this method.",
 	//       "location": "query",

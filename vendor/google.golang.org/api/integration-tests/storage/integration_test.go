@@ -1,17 +1,3 @@
-// Copyright 2017 Google Inc. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // +build integration
 
 package storage
@@ -144,20 +130,20 @@ func createService() *storage.Service {
 		return nil
 	}
 	if bucket = os.Getenv(envBucket); bucket == "" {
-		log.Print("no bucket specified")
+		log.Print("no project ID specified")
 		return nil
 	}
 
 	ctx := context.Background()
 	ts, err := tokenSource(ctx, storage.DevstorageFullControlScope)
 	if err != nil {
-		log.Printf("tokenSource: %v", err)
+		log.Print("createService: %v", err)
 		return nil
 	}
 	client := oauth2.NewClient(ctx, ts)
 	s, err := storage.New(client)
 	if err != nil {
-		log.Printf("unable to create service: %v", err)
+		log.Print("unable to create service: %v", err)
 		return nil
 	}
 	return s
@@ -199,14 +185,12 @@ func TestContentType(t *testing.T) {
 	// The content type configured via googleapi.ContentType, if any, is always "text/html".
 	for _, tc := range []testCase{
 		// With content type specified in the object struct
-		// Temporarily disable this test during rollout of strict Content-Type.
-		// TODO(djd): Re-enable once strict check is 100%.
-		// {
-		// 	objectContentType:    "text/plain",
-		// 	useOptionContentType: true,
-		// 	optionContentType:    "text/html",
-		// 	wantContentType:      "text/html",
-		// },
+		{
+			objectContentType:    "text/plain",
+			useOptionContentType: true,
+			optionContentType:    "text/html",
+			wantContentType:      "text/html",
+		},
 		{
 			objectContentType:    "text/plain",
 			useOptionContentType: true,
@@ -216,7 +200,7 @@ func TestContentType(t *testing.T) {
 		{
 			objectContentType:    "text/plain",
 			useOptionContentType: false,
-			wantContentType:      "text/plain",
+			wantContentType:      "text/plain; charset=utf-8", // sniffed.
 		},
 
 		// Without content type specified in the object struct

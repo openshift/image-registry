@@ -1,13 +1,13 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"YWOzh2SDasdU84ArJnpYek-OMdg/q1aPzEOdugLS9_Y8FK61EmJhEHg\"",
+ "etag": "\"bRFOOrZKfO9LweMbPqu0kcu6De8/fQ7gMSQqLPLbacQ9HzpdBnMKn-E\"",
  "discoveryVersion": "v1",
  "id": "books:v1",
  "name": "books",
  "version": "v1",
- "revision": "20170313",
+ "revision": "20160226",
  "title": "Books API",
- "description": "Searches for books and manages your Google Books library.",
+ "description": "Lets you search for books and manage your Google Books library.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
@@ -1141,20 +1141,6 @@
     "body": {
      "type": "string"
     },
-    "crmExperimentIds": {
-     "type": "array",
-     "description": "The list of crm experiment ids.",
-     "items": {
-      "type": "string",
-      "format": "int64"
-     }
-    },
-    "doc_id": {
-     "type": "string"
-    },
-    "doc_type": {
-     "type": "string"
-    },
     "dont_show_notification": {
      "type": "boolean"
     },
@@ -1165,9 +1151,6 @@
      "type": "string",
      "description": "Resource type.",
      "default": "books#notification"
-    },
-    "notificationGroup": {
-     "type": "string"
     },
     "notification_type": {
      "type": "string"
@@ -1451,22 +1434,6 @@
          "type": "string"
         }
        }
-      },
-      "moreFromSeries": {
-       "type": "object",
-       "properties": {
-        "opted_state": {
-         "type": "string"
-        }
-       }
-      },
-      "rewardExpirations": {
-       "type": "object",
-       "properties": {
-        "opted_state": {
-         "type": "string"
-        }
-       }
       }
      }
     }
@@ -1654,10 +1621,6 @@
           "description": "The finsky offer type (e.g., PURCHASE=0 RENTAL=3)",
           "format": "int32"
          },
-         "giftable": {
-          "type": "boolean",
-          "description": "Indicates whether the offer is giftable."
-         },
          "listPrice": {
           "type": "object",
           "description": "Offer list (=undiscounted) price in Micros.",
@@ -1780,24 +1743,6 @@
        "description": "Whether this volume is purchased, sample, pd download etc.",
        "format": "int32"
       },
-      "familySharing": {
-       "type": "object",
-       "description": "Information on the ability to share with the family.",
-       "properties": {
-        "familyRole": {
-         "type": "string",
-         "description": "The role of the user in the family."
-        },
-        "isSharingAllowed": {
-         "type": "boolean",
-         "description": "Whether or not this volume can be shared with the family by the user. This includes sharing eligibility of both the volume and the user. If the value is true, the user can initiate a family sharing action."
-        },
-        "isSharingDisabledByFop": {
-         "type": "boolean",
-         "description": "Whether or not sharing this volume is temporarily disabled due to issues with the Family Wallet."
-        }
-       }
-      },
       "isFamilySharedFromUser": {
        "type": "boolean",
        "description": "Whether or not the user shared this volume with the family."
@@ -1808,11 +1753,7 @@
       },
       "isFamilySharingAllowed": {
        "type": "boolean",
-       "description": "Deprecated: Replaced by familySharing."
-      },
-      "isFamilySharingDisabledByFop": {
-       "type": "boolean",
-       "description": "Deprecated: Replaced by familySharing."
+       "description": "Whether or not this volume can be shared with the family by the user. This includes sharing eligibility of both the volume and the user. If the value is true, the user can initiate a family sharing action."
       },
       "isInMyBooks": {
        "type": "boolean",
@@ -1994,24 +1935,6 @@
        "type": "integer",
        "description": "Total number of pages as per publisher metadata.",
        "format": "int32"
-      },
-      "panelizationSummary": {
-       "type": "object",
-       "description": "A top-level summary of the panelization info in this volume.",
-       "properties": {
-        "containsEpubBubbles": {
-         "type": "boolean"
-        },
-        "containsImageBubbles": {
-         "type": "boolean"
-        },
-        "epubBubbleVersion": {
-         "type": "string"
-        },
-        "imageBubbleVersion": {
-         "type": "string"
-        }
-       }
       },
       "previewLink": {
        "type": "string",
@@ -3168,11 +3091,6 @@
        "httpMethod": "POST",
        "description": "Inserts a new annotation.",
        "parameters": {
-        "annotationId": {
-         "type": "string",
-         "description": "The ID for the annotation to insert.",
-         "location": "query"
-        },
         "country": {
          "type": "string",
          "description": "ISO-3166-1 code to override the IP-based location.",
@@ -4200,19 +4118,6 @@
        ],
        "location": "query"
       },
-      "maxAllowedMaturityRating": {
-       "type": "string",
-       "description": "The maximum allowed maturity rating of returned recommendations. Books with a higher maturity rating are filtered out.",
-       "enum": [
-        "mature",
-        "not-mature"
-       ],
-       "enumDescriptions": [
-        "Show books which are rated mature or lower.",
-        "Show books which are rated not mature."
-       ],
-       "location": "query"
-      },
       "maxResults": {
        "type": "integer",
        "description": "Maximum number of results to return.",
@@ -4378,9 +4283,8 @@
        "parameters": {
         "acquireMethod": {
          "type": "string",
-         "description": "How the book was acquired",
+         "description": "How the book was aquired",
          "enum": [
-          "FAMILY_SHARED",
           "PREORDERED",
           "PREVIOUSLY_RENTED",
           "PUBLIC_DOMAIN",
@@ -4390,7 +4294,6 @@
           "UPLOADED"
          ],
          "enumDescriptions": [
-          "Books acquired via Family Sharing",
           "Preordered books (not yet available)",
           "User-rented books past their expiration time",
           "Public domain books",

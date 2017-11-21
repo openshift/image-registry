@@ -6,10 +6,8 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	do "gopkg.in/godo.v2"
@@ -26,27 +24,7 @@ type service struct {
 	Output      string
 	Swagger     string
 	SubServices []service
-	Modeler     modeler
-	Extension   extension
 }
-
-type modeler string
-
-const (
-	swagger     modeler = "Swagger"
-	compSwagger modeler = "CompositeSwagger"
-)
-
-type extension string
-
-const (
-	md   extension = "md"
-	json extension = "json"
-)
-
-const (
-	testsSubDir = "tests"
-)
 
 type mapping struct {
 	Plane       string
@@ -59,7 +37,6 @@ var (
 	sdkVersion      string
 	autorestDir     string
 	swaggersDir     string
-	testGen         bool
 	deps            do.S
 	services        = []*service{}
 	servicesMapping = []mapping{
@@ -67,84 +44,50 @@ var (
 			Plane:       "arm",
 			InputPrefix: "arm-",
 			Services: []service{
-				{
-					Name:    "advisor",
-					Version: "2017-04-19",
-				},
-				{
-					Name:    "analysisservices",
-					Version: "2016-05-16",
-				},
-				{
-					Name:    "apimanagement",
-					Swagger: "compositeApiManagementClient",
-					Modeler: compSwagger,
-				},
-				{
-					Name:    "appinsights",
-					Swagger: "compositeAppInsightsManagementClient",
-					Modeler: compSwagger,
-				},
+				// {
+				//     Name: "analysisservices",
+				//     Version: "2016-05-06"
+				// },
 				{
 					Name:    "authorization",
 					Version: "2015-07-01",
 				},
 				{
-					Name:    "automation",
-					Swagger: "compositeAutomation",
-					Modeler: compSwagger,
-				},
-				{
 					Name:    "batch",
-					Version: "2017-01-01",
+					Version: "2015-12-01",
 					Swagger: "BatchManagement",
 				},
 				{
-					Name:    "billing",
-					Version: "2017-04-24-preview",
+					Name: "cdn",
+					// Currently, the generator ignores parameter location extension
+					// https://github.com/Azure/autorest/issues/1532
+					// Version: "2016-10-02",
+					Version: "2016-04-02",
 				},
 				{
-					Name:    "cdn",
-					Version: "2016-10-02",
-				},
-				{
-					// bug in AutoRest (duplicated files)
-					Name: "cognitiveservices",
-					// Version: "2017-04-18",
+					Name:    "cognitiveservices",
 					Version: "2016-02-01-preview",
 				},
-				{
-					Name:    "commerce",
-					Version: "2015-06-01-preview",
-				},
+				// {
+				// 	Name:    "commerce",
+				// 	Version: "2015-06-01-preview",
+				// },
 				{
 					Name:    "compute",
-					Version: "2016-04-30-preview",
+					Version: "2016-03-30",
 				},
 				{
 					Name:    "containerservice",
-					Version: "2017-01-31",
+					Version: "2016-03-30",
 					Swagger: "containerService",
 					Input:   "compute",
-				},
-				{
-					Name:    "consumption",
-					Version: "2017-04-24-preview",
-				},
-				{
-					Name:    "containerregistry",
-					Version: "2017-03-01",
-				},
-				{
-					Name:    "customer-insights",
-					Version: "2017-01-01",
 				},
 				{
 					Name: "datalake-analytics",
 					SubServices: []service{
 						{
 							Name:    "account",
-							Version: "2016-11-01",
+							Version: "2015-10-01-preview",
 						},
 					},
 				},
@@ -153,7 +96,7 @@ var (
 					SubServices: []service{
 						{
 							Name:    "account",
-							Version: "2016-11-01",
+							Version: "2015-10-01-preview",
 						},
 					},
 				},
@@ -163,39 +106,23 @@ var (
 					Swagger: "DTL",
 				},
 				{
-					Name:    "disk",
-					Version: "2016-04-30-preview",
-					Swagger: "disk",
-					Input:   "compute",
-				},
-				{
 					Name:    "dns",
 					Version: "2016-04-01",
-				},
-				{
-					Name:    "documentdb",
-					Version: "2015-04-08",
 				},
 				{
 					Name:    "eventhub",
 					Version: "2015-08-01",
 					Swagger: "EventHub",
 				},
-				{
-					Name:    "graphrbac",
-					Swagger: "compositeGraphRbacManagementClient",
-					Modeler: compSwagger,
-				},
-				{
-					Name:    "hdinsight",
-					Swagger: "compositeHDInsight",
-					Modeler: compSwagger,
-				},
-				{
-					Name:    "insights",
-					Swagger: "compositeInsightsManagementClient",
-					Modeler: compSwagger,
-				},
+				// {
+				// 	Name:    "graphrbac",
+				// 	Version: "1.6",
+				// 	// Composite swagger
+				// },
+				// {
+				// 	Name:    "insights",
+				// 	// Composite swagger
+				// },
 				{
 					Name:    "intune",
 					Version: "2015-01-14-preview",
@@ -211,22 +138,27 @@ var (
 				{
 					Name:    "logic",
 					Version: "2016-06-01",
+					// composite swagger
 				},
 				{
-					Name: "machinelearning",
-					SubServices: []service{
-						{
-							Name:    "commitmentplans",
-							Version: "2016-05-01-preview",
-							Swagger: "commitmentPlans",
-							Input:   "machinelearning",
-						},
-						{
-							Name:    "webservices",
-							Version: "2017-01-01",
-							Input:   "machinelearning",
-						},
-					},
+					Name:    "machinelearning",
+					Version: "2016-05-01-preview",
+					Swagger: "webservices",
+					// SubServices: []service{
+					// Currently, the generator ignores parameter location extension
+					// https://github.com/Azure/autorest/issues/1532
+					// {
+					// 	Name:    "webservices",
+					// 	Version: "2016-05-01-preview",
+					// 	Input:   "machinelearning",
+					// },
+					// {
+					// 	Name:    "commitmentplans",
+					// 	Version: "2016-05-01-preview",
+					// 	Swagger: "commitmentPlans",
+					// 	Input:   "machinelearning",
+					// },
+					// },
 				},
 				{
 					Name:    "mediaservices",
@@ -239,57 +171,29 @@ var (
 					Swagger: "mobile-engagement",
 				},
 				{
-					Name:    "monitor",
-					Swagger: "compositeMonitorManagementClient",
-					Modeler: compSwagger,
-				},
-				{
 					Name:    "network",
-					Swagger: "compositeNetworkClient",
-					Modeler: compSwagger,
+					Version: "2016-09-01",
 				},
 				{
 					Name:    "notificationhubs",
-					Version: "2017-04-01",
-				},
-				{
-					// bug in the Go generator https://github.com/Azure/autorest/issues/2219
-					Name: "operationalinsights",
-					// Swagger: "compositeOperationalInsights",
-					// Modeler: compSwagger,
-					Version: "2015-11-01-preview",
+					Version: "2016-03-01",
 				},
 				{
 					Name:    "powerbiembedded",
 					Version: "2016-01-29",
 				},
-				{
-					// bug in the go generator
-					Name: "recoveryservices",
-					// 	Swagger: "compositeRecoveryServicesClient",
-					// 	Modeler: compSwagger,
-					Version: "2016-06-01",
-					Swagger: "vaults",
-				},
-				{
-					// When using the readme.md, there is an exception in the modeler
-					Name:    "recoveryservicesbackup",
-					Version: "2016-12-01",
-					// Swagger:   "readme",
-					// Extension: md,
-					Swagger: "backupManagement",
-				},
+				// {
+				// 	Name:    "recoveryservices",
+				// 	Version: "2016-06-01",
+				// },
+				// {
+				// 	Name:    "recoveryservicesbackup",
+				// 	Version: "2016-06-01",
+				// composite swagger
+				// },
 				{
 					Name:    "redis",
 					Version: "2016-04-01",
-				},
-				{
-					Name:    "relay",
-					Version: "2016-07-01",
-				},
-				{
-					Name:    "resourcehealth",
-					Version: "2015-01-01",
 				},
 				{
 					Name: "resources",
@@ -308,16 +212,18 @@ var (
 						},
 						{
 							Name:    "policy",
-							Version: "2016-12-01",
+							Version: "2016-04-01",
 						},
 						{
 							Name:    "resources",
 							Version: "2016-09-01",
-							// Version: "2017-05-10",
 						},
 						{
-							Name:    "subscriptions",
-							Version: "2016-06-01",
+							Name: "subscriptions",
+							// AutoRest Go generator has a bug and generates an ugly SDK for subscription newest API version
+							// https://github.com/Azure/autorest/issues/1477
+							// 	Version: "2016-06-01",
+							Version: "2015-11-01",
 						},
 					},
 				},
@@ -327,103 +233,63 @@ var (
 				},
 				{
 					Name:    "search",
-					Version: "2015-08-19",
+					Version: "2015-02-28",
 				},
 				{
 					Name:    "servermanagement",
 					Version: "2016-07-01-preview",
 				},
 				{
-					Name:    "service-map",
-					Version: "2015-11-01-preview",
-					Swagger: "arm-service-map",
-				},
-				{
 					Name:    "servicebus",
 					Version: "2015-08-01",
 				},
 				{
-					Name:    "servicefabric",
-					Version: "2016-09-01",
-				},
-				{
 					Name:    "sql",
-					Swagger: "compositeSql",
-					Modeler: compSwagger,
+					Version: "2015-05-01",
 				},
 				{
 					Name:    "storage",
-					Version: "2016-12-01",
+					Version: "2016-01-01",
 				},
-				{
-					Name:    "storageimportexport",
-					Version: "2016-11-01",
-				},
-				// {
-				// Too soon to release
-				// 	Name: "storsimple8000series",
-				// 	Version: "2017-06-01".
-				// 	Swagger: "storsimple",
-				// },
-				// {
-				// error in the modeler
-				// 	Name:    "timeseriesinsights",
-				// 	Version: "2017-02-28-preview",
-				// },
 				{
 					Name:    "trafficmanager",
 					Version: "2015-11-01",
 				},
 				{
 					Name:    "web",
-					Swagger: "compositeWebAppClient",
-					Modeler: compSwagger,
+					Version: "2015-08-01",
+					Swagger: "service",
+					// enormous composite swagger
 				},
 			},
 		},
 		{
-			Plane:       "dataplane",
-			InputPrefix: "",
-			Services: []service{
-				// {
-				// 	Name:    "batch",
-				// 	Version: "2017-01-01.4.0",
-				// 	Swagger: "BatchService",
-				// },
-				// {
-				// 	Name:    "insights",
-				// 	Swagger: "compositeInsightsClient",
-				// 	Modeler: compSwagger,
-				// },
-				{
-					Name:    "keyvault",
-					Version: "2016-10-01",
-				},
-				// {
-				// 	Name:    "monitor",
-				// 	Swagger: "compositeMonitorClient",
-				// 	Modeler: compSwagger,
-				// },
-				// 	{
-				// 		Name: "search",
-				// 		SubServices: []service{
-				// 			{
-				// 				Name:    "searchindex",
-				// 				Version: "2016-09-01",
-				// 				Input:   "search",
-				// 			},
-				// 			{
-				// 				Name:    "searchservice",
-				// 				Version: "2016-09-01",
-				// 				Input:   "search",
-				// 			},
-				// 		},
-				// 	},
-				// 	{
-				// 		Name:    "servicefabric",
-				// 		Version: "2016-01-28",
-				// 	},
-			},
+		// Plane:       "dataplane",
+		// InputPrefix: "",
+		// Services: []Service{
+		// 	{
+		// 		Name:    "batch",
+		// 		Version: "2016-07-01.3.1",
+		// 		Swagger: "BatchService",
+		// 	},
+		//     {
+		//         Name: "insights",
+		//         // composite swagger
+		//     },
+		//     {
+		//         Name: "keyvault",
+		//         Version: "2015-06-01",
+		//     },
+		//     {
+		//         Name: "search",'
+		//         Version: "2015-02-28"
+		//         // There are 2 files, but no composite swagger...
+		//     },
+		//     {
+		//         Name: "servicefabric",
+		//         Version: "2016-01-28",
+		//     },
+		// },
 		},
 		{
 			Plane:       "",
@@ -434,20 +300,20 @@ var (
 					SubServices: []service{
 						{
 							Name:    "filesystem",
-							Version: "2016-11-01",
+							Version: "2015-10-01-preview",
 						},
 					},
 				},
 				// {
 				// 	Name: "datalake-analytics",
-				// 	SubServices: []service{
+				// 	SubServices: []Service{
 				// 		{
 				// 			Name:    "catalog",
-				// 			Version: "2016-11-01",
+				// 			Version: "2016-06-01-preview",
 				// 		},
 				// 		{
 				// 			Name:    "job",
-				// 			Version: "2016-11-01",
+				// 			Version: "2016-03-20-preview",
 				// 		},
 				// 	},
 				// },
@@ -471,31 +337,16 @@ func initAndAddService(service *service, inputPrefix, plane string) {
 	if service.Swagger == "" {
 		service.Swagger = service.Name
 	}
-	if service.Extension == "" {
-		service.Extension = json
-	}
 	packages := append(service.Packages, service.Name)
 	service.TaskName = fmt.Sprintf("%s>%s", plane, strings.Join(packages, ">"))
-	service.Fullname = filepath.Join(plane, strings.Join(packages, string(os.PathSeparator)))
-	if service.Modeler == compSwagger {
-		service.Input = filepath.Join(inputPrefix+strings.Join(packages, string(os.PathSeparator)), service.Swagger)
+	service.Fullname = fmt.Sprintf("%s/%s", plane, strings.Join(packages, "/"))
+	if service.Input == "" {
+		service.Input = fmt.Sprintf("%s%s/%s/swagger/%s", inputPrefix, strings.Join(packages, "/"), service.Version, service.Swagger)
 	} else {
-		input := []string{}
-		if service.Input == "" {
-			input = append(input, inputPrefix+strings.Join(packages, string(os.PathSeparator)))
-		} else {
-			input = append(input, inputPrefix+service.Input)
-		}
-		input = append(input, service.Version)
-		if service.Extension == json {
-			input = append(input, "swagger")
-		}
-		input = append(input, service.Swagger)
-		service.Input = filepath.Join(input...)
-		service.Modeler = swagger
+		service.Input = fmt.Sprintf("%s%s/%s/swagger/%s", inputPrefix, service.Input, service.Version, service.Swagger)
 	}
-	service.Namespace = filepath.Join("github.com", "Azure", "azure-sdk-for-go", service.Fullname)
-	service.Output = filepath.Join(gopath, "src", service.Namespace)
+	service.Namespace = fmt.Sprintf("github.com/Azure/azure-sdk-for-go/%s", service.Fullname)
+	service.Output = fmt.Sprintf("%s/src/%s", gopath, service.Namespace)
 
 	if service.SubServices != nil {
 		for _, subs := range service.SubServices {
@@ -510,7 +361,7 @@ func initAndAddService(service *service, inputPrefix, plane string) {
 }
 
 func tasks(p *do.Project) {
-	p.Task("default", do.S{"setvars", "generate:all", "management"}, nil)
+	p.Task("default", do.S{"setvars", "generate:all"}, nil)
 	p.Task("setvars", nil, setVars)
 	p.Use("generate", generateTasks)
 	p.Use("gofmt", formatTasks)
@@ -518,7 +369,6 @@ func tasks(p *do.Project) {
 	p.Use("golint", lintTasks)
 	p.Use("govet", vetTasks)
 	p.Use("delete", deleteTasks)
-	p.Task("management", do.S{"setvars"}, managementVersion)
 }
 
 func setVars(c *do.Context) {
@@ -527,9 +377,8 @@ func setVars(c *do.Context) {
 	}
 
 	sdkVersion = c.Args.MustString("s", "sdk", "version")
-	autorestDir = c.Args.MayString("", "a", "ar", "autorest")
-	swaggersDir = c.Args.MayString("C:/", "w", "sw", "swagger")
-	testGen = c.Args.MayBool(false, "t", "testgen")
+	autorestDir = c.Args.MayString("C:", "a", "ar", "autorest")
+	swaggersDir = c.Args.MayString("C:", "w", "sw", "swagger")
 }
 
 func generateTasks(p *do.Project) {
@@ -537,44 +386,20 @@ func generateTasks(p *do.Project) {
 }
 
 func generate(service *service) {
-	codegen := "Go"
-	if testGen {
-		codegen = "Go.TestGen"
-		service.Fullname = strings.Join([]string{service.Fullname, testsSubDir}, string(os.PathSeparator))
-		service.Output = filepath.Join(service.Output, testsSubDir)
-	}
-
 	fmt.Printf("Generating %s...\n\n", service.Fullname)
-
 	delete(service)
 
-	execCommand := "autorest"
-	commandArgs := []string{
-		"-Input", filepath.Join(swaggersDir, "azure-rest-api-specs", service.Input+"."+string(service.Extension)),
-		"-CodeGenerator", codegen,
+	autorest := exec.Command(fmt.Sprintf("%s/autorest/src/core/AutoRest/bin/Debug/net451/win7-x64/autorest", autorestDir),
+		"-Input", fmt.Sprintf("%s/azure-rest-api-specs/%s.json", swaggersDir, service.Input),
+		"-CodeGenerator", "Go",
 		"-Header", "MICROSOFT_APACHE",
-		"-Namespace", service.Name,
+		"-Namespace", service.Namespace,
 		"-OutputDirectory", service.Output,
-		"-Modeler", string(service.Modeler),
-		"-pv", sdkVersion,
-	}
-
-	// default to the current directory
-	workingDir := ""
-
-	if autorestDir != "" {
-		// if an AutoRest directory was specified then assume
-		// the caller wants to use a locally-built version.
-		execCommand = "gulp"
-		commandArgs = append([]string{"autorest"}, commandArgs...)
-		workingDir = filepath.Join(autorestDir, "autorest")
-	}
-
-	autorest := exec.Command(execCommand, commandArgs...)
-	autorest.Dir = workingDir
-
-	if err := runner(autorest); err != nil {
-		panic(fmt.Errorf("Autorest error: %s", err))
+		"-Modeler", "Swagger",
+		"-pv", sdkVersion)
+	err := runner(autorest)
+	if err != nil {
+		panic(fmt.Errorf("Autorest error: %s\n", err))
 	}
 
 	format(service)
@@ -604,7 +429,7 @@ func format(service *service) {
 	gofmt := exec.Command("gofmt", "-w", service.Output)
 	err := runner(gofmt)
 	if err != nil {
-		panic(fmt.Errorf("gofmt error: %s", err))
+		panic(fmt.Errorf("gofmt error: %s\n", err))
 	}
 }
 
@@ -617,7 +442,7 @@ func build(service *service) {
 	gobuild := exec.Command("go", "build", service.Namespace)
 	err := runner(gobuild)
 	if err != nil {
-		panic(fmt.Errorf("go build error: %s", err))
+		panic(fmt.Errorf("go build error: %s\n", err))
 	}
 }
 
@@ -627,10 +452,10 @@ func lintTasks(p *do.Project) {
 
 func lint(service *service) {
 	fmt.Printf("Linting %s...\n\n", service.Fullname)
-	golint := exec.Command(filepath.Join(gopath, "bin", "golint"), service.Namespace)
+	golint := exec.Command(fmt.Sprintf("%s/bin/golint", gopath), service.Namespace)
 	err := runner(golint)
 	if err != nil {
-		panic(fmt.Errorf("golint error: %s", err))
+		panic(fmt.Errorf("golint error: %s\n", err))
 	}
 }
 
@@ -643,25 +468,8 @@ func vet(service *service) {
 	govet := exec.Command("go", "vet", service.Namespace)
 	err := runner(govet)
 	if err != nil {
-		panic(fmt.Errorf("go vet error: %s", err))
+		panic(fmt.Errorf("go vet error: %s\n", err))
 	}
-}
-
-func managementVersion(c *do.Context) {
-	version("management")
-}
-
-func version(packageName string) {
-	versionFile := filepath.Join(packageName, "version.go")
-	os.Remove(versionFile)
-	template := `package %s
-
-var (
-	sdkVersion = "%s"
-)
-`
-	data := []byte(fmt.Sprintf(template, packageName, sdkVersion))
-	ioutil.WriteFile(versionFile, data, 0644)
 }
 
 func addTasks(fn func(*service), p *do.Project) {

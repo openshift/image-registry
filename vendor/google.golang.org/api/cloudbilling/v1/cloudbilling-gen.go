@@ -108,32 +108,25 @@ type ProjectsService struct {
 	s *Service
 }
 
-// BillingAccount: A billing account in [Google
-// Cloud
-// Console](https://console.cloud.google.com/). You can assign a billing
-// account
-// to one or more projects.
+// BillingAccount: A billing account in [Google Developers
+// Console](https://console.developers.google.com/). You can assign a
+// billing account to one or more projects.
 type BillingAccount struct {
 	// DisplayName: The display name given to the billing account, such as
-	// `My Billing
-	// Account`. This name is displayed in the Google Cloud Console.
+	// `My Billing Account`. This name is displayed in the Google Developers
+	// Console.
 	DisplayName string `json:"displayName,omitempty"`
 
 	// Name: The resource name of the billing account. The resource name has
-	// the form
-	// `billingAccounts/{billing_account_id}`. For
-	// example,
-	// `billingAccounts/012345-567890-ABCDEF` would be the resource name
-	// for
+	// the form `billingAccounts/{billing_account_id}`. For example,
+	// `billingAccounts/012345-567890-ABCDEF` would be the resource name for
 	// billing account `012345-567890-ABCDEF`.
 	Name string `json:"name,omitempty"`
 
 	// Open: True if the billing account is open, and will therefore be
-	// charged for any
-	// usage on associated projects. False if the billing account is closed,
-	// and
-	// therefore projects associated with it will be unable to use paid
-	// services.
+	// charged for any usage on associated projects. False if the billing
+	// account is closed, and therefore projects associated with it will be
+	// unable to use paid services.
 	Open bool `json:"open,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -147,20 +140,12 @@ type BillingAccount struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DisplayName") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *BillingAccount) MarshalJSON() ([]byte, error) {
 	type noMethod BillingAccount
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ListBillingAccountsResponse: Response message for
@@ -170,10 +155,9 @@ type ListBillingAccountsResponse struct {
 	BillingAccounts []*BillingAccount `json:"billingAccounts,omitempty"`
 
 	// NextPageToken: A token to retrieve the next page of results. To
-	// retrieve the next page,
-	// call `ListBillingAccounts` again with the `page_token` field set to
-	// this
-	// value. This field is empty if there are no more results to retrieve.
+	// retrieve the next page, call `ListBillingAccounts` again with the
+	// `page_token` field set to this value. This field is empty if there
+	// are no more results to retrieve.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -187,36 +171,25 @@ type ListBillingAccountsResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BillingAccounts") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ListBillingAccountsResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListBillingAccountsResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ListProjectBillingInfoResponse: Request message for
 // `ListProjectBillingInfoResponse`.
 type ListProjectBillingInfoResponse struct {
 	// NextPageToken: A token to retrieve the next page of results. To
-	// retrieve the next page,
-	// call `ListProjectBillingInfo` again with the `page_token` field set
-	// to this
-	// value. This field is empty if there are no more results to retrieve.
+	// retrieve the next page, call `ListProjectBillingInfo` again with the
+	// `page_token` field set to this value. This field is empty if there
+	// are no more results to retrieve.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
 	// ProjectBillingInfo: A list of `ProjectBillingInfo` resources
-	// representing the projects
-	// associated with the billing account.
+	// representing the projects associated with the billing account.
 	ProjectBillingInfo []*ProjectBillingInfo `json:"projectBillingInfo,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -230,57 +203,41 @@ type ListProjectBillingInfoResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ListProjectBillingInfoResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ListProjectBillingInfoResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
-// ProjectBillingInfo: Encapsulation of billing information for a Cloud
-// Console project. A project
-// has at most one associated billing account at a time (but a billing
-// account
-// can be assigned to multiple projects).
+// ProjectBillingInfo: Encapsulation of billing information for a
+// Developers Console project. A project has at most one associated
+// billing account at a time (but a billing account can be assigned to
+// multiple projects).
 type ProjectBillingInfo struct {
 	// BillingAccountName: The resource name of the billing account
-	// associated with the project, if
-	// any. For example, `billingAccounts/012345-567890-ABCDEF`.
+	// associated with the project, if any. For example,
+	// `billingAccounts/012345-567890-ABCDEF`.
 	BillingAccountName string `json:"billingAccountName,omitempty"`
 
 	// BillingEnabled: True if the project is associated with an open
-	// billing account, to which
-	// usage on the project is charged. False if the project is associated
-	// with a
-	// closed billing account, or no billing account at all, and therefore
-	// cannot
-	// use paid services. This field is read-only.
+	// billing account, to which usage on the project is charged. False if
+	// the project is associated with a closed billing account, or no
+	// billing account at all, and therefore cannot use paid services. This
+	// field is read-only.
 	BillingEnabled bool `json:"billingEnabled,omitempty"`
 
-	// Name: The resource name for the `ProjectBillingInfo`; has the
-	// form
+	// Name: The resource name for the `ProjectBillingInfo`; has the form
 	// `projects/{project_id}/billingInfo`. For example, the resource name
-	// for the
-	// billing information for project `tokyo-rain-123` would
-	// be
+	// for the billing information for project `tokyo-rain-123` would be
 	// `projects/tokyo-rain-123/billingInfo`. This field is read-only.
 	Name string `json:"name,omitempty"`
 
 	// ProjectId: The ID of the project that this `ProjectBillingInfo`
-	// represents, such as
-	// `tokyo-rain-123`. This is a convenience field so that you don't need
-	// to
-	// parse the `name` field to obtain a project ID. This field is
-	// read-only.
+	// represents, such as `tokyo-rain-123`. This is a convenience field so
+	// that you don't need to parse the `name` field to obtain a project ID.
+	// This field is read-only.
 	ProjectId string `json:"projectId,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -294,21 +251,12 @@ type ProjectBillingInfo struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BillingAccountName") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ProjectBillingInfo) MarshalJSON() ([]byte, error) {
 	type noMethod ProjectBillingInfo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "cloudbilling.billingAccounts.get":
@@ -319,13 +267,10 @@ type BillingAccountsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets information about a billing account. The current
-// authenticated user
-// must be an [owner of the
-// billing
+// authenticated user must be an [owner of the billing
 // account](https://support.google.com/cloud/answer/4430947).
 func (r *BillingAccountsService) Get(name string) *BillingAccountsGetCall {
 	c := &BillingAccountsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
@@ -359,34 +304,23 @@ func (c *BillingAccountsGetCall) Context(ctx context.Context) *BillingAccountsGe
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *BillingAccountsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *BillingAccountsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudbilling.billingAccounts.get" call.
@@ -421,14 +355,12 @@ func (c *BillingAccountsGetCall) Do(opts ...googleapi.CallOption) (*BillingAccou
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Gets information about a billing account. The current authenticated user\nmust be an [owner of the billing\naccount](https://support.google.com/cloud/answer/4430947).",
-	//   "flatPath": "v1/billingAccounts/{billingAccountsId}",
+	//   "description": "Gets information about a billing account. The current authenticated user must be an [owner of the billing account](https://support.google.com/cloud/answer/4430947).",
 	//   "httpMethod": "GET",
 	//   "id": "cloudbilling.billingAccounts.get",
 	//   "parameterOrder": [
@@ -436,9 +368,9 @@ func (c *BillingAccountsGetCall) Do(opts ...googleapi.CallOption) (*BillingAccou
 	//   ],
 	//   "parameters": {
 	//     "name": {
-	//       "description": "The resource name of the billing account to retrieve. For example,\n`billingAccounts/012345-567890-ABCDEF`.",
+	//       "description": "The resource name of the billing account to retrieve. For example, `billingAccounts/012345-567890-ABCDEF`.",
 	//       "location": "path",
-	//       "pattern": "^billingAccounts/[^/]+$",
+	//       "pattern": "^billingAccounts/[^/]*$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -461,11 +393,9 @@ type BillingAccountsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
-// List: Lists the billing accounts that the current authenticated
-// user
+// List: Lists the billing accounts that the current authenticated user
 // [owns](https://support.google.com/cloud/answer/4430947).
 func (r *BillingAccountsService) List() *BillingAccountsListCall {
 	c := &BillingAccountsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
@@ -473,19 +403,17 @@ func (r *BillingAccountsService) List() *BillingAccountsListCall {
 }
 
 // PageSize sets the optional parameter "pageSize": Requested page size.
-// The maximum page size is 100; this is also the
-// default.
+// The maximum page size is 100; this is also the default.
 func (c *BillingAccountsListCall) PageSize(pageSize int64) *BillingAccountsListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
 }
 
 // PageToken sets the optional parameter "pageToken": A token
-// identifying a page of results to return. This should be
-// a
+// identifying a page of results to return. This should be a
 // `next_page_token` value returned from a previous
-// `ListBillingAccounts`
-// call. If unspecified, the first page of results is returned.
+// `ListBillingAccounts` call. If unspecified, the first page of results
+// is returned.
 func (c *BillingAccountsListCall) PageToken(pageToken string) *BillingAccountsListCall {
 	c.urlParams_.Set("pageToken", pageToken)
 	return c
@@ -517,31 +445,21 @@ func (c *BillingAccountsListCall) Context(ctx context.Context) *BillingAccountsL
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *BillingAccountsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *BillingAccountsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/billingAccounts")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudbilling.billingAccounts.list" call.
@@ -576,26 +494,23 @@ func (c *BillingAccountsListCall) Do(opts ...googleapi.CallOption) (*ListBilling
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists the billing accounts that the current authenticated user\n[owns](https://support.google.com/cloud/answer/4430947).",
-	//   "flatPath": "v1/billingAccounts",
+	//   "description": "Lists the billing accounts that the current authenticated user [owns](https://support.google.com/cloud/answer/4430947).",
 	//   "httpMethod": "GET",
 	//   "id": "cloudbilling.billingAccounts.list",
-	//   "parameterOrder": [],
 	//   "parameters": {
 	//     "pageSize": {
-	//       "description": "Requested page size. The maximum page size is 100; this is also the\ndefault.",
+	//       "description": "Requested page size. The maximum page size is 100; this is also the default.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
 	//     },
 	//     "pageToken": {
-	//       "description": "A token identifying a page of results to return. This should be a\n`next_page_token` value returned from a previous `ListBillingAccounts`\ncall. If unspecified, the first page of results is returned.",
+	//       "description": "A token identifying a page of results to return. This should be a `next_page_token` value returned from a previous `ListBillingAccounts` call. If unspecified, the first page of results is returned.",
 	//       "location": "query",
 	//       "type": "string"
 	//     }
@@ -640,13 +555,10 @@ type BillingAccountsProjectsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists the projects associated with a billing account. The
-// current
-// authenticated user must be an [owner of the
-// billing
+// current authenticated user must be an [owner of the billing
 // account](https://support.google.com/cloud/answer/4430947).
 func (r *BillingAccountsProjectsService) List(name string) *BillingAccountsProjectsListCall {
 	c := &BillingAccountsProjectsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
@@ -655,19 +567,17 @@ func (r *BillingAccountsProjectsService) List(name string) *BillingAccountsProje
 }
 
 // PageSize sets the optional parameter "pageSize": Requested page size.
-// The maximum page size is 100; this is also the
-// default.
+// The maximum page size is 100; this is also the default.
 func (c *BillingAccountsProjectsListCall) PageSize(pageSize int64) *BillingAccountsProjectsListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
 }
 
 // PageToken sets the optional parameter "pageToken": A token
-// identifying a page of results to be returned. This should be
-// a
+// identifying a page of results to be returned. This should be a
 // `next_page_token` value returned from a previous
-// `ListProjectBillingInfo`
-// call. If unspecified, the first page of results is returned.
+// `ListProjectBillingInfo` call. If unspecified, the first page of
+// results is returned.
 func (c *BillingAccountsProjectsListCall) PageToken(pageToken string) *BillingAccountsProjectsListCall {
 	c.urlParams_.Set("pageToken", pageToken)
 	return c
@@ -699,34 +609,23 @@ func (c *BillingAccountsProjectsListCall) Context(ctx context.Context) *BillingA
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *BillingAccountsProjectsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *BillingAccountsProjectsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/{+name}/projects")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudbilling.billingAccounts.projects.list" call.
@@ -761,14 +660,12 @@ func (c *BillingAccountsProjectsListCall) Do(opts ...googleapi.CallOption) (*Lis
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists the projects associated with a billing account. The current\nauthenticated user must be an [owner of the billing\naccount](https://support.google.com/cloud/answer/4430947).",
-	//   "flatPath": "v1/billingAccounts/{billingAccountsId}/projects",
+	//   "description": "Lists the projects associated with a billing account. The current authenticated user must be an [owner of the billing account](https://support.google.com/cloud/answer/4430947).",
 	//   "httpMethod": "GET",
 	//   "id": "cloudbilling.billingAccounts.projects.list",
 	//   "parameterOrder": [
@@ -776,20 +673,20 @@ func (c *BillingAccountsProjectsListCall) Do(opts ...googleapi.CallOption) (*Lis
 	//   ],
 	//   "parameters": {
 	//     "name": {
-	//       "description": "The resource name of the billing account associated with the projects that\nyou want to list. For example, `billingAccounts/012345-567890-ABCDEF`.",
+	//       "description": "The resource name of the billing account associated with the projects that you want to list. For example, `billingAccounts/012345-567890-ABCDEF`.",
 	//       "location": "path",
-	//       "pattern": "^billingAccounts/[^/]+$",
+	//       "pattern": "^billingAccounts/[^/]*$",
 	//       "required": true,
 	//       "type": "string"
 	//     },
 	//     "pageSize": {
-	//       "description": "Requested page size. The maximum page size is 100; this is also the\ndefault.",
+	//       "description": "Requested page size. The maximum page size is 100; this is also the default.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "type": "integer"
 	//     },
 	//     "pageToken": {
-	//       "description": "A token identifying a page of results to be returned. This should be a\n`next_page_token` value returned from a previous `ListProjectBillingInfo`\ncall. If unspecified, the first page of results is returned.",
+	//       "description": "A token identifying a page of results to be returned. This should be a `next_page_token` value returned from a previous `ListProjectBillingInfo` call. If unspecified, the first page of results is returned.",
 	//       "location": "query",
 	//       "type": "string"
 	//     }
@@ -834,16 +731,12 @@ type ProjectsGetBillingInfoCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // GetBillingInfo: Gets the billing information for a project. The
-// current authenticated user
-// must have [permission to view
-// the
-// project](https://cloud.google.com/docs/permissions-overview#h.bgs0
-// oxofvnoo
-// ).
+// current authenticated user must have [permission to view the
+// project](https://cloud.google.com/docs/permissions-overview#h.bgs0oxof
+// vnoo ).
 func (r *ProjectsService) GetBillingInfo(name string) *ProjectsGetBillingInfoCall {
 	c := &ProjectsGetBillingInfoCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -876,34 +769,23 @@ func (c *ProjectsGetBillingInfoCall) Context(ctx context.Context) *ProjectsGetBi
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsGetBillingInfoCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsGetBillingInfoCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/{+name}/billingInfo")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudbilling.projects.getBillingInfo" call.
@@ -938,14 +820,12 @@ func (c *ProjectsGetBillingInfoCall) Do(opts ...googleapi.CallOption) (*ProjectB
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Gets the billing information for a project. The current authenticated user\nmust have [permission to view the\nproject](https://cloud.google.com/docs/permissions-overview#h.bgs0oxofvnoo\n).",
-	//   "flatPath": "v1/projects/{projectsId}/billingInfo",
+	//   "description": "Gets the billing information for a project. The current authenticated user must have [permission to view the project](https://cloud.google.com/docs/permissions-overview#h.bgs0oxofvnoo ).",
 	//   "httpMethod": "GET",
 	//   "id": "cloudbilling.projects.getBillingInfo",
 	//   "parameterOrder": [
@@ -953,9 +833,9 @@ func (c *ProjectsGetBillingInfoCall) Do(opts ...googleapi.CallOption) (*ProjectB
 	//   ],
 	//   "parameters": {
 	//     "name": {
-	//       "description": "The resource name of the project for which billing information is\nretrieved. For example, `projects/tokyo-rain-123`.",
+	//       "description": "The resource name of the project for which billing information is retrieved. For example, `projects/tokyo-rain-123`.",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]+$",
+	//       "pattern": "^projects/[^/]*$",
 	//       "required": true,
 	//       "type": "string"
 	//     }
@@ -979,65 +859,36 @@ type ProjectsUpdateBillingInfoCall struct {
 	projectbillinginfo *ProjectBillingInfo
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
-	header_            http.Header
 }
 
 // UpdateBillingInfo: Sets or updates the billing account associated
-// with a project. You specify
-// the new billing account by setting the `billing_account_name` in
+// with a project. You specify the new billing account by setting the
+// `billing_account_name` in the `ProjectBillingInfo` resource to the
+// resource name of a billing account. Associating a project with an
+// open billing account enables billing on the project and allows
+// charges for resource usage. If the project already had a billing
+// account, this method changes the billing account used for resource
+// usage charges. *Note:* Incurred charges that have not yet been
+// reported in the transaction history of the Google Developers Console
+// may be billed to the new billing account, even if the charge occurred
+// before the new billing account was assigned to the project. The
+// current authenticated user must have ownership privileges for both
 // the
-// `ProjectBillingInfo` resource to the resource name of a billing
-// account.
-// Associating a project with an open billing account enables billing on
-// the
-// project and allows charges for resource usage. If the project already
-// had a
-// billing account, this method changes the billing account used for
-// resource
-// usage charges.
-//
-// *Note:* Incurred charges that have not yet been reported in the
-// transaction
-// history of the Google Cloud Console may be billed to the new
-// billing
-// account, even if the charge occurred before the new billing account
-// was
-// assigned to the project.
-//
-// The current authenticated user must have ownership privileges for
-// both
-// the
-// [project](https://cloud.google.com/docs/permissions-overview#h.bgs
-// 0oxofvnoo
-// ) and the
-// [billing
-// account](https://support.google.com/cloud/answer/4430947).
-//
-// Y
-// ou can disable billing on the project by setting
-// the
-// `billing_account_name` field to empty. This action disassociates
-// the
-// current billing account from the project. Any billable activity of
-// your
-// in-use services will stop, and your application could stop
-// functioning as
-// expected. Any unbilled charges to date will be billed to the
-// previously
-// associated account. The current authenticated user must be either an
-// owner
-// of the project or an owner of the billing account for the
-// project.
-//
-// Note that associating a project with a *closed* billing account will
-// have
-// much the same effect as disabling billing on the project: any
-// paid
+// [project](https://cloud.google.com/docs/permissions-overview#h.bgs0oxo
+// fvnoo ) and the [billing
+// account](https://support.google.com/cloud/answer/4430947). You can
+// disable billing on the project by setting the `billing_account_name`
+// field to empty. This action disassociates the current billing account
+// from the project. Any billable activity of your in-use services will
+// stop, and your application could stop functioning as expected. Any
+// unbilled charges to date will be billed to the previously associated
+// account. The current authenticated user must be either an owner of
+// the project or an owner of the billing account for the project. Note
+// that associating a project with a *closed* billing account will have
+// much the same effect as disabling billing on the project: any paid
 // resources used by the project will be shut down. Thus, unless you
-// wish to
-// disable billing, you should always call this method with the name of
-// an
-// *open* billing account.
+// wish to disable billing, you should always call this method with the
+// name of an *open* billing account.
 func (r *ProjectsService) UpdateBillingInfo(name string, projectbillinginfo *ProjectBillingInfo) *ProjectsUpdateBillingInfoCall {
 	c := &ProjectsUpdateBillingInfoCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -1061,36 +912,26 @@ func (c *ProjectsUpdateBillingInfoCall) Context(ctx context.Context) *ProjectsUp
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ProjectsUpdateBillingInfoCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ProjectsUpdateBillingInfoCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.projectbillinginfo)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/{+name}/billingInfo")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"name": c.name,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "cloudbilling.projects.updateBillingInfo" call.
@@ -1125,14 +966,12 @@ func (c *ProjectsUpdateBillingInfoCall) Do(opts ...googleapi.CallOption) (*Proje
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Sets or updates the billing account associated with a project. You specify\nthe new billing account by setting the `billing_account_name` in the\n`ProjectBillingInfo` resource to the resource name of a billing account.\nAssociating a project with an open billing account enables billing on the\nproject and allows charges for resource usage. If the project already had a\nbilling account, this method changes the billing account used for resource\nusage charges.\n\n*Note:* Incurred charges that have not yet been reported in the transaction\nhistory of the Google Cloud Console may be billed to the new billing\naccount, even if the charge occurred before the new billing account was\nassigned to the project.\n\nThe current authenticated user must have ownership privileges for both the\n[project](https://cloud.google.com/docs/permissions-overview#h.bgs0oxofvnoo\n) and the [billing\naccount](https://support.google.com/cloud/answer/4430947).\n\nYou can disable billing on the project by setting the\n`billing_account_name` field to empty. This action disassociates the\ncurrent billing account from the project. Any billable activity of your\nin-use services will stop, and your application could stop functioning as\nexpected. Any unbilled charges to date will be billed to the previously\nassociated account. The current authenticated user must be either an owner\nof the project or an owner of the billing account for the project.\n\nNote that associating a project with a *closed* billing account will have\nmuch the same effect as disabling billing on the project: any paid\nresources used by the project will be shut down. Thus, unless you wish to\ndisable billing, you should always call this method with the name of an\n*open* billing account.",
-	//   "flatPath": "v1/projects/{projectsId}/billingInfo",
+	//   "description": "Sets or updates the billing account associated with a project. You specify the new billing account by setting the `billing_account_name` in the `ProjectBillingInfo` resource to the resource name of a billing account. Associating a project with an open billing account enables billing on the project and allows charges for resource usage. If the project already had a billing account, this method changes the billing account used for resource usage charges. *Note:* Incurred charges that have not yet been reported in the transaction history of the Google Developers Console may be billed to the new billing account, even if the charge occurred before the new billing account was assigned to the project. The current authenticated user must have ownership privileges for both the [project](https://cloud.google.com/docs/permissions-overview#h.bgs0oxofvnoo ) and the [billing account](https://support.google.com/cloud/answer/4430947). You can disable billing on the project by setting the `billing_account_name` field to empty. This action disassociates the current billing account from the project. Any billable activity of your in-use services will stop, and your application could stop functioning as expected. Any unbilled charges to date will be billed to the previously associated account. The current authenticated user must be either an owner of the project or an owner of the billing account for the project. Note that associating a project with a *closed* billing account will have much the same effect as disabling billing on the project: any paid resources used by the project will be shut down. Thus, unless you wish to disable billing, you should always call this method with the name of an *open* billing account.",
 	//   "httpMethod": "PUT",
 	//   "id": "cloudbilling.projects.updateBillingInfo",
 	//   "parameterOrder": [
@@ -1140,9 +979,9 @@ func (c *ProjectsUpdateBillingInfoCall) Do(opts ...googleapi.CallOption) (*Proje
 	//   ],
 	//   "parameters": {
 	//     "name": {
-	//       "description": "The resource name of the project associated with the billing information\nthat you want to update. For example, `projects/tokyo-rain-123`.",
+	//       "description": "The resource name of the project associated with the billing information that you want to update. For example, `projects/tokyo-rain-123`.",
 	//       "location": "path",
-	//       "pattern": "^projects/[^/]+$",
+	//       "pattern": "^projects/[^/]*$",
 	//       "required": true,
 	//       "type": "string"
 	//     }

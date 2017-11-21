@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build integration
+
 package datastore
 
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"reflect"
 	"sort"
@@ -32,35 +35,23 @@ import (
 // TODO(djd): Make test entity clean up more robust: some test entities may
 // be left behind if tests are aborted, the transport fails, etc.
 
-// suffix is a timestamp-based suffix which is appended to key names,
-// particularly for the root keys of entity groups. This reduces flakiness
-// when the tests are run in parallel.
-var suffix = fmt.Sprintf("-t%d", time.Now().UnixNano())
-
-func newClient(ctx context.Context, t *testing.T) *Client {
+func newClient(ctx context.Context) *Client {
 	ts := testutil.TokenSource(ctx, ScopeDatastore, ScopeUserEmail)
-	if ts == nil {
-		t.Skip("Integration tests skipped. See CONTRIBUTING.md for details")
-	}
 	client, err := NewClient(ctx, testutil.ProjID(), cloud.WithTokenSource(ts))
 	if err != nil {
-		t.Fatalf("NewClient: %v", err)
+		log.Fatal(err)
 	}
 	return client
 }
 
 func TestBasics(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
-	ctx := context.Background()
-	client := newClient(ctx, t)
-
 	type X struct {
 		I int
 		S string
 		T time.Time
 	}
+	ctx := context.Background()
+	client := newClient(ctx)
 	x0 := X{66, "99", time.Now().Truncate(time.Millisecond)}
 	k, err := client.Put(ctx, NewIncompleteKey(ctx, "BasicsX", nil), &x0)
 	if err != nil {
@@ -81,17 +72,13 @@ func TestBasics(t *testing.T) {
 }
 
 func TestListValues(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
-	ctx := context.Background()
-	client := newClient(ctx, t)
-
 	p0 := PropertyList{
 		{Name: "L", Value: int64(12), Multiple: true},
 		{Name: "L", Value: "string", Multiple: true},
 		{Name: "L", Value: true, Multiple: true},
 	}
+	ctx := context.Background()
+	client := newClient(ctx)
 	k, err := client.Put(ctx, NewIncompleteKey(ctx, "ListValue", nil), &p0)
 	if err != nil {
 		t.Fatalf("client.Put: %v", err)
@@ -109,16 +96,12 @@ func TestListValues(t *testing.T) {
 }
 
 func TestGetMulti(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
-	ctx := context.Background()
-	client := newClient(ctx, t)
-
 	type X struct {
 		I int
 	}
-	p := NewKey(ctx, "X", "x"+suffix, 0, nil)
+	ctx := context.Background()
+	client := newClient(ctx)
+	p := NewKey(ctx, "X", "", time.Now().Unix(), nil)
 
 	cases := []struct {
 		key *Key
@@ -149,7 +132,7 @@ func TestGetMulti(t *testing.T) {
 	}
 	e, ok := err.(MultiError)
 	if !ok {
-		t.Errorf("client.GetMulti got %T, expected MultiError", err)
+		t.Errorf("client.GetMulti got %t, expected MultiError", err)
 	}
 	for i, err := range e {
 		got, want := err, (error)(nil)
@@ -181,12 +164,6 @@ func (z Z) String() string {
 }
 
 func TestUnindexableValues(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
-	ctx := context.Background()
-	client := newClient(ctx, t)
-
 	x1500 := strings.Repeat("x", 1500)
 	x1501 := strings.Repeat("x", 1501)
 	testCases := []struct {
@@ -202,6 +179,8 @@ func TestUnindexableValues(t *testing.T) {
 		{in: Z{K: []byte(x1500)}, wantErr: false},
 		{in: Z{K: []byte(x1501)}, wantErr: false},
 	}
+	ctx := context.Background()
+	client := newClient(ctx)
 	for _, tt := range testCases {
 		_, err := client.Put(ctx, NewIncompleteKey(ctx, "BasicsZ", nil), &tt.in)
 		if (err != nil) != tt.wantErr {
@@ -273,13 +252,9 @@ func testSmallQueries(t *testing.T, ctx context.Context, client *Client, parent 
 }
 
 func TestFilters(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
 	ctx := context.Background()
-	client := newClient(ctx, t)
-
-	parent := NewKey(ctx, "SQParent", "TestFilters"+suffix, 0, nil)
+	client := newClient(ctx)
+	parent := NewKey(ctx, "SQParent", "TestFilters", 0, nil)
 	now := time.Now().Truncate(time.Millisecond).Unix()
 	children := []*SQChild{
 		{I: 0, T: now, U: now},
@@ -359,13 +334,9 @@ func TestFilters(t *testing.T) {
 }
 
 func TestEventualConsistency(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
 	ctx := context.Background()
-	client := newClient(ctx, t)
-
-	parent := NewKey(ctx, "SQParent", "TestEventualConsistency"+suffix, 0, nil)
+	client := newClient(ctx)
+	parent := NewKey(ctx, "SQParent", "TestEventualConsistency", 0, nil)
 	now := time.Now().Truncate(time.Millisecond).Unix()
 	children := []*SQChild{
 		{I: 0, T: now, U: now},
@@ -385,13 +356,9 @@ func TestEventualConsistency(t *testing.T) {
 }
 
 func TestProjection(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
 	ctx := context.Background()
-	client := newClient(ctx, t)
-
-	parent := NewKey(ctx, "SQParent", "TestProjection"+suffix, 0, nil)
+	client := newClient(ctx)
+	parent := NewKey(ctx, "SQParent", "TestProjection", 0, nil)
 	now := time.Now().Truncate(time.Millisecond).Unix()
 	children := []*SQChild{
 		{I: 1 << 0, J: 100, T: now, U: now},
@@ -424,12 +391,8 @@ func TestProjection(t *testing.T) {
 }
 
 func TestAllocateIDs(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
 	ctx := context.Background()
-	client := newClient(ctx, t)
-
+	client := newClient(ctx)
 	keys := make([]*Key, 5)
 	for i := range keys {
 		keys[i] = NewIncompleteKey(ctx, "AllocID", nil)
@@ -449,12 +412,6 @@ func TestAllocateIDs(t *testing.T) {
 }
 
 func TestGetAllWithFieldMismatch(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
-	ctx := context.Background()
-	client := newClient(ctx, t)
-
 	type Fat struct {
 		X, Y int
 	}
@@ -462,11 +419,13 @@ func TestGetAllWithFieldMismatch(t *testing.T) {
 		X int
 	}
 
+	ctx := context.Background()
+	client := newClient(ctx)
 	// Ancestor queries (those within an entity group) are strongly consistent
 	// by default, which prevents a test from being flaky.
 	// See https://cloud.google.com/appengine/docs/go/datastore/queries#Go_Data_consistency
 	// for more information.
-	parent := NewKey(ctx, "SQParent", "TestGetAllWithFieldMismatch"+suffix, 0, nil)
+	parent := NewKey(ctx, "SQParent", "TestGetAllWithFieldMismatch", 0, nil)
 	putKeys := make([]*Key, 3)
 	for i := range putKeys {
 		putKeys[i] = NewKey(ctx, "GetAllThing", "", int64(10+i), parent)
@@ -495,12 +454,6 @@ func TestGetAllWithFieldMismatch(t *testing.T) {
 }
 
 func TestKindlessQueries(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
-	ctx := context.Background()
-	client := newClient(ctx, t)
-
 	type Dee struct {
 		I   int
 		Why string
@@ -510,7 +463,9 @@ func TestKindlessQueries(t *testing.T) {
 		Pling string
 	}
 
-	parent := NewKey(ctx, "Tweedle", "tweedle"+suffix, 0, nil)
+	ctx := context.Background()
+	client := newClient(ctx)
+	parent := NewKey(ctx, "Tweedle", "tweedle", 0, nil)
 
 	keys := []*Key{
 		NewKey(ctx, "Dee", "dee0", 0, parent),
@@ -618,11 +573,8 @@ loop:
 }
 
 func TestTransaction(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
 	ctx := context.Background()
-	client := newClient(ctx, t)
+	client := newClient(ctx)
 
 	type Counter struct {
 		N int
@@ -713,48 +665,11 @@ func TestTransaction(t *testing.T) {
 
 		// Check the final value of the counter.
 		if err := client.Get(ctx, key, c); err != nil {
-			t.Errorf("%s: client.Get: %v", tt.desc, err)
+			t.Errorf("%s: client.Get: %v", err)
 			continue
 		}
 		if c.N != tt.want {
-			t.Errorf("%s: counter N=%d, want N=%d", tt.desc, c.N, tt.want)
+			t.Errorf("%s: counter N=%d, want N=%d", c.N, tt.want)
 		}
-	}
-}
-
-func TestNilPointers(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Integration tests skipped in short mode")
-	}
-	ctx := context.Background()
-	client := newClient(ctx, t)
-
-	type X struct {
-		S string
-	}
-
-	src := []*X{{"zero"}, {"one"}}
-	keys := []*Key{NewIncompleteKey(ctx, "NilX", nil), NewIncompleteKey(ctx, "NilX", nil)}
-	keys, err := client.PutMulti(ctx, keys, src)
-	if err != nil {
-		t.Fatalf("PutMulti: %v", err)
-	}
-
-	// It's okay to store into a slice of nil *X.
-	xs := make([]*X, 2)
-	if err := client.GetMulti(ctx, keys, xs); err != nil {
-		t.Errorf("GetMulti: %v", err)
-	} else if !reflect.DeepEqual(xs, src) {
-		t.Errorf("GetMulti fetched %v, want %v", xs, src)
-	}
-
-	// It isn't okay to store into a single nil *X.
-	var x0 *X
-	if err, want := client.Get(ctx, keys[0], x0), ErrInvalidEntityType; err != want {
-		t.Errorf("Get: err %v; want %v", err, want)
-	}
-
-	if err := client.DeleteMulti(ctx, keys); err != nil {
-		t.Errorf("Delete: %v", err)
 	}
 }

@@ -5,7 +5,7 @@ import (
 	authclientv1 "k8s.io/kubernetes/pkg/client/clientset_generated/clientset/typed/authorization/v1"
 	kcoreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 
-	"github.com/openshift/origin/pkg/cmd/util/clientcmd"
+	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
 	imageclientv1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
 	userclientv1 "github.com/openshift/origin/pkg/user/generated/clientset/typed/user/v1"
 )
@@ -104,8 +104,6 @@ type registryClient struct {
 }
 
 // NewRegistryClient provides a new registry client.
-// TODO: Remove clientcmd dependency and move the parsing of required
-// environemtn variable to registry.
 func NewRegistryClient(config *clientcmd.Config) RegistryClient {
 	return &registryClient{
 		kubeConfig: config.KubeConfig(),

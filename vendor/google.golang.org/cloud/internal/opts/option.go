@@ -19,7 +19,6 @@ type DialOpt struct {
 
 	TokenSource oauth2.TokenSource
 
-	HTTPClient   *http.Client
-	GRPCClient   *grpc.ClientConn
-	GRPCDialOpts []grpc.DialOption
+	HTTPClient *http.Client
+	GRPCClient *grpc.ClientConn
 }

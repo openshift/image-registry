@@ -1,12 +1,12 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"tbys6C40o18GZwyMen5GMkdK-3s/z8hLagElncDGGS_B7W6I6uNUHDs\"",
+ "etag": "\"bRFOOrZKfO9LweMbPqu0kcu6De8/cxP0mtBkWIA4ZdoBuvl7SgC3-Gc\"",
  "discoveryVersion": "v1",
  "id": "androidpublisher:v2",
  "name": "androidpublisher",
  "canonicalName": "Android Publisher",
  "version": "v2",
- "revision": "20170222",
+ "revision": "20160111",
  "title": "Google Play Developer API",
  "description": "Lets Android application developers access their Google Play accounts.",
  "ownerDomain": "google.com",
@@ -205,109 +205,6 @@
     "id": {
      "type": "string",
      "description": "The ID of the edit that can be used in subsequent API calls."
-    }
-   }
-  },
-  "Comment": {
-   "id": "Comment",
-   "type": "object",
-   "properties": {
-    "developerComment": {
-     "$ref": "DeveloperComment",
-     "description": "A comment from a developer."
-    },
-    "userComment": {
-     "$ref": "UserComment",
-     "description": "A comment from a user."
-    }
-   }
-  },
-  "DeobfuscationFile": {
-   "id": "DeobfuscationFile",
-   "type": "object",
-   "description": "Represents a deobfuscation file.",
-   "properties": {
-    "symbolType": {
-     "type": "string",
-     "description": "The type of the deobfuscation file."
-    }
-   }
-  },
-  "DeobfuscationFilesUploadResponse": {
-   "id": "DeobfuscationFilesUploadResponse",
-   "type": "object",
-   "properties": {
-    "deobfuscationFile": {
-     "$ref": "DeobfuscationFile"
-    }
-   }
-  },
-  "DeveloperComment": {
-   "id": "DeveloperComment",
-   "type": "object",
-   "properties": {
-    "lastModified": {
-     "$ref": "Timestamp",
-     "description": "The last time at which this comment was updated."
-    },
-    "text": {
-     "type": "string",
-     "description": "The content of the comment, i.e. reply body."
-    }
-   }
-  },
-  "DeviceMetadata": {
-   "id": "DeviceMetadata",
-   "type": "object",
-   "properties": {
-    "cpuMake": {
-     "type": "string",
-     "description": "Device CPU make e.g. \"Qualcomm\""
-    },
-    "cpuModel": {
-     "type": "string",
-     "description": "Device CPU model e.g. \"MSM8974\""
-    },
-    "deviceClass": {
-     "type": "string",
-     "description": "Device class (e.g. tablet)"
-    },
-    "glEsVersion": {
-     "type": "integer",
-     "description": "OpenGL version",
-     "format": "int32"
-    },
-    "manufacturer": {
-     "type": "string",
-     "description": "Device manufacturer (e.g. Motorola)"
-    },
-    "nativePlatform": {
-     "type": "string",
-     "description": "Comma separated list of native platforms (e.g. \"arm\", \"arm7\")"
-    },
-    "productName": {
-     "type": "string",
-     "description": "Device model name (e.g. Droid)"
-    },
-    "ramMb": {
-     "type": "integer",
-     "description": "Device RAM in Megabytes e.g. \"2048\"",
-     "format": "int32"
-    },
-    "screenDensityDpi": {
-     "type": "integer",
-     "description": "Screen density in DPI",
-     "format": "int32"
-    },
-    "screenHeightPx": {
-     "type": "integer",
-     "description": "Screen height in pixels",
-     "format": "int32"
-    },
-    "screenWidthPx": {
-     "type": "integer",
-     "description": "Screen width in pixels",
-     "format": "int32"
     }
    }
   },
@@ -856,78 +753,6 @@
     }
    }
   },
-  "Review": {
-   "id": "Review",
-   "type": "object",
-   "properties": {
-    "authorName": {
-     "type": "string",
-     "description": "The name of the user who wrote the review."
-    },
-    "comments": {
-     "type": "array",
-     "description": "A repeated field containing comments for the review.",
-     "items": {
-      "$ref": "Comment"
-     }
-    },
-    "reviewId": {
-     "type": "string",
-     "description": "Unique identifier for this review."
-    }
-   }
-  },
-  "ReviewReplyResult": {
-   "id": "ReviewReplyResult",
-   "type": "object",
-   "properties": {
-    "lastEdited": {
-     "$ref": "Timestamp",
-     "description": "The time at which the reply took effect."
-    },
-    "replyText": {
-     "type": "string",
-     "description": "The reply text that was applied."
-    }
-   }
-  },
-  "ReviewsListResponse": {
-   "id": "ReviewsListResponse",
-   "type": "object",
-   "properties": {
-    "pageInfo": {
-     "$ref": "PageInfo"
-    },
-    "reviews": {
-     "type": "array",
-     "items": {
-      "$ref": "Review"
-     }
-    },
-    "tokenPagination": {
-     "$ref": "TokenPagination"
-    }
-   }
-  },
-  "ReviewsReplyRequest": {
-   "id": "ReviewsReplyRequest",
-   "type": "object",
-   "properties": {
-    "replyText": {
-     "type": "string",
-     "description": "The text to set as the reply. Replies of more than approximately 350 characters will be rejected. HTML tags will be stripped."
-    }
-   }
-  },
-  "ReviewsReplyResponse": {
-   "id": "ReviewsReplyResponse",
-   "type": "object",
-   "properties": {
-    "result": {
-     "$ref": "ReviewReplyResult"
-    }
-   }
-  },
   "Season": {
    "id": "Season",
    "type": "object",
@@ -956,7 +781,7 @@
    "properties": {
     "desiredExpiryTimeMillis": {
      "type": "string",
-     "description": "The desired next expiry time to assign to the subscription, in milliseconds since the Epoch. The given time must be later/greater than the current expiry time for the subscription.",
+     "description": "The desired next expiry time for the subscription in milliseconds since Epoch. The given time must be after the current expiry time for the subscription.",
      "format": "int64"
     },
     "expectedExpiryTimeMillis": {
@@ -975,22 +800,9 @@
      "type": "boolean",
      "description": "Whether the subscription will automatically be renewed when it reaches its current expiry time."
     },
-    "cancelReason": {
-     "type": "integer",
-     "description": "The reason why a subscription was cancelled or is not auto-renewing. Possible values are:  \n- User cancelled the subscription \n- Subscription was cancelled by the system, for example because of a billing problem",
-     "format": "int32"
-    },
-    "countryCode": {
-     "type": "string",
-     "description": "ISO 3166-1 alpha-2 billing country/region code of the user at the time the subscription was granted."
-    },
-    "developerPayload": {
-     "type": "string",
-     "description": "A developer-specified string that contains supplemental information about an order."
-    },
     "expiryTimeMillis": {
      "type": "string",
-     "description": "Time at which the subscription will expire, in milliseconds since the Epoch.",
+     "description": "Time at which the subscription will expire, in milliseconds since Epoch.",
      "format": "int64"
     },
     "kind": {
@@ -998,28 +810,9 @@
      "description": "This kind represents a subscriptionPurchase object in the androidpublisher service.",
      "default": "androidpublisher#subscriptionPurchase"
     },
-    "paymentState": {
-     "type": "integer",
-     "description": "The payment state of the subscription. Possible values are:  \n- Payment pending \n- Payment received",
-     "format": "int32"
-    },
-    "priceAmountMicros": {
-     "type": "string",
-     "description": "Price of the subscription, not including tax. Price is expressed in micro-units, where 1,000,000 micro-units represents one unit of the currency. For example, if the subscription price is €1.99, price_amount_micros is 1990000.",
-     "format": "int64"
-    },
-    "priceCurrencyCode": {
-     "type": "string",
-     "description": "ISO 4217 currency code for the subscription price. For example, if the price is specified in British pounds sterling, price_currency_code is \"GBP\"."
-    },
     "startTimeMillis": {
      "type": "string",
-     "description": "Time at which the subscription was granted, in milliseconds since the Epoch.",
-     "format": "int64"
-    },
-    "userCancellationTimeMillis": {
-     "type": "string",
-     "description": "The time at which the subscription was canceled by the user, in milliseconds since the epoch. Only present if cancelReason is 0.",
+     "description": "Time at which the subscription was granted, in milliseconds since Epoch.",
      "format": "int64"
     }
    }
@@ -1060,20 +853,6 @@
      "items": {
       "type": "string"
      }
-    }
-   }
-  },
-  "Timestamp": {
-   "id": "Timestamp",
-   "type": "object",
-   "properties": {
-    "nanos": {
-     "type": "integer",
-     "format": "int32"
-    },
-    "seconds": {
-     "type": "string",
-     "format": "int64"
     }
    }
   },
@@ -1122,109 +901,6 @@
      "type": "array",
      "items": {
       "$ref": "Track"
-     }
-    }
-   }
-  },
-  "UserComment": {
-   "id": "UserComment",
-   "type": "object",
-   "properties": {
-    "androidOsVersion": {
-     "type": "integer",
-     "description": "Integer Android SDK version of the user's device at the time the review was written, e.g. 23 is Marshmallow. May be absent.",
-     "format": "int32"
-    },
-    "appVersionCode": {
-     "type": "integer",
-     "description": "Integer version code of the app as installed at the time the review was written. May be absent.",
-     "format": "int32"
-    },
-    "appVersionName": {
-     "type": "string",
-     "description": "String version name of the app as installed at the time the review was written. May be absent."
-    },
-    "device": {
-     "type": "string",
-     "description": "Codename for the reviewer's device, e.g. klte, flounder. May be absent."
-    },
-    "deviceMetadata": {
-     "$ref": "DeviceMetadata",
-     "description": "Some information about the characteristics of the user's device"
-    },
-    "lastModified": {
-     "$ref": "Timestamp",
-     "description": "The last time at which this comment was updated."
-    },
-    "originalText": {
-     "type": "string",
-     "description": "Untranslated text of the review, in the case where the review has been translated. If the review has not been translated this is left blank."
-    },
-    "reviewerLanguage": {
-     "type": "string",
-     "description": "Language code for the reviewer. This is taken from the device settings so is not guaranteed to match the language the review is written in. May be absent."
-    },
-    "starRating": {
-     "type": "integer",
-     "description": "The star rating associated with the review, from 1 to 5.",
-     "format": "int32"
-    },
-    "text": {
-     "type": "string",
-     "description": "The content of the comment, i.e. review body. In some cases users have been able to write a review with separate title and body; in those cases the title and body are concatenated and separated by a tab character."
-    },
-    "thumbsDownCount": {
-     "type": "integer",
-     "description": "Number of users who have given this review a thumbs down",
-     "format": "int32"
-    },
-    "thumbsUpCount": {
-     "type": "integer",
-     "description": "Number of users who have given this review a thumbs up",
-     "format": "int32"
-    }
-   }
-  },
-  "VoidedPurchase": {
-   "id": "VoidedPurchase",
-   "type": "object",
-   "description": "A VoidedPurchase resource indicates a purchase that was either cancelled/refunded/charged-back.",
-   "properties": {
-    "kind": {
-     "type": "string",
-     "description": "This kind represents a voided purchase object in the androidpublisher service.",
-     "default": "androidpublisher#voidedPurchase"
-    },
-    "purchaseTimeMillis": {
-     "type": "string",
-     "description": "The time at which the purchase was made, in milliseconds since the epoch (Jan 1, 1970).",
-     "format": "int64"
-    },
-    "purchaseToken": {
-     "type": "string",
-     "description": "The token that was generated when a purchase was made. This uniquely identifies a purchase."
-    },
-    "voidedTimeMillis": {
-     "type": "string",
-     "description": "The time at which the purchase was cancelled/refunded/charged-back, in milliseconds since the epoch (Jan 1, 1970).",
-     "format": "int64"
-    }
-   }
-  },
-  "VoidedPurchasesListResponse": {
-   "id": "VoidedPurchasesListResponse",
-   "type": "object",
-   "properties": {
-    "pageInfo": {
-     "$ref": "PageInfo"
-    },
-    "tokenPagination": {
-     "$ref": "TokenPagination"
-    },
-    "voidedPurchases": {
-     "type": "array",
-     "items": {
-      "$ref": "VoidedPurchase"
      }
     }
    }
@@ -1745,77 +1421,6 @@
          "resumable": {
           "multipart": true,
           "path": "/resumable/upload/androidpublisher/v2/applications/{packageName}/edits/{editId}/apks"
-         }
-        }
-       }
-      }
-     }
-    },
-    "deobfuscationfiles": {
-     "methods": {
-      "upload": {
-       "id": "androidpublisher.edits.deobfuscationfiles.upload",
-       "path": "{packageName}/edits/{editId}/apks/{apkVersionCode}/deobfuscationFiles/{deobfuscationFileType}",
-       "httpMethod": "POST",
-       "description": "Uploads the deobfuscation file of the specified APK. If a deobfuscation file already exists, it will be replaced.",
-       "parameters": {
-        "apkVersionCode": {
-         "type": "integer",
-         "description": "The version code of the APK whose deobfuscation file is being uploaded.",
-         "required": true,
-         "format": "int32",
-         "location": "path"
-        },
-        "deobfuscationFileType": {
-         "type": "string",
-         "required": true,
-         "enum": [
-          "proguard"
-         ],
-         "enumDescriptions": [
-          ""
-         ],
-         "location": "path"
-        },
-        "editId": {
-         "type": "string",
-         "description": "Unique identifier for this edit.",
-         "required": true,
-         "location": "path"
-        },
-        "packageName": {
-         "type": "string",
-         "description": "Unique identifier of the Android app for which the deobfuscatiuon files are being uploaded; for example, \"com.spiffygame\".",
-         "required": true,
-         "location": "path"
-        }
-       },
-       "parameterOrder": [
-        "packageName",
-        "editId",
-        "apkVersionCode",
-        "deobfuscationFileType"
-       ],
-       "response": {
-        "$ref": "DeobfuscationFilesUploadResponse"
-       },
-       "scopes": [
-        "https://www.googleapis.com/auth/androidpublisher"
-       ],
-       "supportsMediaUpload": true,
-       "mediaUpload": {
-        "accept": [
-         "application/octet-stream"
-        ],
-        "maxSize": "300MB",
-        "protocols": {
-         "simple": {
-          "multipart": true,
-          "path": "/upload/androidpublisher/v2/applications/{packageName}/edits/{editId}/apks/{apkVersionCode}/deobfuscationFiles/{deobfuscationFileType}"
-         },
-         "resumable": {
-          "multipart": true,
-          "path": "/resumable/upload/androidpublisher/v2/applications/{packageName}/edits/{editId}/apks/{apkVersionCode}/deobfuscationFiles/{deobfuscationFileType}"
          }
         }
        }
@@ -3480,169 +3085,6 @@
        ]
       }
      }
-    },
-    "voidedpurchases": {
-     "methods": {
-      "list": {
-       "id": "androidpublisher.purchases.voidedpurchases.list",
-       "path": "{packageName}/purchases/voidedpurchases",
-       "httpMethod": "GET",
-       "description": "Lists the purchases that were cancelled, refunded or charged-back.",
-       "parameters": {
-        "endTime": {
-         "type": "string",
-         "description": "The time, in milliseconds since the Epoch, of the newest voided in-app product purchase that you want to see in the response. The value of this parameter cannot be greater than the current time and is ignored if a pagination token is set. Default value is current time.",
-         "format": "int64",
-         "location": "query"
-        },
-        "maxResults": {
-         "type": "integer",
-         "format": "uint32",
-         "location": "query"
-        },
-        "packageName": {
-         "type": "string",
-         "description": "The package name of the application for which voided purchases need to be returned (for example, 'com.some.thing').",
-         "required": true,
-         "location": "path"
-        },
-        "startIndex": {
-         "type": "integer",
-         "format": "uint32",
-         "location": "query"
-        },
-        "startTime": {
-         "type": "string",
-         "description": "The time, in milliseconds since the Epoch, of the oldest voided in-app product purchase that you want to see in the response. The value of this parameter cannot be older than 30 days and is ignored if a pagination token is set. Default value is current time minus 30 days.",
-         "format": "int64",
-         "location": "query"
-        },
-        "token": {
-         "type": "string",
-         "location": "query"
-        }
-       },
-       "parameterOrder": [
-        "packageName"
-       ],
-       "response": {
-        "$ref": "VoidedPurchasesListResponse"
-       },
-       "scopes": [
-        "https://www.googleapis.com/auth/androidpublisher"
-       ]
-      }
-     }
-    }
-   }
-  },
-  "reviews": {
-   "methods": {
-    "get": {
-     "id": "androidpublisher.reviews.get",
-     "path": "{packageName}/reviews/{reviewId}",
-     "httpMethod": "GET",
-     "description": "Returns a single review.",
-     "parameters": {
-      "packageName": {
-       "type": "string",
-       "description": "Unique identifier for the Android app for which we want reviews; for example, \"com.spiffygame\".",
-       "required": true,
-       "location": "path"
-      },
-      "reviewId": {
-       "type": "string",
-       "required": true,
-       "location": "path"
-      },
-      "translationLanguage": {
-       "type": "string",
-       "location": "query"
-      }
-     },
-     "parameterOrder": [
-      "packageName",
-      "reviewId"
-     ],
-     "response": {
-      "$ref": "Review"
-     },
-     "scopes": [
-      "https://www.googleapis.com/auth/androidpublisher"
-     ]
-    },
-    "list": {
-     "id": "androidpublisher.reviews.list",
-     "path": "{packageName}/reviews",
-     "httpMethod": "GET",
-     "description": "Returns a list of reviews. Only reviews from last week will be returned.",
-     "parameters": {
-      "maxResults": {
-       "type": "integer",
-       "format": "uint32",
-       "location": "query"
-      },
-      "packageName": {
-       "type": "string",
-       "description": "Unique identifier for the Android app for which we want reviews; for example, \"com.spiffygame\".",
-       "required": true,
-       "location": "path"
-      },
-      "startIndex": {
-       "type": "integer",
-       "format": "uint32",
-       "location": "query"
-      },
-      "token": {
-       "type": "string",
-       "location": "query"
-      },
-      "translationLanguage": {
-       "type": "string",
-       "location": "query"
-      }
-     },
-     "parameterOrder": [
-      "packageName"
-     ],
-     "response": {
-      "$ref": "ReviewsListResponse"
-     },
-     "scopes": [
-      "https://www.googleapis.com/auth/androidpublisher"
-     ]
-    },
-    "reply": {
-     "id": "androidpublisher.reviews.reply",
-     "path": "{packageName}/reviews/{reviewId}:reply",
-     "httpMethod": "POST",
-     "description": "Reply to a single review, or update an existing reply.",
-     "parameters": {
-      "packageName": {
-       "type": "string",
-       "description": "Unique identifier for the Android app for which we want reviews; for example, \"com.spiffygame\".",
-       "required": true,
-       "location": "path"
-      },
-      "reviewId": {
-       "type": "string",
-       "required": true,
-       "location": "path"
-      }
-     },
-     "parameterOrder": [
-      "packageName",
-      "reviewId"
-     ],
-     "request": {
-      "$ref": "ReviewsReplyRequest"
-     },
-     "response": {
-      "$ref": "ReviewsReplyResponse"
-     },
-     "scopes": [
-      "https://www.googleapis.com/auth/androidpublisher"
-     ]
     }
    }
   }

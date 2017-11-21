@@ -27,7 +27,7 @@ const (
 	DatabaseServerVersion12 = "12.0"
 )
 
-// DatabaseServer represents the set of data received from
+// DatabaseServer represents the set of data recieved from
 // a database server list operation.
 //
 // https://msdn.microsoft.com/en-us/library/azure/dn505702.aspx
@@ -45,7 +45,7 @@ type ListServersResponse struct {
 }
 
 // FirewallRuleCreateParams represents the set of possible
-// parameters when creating a firewall rule on an Azure database server.
+// paramaters when creating a firewall rule on an Azure database server.
 //
 // https://msdn.microsoft.com/en-us/library/azure/dn505712.aspx
 type FirewallRuleCreateParams struct {
@@ -55,7 +55,7 @@ type FirewallRuleCreateParams struct {
 	EndIPAddress   string
 }
 
-// FirewallRuleResponse represents the set of data received from
+// FirewallRuleResponse represents the set of data recieved from
 // an Azure database server firewall rule get response.
 //
 // https://msdn.microsoft.com/en-us/library/azure/dn505698.aspx

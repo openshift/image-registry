@@ -23,6 +23,9 @@ import (
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	"github.com/openshift/origin/pkg/image/util"
+
+	// install image API for k8s.io/kubernetes/pkg/api.Scheme.Converter
+	_ "github.com/openshift/origin/pkg/image/apis/image/install"
 )
 
 type ManifestSchemaVersion int

@@ -86,7 +86,6 @@ func New(client *http.Client) (*Service, error) {
 	s.Permissions = NewPermissionsService(s)
 	s.Replies = NewRepliesService(s)
 	s.Revisions = NewRevisionsService(s)
-	s.Teamdrives = NewTeamdrivesService(s)
 	return s, nil
 }
 
@@ -110,8 +109,6 @@ type Service struct {
 	Replies *RepliesService
 
 	Revisions *RevisionsService
-
-	Teamdrives *TeamdrivesService
 }
 
 func (s *Service) userAgent() string {
@@ -193,15 +190,6 @@ type RevisionsService struct {
 	s *Service
 }
 
-func NewTeamdrivesService(s *Service) *TeamdrivesService {
-	rs := &TeamdrivesService{s: s}
-	return rs
-}
-
-type TeamdrivesService struct {
-	s *Service
-}
-
 // About: Information about the user, the user's Drive, and system
 // capabilities.
 type About struct {
@@ -220,8 +208,7 @@ type About struct {
 	// supported imports.
 	ImportFormats map[string][]string `json:"importFormats,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#about".
+	// Kind: This is always drive#about.
 	Kind string `json:"kind,omitempty"`
 
 	// MaxImportSizes: A map of maximum import sizes by MIME type, in bytes.
@@ -233,9 +220,6 @@ type About struct {
 	// StorageQuota: The user's storage quota limits and usage. All fields
 	// are measured in bytes.
 	StorageQuota *AboutStorageQuota `json:"storageQuota,omitempty"`
-
-	// TeamDriveThemes: A list of themes that are supported for Team Drives.
-	TeamDriveThemes []*AboutTeamDriveThemes `json:"teamDriveThemes,omitempty"`
 
 	// User: The authenticated user.
 	User *User `json:"user,omitempty"`
@@ -251,20 +235,12 @@ type About struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AppInstalled") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *About) MarshalJSON() ([]byte, error) {
 	type noMethod About
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AboutStorageQuota: The user's storage quota limits and usage. All
@@ -290,87 +266,32 @@ type AboutStorageQuota struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Limit") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AboutStorageQuota) MarshalJSON() ([]byte, error) {
 	type noMethod AboutStorageQuota
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
-type AboutTeamDriveThemes struct {
-	// BackgroundImageLink: A link to this Team Drive theme's background
-	// image.
-	BackgroundImageLink string `json:"backgroundImageLink,omitempty"`
-
-	// ColorRgb: The color of this Team Drive theme as an RGB hex string.
-	ColorRgb string `json:"colorRgb,omitempty"`
-
-	// Id: The ID of the theme.
-	Id string `json:"id,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "BackgroundImageLink")
-	// to unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BackgroundImageLink") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *AboutTeamDriveThemes) MarshalJSON() ([]byte, error) {
-	type noMethod AboutTeamDriveThemes
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// Change: A change to a file or Team Drive.
+// Change: A change to a file.
 type Change struct {
-	// File: The updated state of the file. Present if the type is file and
-	// the file has not been removed from this list of changes.
+	// File: The updated state of the file. Present if the file has not been
+	// removed.
 	File *File `json:"file,omitempty"`
 
 	// FileId: The ID of the file which has changed.
 	FileId string `json:"fileId,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#change".
+	// Kind: This is always drive#change.
 	Kind string `json:"kind,omitempty"`
 
-	// Removed: Whether the file or Team Drive has been removed from this
-	// list of changes, for example by deletion or loss of access.
+	// Removed: Whether the file has been removed from the view of the
+	// changes list, for example by deletion or lost access.
 	Removed bool `json:"removed,omitempty"`
-
-	// TeamDrive: The updated state of the Team Drive. Present if the type
-	// is teamDrive, the user is still a member of the Team Drive, and the
-	// Team Drive has not been removed.
-	TeamDrive *TeamDrive `json:"teamDrive,omitempty"`
-
-	// TeamDriveId: The ID of the Team Drive associated with this change.
-	TeamDriveId string `json:"teamDriveId,omitempty"`
 
 	// Time: The time of this change (RFC 3339 date-time).
 	Time string `json:"time,omitempty"`
-
-	// Type: The type of the change. Possible values are file and teamDrive.
-	Type string `json:"type,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "File") to
 	// unconditionally include in API requests. By default, fields with
@@ -379,31 +300,20 @@ type Change struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "File") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Change) MarshalJSON() ([]byte, error) {
 	type noMethod Change
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ChangeList: A list of changes for a user.
 type ChangeList struct {
-	// Changes: The list of changes. If nextPageToken is populated, then
-	// this list may be incomplete and an additional page of results should
-	// be fetched.
+	// Changes: The page of changes.
 	Changes []*Change `json:"changes,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#changeList".
+	// Kind: This is always drive#changeList.
 	Kind string `json:"kind,omitempty"`
 
 	// NewStartPageToken: The starting page token for future changes. This
@@ -412,9 +322,7 @@ type ChangeList struct {
 	NewStartPageToken string `json:"newStartPageToken,omitempty"`
 
 	// NextPageToken: The page token for the next page of changes. This will
-	// be absent if the end of the changes list has been reached. If the
-	// token is rejected for any reason, it should be discarded, and
-	// pagination should be restarted from the first page of results.
+	// be absent if the end of the current changes list has been reached.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -428,20 +336,12 @@ type ChangeList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Changes") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ChangeList) MarshalJSON() ([]byte, error) {
 	type noMethod ChangeList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Channel: An notification channel used to watch for resource changes.
@@ -494,20 +394,12 @@ type Channel struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Address") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Channel) MarshalJSON() ([]byte, error) {
 	type noMethod Channel
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Comment: A comment on a file.
@@ -538,8 +430,7 @@ type Comment struct {
 	// Id: The ID of the comment.
 	Id string `json:"id,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#comment".
+	// Kind: This is always drive#comment.
 	Kind string `json:"kind,omitempty"`
 
 	// ModifiedTime: The last time the comment or any of its replies was
@@ -570,20 +461,12 @@ type Comment struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Anchor") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Comment) MarshalJSON() ([]byte, error) {
 	type noMethod Comment
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CommentQuotedFileContent: The file content to which the comment
@@ -604,37 +487,24 @@ type CommentQuotedFileContent struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "MimeType") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CommentQuotedFileContent) MarshalJSON() ([]byte, error) {
 	type noMethod CommentQuotedFileContent
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CommentList: A list of comments on a file.
 type CommentList struct {
-	// Comments: The list of comments. If nextPageToken is populated, then
-	// this list may be incomplete and an additional page of results should
-	// be fetched.
+	// Comments: The page of comments.
 	Comments []*Comment `json:"comments,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#commentList".
+	// Kind: This is always drive#commentList.
 	Kind string `json:"kind,omitempty"`
 
 	// NextPageToken: The page token for the next page of comments. This
-	// will be absent if the end of the comments list has been reached. If
-	// the token is rejected for any reason, it should be discarded, and
-	// pagination should be restarted from the first page of results.
+	// will be absent if the end of the comments list has been reached.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -648,20 +518,12 @@ type CommentList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Comments") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CommentList) MarshalJSON() ([]byte, error) {
 	type noMethod CommentList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // File: The metadata for a file.
@@ -671,8 +533,7 @@ type File struct {
 	// Entries with null values are cleared in update and copy requests.
 	AppProperties map[string]string `json:"appProperties,omitempty"`
 
-	// Capabilities: Capabilities the current user has on this file. Each
-	// capability corresponds to a fine-grained action that a user may take.
+	// Capabilities: Capabilities the current user has on the file.
 	Capabilities *FileCapabilities `json:"capabilities,omitempty"`
 
 	// ContentHints: Additional information about the content of the file.
@@ -709,14 +570,6 @@ type File struct {
 	// is not cleared if the new name does not contain a valid extension.
 	FullFileExtension string `json:"fullFileExtension,omitempty"`
 
-	// HasAugmentedPermissions: Whether any users are granted file access
-	// directly on this file. This field is only populated for Team Drive
-	// files.
-	HasAugmentedPermissions bool `json:"hasAugmentedPermissions,omitempty"`
-
-	// HasThumbnail: Whether this file has a thumbnail.
-	HasThumbnail bool `json:"hasThumbnail,omitempty"`
-
 	// HeadRevisionId: The ID of the file's head revision. This is currently
 	// only available for files with binary content in Drive.
 	HeadRevisionId string `json:"headRevisionId,omitempty"`
@@ -731,12 +584,7 @@ type File struct {
 	// available.
 	ImageMediaMetadata *FileImageMediaMetadata `json:"imageMediaMetadata,omitempty"`
 
-	// IsAppAuthorized: Whether the file was created or opened by the
-	// requesting app.
-	IsAppAuthorized bool `json:"isAppAuthorized,omitempty"`
-
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#file".
+	// Kind: This is always drive#file.
 	Kind string `json:"kind,omitempty"`
 
 	// LastModifyingUser: The last user to modify the file.
@@ -755,9 +603,6 @@ type File struct {
 	// are published in the About resource.
 	MimeType string `json:"mimeType,omitempty"`
 
-	// ModifiedByMe: Whether the file has been modified by this user.
-	ModifiedByMe bool `json:"modifiedByMe,omitempty"`
-
 	// ModifiedByMeTime: The last time the file was modified by the user
 	// (RFC 3339 date-time).
 	ModifiedByMeTime string `json:"modifiedByMeTime,omitempty"`
@@ -769,9 +614,7 @@ type File struct {
 	ModifiedTime string `json:"modifiedTime,omitempty"`
 
 	// Name: The name of the file. This is not necessarily unique within a
-	// folder. Note that for immutable items such as the top level folders
-	// of Team Drives, My Drive root folder, and Application Data folder the
-	// name is constant.
+	// folder.
 	Name string `json:"name,omitempty"`
 
 	// OriginalFilename: The original filename of the uploaded content if
@@ -779,12 +622,11 @@ type File struct {
 	// available for files with binary content in Drive.
 	OriginalFilename string `json:"originalFilename,omitempty"`
 
-	// OwnedByMe: Whether the user owns the file. Not populated for Team
-	// Drive files.
+	// OwnedByMe: Whether the user owns the file.
 	OwnedByMe bool `json:"ownedByMe,omitempty"`
 
 	// Owners: The owners of the file. Currently, only certain legacy files
-	// may have more than one owner. Not populated for Team Drive files.
+	// may have more than one owner.
 	Owners []*User `json:"owners,omitempty"`
 
 	// Parents: The IDs of the parent folders which contain the file.
@@ -794,8 +636,7 @@ type File struct {
 	Parents []string `json:"parents,omitempty"`
 
 	// Permissions: The full list of permissions for the file. This is only
-	// available if the requesting user can share the file. Not populated
-	// for Team Drive files.
+	// available if the requesting user can share the file.
 	Permissions []*Permission `json:"permissions,omitempty"`
 
 	// Properties: A collection of arbitrary key-value pairs which are
@@ -808,8 +649,7 @@ type File struct {
 	// keepForever enabled.
 	QuotaBytesUsed int64 `json:"quotaBytesUsed,omitempty,string"`
 
-	// Shared: Whether the file has been shared. Not populated for Team
-	// Drive files.
+	// Shared: Whether the file has been shared.
 	Shared bool `json:"shared,omitempty"`
 
 	// SharedWithMeTime: The time at which the file was shared with the
@@ -831,30 +671,14 @@ type File struct {
 	// Starred: Whether the user has starred the file.
 	Starred bool `json:"starred,omitempty"`
 
-	// TeamDriveId: ID of the Team Drive the file resides in.
-	TeamDriveId string `json:"teamDriveId,omitempty"`
-
 	// ThumbnailLink: A short-lived link to the file's thumbnail, if
-	// available. Typically lasts on the order of hours. Only populated when
-	// the requesting app can access the file's content.
+	// available. Typically lasts on the order of hours.
 	ThumbnailLink string `json:"thumbnailLink,omitempty"`
-
-	// ThumbnailVersion: The thumbnail version for use in thumbnail cache
-	// invalidation.
-	ThumbnailVersion int64 `json:"thumbnailVersion,omitempty,string"`
 
 	// Trashed: Whether the file has been trashed, either explicitly or from
 	// a trashed parent folder. Only the owner may trash a file, and other
 	// users cannot see files in the owner's trash.
 	Trashed bool `json:"trashed,omitempty"`
-
-	// TrashedTime: The time that the item was trashed (RFC 3339 date-time).
-	// Only populated for Team Drive files.
-	TrashedTime string `json:"trashedTime,omitempty"`
-
-	// TrashingUser: If the file has been explicitly trashed, the user who
-	// trashed it. Only populated for Team Drive files.
-	TrashingUser *User `json:"trashingUser,omitempty"`
 
 	// Version: A monotonically increasing version number for the file. This
 	// reflects every change made to the file on the server, even those not
@@ -887,7 +711,7 @@ type File struct {
 	WebViewLink string `json:"webViewLink,omitempty"`
 
 	// WritersCanShare: Whether users with only writer permission can modify
-	// the file's permissions. Not populated for Team Drive files.
+	// the file's permissions.
 	WritersCanShare bool `json:"writersCanShare,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -901,116 +725,46 @@ type File struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AppProperties") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *File) MarshalJSON() ([]byte, error) {
 	type noMethod File
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
-// FileCapabilities: Capabilities the current user has on this file.
-// Each capability corresponds to a fine-grained action that a user may
-// take.
+// FileCapabilities: Capabilities the current user has on the file.
 type FileCapabilities struct {
-	// CanAddChildren: Whether the current user can add children to this
-	// folder. This is always false when the item is not a folder.
-	CanAddChildren bool `json:"canAddChildren,omitempty"`
-
-	// CanChangeViewersCanCopyContent: Whether the current user can change
-	// whether viewers can copy the contents of this file.
-	CanChangeViewersCanCopyContent bool `json:"canChangeViewersCanCopyContent,omitempty"`
-
-	// CanComment: Whether the current user can comment on this file.
+	// CanComment: Whether the user can comment on the file.
 	CanComment bool `json:"canComment,omitempty"`
 
-	// CanCopy: Whether the current user can copy this file. For a Team
-	// Drive item, whether the current user can copy non-folder descendants
-	// of this item, or this item itself if it is not a folder.
+	// CanCopy: Whether the user can copy the file.
 	CanCopy bool `json:"canCopy,omitempty"`
 
-	// CanDelete: Whether the current user can delete this file.
-	CanDelete bool `json:"canDelete,omitempty"`
-
-	// CanDownload: Whether the current user can download this file.
-	CanDownload bool `json:"canDownload,omitempty"`
-
-	// CanEdit: Whether the current user can edit this file.
+	// CanEdit: Whether the user can edit the file's content.
 	CanEdit bool `json:"canEdit,omitempty"`
 
-	// CanListChildren: Whether the current user can list the children of
-	// this folder. This is always false when the item is not a folder.
-	CanListChildren bool `json:"canListChildren,omitempty"`
-
-	// CanMoveItemIntoTeamDrive: Whether the current user can move this item
-	// into a Team Drive. If the item is in a Team Drive, this field is
-	// equivalent to canMoveTeamDriveItem.
-	CanMoveItemIntoTeamDrive bool `json:"canMoveItemIntoTeamDrive,omitempty"`
-
-	// CanMoveTeamDriveItem: Whether the current user can move this Team
-	// Drive item by changing its parent. Note that a request to change the
-	// parent for this item may still fail depending on the new parent that
-	// is being added. Only populated for Team Drive files.
-	CanMoveTeamDriveItem bool `json:"canMoveTeamDriveItem,omitempty"`
-
-	// CanReadRevisions: Whether the current user can read the revisions
-	// resource of this file. For a Team Drive item, whether revisions of
-	// non-folder descendants of this item, or this item itself if it is not
-	// a folder, can be read.
+	// CanReadRevisions: Whether the current user has read access to the
+	// Revisions resource of the file.
 	CanReadRevisions bool `json:"canReadRevisions,omitempty"`
 
-	// CanReadTeamDrive: Whether the current user can read the Team Drive to
-	// which this file belongs. Only populated for Team Drive files.
-	CanReadTeamDrive bool `json:"canReadTeamDrive,omitempty"`
-
-	// CanRemoveChildren: Whether the current user can remove children from
-	// this folder. This is always false when the item is not a folder.
-	CanRemoveChildren bool `json:"canRemoveChildren,omitempty"`
-
-	// CanRename: Whether the current user can rename this file.
-	CanRename bool `json:"canRename,omitempty"`
-
-	// CanShare: Whether the current user can modify the sharing settings
-	// for this file.
+	// CanShare: Whether the user can modify the file's permissions and
+	// sharing settings.
 	CanShare bool `json:"canShare,omitempty"`
 
-	// CanTrash: Whether the current user can move this file to trash.
-	CanTrash bool `json:"canTrash,omitempty"`
-
-	// CanUntrash: Whether the current user can restore this file from
-	// trash.
-	CanUntrash bool `json:"canUntrash,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "CanAddChildren") to
+	// ForceSendFields is a list of field names (e.g. "CanComment") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CanAddChildren") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FileCapabilities) MarshalJSON() ([]byte, error) {
 	type noMethod FileCapabilities
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FileContentHints: Additional information about the content of the
@@ -1032,20 +786,12 @@ type FileContentHints struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "IndexableText") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FileContentHints) MarshalJSON() ([]byte, error) {
 	type noMethod FileContentHints
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FileContentHintsThumbnail: A thumbnail for the file. This will only
@@ -1065,20 +811,12 @@ type FileContentHintsThumbnail struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Image") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FileContentHintsThumbnail) MarshalJSON() ([]byte, error) {
 	type noMethod FileContentHintsThumbnail
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FileImageMediaMetadata: Additional metadata about image media, if
@@ -1157,42 +895,12 @@ type FileImageMediaMetadata struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Aperture") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FileImageMediaMetadata) MarshalJSON() ([]byte, error) {
 	type noMethod FileImageMediaMetadata
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *FileImageMediaMetadata) UnmarshalJSON(data []byte) error {
-	type noMethod FileImageMediaMetadata
-	var s1 struct {
-		Aperture         gensupport.JSONFloat64 `json:"aperture"`
-		ExposureBias     gensupport.JSONFloat64 `json:"exposureBias"`
-		ExposureTime     gensupport.JSONFloat64 `json:"exposureTime"`
-		FocalLength      gensupport.JSONFloat64 `json:"focalLength"`
-		MaxApertureValue gensupport.JSONFloat64 `json:"maxApertureValue"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.Aperture = float64(s1.Aperture)
-	s.ExposureBias = float64(s1.ExposureBias)
-	s.ExposureTime = float64(s1.ExposureTime)
-	s.FocalLength = float64(s1.FocalLength)
-	s.MaxApertureValue = float64(s1.MaxApertureValue)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FileImageMediaMetadataLocation: Geographic location information
@@ -1214,38 +922,12 @@ type FileImageMediaMetadataLocation struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Altitude") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FileImageMediaMetadataLocation) MarshalJSON() ([]byte, error) {
 	type noMethod FileImageMediaMetadataLocation
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *FileImageMediaMetadataLocation) UnmarshalJSON(data []byte) error {
-	type noMethod FileImageMediaMetadataLocation
-	var s1 struct {
-		Altitude  gensupport.JSONFloat64 `json:"altitude"`
-		Latitude  gensupport.JSONFloat64 `json:"latitude"`
-		Longitude gensupport.JSONFloat64 `json:"longitude"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.Altitude = float64(s1.Altitude)
-	s.Latitude = float64(s1.Latitude)
-	s.Longitude = float64(s1.Longitude)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FileVideoMediaMetadata: Additional metadata about video media. This
@@ -1267,46 +949,24 @@ type FileVideoMediaMetadata struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DurationMillis") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FileVideoMediaMetadata) MarshalJSON() ([]byte, error) {
 	type noMethod FileVideoMediaMetadata
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FileList: A list of files.
 type FileList struct {
-	// Files: The list of files. If nextPageToken is populated, then this
-	// list may be incomplete and an additional page of results should be
-	// fetched.
+	// Files: The page of files.
 	Files []*File `json:"files,omitempty"`
 
-	// IncompleteSearch: Whether the search process was incomplete. If true,
-	// then some search results may be missing, since all documents were not
-	// searched. This may occur when searching multiple Team Drives with the
-	// "user,allTeamDrives" corpora, but all corpora could not be searched.
-	// When this happens, it is suggested that clients narrow their query by
-	// choosing a different corpus such as "user" or "teamDrive".
-	IncompleteSearch bool `json:"incompleteSearch,omitempty"`
-
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#fileList".
+	// Kind: This is always drive#fileList.
 	Kind string `json:"kind,omitempty"`
 
 	// NextPageToken: The page token for the next page of files. This will
-	// be absent if the end of the files list has been reached. If the token
-	// is rejected for any reason, it should be discarded, and pagination
-	// should be restarted from the first page of results.
+	// be absent if the end of the files list has been reached.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -1320,20 +980,12 @@ type FileList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Files") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FileList) MarshalJSON() ([]byte, error) {
 	type noMethod FileList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GeneratedIds: A list of generated file IDs which can be provided in
@@ -1343,8 +995,7 @@ type GeneratedIds struct {
 	// space.
 	Ids []string `json:"ids,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#generatedIds".
+	// Kind: This is always drive#generatedIds
 	Kind string `json:"kind,omitempty"`
 
 	// Space: The type of file that can be created with these IDs.
@@ -1361,20 +1012,12 @@ type GeneratedIds struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Ids") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeneratedIds) MarshalJSON() ([]byte, error) {
 	type noMethod GeneratedIds
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Permission: A permission for a file. A permission grants a user,
@@ -1384,10 +1027,6 @@ type Permission struct {
 	// discovered through search. This is only applicable for permissions of
 	// type domain or anyone.
 	AllowFileDiscovery bool `json:"allowFileDiscovery,omitempty"`
-
-	// Deleted: Whether the account of the permission has been deleted. This
-	// field only pertains to user and group permissions.
-	Deleted bool `json:"deleted,omitempty"`
 
 	// DisplayName: A displayable name for users, groups or domains.
 	DisplayName string `json:"displayName,omitempty"`
@@ -1399,38 +1038,22 @@ type Permission struct {
 	// permission refers.
 	EmailAddress string `json:"emailAddress,omitempty"`
 
-	// ExpirationTime: The time at which this permission will expire (RFC
-	// 3339 date-time). Expiration times have the following restrictions:
-	//
-	// - They can only be set on user and group permissions
-	// - The time must be in the future
-	// - The time cannot be more than a year in the future
-	ExpirationTime string `json:"expirationTime,omitempty"`
-
 	// Id: The ID of this permission. This is a unique identifier for the
 	// grantee, and is published in User resources as permissionId.
 	Id string `json:"id,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#permission".
+	// Kind: This is always drive#permission.
 	Kind string `json:"kind,omitempty"`
 
 	// PhotoLink: A link to the user's profile photo, if available.
 	PhotoLink string `json:"photoLink,omitempty"`
 
-	// Role: The role granted by this permission. While new values may be
-	// supported in the future, the following are currently allowed:
-	// - organizer
+	// Role: The role granted by this permission. Valid values are:
 	// - owner
 	// - writer
 	// - commenter
 	// - reader
 	Role string `json:"role,omitempty"`
-
-	// TeamDrivePermissionDetails: Details of whether the permissions on
-	// this Team Drive item are inherited or directly on this item. This is
-	// an output-only field which is present only for Team Drive items.
-	TeamDrivePermissionDetails []*PermissionTeamDrivePermissionDetails `json:"teamDrivePermissionDetails,omitempty"`
 
 	// Type: The type of the grantee. Valid values are:
 	// - user
@@ -1450,88 +1073,20 @@ type Permission struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AllowFileDiscovery") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Permission) MarshalJSON() ([]byte, error) {
 	type noMethod Permission
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-type PermissionTeamDrivePermissionDetails struct {
-	// Inherited: Whether this permission is inherited. This field is always
-	// populated. This is an output-only field.
-	Inherited bool `json:"inherited,omitempty"`
-
-	// InheritedFrom: The ID of the item from which this permission is
-	// inherited. This is an output-only field and is only populated for
-	// members of the Team Drive.
-	InheritedFrom string `json:"inheritedFrom,omitempty"`
-
-	// Role: The primary role for this user. While new values may be added
-	// in the future, the following are currently possible:
-	// - organizer
-	// - writer
-	// - commenter
-	// - reader
-	Role string `json:"role,omitempty"`
-
-	// TeamDrivePermissionType: The Team Drive permission type for this
-	// user. While new values may be added in future, the following are
-	// currently possible:
-	// - file
-	// -
-	// - member
-	TeamDrivePermissionType string `json:"teamDrivePermissionType,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "Inherited") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Inherited") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *PermissionTeamDrivePermissionDetails) MarshalJSON() ([]byte, error) {
-	type noMethod PermissionTeamDrivePermissionDetails
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PermissionList: A list of permissions for a file.
 type PermissionList struct {
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#permissionList".
+	// Kind: This is always drive#permissionList.
 	Kind string `json:"kind,omitempty"`
 
-	// NextPageToken: The page token for the next page of permissions. This
-	// field will be absent if the end of the permissions list has been
-	// reached. If the token is rejected for any reason, it should be
-	// discarded, and pagination should be restarted from the first page of
-	// results.
-	NextPageToken string `json:"nextPageToken,omitempty"`
-
-	// Permissions: The list of permissions. If nextPageToken is populated,
-	// then this list may be incomplete and an additional page of results
-	// should be fetched.
+	// Permissions: The full list of permissions.
 	Permissions []*Permission `json:"permissions,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -1545,20 +1100,12 @@ type PermissionList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PermissionList) MarshalJSON() ([]byte, error) {
 	type noMethod PermissionList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Reply: A reply to a comment on a file.
@@ -1591,8 +1138,7 @@ type Reply struct {
 	// Id: The ID of the reply.
 	Id string `json:"id,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#reply".
+	// Kind: This is always drive#reply.
 	Kind string `json:"kind,omitempty"`
 
 	// ModifiedTime: The last time the reply was modified (RFC 3339
@@ -1610,37 +1156,24 @@ type Reply struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Action") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Reply) MarshalJSON() ([]byte, error) {
 	type noMethod Reply
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ReplyList: A list of replies to a comment on a file.
 type ReplyList struct {
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#replyList".
+	// Kind: This is always drive#replyList.
 	Kind string `json:"kind,omitempty"`
 
 	// NextPageToken: The page token for the next page of replies. This will
-	// be absent if the end of the replies list has been reached. If the
-	// token is rejected for any reason, it should be discarded, and
-	// pagination should be restarted from the first page of results.
+	// be absent if the end of the replies list has been reached.
 	NextPageToken string `json:"nextPageToken,omitempty"`
 
-	// Replies: The list of replies. If nextPageToken is populated, then
-	// this list may be incomplete and an additional page of results should
-	// be fetched.
+	// Replies: The page of replies.
 	Replies []*Reply `json:"replies,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -1654,20 +1187,12 @@ type ReplyList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ReplyList) MarshalJSON() ([]byte, error) {
 	type noMethod ReplyList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Revision: The metadata for a revision to a file.
@@ -1682,8 +1207,7 @@ type Revision struct {
 	// This field is only applicable to files with binary content in Drive.
 	KeepForever bool `json:"keepForever,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#revision".
+	// Kind: This is always drive#revision.
 	Kind string `json:"kind,omitempty"`
 
 	// LastModifyingUser: The last user to modify this revision.
@@ -1731,37 +1255,20 @@ type Revision struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Id") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Revision) MarshalJSON() ([]byte, error) {
 	type noMethod Revision
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RevisionList: A list of revisions of a file.
 type RevisionList struct {
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#revisionList".
+	// Kind: This is always drive#revisionList.
 	Kind string `json:"kind,omitempty"`
 
-	// NextPageToken: The page token for the next page of revisions. This
-	// will be absent if the end of the revisions list has been reached. If
-	// the token is rejected for any reason, it should be discarded, and
-	// pagination should be restarted from the first page of results.
-	NextPageToken string `json:"nextPageToken,omitempty"`
-
-	// Revisions: The list of revisions. If nextPageToken is populated, then
-	// this list may be incomplete and an additional page of results should
-	// be fetched.
+	// Revisions: The full list of revisions.
 	Revisions []*Revision `json:"revisions,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -1775,25 +1282,16 @@ type RevisionList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RevisionList) MarshalJSON() ([]byte, error) {
 	type noMethod RevisionList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type StartPageToken struct {
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#startPageToken".
+	// Kind: This is always drive#startPageToken.
 	Kind string `json:"kind,omitempty"`
 
 	// StartPageToken: The starting page token for listing changes.
@@ -1810,286 +1308,12 @@ type StartPageToken struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *StartPageToken) MarshalJSON() ([]byte, error) {
 	type noMethod StartPageToken
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// TeamDrive: Representation of a Team Drive.
-type TeamDrive struct {
-	// BackgroundImageFile: An image file and cropping parameters from which
-	// a background image for this Team Drive is set. This is a write only
-	// field that can only be set on a drive.teamdrives.update request that
-	// does not set themeId. When specified, all fields of the
-	// backgroundImageFile must be set.
-	BackgroundImageFile *TeamDriveBackgroundImageFile `json:"backgroundImageFile,omitempty"`
-
-	// BackgroundImageLink: A short-lived link to this Team Drive's
-	// background image.
-	BackgroundImageLink string `json:"backgroundImageLink,omitempty"`
-
-	// Capabilities: Capabilities the current user has on this Team Drive.
-	Capabilities *TeamDriveCapabilities `json:"capabilities,omitempty"`
-
-	// ColorRgb: The color of this Team Drive as an RGB hex string. It can
-	// only be set on a drive.teamdrives.update request that does not set
-	// themeId.
-	ColorRgb string `json:"colorRgb,omitempty"`
-
-	// Id: The ID of this Team Drive which is also the ID of the top level
-	// folder for this Team Drive.
-	Id string `json:"id,omitempty"`
-
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#teamDrive".
-	Kind string `json:"kind,omitempty"`
-
-	// Name: The name of this Team Drive.
-	Name string `json:"name,omitempty"`
-
-	// ThemeId: The ID of the theme from which the background image and
-	// color will be set. The set of possible teamDriveThemes can be
-	// retrieved from a drive.about.get response. When not specified on a
-	// drive.teamdrives.create request, a random theme is chosen from which
-	// the background image and color are set. This is a write only field
-	// that can only be set on a request that does not set colorRgb or
-	// backgroundImageFile.
-	ThemeId string `json:"themeId,omitempty"`
-
-	// ServerResponse contains the HTTP response code and headers from the
-	// server.
-	googleapi.ServerResponse `json:"-"`
-
-	// ForceSendFields is a list of field names (e.g. "BackgroundImageFile")
-	// to unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BackgroundImageFile") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *TeamDrive) MarshalJSON() ([]byte, error) {
-	type noMethod TeamDrive
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// TeamDriveBackgroundImageFile: An image file and cropping parameters
-// from which a background image for this Team Drive is set. This is a
-// write only field that can only be set on a drive.teamdrives.update
-// request that does not set themeId. When specified, all fields of the
-// backgroundImageFile must be set.
-type TeamDriveBackgroundImageFile struct {
-	// Id: The ID of an image file in Drive to use for the background image.
-	Id string `json:"id,omitempty"`
-
-	// Width: The width of the cropped image in the closed range of 0 to 1,
-	// which is the width of the cropped image divided by the width of the
-	// entire image. The height is computed by applying a width to height
-	// aspect ratio of 80 to 9. The resulting image must be at least 1280
-	// pixels wide and 144 pixels high.
-	Width float64 `json:"width,omitempty"`
-
-	// XCoordinate: The X coordinate of the upper left corner of the
-	// cropping area in the background image. This is a value in the closed
-	// range of 0 to 1 which is the horizontal distance from the left side
-	// of the entire image to the left side of the cropping area divided by
-	// the width of the entire image.
-	XCoordinate float64 `json:"xCoordinate,omitempty"`
-
-	// YCoordinate: The Y coordinate of the upper left corner of the
-	// cropping area in the background image. This is a value in the closed
-	// range of 0 to 1 which is the vertical distance from the top side of
-	// the entire image to the top side of the cropping area divided by the
-	// height of the entire image.
-	YCoordinate float64 `json:"yCoordinate,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "Id") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Id") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *TeamDriveBackgroundImageFile) MarshalJSON() ([]byte, error) {
-	type noMethod TeamDriveBackgroundImageFile
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *TeamDriveBackgroundImageFile) UnmarshalJSON(data []byte) error {
-	type noMethod TeamDriveBackgroundImageFile
-	var s1 struct {
-		Width       gensupport.JSONFloat64 `json:"width"`
-		XCoordinate gensupport.JSONFloat64 `json:"xCoordinate"`
-		YCoordinate gensupport.JSONFloat64 `json:"yCoordinate"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.Width = float64(s1.Width)
-	s.XCoordinate = float64(s1.XCoordinate)
-	s.YCoordinate = float64(s1.YCoordinate)
-	return nil
-}
-
-// TeamDriveCapabilities: Capabilities the current user has on this Team
-// Drive.
-type TeamDriveCapabilities struct {
-	// CanAddChildren: Whether the current user can add children to folders
-	// in this Team Drive.
-	CanAddChildren bool `json:"canAddChildren,omitempty"`
-
-	// CanChangeTeamDriveBackground: Whether the current user can change the
-	// background of this Team Drive.
-	CanChangeTeamDriveBackground bool `json:"canChangeTeamDriveBackground,omitempty"`
-
-	// CanComment: Whether the current user can comment on files in this
-	// Team Drive.
-	CanComment bool `json:"canComment,omitempty"`
-
-	// CanCopy: Whether the current user can copy files in this Team Drive.
-	CanCopy bool `json:"canCopy,omitempty"`
-
-	// CanDeleteTeamDrive: Whether the current user can delete this Team
-	// Drive. Attempting to delete the Team Drive may still fail if there
-	// are untrashed items inside the Team Drive.
-	CanDeleteTeamDrive bool `json:"canDeleteTeamDrive,omitempty"`
-
-	// CanDownload: Whether the current user can download files in this Team
-	// Drive.
-	CanDownload bool `json:"canDownload,omitempty"`
-
-	// CanEdit: Whether the current user can edit files in this Team Drive
-	CanEdit bool `json:"canEdit,omitempty"`
-
-	// CanListChildren: Whether the current user can list the children of
-	// folders in this Team Drive.
-	CanListChildren bool `json:"canListChildren,omitempty"`
-
-	// CanManageMembers: Whether the current user can add members to this
-	// Team Drive or remove them or change their role.
-	CanManageMembers bool `json:"canManageMembers,omitempty"`
-
-	// CanReadRevisions: Whether the current user can read the revisions
-	// resource of files in this Team Drive.
-	CanReadRevisions bool `json:"canReadRevisions,omitempty"`
-
-	// CanRemoveChildren: Whether the current user can remove children from
-	// folders in this Team Drive.
-	CanRemoveChildren bool `json:"canRemoveChildren,omitempty"`
-
-	// CanRename: Whether the current user can rename files or folders in
-	// this Team Drive.
-	CanRename bool `json:"canRename,omitempty"`
-
-	// CanRenameTeamDrive: Whether the current user can rename this Team
-	// Drive.
-	CanRenameTeamDrive bool `json:"canRenameTeamDrive,omitempty"`
-
-	// CanShare: Whether the current user can share files or folders in this
-	// Team Drive.
-	CanShare bool `json:"canShare,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "CanAddChildren") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CanAddChildren") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *TeamDriveCapabilities) MarshalJSON() ([]byte, error) {
-	type noMethod TeamDriveCapabilities
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// TeamDriveList: A list of Team Drives.
-type TeamDriveList struct {
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#teamDriveList".
-	Kind string `json:"kind,omitempty"`
-
-	// NextPageToken: The page token for the next page of Team Drives. This
-	// will be absent if the end of the Team Drives list has been reached.
-	// If the token is rejected for any reason, it should be discarded, and
-	// pagination should be restarted from the first page of results.
-	NextPageToken string `json:"nextPageToken,omitempty"`
-
-	// TeamDrives: The list of Team Drives. If nextPageToken is populated,
-	// then this list may be incomplete and an additional page of results
-	// should be fetched.
-	TeamDrives []*TeamDrive `json:"teamDrives,omitempty"`
-
-	// ServerResponse contains the HTTP response code and headers from the
-	// server.
-	googleapi.ServerResponse `json:"-"`
-
-	// ForceSendFields is a list of field names (e.g. "Kind") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *TeamDriveList) MarshalJSON() ([]byte, error) {
-	type noMethod TeamDriveList
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // User: Information about a Drive user.
@@ -2102,8 +1326,7 @@ type User struct {
 	// visible to the requester.
 	EmailAddress string `json:"emailAddress,omitempty"`
 
-	// Kind: Identifies what kind of resource this is. Value: the fixed
-	// string "drive#user".
+	// Kind: This is always drive#user.
 	Kind string `json:"kind,omitempty"`
 
 	// Me: Whether this user is the requesting user.
@@ -2122,20 +1345,12 @@ type User struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DisplayName") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *User) MarshalJSON() ([]byte, error) {
 	type noMethod User
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "drive.about.get":
@@ -2145,7 +1360,6 @@ type AboutGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets information about the user, the user's Drive, and system
@@ -2181,31 +1395,21 @@ func (c *AboutGetCall) Context(ctx context.Context) *AboutGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AboutGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AboutGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "about")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.about.get" call.
@@ -2240,8 +1444,7 @@ func (c *AboutGetCall) Do(opts ...googleapi.CallOption) (*About, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2273,28 +1476,12 @@ type ChangesGetStartPageTokenCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // GetStartPageToken: Gets the starting pageToken for listing future
 // changes.
 func (r *ChangesService) GetStartPageToken() *ChangesGetStartPageTokenCall {
 	c := &ChangesGetStartPageTokenCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *ChangesGetStartPageTokenCall) SupportsTeamDrives(supportsTeamDrives bool) *ChangesGetStartPageTokenCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
-	return c
-}
-
-// TeamDriveId sets the optional parameter "teamDriveId": The ID of the
-// Team Drive for which the starting pageToken for listing future
-// changes from that Team Drive will be returned.
-func (c *ChangesGetStartPageTokenCall) TeamDriveId(teamDriveId string) *ChangesGetStartPageTokenCall {
-	c.urlParams_.Set("teamDriveId", teamDriveId)
 	return c
 }
 
@@ -2324,31 +1511,21 @@ func (c *ChangesGetStartPageTokenCall) Context(ctx context.Context) *ChangesGetS
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ChangesGetStartPageTokenCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ChangesGetStartPageTokenCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "changes/startPageToken")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.changes.getStartPageToken" call.
@@ -2383,8 +1560,7 @@ func (c *ChangesGetStartPageTokenCall) Do(opts ...googleapi.CallOption) (*StartP
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2392,19 +1568,6 @@ func (c *ChangesGetStartPageTokenCall) Do(opts ...googleapi.CallOption) (*StartP
 	//   "description": "Gets the starting pageToken for listing future changes.",
 	//   "httpMethod": "GET",
 	//   "id": "drive.changes.getStartPageToken",
-	//   "parameters": {
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "teamDriveId": {
-	//       "description": "The ID of the Team Drive for which the starting pageToken for listing future changes from that Team Drive will be returned.",
-	//       "location": "query",
-	//       "type": "string"
-	//     }
-	//   },
 	//   "path": "changes/startPageToken",
 	//   "response": {
 	//     "$ref": "StartPageToken"
@@ -2429,39 +1592,20 @@ type ChangesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
-// List: Lists the changes for a user or Team Drive.
+// List: Lists changes for a user.
 func (r *ChangesService) List(pageToken string) *ChangesListCall {
 	c := &ChangesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.urlParams_.Set("pageToken", pageToken)
 	return c
 }
 
-// IncludeCorpusRemovals sets the optional parameter
-// "includeCorpusRemovals": Whether changes should include the file
-// resource if the file is still accessible by the user at the time of
-// the request, even when a file was removed from the list of changes
-// and there will be no further change entries for this file.
-func (c *ChangesListCall) IncludeCorpusRemovals(includeCorpusRemovals bool) *ChangesListCall {
-	c.urlParams_.Set("includeCorpusRemovals", fmt.Sprint(includeCorpusRemovals))
-	return c
-}
-
 // IncludeRemoved sets the optional parameter "includeRemoved": Whether
-// to include changes indicating that items have been removed from the
-// list of changes, for example by deletion or loss of access.
+// to include changes indicating that items have left the view of the
+// changes list, for example by deletion or lost access.
 func (c *ChangesListCall) IncludeRemoved(includeRemoved bool) *ChangesListCall {
 	c.urlParams_.Set("includeRemoved", fmt.Sprint(includeRemoved))
-	return c
-}
-
-// IncludeTeamDriveItems sets the optional parameter
-// "includeTeamDriveItems": Whether Team Drive files or changes should
-// be included in results.
-func (c *ChangesListCall) IncludeTeamDriveItems(includeTeamDriveItems bool) *ChangesListCall {
-	c.urlParams_.Set("includeTeamDriveItems", fmt.Sprint(includeTeamDriveItems))
 	return c
 }
 
@@ -2487,22 +1631,6 @@ func (c *ChangesListCall) RestrictToMyDrive(restrictToMyDrive bool) *ChangesList
 // 'drive', 'appDataFolder' and 'photos'.
 func (c *ChangesListCall) Spaces(spaces string) *ChangesListCall {
 	c.urlParams_.Set("spaces", spaces)
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *ChangesListCall) SupportsTeamDrives(supportsTeamDrives bool) *ChangesListCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
-	return c
-}
-
-// TeamDriveId sets the optional parameter "teamDriveId": The Team Drive
-// from which changes will be returned. If specified the change IDs will
-// be reflective of the Team Drive; use the combined Team Drive ID and
-// change ID as an identifier.
-func (c *ChangesListCall) TeamDriveId(teamDriveId string) *ChangesListCall {
-	c.urlParams_.Set("teamDriveId", teamDriveId)
 	return c
 }
 
@@ -2532,31 +1660,21 @@ func (c *ChangesListCall) Context(ctx context.Context) *ChangesListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ChangesListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ChangesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "changes")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.changes.list" call.
@@ -2591,34 +1709,21 @@ func (c *ChangesListCall) Do(opts ...googleapi.CallOption) (*ChangeList, error) 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists the changes for a user or Team Drive.",
+	//   "description": "Lists changes for a user.",
 	//   "httpMethod": "GET",
 	//   "id": "drive.changes.list",
 	//   "parameterOrder": [
 	//     "pageToken"
 	//   ],
 	//   "parameters": {
-	//     "includeCorpusRemovals": {
-	//       "default": "false",
-	//       "description": "Whether changes should include the file resource if the file is still accessible by the user at the time of the request, even when a file was removed from the list of changes and there will be no further change entries for this file.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
 	//     "includeRemoved": {
 	//       "default": "true",
-	//       "description": "Whether to include changes indicating that items have been removed from the list of changes, for example by deletion or loss of access.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "includeTeamDriveItems": {
-	//       "default": "false",
-	//       "description": "Whether Team Drive files or changes should be included in results.",
+	//       "description": "Whether to include changes indicating that items have left the view of the changes list, for example by deletion or lost access.",
 	//       "location": "query",
 	//       "type": "boolean"
 	//     },
@@ -2648,17 +1753,6 @@ func (c *ChangesListCall) Do(opts ...googleapi.CallOption) (*ChangeList, error) 
 	//       "description": "A comma-separated list of spaces to query within the user corpus. Supported values are 'drive', 'appDataFolder' and 'photos'.",
 	//       "location": "query",
 	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "teamDriveId": {
-	//       "description": "The Team Drive from which changes will be returned. If specified the change IDs will be reflective of the Team Drive; use the combined Team Drive ID and change ID as an identifier.",
-	//       "location": "query",
-	//       "type": "string"
 	//     }
 	//   },
 	//   "path": "changes",
@@ -2686,7 +1780,6 @@ type ChangesWatchCall struct {
 	channel    *Channel
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Watch: Subscribes to changes for a user.
@@ -2697,29 +1790,11 @@ func (r *ChangesService) Watch(pageToken string, channel *Channel) *ChangesWatch
 	return c
 }
 
-// IncludeCorpusRemovals sets the optional parameter
-// "includeCorpusRemovals": Whether changes should include the file
-// resource if the file is still accessible by the user at the time of
-// the request, even when a file was removed from the list of changes
-// and there will be no further change entries for this file.
-func (c *ChangesWatchCall) IncludeCorpusRemovals(includeCorpusRemovals bool) *ChangesWatchCall {
-	c.urlParams_.Set("includeCorpusRemovals", fmt.Sprint(includeCorpusRemovals))
-	return c
-}
-
 // IncludeRemoved sets the optional parameter "includeRemoved": Whether
-// to include changes indicating that items have been removed from the
-// list of changes, for example by deletion or loss of access.
+// to include changes indicating that items have left the view of the
+// changes list, for example by deletion or lost access.
 func (c *ChangesWatchCall) IncludeRemoved(includeRemoved bool) *ChangesWatchCall {
 	c.urlParams_.Set("includeRemoved", fmt.Sprint(includeRemoved))
-	return c
-}
-
-// IncludeTeamDriveItems sets the optional parameter
-// "includeTeamDriveItems": Whether Team Drive files or changes should
-// be included in results.
-func (c *ChangesWatchCall) IncludeTeamDriveItems(includeTeamDriveItems bool) *ChangesWatchCall {
-	c.urlParams_.Set("includeTeamDriveItems", fmt.Sprint(includeTeamDriveItems))
 	return c
 }
 
@@ -2748,22 +1823,6 @@ func (c *ChangesWatchCall) Spaces(spaces string) *ChangesWatchCall {
 	return c
 }
 
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *ChangesWatchCall) SupportsTeamDrives(supportsTeamDrives bool) *ChangesWatchCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
-	return c
-}
-
-// TeamDriveId sets the optional parameter "teamDriveId": The Team Drive
-// from which changes will be returned. If specified the change IDs will
-// be reflective of the Team Drive; use the combined Team Drive ID and
-// change ID as an identifier.
-func (c *ChangesWatchCall) TeamDriveId(teamDriveId string) *ChangesWatchCall {
-	c.urlParams_.Set("teamDriveId", teamDriveId)
-	return c
-}
-
 // Fields allows partial responses to be retrieved. See
 // https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
 // for more information.
@@ -2780,33 +1839,24 @@ func (c *ChangesWatchCall) Context(ctx context.Context) *ChangesWatchCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ChangesWatchCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ChangesWatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.channel)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "changes/watch")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.changes.watch" call.
@@ -2841,8 +1891,7 @@ func (c *ChangesWatchCall) Do(opts ...googleapi.CallOption) (*Channel, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2854,21 +1903,9 @@ func (c *ChangesWatchCall) Do(opts ...googleapi.CallOption) (*Channel, error) {
 	//     "pageToken"
 	//   ],
 	//   "parameters": {
-	//     "includeCorpusRemovals": {
-	//       "default": "false",
-	//       "description": "Whether changes should include the file resource if the file is still accessible by the user at the time of the request, even when a file was removed from the list of changes and there will be no further change entries for this file.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
 	//     "includeRemoved": {
 	//       "default": "true",
-	//       "description": "Whether to include changes indicating that items have been removed from the list of changes, for example by deletion or loss of access.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "includeTeamDriveItems": {
-	//       "default": "false",
-	//       "description": "Whether Team Drive files or changes should be included in results.",
+	//       "description": "Whether to include changes indicating that items have left the view of the changes list, for example by deletion or lost access.",
 	//       "location": "query",
 	//       "type": "boolean"
 	//     },
@@ -2896,17 +1933,6 @@ func (c *ChangesWatchCall) Do(opts ...googleapi.CallOption) (*Channel, error) {
 	//     "spaces": {
 	//       "default": "drive",
 	//       "description": "A comma-separated list of spaces to query within the user corpus. Supported values are 'drive', 'appDataFolder' and 'photos'.",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "teamDriveId": {
-	//       "description": "The Team Drive from which changes will be returned. If specified the change IDs will be reflective of the Team Drive; use the combined Team Drive ID and change ID as an identifier.",
 	//       "location": "query",
 	//       "type": "string"
 	//     }
@@ -2940,7 +1966,6 @@ type ChannelsStopCall struct {
 	channel    *Channel
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Stop: Stop watching resources through this channel
@@ -2966,33 +1991,24 @@ func (c *ChannelsStopCall) Context(ctx context.Context) *ChannelsStopCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ChannelsStopCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ChannelsStopCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.channel)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "channels/stop")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.channels.stop" call.
@@ -3037,7 +2053,6 @@ type CommentsCreateCall struct {
 	comment    *Comment
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Create: Creates a new comment on a file.
@@ -3064,36 +2079,26 @@ func (c *CommentsCreateCall) Context(ctx context.Context) *CommentsCreateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *CommentsCreateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *CommentsCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.comment)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.comments.create" call.
@@ -3128,8 +2133,7 @@ func (c *CommentsCreateCall) Do(opts ...googleapi.CallOption) (*Comment, error) 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3171,7 +2175,6 @@ type CommentsDeleteCall struct {
 	commentId  string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Delete: Deletes a comment.
@@ -3198,32 +2201,21 @@ func (c *CommentsDeleteCall) Context(ctx context.Context) *CommentsDeleteCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *CommentsDeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *CommentsDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":    c.fileId,
 		"commentId": c.commentId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.comments.delete" call.
@@ -3278,7 +2270,6 @@ type CommentsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets a comment by ID.
@@ -3323,35 +2314,24 @@ func (c *CommentsGetCall) Context(ctx context.Context) *CommentsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *CommentsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *CommentsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":    c.fileId,
 		"commentId": c.commentId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.comments.get" call.
@@ -3386,8 +2366,7 @@ func (c *CommentsGetCall) Do(opts ...googleapi.CallOption) (*Comment, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3440,7 +2419,6 @@ type CommentsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists a file's comments.
@@ -3507,34 +2485,23 @@ func (c *CommentsListCall) Context(ctx context.Context) *CommentsListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *CommentsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *CommentsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.comments.list" call.
@@ -3569,8 +2536,7 @@ func (c *CommentsListCall) Do(opts ...googleapi.CallOption) (*CommentList, error
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3657,7 +2623,6 @@ type CommentsUpdateCall struct {
 	comment    *Comment
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Update: Updates a comment with patch semantics.
@@ -3685,37 +2650,27 @@ func (c *CommentsUpdateCall) Context(ctx context.Context) *CommentsUpdateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *CommentsUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *CommentsUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.comment)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":    c.fileId,
 		"commentId": c.commentId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.comments.update" call.
@@ -3750,8 +2705,7 @@ func (c *CommentsUpdateCall) Do(opts ...googleapi.CallOption) (*Comment, error) 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3800,7 +2754,6 @@ type FilesCopyCall struct {
 	file       *File
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Copy: Creates a copy of a file and applies any requested updates with
@@ -3839,13 +2792,6 @@ func (c *FilesCopyCall) OcrLanguage(ocrLanguage string) *FilesCopyCall {
 	return c
 }
 
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *FilesCopyCall) SupportsTeamDrives(supportsTeamDrives bool) *FilesCopyCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
-	return c
-}
-
 // Fields allows partial responses to be retrieved. See
 // https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
 // for more information.
@@ -3862,36 +2808,26 @@ func (c *FilesCopyCall) Context(ctx context.Context) *FilesCopyCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesCopyCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesCopyCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.file)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/copy")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.files.copy" call.
@@ -3926,8 +2862,7 @@ func (c *FilesCopyCall) Do(opts ...googleapi.CallOption) (*File, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3961,12 +2896,6 @@ func (c *FilesCopyCall) Do(opts ...googleapi.CallOption) (*File, error) {
 	//       "description": "A language hint for OCR processing during image import (ISO 639-1 code).",
 	//       "location": "query",
 	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "files/{fileId}/copy",
@@ -3993,12 +2922,11 @@ type FilesCreateCall struct {
 	file             *File
 	urlParams_       gensupport.URLParams
 	media_           io.Reader
-	mediaBuffer_     *gensupport.MediaBuffer
+	resumableBuffer_ *gensupport.ResumableBuffer
 	mediaType_       string
 	mediaSize_       int64 // mediaSize, if known.  Used only for calls to progressUpdater_.
 	progressUpdater_ googleapi.ProgressUpdater
 	ctx_             context.Context
-	header_          http.Header
 }
 
 // Create: Creates a new file.
@@ -4035,13 +2963,6 @@ func (c *FilesCreateCall) OcrLanguage(ocrLanguage string) *FilesCreateCall {
 	return c
 }
 
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *FilesCreateCall) SupportsTeamDrives(supportsTeamDrives bool) *FilesCreateCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
-	return c
-}
-
 // UseContentAsIndexableText sets the optional parameter
 // "useContentAsIndexableText": Whether to use the uploaded content as
 // indexable text.
@@ -4064,7 +2985,7 @@ func (c *FilesCreateCall) Media(r io.Reader, options ...googleapi.MediaOption) *
 	if !opts.ForceEmptyContentType {
 		r, c.mediaType_ = gensupport.DetermineContentType(r, opts.ContentType)
 	}
-	c.media_, c.mediaBuffer_ = gensupport.PrepareUpload(r, chunkSize)
+	c.media_, c.resumableBuffer_ = gensupport.PrepareUpload(r, chunkSize)
 	return c
 }
 
@@ -4081,7 +3002,7 @@ func (c *FilesCreateCall) ResumableMedia(ctx context.Context, r io.ReaderAt, siz
 	c.ctx_ = ctx
 	rdr := gensupport.ReaderAtToReader(r, size)
 	rdr, c.mediaType_ = gensupport.DetermineContentType(rdr, mediaType)
-	c.mediaBuffer_ = gensupport.NewMediaBuffer(rdr, googleapi.DefaultUploadChunkSize)
+	c.resumableBuffer_ = gensupport.NewResumableBuffer(rdr, googleapi.DefaultUploadChunkSize)
 	c.media_ = nil
 	c.mediaSize_ = size
 	return c
@@ -4114,54 +3035,41 @@ func (c *FilesCreateCall) Context(ctx context.Context) *FilesCreateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesCreateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.file)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files")
-	if c.media_ != nil || c.mediaBuffer_ != nil {
+	if c.media_ != nil || c.resumableBuffer_ != nil {
 		urls = strings.Replace(urls, "https://www.googleapis.com/", "https://www.googleapis.com/upload/", 1)
 		protocol := "multipart"
-		if c.mediaBuffer_ != nil {
+		if c.resumableBuffer_ != nil {
 			protocol = "resumable"
 		}
 		c.urlParams_.Set("uploadType", protocol)
 	}
-	if body == nil {
-		body = new(bytes.Buffer)
-		reqHeaders.Set("Content-Type", "application/json")
-	}
+	urls += "?" + c.urlParams_.Encode()
 	if c.media_ != nil {
-		combined, ctype := gensupport.CombineBodyMedia(body, "application/json", c.media_, c.mediaType_)
+		var combined io.ReadCloser
+		combined, ctype = gensupport.CombineBodyMedia(body, ctype, c.media_, c.mediaType_)
 		defer combined.Close()
-		reqHeaders.Set("Content-Type", ctype)
 		body = combined
 	}
-	if c.mediaBuffer_ != nil && c.mediaType_ != "" {
-		reqHeaders.Set("X-Upload-Content-Type", c.mediaType_)
-	}
-	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	if c.resumableBuffer_ != nil && c.mediaType_ != "" {
+		req.Header.Set("X-Upload-Content-Type", c.mediaType_)
+	}
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.files.create" call.
@@ -4173,7 +3081,9 @@ func (c *FilesCreateCall) doRequest(alt string) (*http.Response, error) {
 // returned.
 func (c *FilesCreateCall) Do(opts ...googleapi.CallOption) (*File, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
+	res, err := gensupport.Retry(c.ctx_, func() (*http.Response, error) {
+		return c.doRequest("json")
+	}, gensupport.DefaultBackoffStrategy())
 	if res != nil && res.StatusCode == http.StatusNotModified {
 		if res.Body != nil {
 			res.Body.Close()
@@ -4190,13 +3100,13 @@ func (c *FilesCreateCall) Do(opts ...googleapi.CallOption) (*File, error) {
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
-	if c.mediaBuffer_ != nil {
+	if c.resumableBuffer_ != nil {
 		loc := res.Header.Get("Location")
 		rx := &gensupport.ResumableUpload{
 			Client:    c.s.client,
 			UserAgent: c.s.userAgent(),
 			URI:       loc,
-			Media:     c.mediaBuffer_,
+			Media:     c.resumableBuffer_,
 			MediaType: c.mediaType_,
 			Callback: func(curr int64) {
 				if c.progressUpdater_ != nil {
@@ -4223,8 +3133,7 @@ func (c *FilesCreateCall) Do(opts ...googleapi.CallOption) (*File, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4266,12 +3175,6 @@ func (c *FilesCreateCall) Do(opts ...googleapi.CallOption) (*File, error) {
 	//       "location": "query",
 	//       "type": "string"
 	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
 	//     "useContentAsIndexableText": {
 	//       "default": "false",
 	//       "description": "Whether to use the uploaded content as indexable text.",
@@ -4304,23 +3207,14 @@ type FilesDeleteCall struct {
 	fileId     string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Delete: Permanently deletes a file owned by the user without moving
-// it to the trash. If the file belongs to a Team Drive the user must be
-// an organizer on the parent. If the target is a folder, all
-// descendants owned by the user are also deleted.
+// it to the trash. If the target is a folder, all descendants owned by
+// the user are also deleted.
 func (r *FilesService) Delete(fileId string) *FilesDeleteCall {
 	c := &FilesDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.fileId = fileId
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *FilesDeleteCall) SupportsTeamDrives(supportsTeamDrives bool) *FilesDeleteCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
 	return c
 }
 
@@ -4340,31 +3234,20 @@ func (c *FilesDeleteCall) Context(ctx context.Context) *FilesDeleteCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesDeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.files.delete" call.
@@ -4380,7 +3263,7 @@ func (c *FilesDeleteCall) Do(opts ...googleapi.CallOption) error {
 	}
 	return nil
 	// {
-	//   "description": "Permanently deletes a file owned by the user without moving it to the trash. If the file belongs to a Team Drive the user must be an organizer on the parent. If the target is a folder, all descendants owned by the user are also deleted.",
+	//   "description": "Permanently deletes a file owned by the user without moving it to the trash. If the target is a folder, all descendants owned by the user are also deleted.",
 	//   "httpMethod": "DELETE",
 	//   "id": "drive.files.delete",
 	//   "parameterOrder": [
@@ -4392,12 +3275,6 @@ func (c *FilesDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "files/{fileId}",
@@ -4416,7 +3293,6 @@ type FilesEmptyTrashCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // EmptyTrash: Permanently deletes all of the user's trashed files.
@@ -4441,28 +3317,18 @@ func (c *FilesEmptyTrashCall) Context(ctx context.Context) *FilesEmptyTrashCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesEmptyTrashCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesEmptyTrashCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/trash")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.files.emptyTrash" call.
@@ -4497,7 +3363,6 @@ type FilesExportCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Export: Exports a Google Doc to the requested MIME type and returns
@@ -4535,34 +3400,23 @@ func (c *FilesExportCall) Context(ctx context.Context) *FilesExportCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesExportCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesExportCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/export")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Download fetches the API endpoint's "media" value, instead of the normal
@@ -4633,7 +3487,6 @@ type FilesGenerateIdsCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // GenerateIds: Generates a set of file IDs which can be provided in
@@ -4684,31 +3537,21 @@ func (c *FilesGenerateIdsCall) Context(ctx context.Context) *FilesGenerateIdsCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesGenerateIdsCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesGenerateIdsCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/generateIds")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.files.generateIds" call.
@@ -4743,8 +3586,7 @@ func (c *FilesGenerateIdsCall) Do(opts ...googleapi.CallOption) (*GeneratedIds, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4790,7 +3632,6 @@ type FilesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets a file's metadata or content by ID.
@@ -4806,13 +3647,6 @@ func (r *FilesService) Get(fileId string) *FilesGetCall {
 // alt=media.
 func (c *FilesGetCall) AcknowledgeAbuse(acknowledgeAbuse bool) *FilesGetCall {
 	c.urlParams_.Set("acknowledgeAbuse", fmt.Sprint(acknowledgeAbuse))
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *FilesGetCall) SupportsTeamDrives(supportsTeamDrives bool) *FilesGetCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
 	return c
 }
 
@@ -4842,34 +3676,23 @@ func (c *FilesGetCall) Context(ctx context.Context) *FilesGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Download fetches the API endpoint's "media" value, instead of the normal
@@ -4920,8 +3743,7 @@ func (c *FilesGetCall) Do(opts ...googleapi.CallOption) (*File, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4944,12 +3766,6 @@ func (c *FilesGetCall) Do(opts ...googleapi.CallOption) (*File, error) {
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "files/{fileId}",
@@ -4979,7 +3795,6 @@ type FilesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists or searches files.
@@ -4988,33 +3803,14 @@ func (r *FilesService) List() *FilesListCall {
 	return c
 }
 
-// Corpora sets the optional parameter "corpora": Comma-separated list
-// of bodies of items (files/documents) to which the query applies.
-// Supported bodies are 'user', 'domain', 'teamDrive' and
-// 'allTeamDrives'. 'allTeamDrives' must be combined with 'user'; all
-// other values must be used in isolation. Prefer 'user' or 'teamDrive'
-// to 'allTeamDrives' for efficiency.
-func (c *FilesListCall) Corpora(corpora string) *FilesListCall {
-	c.urlParams_.Set("corpora", corpora)
-	return c
-}
-
 // Corpus sets the optional parameter "corpus": The source of files to
-// list. Deprecated: use 'corpora' instead.
+// list.
 //
 // Possible values:
 //   "domain" - Files shared to the user's domain.
-//   "user" - Files owned by or shared to the user.
+//   "user" (default) - Files owned by or shared to the user.
 func (c *FilesListCall) Corpus(corpus string) *FilesListCall {
 	c.urlParams_.Set("corpus", corpus)
-	return c
-}
-
-// IncludeTeamDriveItems sets the optional parameter
-// "includeTeamDriveItems": Whether Team Drive items should be included
-// in results.
-func (c *FilesListCall) IncludeTeamDriveItems(includeTeamDriveItems bool) *FilesListCall {
-	c.urlParams_.Set("includeTeamDriveItems", fmt.Sprint(includeTeamDriveItems))
 	return c
 }
 
@@ -5033,8 +3829,7 @@ func (c *FilesListCall) OrderBy(orderBy string) *FilesListCall {
 }
 
 // PageSize sets the optional parameter "pageSize": The maximum number
-// of files to return per page. Partial or empty result pages are
-// possible even before the end of the files list has been reached.
+// of files to return per page.
 func (c *FilesListCall) PageSize(pageSize int64) *FilesListCall {
 	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
 	return c
@@ -5060,20 +3855,6 @@ func (c *FilesListCall) Q(q string) *FilesListCall {
 // 'appDataFolder' and 'photos'.
 func (c *FilesListCall) Spaces(spaces string) *FilesListCall {
 	c.urlParams_.Set("spaces", spaces)
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *FilesListCall) SupportsTeamDrives(supportsTeamDrives bool) *FilesListCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
-	return c
-}
-
-// TeamDriveId sets the optional parameter "teamDriveId": ID of Team
-// Drive to search.
-func (c *FilesListCall) TeamDriveId(teamDriveId string) *FilesListCall {
-	c.urlParams_.Set("teamDriveId", teamDriveId)
 	return c
 }
 
@@ -5103,31 +3884,21 @@ func (c *FilesListCall) Context(ctx context.Context) *FilesListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.files.list" call.
@@ -5162,8 +3933,7 @@ func (c *FilesListCall) Do(opts ...googleapi.CallOption) (*FileList, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5172,13 +3942,9 @@ func (c *FilesListCall) Do(opts ...googleapi.CallOption) (*FileList, error) {
 	//   "httpMethod": "GET",
 	//   "id": "drive.files.list",
 	//   "parameters": {
-	//     "corpora": {
-	//       "description": "Comma-separated list of bodies of items (files/documents) to which the query applies. Supported bodies are 'user', 'domain', 'teamDrive' and 'allTeamDrives'. 'allTeamDrives' must be combined with 'user'; all other values must be used in isolation. Prefer 'user' or 'teamDrive' to 'allTeamDrives' for efficiency.",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
 	//     "corpus": {
-	//       "description": "The source of files to list. Deprecated: use 'corpora' instead.",
+	//       "default": "user",
+	//       "description": "The source of files to list.",
 	//       "enum": [
 	//         "domain",
 	//         "user"
@@ -5190,12 +3956,6 @@ func (c *FilesListCall) Do(opts ...googleapi.CallOption) (*FileList, error) {
 	//       "location": "query",
 	//       "type": "string"
 	//     },
-	//     "includeTeamDriveItems": {
-	//       "default": "false",
-	//       "description": "Whether Team Drive items should be included in results.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
 	//     "orderBy": {
 	//       "description": "A comma-separated list of sort keys. Valid keys are 'createdTime', 'folder', 'modifiedByMeTime', 'modifiedTime', 'name', 'quotaBytesUsed', 'recency', 'sharedWithMeTime', 'starred', and 'viewedByMeTime'. Each key sorts ascending by default, but may be reversed with the 'desc' modifier. Example usage: ?orderBy=folder,modifiedTime desc,name. Please note that there is a current limitation for users with approximately one million files in which the requested sort order is ignored.",
 	//       "location": "query",
@@ -5203,7 +3963,7 @@ func (c *FilesListCall) Do(opts ...googleapi.CallOption) (*FileList, error) {
 	//     },
 	//     "pageSize": {
 	//       "default": "100",
-	//       "description": "The maximum number of files to return per page. Partial or empty result pages are possible even before the end of the files list has been reached.",
+	//       "description": "The maximum number of files to return per page.",
 	//       "format": "int32",
 	//       "location": "query",
 	//       "maximum": "1000",
@@ -5223,17 +3983,6 @@ func (c *FilesListCall) Do(opts ...googleapi.CallOption) (*FileList, error) {
 	//     "spaces": {
 	//       "default": "drive",
 	//       "description": "A comma-separated list of spaces to query within the corpus. Supported values are 'drive', 'appDataFolder' and 'photos'.",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "teamDriveId": {
-	//       "description": "ID of Team Drive to search.",
 	//       "location": "query",
 	//       "type": "string"
 	//     }
@@ -5284,12 +4033,11 @@ type FilesUpdateCall struct {
 	file             *File
 	urlParams_       gensupport.URLParams
 	media_           io.Reader
-	mediaBuffer_     *gensupport.MediaBuffer
+	resumableBuffer_ *gensupport.ResumableBuffer
 	mediaType_       string
 	mediaSize_       int64 // mediaSize, if known.  Used only for calls to progressUpdater_.
 	progressUpdater_ googleapi.ProgressUpdater
 	ctx_             context.Context
-	header_          http.Header
 }
 
 // Update: Updates a file's metadata and/or content with patch
@@ -5331,13 +4079,6 @@ func (c *FilesUpdateCall) RemoveParents(removeParents string) *FilesUpdateCall {
 	return c
 }
 
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *FilesUpdateCall) SupportsTeamDrives(supportsTeamDrives bool) *FilesUpdateCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
-	return c
-}
-
 // UseContentAsIndexableText sets the optional parameter
 // "useContentAsIndexableText": Whether to use the uploaded content as
 // indexable text.
@@ -5360,7 +4101,7 @@ func (c *FilesUpdateCall) Media(r io.Reader, options ...googleapi.MediaOption) *
 	if !opts.ForceEmptyContentType {
 		r, c.mediaType_ = gensupport.DetermineContentType(r, opts.ContentType)
 	}
-	c.media_, c.mediaBuffer_ = gensupport.PrepareUpload(r, chunkSize)
+	c.media_, c.resumableBuffer_ = gensupport.PrepareUpload(r, chunkSize)
 	return c
 }
 
@@ -5377,7 +4118,7 @@ func (c *FilesUpdateCall) ResumableMedia(ctx context.Context, r io.ReaderAt, siz
 	c.ctx_ = ctx
 	rdr := gensupport.ReaderAtToReader(r, size)
 	rdr, c.mediaType_ = gensupport.DetermineContentType(rdr, mediaType)
-	c.mediaBuffer_ = gensupport.NewMediaBuffer(rdr, googleapi.DefaultUploadChunkSize)
+	c.resumableBuffer_ = gensupport.NewResumableBuffer(rdr, googleapi.DefaultUploadChunkSize)
 	c.media_ = nil
 	c.mediaSize_ = size
 	return c
@@ -5410,57 +4151,43 @@ func (c *FilesUpdateCall) Context(ctx context.Context) *FilesUpdateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.file)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}")
-	if c.media_ != nil || c.mediaBuffer_ != nil {
+	if c.media_ != nil || c.resumableBuffer_ != nil {
 		urls = strings.Replace(urls, "https://www.googleapis.com/", "https://www.googleapis.com/upload/", 1)
 		protocol := "multipart"
-		if c.mediaBuffer_ != nil {
+		if c.resumableBuffer_ != nil {
 			protocol = "resumable"
 		}
 		c.urlParams_.Set("uploadType", protocol)
 	}
-	if body == nil {
-		body = new(bytes.Buffer)
-		reqHeaders.Set("Content-Type", "application/json")
-	}
+	urls += "?" + c.urlParams_.Encode()
 	if c.media_ != nil {
-		combined, ctype := gensupport.CombineBodyMedia(body, "application/json", c.media_, c.mediaType_)
+		var combined io.ReadCloser
+		combined, ctype = gensupport.CombineBodyMedia(body, ctype, c.media_, c.mediaType_)
 		defer combined.Close()
-		reqHeaders.Set("Content-Type", ctype)
 		body = combined
 	}
-	if c.mediaBuffer_ != nil && c.mediaType_ != "" {
-		reqHeaders.Set("X-Upload-Content-Type", c.mediaType_)
-	}
-	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	if c.resumableBuffer_ != nil && c.mediaType_ != "" {
+		req.Header.Set("X-Upload-Content-Type", c.mediaType_)
+	}
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.files.update" call.
@@ -5472,7 +4199,9 @@ func (c *FilesUpdateCall) doRequest(alt string) (*http.Response, error) {
 // returned.
 func (c *FilesUpdateCall) Do(opts ...googleapi.CallOption) (*File, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
+	res, err := gensupport.Retry(c.ctx_, func() (*http.Response, error) {
+		return c.doRequest("json")
+	}, gensupport.DefaultBackoffStrategy())
 	if res != nil && res.StatusCode == http.StatusNotModified {
 		if res.Body != nil {
 			res.Body.Close()
@@ -5489,13 +4218,13 @@ func (c *FilesUpdateCall) Do(opts ...googleapi.CallOption) (*File, error) {
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
-	if c.mediaBuffer_ != nil {
+	if c.resumableBuffer_ != nil {
 		loc := res.Header.Get("Location")
 		rx := &gensupport.ResumableUpload{
 			Client:    c.s.client,
 			UserAgent: c.s.userAgent(),
 			URI:       loc,
-			Media:     c.mediaBuffer_,
+			Media:     c.resumableBuffer_,
 			MediaType: c.mediaType_,
 			Callback: func(curr int64) {
 				if c.progressUpdater_ != nil {
@@ -5522,8 +4251,7 @@ func (c *FilesUpdateCall) Do(opts ...googleapi.CallOption) (*File, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5578,12 +4306,6 @@ func (c *FilesUpdateCall) Do(opts ...googleapi.CallOption) (*File, error) {
 	//       "location": "query",
 	//       "type": "string"
 	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
 	//     "useContentAsIndexableText": {
 	//       "default": "false",
 	//       "description": "Whether to use the uploaded content as indexable text.",
@@ -5618,7 +4340,6 @@ type FilesWatchCall struct {
 	channel    *Channel
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Watch: Subscribes to changes to a file
@@ -5638,13 +4359,6 @@ func (c *FilesWatchCall) AcknowledgeAbuse(acknowledgeAbuse bool) *FilesWatchCall
 	return c
 }
 
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *FilesWatchCall) SupportsTeamDrives(supportsTeamDrives bool) *FilesWatchCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
-	return c
-}
-
 // Fields allows partial responses to be retrieved. See
 // https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
 // for more information.
@@ -5661,36 +4375,26 @@ func (c *FilesWatchCall) Context(ctx context.Context) *FilesWatchCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *FilesWatchCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *FilesWatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.channel)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/watch")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Download fetches the API endpoint's "media" value, instead of the normal
@@ -5741,8 +4445,7 @@ func (c *FilesWatchCall) Do(opts ...googleapi.CallOption) (*Channel, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5765,12 +4468,6 @@ func (c *FilesWatchCall) Do(opts ...googleapi.CallOption) (*Channel, error) {
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "files/{fileId}/watch",
@@ -5805,10 +4502,9 @@ type PermissionsCreateCall struct {
 	permission *Permission
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
-// Create: Creates a permission for a file or Team Drive.
+// Create: Creates a permission for a file.
 func (r *PermissionsService) Create(fileId string, permission *Permission) *PermissionsCreateCall {
 	c := &PermissionsCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.fileId = fileId
@@ -5830,13 +4526,6 @@ func (c *PermissionsCreateCall) EmailMessage(emailMessage string) *PermissionsCr
 // disabled for ownership transfers.
 func (c *PermissionsCreateCall) SendNotificationEmail(sendNotificationEmail bool) *PermissionsCreateCall {
 	c.urlParams_.Set("sendNotificationEmail", fmt.Sprint(sendNotificationEmail))
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *PermissionsCreateCall) SupportsTeamDrives(supportsTeamDrives bool) *PermissionsCreateCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
 	return c
 }
 
@@ -5865,36 +4554,26 @@ func (c *PermissionsCreateCall) Context(ctx context.Context) *PermissionsCreateC
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PermissionsCreateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PermissionsCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permission)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.permissions.create" call.
@@ -5929,13 +4608,12 @@ func (c *PermissionsCreateCall) Do(opts ...googleapi.CallOption) (*Permission, e
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates a permission for a file or Team Drive.",
+	//   "description": "Creates a permission for a file.",
 	//   "httpMethod": "POST",
 	//   "id": "drive.permissions.create",
 	//   "parameterOrder": [
@@ -5948,19 +4626,13 @@ func (c *PermissionsCreateCall) Do(opts ...googleapi.CallOption) (*Permission, e
 	//       "type": "string"
 	//     },
 	//     "fileId": {
-	//       "description": "The ID of the file or Team Drive.",
+	//       "description": "The ID of the file.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
 	//     },
 	//     "sendNotificationEmail": {
 	//       "description": "Whether to send a notification email when sharing to users or groups. This defaults to true for users and groups, and is not allowed for other requests. It must not be disabled for ownership transfers.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
 	//       "location": "query",
 	//       "type": "boolean"
 	//     },
@@ -5994,7 +4666,6 @@ type PermissionsDeleteCall struct {
 	permissionId string
 	urlParams_   gensupport.URLParams
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Delete: Deletes a permission.
@@ -6002,13 +4673,6 @@ func (r *PermissionsService) Delete(fileId string, permissionId string) *Permiss
 	c := &PermissionsDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.fileId = fileId
 	c.permissionId = permissionId
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *PermissionsDeleteCall) SupportsTeamDrives(supportsTeamDrives bool) *PermissionsDeleteCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
 	return c
 }
 
@@ -6028,32 +4692,21 @@ func (c *PermissionsDeleteCall) Context(ctx context.Context) *PermissionsDeleteC
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PermissionsDeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PermissionsDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions/{permissionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":       c.fileId,
 		"permissionId": c.permissionId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.permissions.delete" call.
@@ -6078,7 +4731,7 @@ func (c *PermissionsDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//   ],
 	//   "parameters": {
 	//     "fileId": {
-	//       "description": "The ID of the file or Team Drive.",
+	//       "description": "The ID of the file.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -6088,12 +4741,6 @@ func (c *PermissionsDeleteCall) Do(opts ...googleapi.CallOption) error {
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "files/{fileId}/permissions/{permissionId}",
@@ -6114,7 +4761,6 @@ type PermissionsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets a permission by ID.
@@ -6122,13 +4768,6 @@ func (r *PermissionsService) Get(fileId string, permissionId string) *Permission
 	c := &PermissionsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.fileId = fileId
 	c.permissionId = permissionId
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *PermissionsGetCall) SupportsTeamDrives(supportsTeamDrives bool) *PermissionsGetCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
 	return c
 }
 
@@ -6158,35 +4797,24 @@ func (c *PermissionsGetCall) Context(ctx context.Context) *PermissionsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PermissionsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PermissionsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions/{permissionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":       c.fileId,
 		"permissionId": c.permissionId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.permissions.get" call.
@@ -6221,8 +4849,7 @@ func (c *PermissionsGetCall) Do(opts ...googleapi.CallOption) (*Permission, erro
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6246,12 +4873,6 @@ func (c *PermissionsGetCall) Do(opts ...googleapi.CallOption) (*Permission, erro
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "files/{fileId}/permissions/{permissionId}",
@@ -6278,37 +4899,12 @@ type PermissionsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
-// List: Lists a file's or Team Drive's permissions.
+// List: Lists a file's permissions.
 func (r *PermissionsService) List(fileId string) *PermissionsListCall {
 	c := &PermissionsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.fileId = fileId
-	return c
-}
-
-// PageSize sets the optional parameter "pageSize": The maximum number
-// of permissions to return per page. When not set for files in a Team
-// Drive, at most 100 results will be returned. When not set for files
-// that are not in a Team Drive, the entire list will be returned.
-func (c *PermissionsListCall) PageSize(pageSize int64) *PermissionsListCall {
-	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
-	return c
-}
-
-// PageToken sets the optional parameter "pageToken": The token for
-// continuing a previous list request on the next page. This should be
-// set to the value of 'nextPageToken' from the previous response.
-func (c *PermissionsListCall) PageToken(pageToken string) *PermissionsListCall {
-	c.urlParams_.Set("pageToken", pageToken)
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *PermissionsListCall) SupportsTeamDrives(supportsTeamDrives bool) *PermissionsListCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
 	return c
 }
 
@@ -6338,34 +4934,23 @@ func (c *PermissionsListCall) Context(ctx context.Context) *PermissionsListCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PermissionsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PermissionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.permissions.list" call.
@@ -6400,13 +4985,12 @@ func (c *PermissionsListCall) Do(opts ...googleapi.CallOption) (*PermissionList,
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists a file's or Team Drive's permissions.",
+	//   "description": "Lists a file's permissions.",
 	//   "httpMethod": "GET",
 	//   "id": "drive.permissions.list",
 	//   "parameterOrder": [
@@ -6414,29 +4998,10 @@ func (c *PermissionsListCall) Do(opts ...googleapi.CallOption) (*PermissionList,
 	//   ],
 	//   "parameters": {
 	//     "fileId": {
-	//       "description": "The ID of the file or Team Drive.",
+	//       "description": "The ID of the file.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
-	//     },
-	//     "pageSize": {
-	//       "description": "The maximum number of permissions to return per page. When not set for files in a Team Drive, at most 100 results will be returned. When not set for files that are not in a Team Drive, the entire list will be returned.",
-	//       "format": "int32",
-	//       "location": "query",
-	//       "maximum": "100",
-	//       "minimum": "1",
-	//       "type": "integer"
-	//     },
-	//     "pageToken": {
-	//       "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response.",
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
 	//     }
 	//   },
 	//   "path": "files/{fileId}/permissions",
@@ -6455,27 +5020,6 @@ func (c *PermissionsListCall) Do(opts ...googleapi.CallOption) (*PermissionList,
 
 }
 
-// Pages invokes f for each page of results.
-// A non-nil error returned from f will halt the iteration.
-// The provided context supersedes any context provided to the Context method.
-func (c *PermissionsListCall) Pages(ctx context.Context, f func(*PermissionList) error) error {
-	c.ctx_ = ctx
-	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
-	for {
-		x, err := c.Do()
-		if err != nil {
-			return err
-		}
-		if err := f(x); err != nil {
-			return err
-		}
-		if x.NextPageToken == "" {
-			return nil
-		}
-		c.PageToken(x.NextPageToken)
-	}
-}
-
 // method id "drive.permissions.update":
 
 type PermissionsUpdateCall struct {
@@ -6485,7 +5029,6 @@ type PermissionsUpdateCall struct {
 	permission   *Permission
 	urlParams_   gensupport.URLParams
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Update: Updates a permission with patch semantics.
@@ -6494,20 +5037,6 @@ func (r *PermissionsService) Update(fileId string, permissionId string, permissi
 	c.fileId = fileId
 	c.permissionId = permissionId
 	c.permission = permission
-	return c
-}
-
-// RemoveExpiration sets the optional parameter "removeExpiration":
-// Whether to remove the expiration date.
-func (c *PermissionsUpdateCall) RemoveExpiration(removeExpiration bool) *PermissionsUpdateCall {
-	c.urlParams_.Set("removeExpiration", fmt.Sprint(removeExpiration))
-	return c
-}
-
-// SupportsTeamDrives sets the optional parameter "supportsTeamDrives":
-// Whether the requesting application supports Team Drives.
-func (c *PermissionsUpdateCall) SupportsTeamDrives(supportsTeamDrives bool) *PermissionsUpdateCall {
-	c.urlParams_.Set("supportsTeamDrives", fmt.Sprint(supportsTeamDrives))
 	return c
 }
 
@@ -6536,37 +5065,27 @@ func (c *PermissionsUpdateCall) Context(ctx context.Context) *PermissionsUpdateC
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PermissionsUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PermissionsUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permission)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions/{permissionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":       c.fileId,
 		"permissionId": c.permissionId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.permissions.update" call.
@@ -6601,8 +5120,7 @@ func (c *PermissionsUpdateCall) Do(opts ...googleapi.CallOption) (*Permission, e
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6616,7 +5134,7 @@ func (c *PermissionsUpdateCall) Do(opts ...googleapi.CallOption) (*Permission, e
 	//   ],
 	//   "parameters": {
 	//     "fileId": {
-	//       "description": "The ID of the file or Team Drive.",
+	//       "description": "The ID of the file.",
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
@@ -6626,18 +5144,6 @@ func (c *PermissionsUpdateCall) Do(opts ...googleapi.CallOption) (*Permission, e
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
-	//     },
-	//     "removeExpiration": {
-	//       "default": "false",
-	//       "description": "Whether to remove the expiration date.",
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "supportsTeamDrives": {
-	//       "default": "false",
-	//       "description": "Whether the requesting application supports Team Drives.",
-	//       "location": "query",
-	//       "type": "boolean"
 	//     },
 	//     "transferOwnership": {
 	//       "default": "false",
@@ -6670,7 +5176,6 @@ type RepliesCreateCall struct {
 	reply      *Reply
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Create: Creates a new reply to a comment.
@@ -6698,37 +5203,27 @@ func (c *RepliesCreateCall) Context(ctx context.Context) *RepliesCreateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RepliesCreateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RepliesCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.reply)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":    c.fileId,
 		"commentId": c.commentId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.replies.create" call.
@@ -6763,8 +5258,7 @@ func (c *RepliesCreateCall) Do(opts ...googleapi.CallOption) (*Reply, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6814,7 +5308,6 @@ type RepliesDeleteCall struct {
 	replyId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Delete: Deletes a reply.
@@ -6842,33 +5335,22 @@ func (c *RepliesDeleteCall) Context(ctx context.Context) *RepliesDeleteCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RepliesDeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RepliesDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies/{replyId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":    c.fileId,
 		"commentId": c.commentId,
 		"replyId":   c.replyId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.replies.delete" call.
@@ -6931,7 +5413,6 @@ type RepliesGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets a reply by ID.
@@ -6977,36 +5458,25 @@ func (c *RepliesGetCall) Context(ctx context.Context) *RepliesGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RepliesGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RepliesGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies/{replyId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":    c.fileId,
 		"commentId": c.commentId,
 		"replyId":   c.replyId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.replies.get" call.
@@ -7041,8 +5511,7 @@ func (c *RepliesGetCall) Do(opts ...googleapi.CallOption) (*Reply, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7103,7 +5572,6 @@ type RepliesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists a comment's replies.
@@ -7163,35 +5631,24 @@ func (c *RepliesListCall) Context(ctx context.Context) *RepliesListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RepliesListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RepliesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":    c.fileId,
 		"commentId": c.commentId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.replies.list" call.
@@ -7226,8 +5683,7 @@ func (c *RepliesListCall) Do(opts ...googleapi.CallOption) (*ReplyList, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7317,7 +5773,6 @@ type RepliesUpdateCall struct {
 	reply      *Reply
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Update: Updates a reply with patch semantics.
@@ -7346,38 +5801,28 @@ func (c *RepliesUpdateCall) Context(ctx context.Context) *RepliesUpdateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RepliesUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RepliesUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.reply)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies/{replyId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":    c.fileId,
 		"commentId": c.commentId,
 		"replyId":   c.replyId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.replies.update" call.
@@ -7412,8 +5857,7 @@ func (c *RepliesUpdateCall) Do(opts ...googleapi.CallOption) (*Reply, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7469,7 +5913,6 @@ type RevisionsDeleteCall struct {
 	revisionId string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Delete: Permanently deletes a revision. This method is only
@@ -7497,32 +5940,21 @@ func (c *RevisionsDeleteCall) Context(ctx context.Context) *RevisionsDeleteCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RevisionsDeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RevisionsDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/revisions/{revisionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":     c.fileId,
 		"revisionId": c.revisionId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.revisions.delete" call.
@@ -7578,7 +6010,6 @@ type RevisionsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets a revision's metadata or content by ID.
@@ -7624,35 +6055,24 @@ func (c *RevisionsGetCall) Context(ctx context.Context) *RevisionsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RevisionsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RevisionsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/revisions/{revisionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":     c.fileId,
 		"revisionId": c.revisionId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Download fetches the API endpoint's "media" value, instead of the normal
@@ -7703,8 +6123,7 @@ func (c *RevisionsGetCall) Do(opts ...googleapi.CallOption) (*Revision, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7763,28 +6182,12 @@ type RevisionsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Lists a file's revisions.
 func (r *RevisionsService) List(fileId string) *RevisionsListCall {
 	c := &RevisionsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.fileId = fileId
-	return c
-}
-
-// PageSize sets the optional parameter "pageSize": The maximum number
-// of revisions to return per page.
-func (c *RevisionsListCall) PageSize(pageSize int64) *RevisionsListCall {
-	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
-	return c
-}
-
-// PageToken sets the optional parameter "pageToken": The token for
-// continuing a previous list request on the next page. This should be
-// set to the value of 'nextPageToken' from the previous response.
-func (c *RevisionsListCall) PageToken(pageToken string) *RevisionsListCall {
-	c.urlParams_.Set("pageToken", pageToken)
 	return c
 }
 
@@ -7814,34 +6217,23 @@ func (c *RevisionsListCall) Context(ctx context.Context) *RevisionsListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RevisionsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RevisionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/revisions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId": c.fileId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.revisions.list" call.
@@ -7876,8 +6268,7 @@ func (c *RevisionsListCall) Do(opts ...googleapi.CallOption) (*RevisionList, err
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7893,20 +6284,6 @@ func (c *RevisionsListCall) Do(opts ...googleapi.CallOption) (*RevisionList, err
 	//       "description": "The ID of the file.",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "string"
-	//     },
-	//     "pageSize": {
-	//       "default": "200",
-	//       "description": "The maximum number of revisions to return per page.",
-	//       "format": "int32",
-	//       "location": "query",
-	//       "maximum": "1000",
-	//       "minimum": "1",
-	//       "type": "integer"
-	//     },
-	//     "pageToken": {
-	//       "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response.",
-	//       "location": "query",
 	//       "type": "string"
 	//     }
 	//   },
@@ -7927,27 +6304,6 @@ func (c *RevisionsListCall) Do(opts ...googleapi.CallOption) (*RevisionList, err
 
 }
 
-// Pages invokes f for each page of results.
-// A non-nil error returned from f will halt the iteration.
-// The provided context supersedes any context provided to the Context method.
-func (c *RevisionsListCall) Pages(ctx context.Context, f func(*RevisionList) error) error {
-	c.ctx_ = ctx
-	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
-	for {
-		x, err := c.Do()
-		if err != nil {
-			return err
-		}
-		if err := f(x); err != nil {
-			return err
-		}
-		if x.NextPageToken == "" {
-			return nil
-		}
-		c.PageToken(x.NextPageToken)
-	}
-}
-
 // method id "drive.revisions.update":
 
 type RevisionsUpdateCall struct {
@@ -7957,7 +6313,6 @@ type RevisionsUpdateCall struct {
 	revision   *Revision
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Update: Updates a revision with patch semantics.
@@ -7985,37 +6340,27 @@ func (c *RevisionsUpdateCall) Context(ctx context.Context) *RevisionsUpdateCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RevisionsUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RevisionsUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.revision)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/revisions/{revisionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"fileId":     c.fileId,
 		"revisionId": c.revisionId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "drive.revisions.update" call.
@@ -8050,8 +6395,7 @@ func (c *RevisionsUpdateCall) Do(opts ...googleapi.CallOption) (*Revision, error
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8088,675 +6432,6 @@ func (c *RevisionsUpdateCall) Do(opts ...googleapi.CallOption) (*Revision, error
 	//     "https://www.googleapis.com/auth/drive",
 	//     "https://www.googleapis.com/auth/drive.appdata",
 	//     "https://www.googleapis.com/auth/drive.file"
-	//   ]
-	// }
-
-}
-
-// method id "drive.teamdrives.create":
-
-type TeamdrivesCreateCall struct {
-	s          *Service
-	teamdrive  *TeamDrive
-	urlParams_ gensupport.URLParams
-	ctx_       context.Context
-	header_    http.Header
-}
-
-// Create: Creates a new Team Drive.
-func (r *TeamdrivesService) Create(requestId string, teamdrive *TeamDrive) *TeamdrivesCreateCall {
-	c := &TeamdrivesCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	c.urlParams_.Set("requestId", requestId)
-	c.teamdrive = teamdrive
-	return c
-}
-
-// Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
-func (c *TeamdrivesCreateCall) Fields(s ...googleapi.Field) *TeamdrivesCreateCall {
-	c.urlParams_.Set("fields", googleapi.CombineFields(s))
-	return c
-}
-
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
-func (c *TeamdrivesCreateCall) Context(ctx context.Context) *TeamdrivesCreateCall {
-	c.ctx_ = ctx
-	return c
-}
-
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TeamdrivesCreateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
-func (c *TeamdrivesCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	var body io.Reader = nil
-	body, err := googleapi.WithoutDataWrapper.JSONReader(c.teamdrive)
-	if err != nil {
-		return nil, err
-	}
-	reqHeaders.Set("Content-Type", "application/json")
-	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives")
-	urls += "?" + c.urlParams_.Encode()
-	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
-}
-
-// Do executes the "drive.teamdrives.create" call.
-// Exactly one of *TeamDrive or error will be non-nil. Any non-2xx
-// status code is an error. Response headers are in either
-// *TeamDrive.ServerResponse.Header or (if a response was returned at
-// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
-// to check whether the returned error was because
-// http.StatusNotModified was returned.
-func (c *TeamdrivesCreateCall) Do(opts ...googleapi.CallOption) (*TeamDrive, error) {
-	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
-	if res != nil && res.StatusCode == http.StatusNotModified {
-		if res.Body != nil {
-			res.Body.Close()
-		}
-		return nil, &googleapi.Error{
-			Code:   res.StatusCode,
-			Header: res.Header,
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	defer googleapi.CloseBody(res)
-	if err := googleapi.CheckResponse(res); err != nil {
-		return nil, err
-	}
-	ret := &TeamDrive{
-		ServerResponse: googleapi.ServerResponse{
-			Header:         res.Header,
-			HTTPStatusCode: res.StatusCode,
-		},
-	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
-		return nil, err
-	}
-	return ret, nil
-	// {
-	//   "description": "Creates a new Team Drive.",
-	//   "httpMethod": "POST",
-	//   "id": "drive.teamdrives.create",
-	//   "parameterOrder": [
-	//     "requestId"
-	//   ],
-	//   "parameters": {
-	//     "requestId": {
-	//       "description": "An ID, such as a random UUID, which uniquely identifies this user's request for idempotent creation of a Team Drive. A repeated request by the same user and with the same request ID will avoid creating duplicates by attempting to create the same Team Drive. If the Team Drive already exists a 409 error will be returned.",
-	//       "location": "query",
-	//       "required": true,
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "teamdrives",
-	//   "request": {
-	//     "$ref": "TeamDrive"
-	//   },
-	//   "response": {
-	//     "$ref": "TeamDrive"
-	//   },
-	//   "scopes": [
-	//     "https://www.googleapis.com/auth/drive"
-	//   ]
-	// }
-
-}
-
-// method id "drive.teamdrives.delete":
-
-type TeamdrivesDeleteCall struct {
-	s           *Service
-	teamDriveId string
-	urlParams_  gensupport.URLParams
-	ctx_        context.Context
-	header_     http.Header
-}
-
-// Delete: Permanently deletes a Team Drive for which the user is an
-// organizer. The Team Drive cannot contain any untrashed items.
-func (r *TeamdrivesService) Delete(teamDriveId string) *TeamdrivesDeleteCall {
-	c := &TeamdrivesDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	c.teamDriveId = teamDriveId
-	return c
-}
-
-// Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
-func (c *TeamdrivesDeleteCall) Fields(s ...googleapi.Field) *TeamdrivesDeleteCall {
-	c.urlParams_.Set("fields", googleapi.CombineFields(s))
-	return c
-}
-
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
-func (c *TeamdrivesDeleteCall) Context(ctx context.Context) *TeamdrivesDeleteCall {
-	c.ctx_ = ctx
-	return c
-}
-
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TeamdrivesDeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
-func (c *TeamdrivesDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	var body io.Reader = nil
-	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives/{teamDriveId}")
-	urls += "?" + c.urlParams_.Encode()
-	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
-	googleapi.Expand(req.URL, map[string]string{
-		"teamDriveId": c.teamDriveId,
-	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
-}
-
-// Do executes the "drive.teamdrives.delete" call.
-func (c *TeamdrivesDeleteCall) Do(opts ...googleapi.CallOption) error {
-	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
-	if err != nil {
-		return err
-	}
-	defer googleapi.CloseBody(res)
-	if err := googleapi.CheckResponse(res); err != nil {
-		return err
-	}
-	return nil
-	// {
-	//   "description": "Permanently deletes a Team Drive for which the user is an organizer. The Team Drive cannot contain any untrashed items.",
-	//   "httpMethod": "DELETE",
-	//   "id": "drive.teamdrives.delete",
-	//   "parameterOrder": [
-	//     "teamDriveId"
-	//   ],
-	//   "parameters": {
-	//     "teamDriveId": {
-	//       "description": "The ID of the Team Drive",
-	//       "location": "path",
-	//       "required": true,
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "teamdrives/{teamDriveId}",
-	//   "scopes": [
-	//     "https://www.googleapis.com/auth/drive"
-	//   ]
-	// }
-
-}
-
-// method id "drive.teamdrives.get":
-
-type TeamdrivesGetCall struct {
-	s            *Service
-	teamDriveId  string
-	urlParams_   gensupport.URLParams
-	ifNoneMatch_ string
-	ctx_         context.Context
-	header_      http.Header
-}
-
-// Get: Gets a Team Drive's metadata by ID.
-func (r *TeamdrivesService) Get(teamDriveId string) *TeamdrivesGetCall {
-	c := &TeamdrivesGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	c.teamDriveId = teamDriveId
-	return c
-}
-
-// Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
-func (c *TeamdrivesGetCall) Fields(s ...googleapi.Field) *TeamdrivesGetCall {
-	c.urlParams_.Set("fields", googleapi.CombineFields(s))
-	return c
-}
-
-// IfNoneMatch sets the optional parameter which makes the operation
-// fail if the object's ETag matches the given value. This is useful for
-// getting updates only after the object has changed since the last
-// request. Use googleapi.IsNotModified to check whether the response
-// error from Do is the result of In-None-Match.
-func (c *TeamdrivesGetCall) IfNoneMatch(entityTag string) *TeamdrivesGetCall {
-	c.ifNoneMatch_ = entityTag
-	return c
-}
-
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
-func (c *TeamdrivesGetCall) Context(ctx context.Context) *TeamdrivesGetCall {
-	c.ctx_ = ctx
-	return c
-}
-
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TeamdrivesGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
-func (c *TeamdrivesGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
-	var body io.Reader = nil
-	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives/{teamDriveId}")
-	urls += "?" + c.urlParams_.Encode()
-	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	googleapi.Expand(req.URL, map[string]string{
-		"teamDriveId": c.teamDriveId,
-	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
-}
-
-// Do executes the "drive.teamdrives.get" call.
-// Exactly one of *TeamDrive or error will be non-nil. Any non-2xx
-// status code is an error. Response headers are in either
-// *TeamDrive.ServerResponse.Header or (if a response was returned at
-// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
-// to check whether the returned error was because
-// http.StatusNotModified was returned.
-func (c *TeamdrivesGetCall) Do(opts ...googleapi.CallOption) (*TeamDrive, error) {
-	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
-	if res != nil && res.StatusCode == http.StatusNotModified {
-		if res.Body != nil {
-			res.Body.Close()
-		}
-		return nil, &googleapi.Error{
-			Code:   res.StatusCode,
-			Header: res.Header,
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	defer googleapi.CloseBody(res)
-	if err := googleapi.CheckResponse(res); err != nil {
-		return nil, err
-	}
-	ret := &TeamDrive{
-		ServerResponse: googleapi.ServerResponse{
-			Header:         res.Header,
-			HTTPStatusCode: res.StatusCode,
-		},
-	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
-		return nil, err
-	}
-	return ret, nil
-	// {
-	//   "description": "Gets a Team Drive's metadata by ID.",
-	//   "httpMethod": "GET",
-	//   "id": "drive.teamdrives.get",
-	//   "parameterOrder": [
-	//     "teamDriveId"
-	//   ],
-	//   "parameters": {
-	//     "teamDriveId": {
-	//       "description": "The ID of the Team Drive",
-	//       "location": "path",
-	//       "required": true,
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "teamdrives/{teamDriveId}",
-	//   "response": {
-	//     "$ref": "TeamDrive"
-	//   },
-	//   "scopes": [
-	//     "https://www.googleapis.com/auth/drive",
-	//     "https://www.googleapis.com/auth/drive.readonly"
-	//   ]
-	// }
-
-}
-
-// method id "drive.teamdrives.list":
-
-type TeamdrivesListCall struct {
-	s            *Service
-	urlParams_   gensupport.URLParams
-	ifNoneMatch_ string
-	ctx_         context.Context
-	header_      http.Header
-}
-
-// List: Lists the user's Team Drives.
-func (r *TeamdrivesService) List() *TeamdrivesListCall {
-	c := &TeamdrivesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	return c
-}
-
-// PageSize sets the optional parameter "pageSize": Maximum number of
-// Team Drives to return.
-func (c *TeamdrivesListCall) PageSize(pageSize int64) *TeamdrivesListCall {
-	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
-	return c
-}
-
-// PageToken sets the optional parameter "pageToken": Page token for
-// Team Drives.
-func (c *TeamdrivesListCall) PageToken(pageToken string) *TeamdrivesListCall {
-	c.urlParams_.Set("pageToken", pageToken)
-	return c
-}
-
-// Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
-func (c *TeamdrivesListCall) Fields(s ...googleapi.Field) *TeamdrivesListCall {
-	c.urlParams_.Set("fields", googleapi.CombineFields(s))
-	return c
-}
-
-// IfNoneMatch sets the optional parameter which makes the operation
-// fail if the object's ETag matches the given value. This is useful for
-// getting updates only after the object has changed since the last
-// request. Use googleapi.IsNotModified to check whether the response
-// error from Do is the result of In-None-Match.
-func (c *TeamdrivesListCall) IfNoneMatch(entityTag string) *TeamdrivesListCall {
-	c.ifNoneMatch_ = entityTag
-	return c
-}
-
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
-func (c *TeamdrivesListCall) Context(ctx context.Context) *TeamdrivesListCall {
-	c.ctx_ = ctx
-	return c
-}
-
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TeamdrivesListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
-func (c *TeamdrivesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
-	var body io.Reader = nil
-	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives")
-	urls += "?" + c.urlParams_.Encode()
-	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
-}
-
-// Do executes the "drive.teamdrives.list" call.
-// Exactly one of *TeamDriveList or error will be non-nil. Any non-2xx
-// status code is an error. Response headers are in either
-// *TeamDriveList.ServerResponse.Header or (if a response was returned
-// at all) in error.(*googleapi.Error).Header. Use
-// googleapi.IsNotModified to check whether the returned error was
-// because http.StatusNotModified was returned.
-func (c *TeamdrivesListCall) Do(opts ...googleapi.CallOption) (*TeamDriveList, error) {
-	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
-	if res != nil && res.StatusCode == http.StatusNotModified {
-		if res.Body != nil {
-			res.Body.Close()
-		}
-		return nil, &googleapi.Error{
-			Code:   res.StatusCode,
-			Header: res.Header,
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	defer googleapi.CloseBody(res)
-	if err := googleapi.CheckResponse(res); err != nil {
-		return nil, err
-	}
-	ret := &TeamDriveList{
-		ServerResponse: googleapi.ServerResponse{
-			Header:         res.Header,
-			HTTPStatusCode: res.StatusCode,
-		},
-	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
-		return nil, err
-	}
-	return ret, nil
-	// {
-	//   "description": "Lists the user's Team Drives.",
-	//   "httpMethod": "GET",
-	//   "id": "drive.teamdrives.list",
-	//   "parameters": {
-	//     "pageSize": {
-	//       "default": "10",
-	//       "description": "Maximum number of Team Drives to return.",
-	//       "format": "int32",
-	//       "location": "query",
-	//       "maximum": "100",
-	//       "minimum": "1",
-	//       "type": "integer"
-	//     },
-	//     "pageToken": {
-	//       "description": "Page token for Team Drives.",
-	//       "location": "query",
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "teamdrives",
-	//   "response": {
-	//     "$ref": "TeamDriveList"
-	//   },
-	//   "scopes": [
-	//     "https://www.googleapis.com/auth/drive",
-	//     "https://www.googleapis.com/auth/drive.readonly"
-	//   ]
-	// }
-
-}
-
-// Pages invokes f for each page of results.
-// A non-nil error returned from f will halt the iteration.
-// The provided context supersedes any context provided to the Context method.
-func (c *TeamdrivesListCall) Pages(ctx context.Context, f func(*TeamDriveList) error) error {
-	c.ctx_ = ctx
-	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
-	for {
-		x, err := c.Do()
-		if err != nil {
-			return err
-		}
-		if err := f(x); err != nil {
-			return err
-		}
-		if x.NextPageToken == "" {
-			return nil
-		}
-		c.PageToken(x.NextPageToken)
-	}
-}
-
-// method id "drive.teamdrives.update":
-
-type TeamdrivesUpdateCall struct {
-	s           *Service
-	teamDriveId string
-	teamdrive   *TeamDrive
-	urlParams_  gensupport.URLParams
-	ctx_        context.Context
-	header_     http.Header
-}
-
-// Update: Updates a Team Drive's metadata
-func (r *TeamdrivesService) Update(teamDriveId string, teamdrive *TeamDrive) *TeamdrivesUpdateCall {
-	c := &TeamdrivesUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	c.teamDriveId = teamDriveId
-	c.teamdrive = teamdrive
-	return c
-}
-
-// Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
-func (c *TeamdrivesUpdateCall) Fields(s ...googleapi.Field) *TeamdrivesUpdateCall {
-	c.urlParams_.Set("fields", googleapi.CombineFields(s))
-	return c
-}
-
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
-func (c *TeamdrivesUpdateCall) Context(ctx context.Context) *TeamdrivesUpdateCall {
-	c.ctx_ = ctx
-	return c
-}
-
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TeamdrivesUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
-func (c *TeamdrivesUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	var body io.Reader = nil
-	body, err := googleapi.WithoutDataWrapper.JSONReader(c.teamdrive)
-	if err != nil {
-		return nil, err
-	}
-	reqHeaders.Set("Content-Type", "application/json")
-	c.urlParams_.Set("alt", alt)
-	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives/{teamDriveId}")
-	urls += "?" + c.urlParams_.Encode()
-	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
-	googleapi.Expand(req.URL, map[string]string{
-		"teamDriveId": c.teamDriveId,
-	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
-}
-
-// Do executes the "drive.teamdrives.update" call.
-// Exactly one of *TeamDrive or error will be non-nil. Any non-2xx
-// status code is an error. Response headers are in either
-// *TeamDrive.ServerResponse.Header or (if a response was returned at
-// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
-// to check whether the returned error was because
-// http.StatusNotModified was returned.
-func (c *TeamdrivesUpdateCall) Do(opts ...googleapi.CallOption) (*TeamDrive, error) {
-	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
-	if res != nil && res.StatusCode == http.StatusNotModified {
-		if res.Body != nil {
-			res.Body.Close()
-		}
-		return nil, &googleapi.Error{
-			Code:   res.StatusCode,
-			Header: res.Header,
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	defer googleapi.CloseBody(res)
-	if err := googleapi.CheckResponse(res); err != nil {
-		return nil, err
-	}
-	ret := &TeamDrive{
-		ServerResponse: googleapi.ServerResponse{
-			Header:         res.Header,
-			HTTPStatusCode: res.StatusCode,
-		},
-	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
-		return nil, err
-	}
-	return ret, nil
-	// {
-	//   "description": "Updates a Team Drive's metadata",
-	//   "httpMethod": "PATCH",
-	//   "id": "drive.teamdrives.update",
-	//   "parameterOrder": [
-	//     "teamDriveId"
-	//   ],
-	//   "parameters": {
-	//     "teamDriveId": {
-	//       "description": "The ID of the Team Drive",
-	//       "location": "path",
-	//       "required": true,
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "teamdrives/{teamDriveId}",
-	//   "request": {
-	//     "$ref": "TeamDrive"
-	//   },
-	//   "response": {
-	//     "$ref": "TeamDrive"
-	//   },
-	//   "scopes": [
-	//     "https://www.googleapis.com/auth/drive"
 	//   ]
 	// }
 

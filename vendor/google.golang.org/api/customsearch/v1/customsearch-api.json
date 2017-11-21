@@ -1,18 +1,18 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"tbys6C40o18GZwyMen5GMkdK-3s/2gL3A40IBu11GP9xmmdXxrLKXPg\"",
+ "etag": "\"FrPV2U6xXFUq8eRv_PO3IoAURkc/KsgpNVP8dzFmgPzAjDdH7uBJP_M\"",
  "discoveryVersion": "v1",
  "id": "customsearch:v1",
  "name": "customsearch",
  "version": "v1",
- "revision": "20160411",
+ "revision": "20131205",
  "title": "CustomSearch API",
  "description": "Lets you search over a website or collection of websites",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
-  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
+  "x16": "http://www.google.com/images/icons/product/search-16.gif",
+  "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "documentationLink": "https://developers.google.com/custom-search/v1/using_rest",
  "protocol": "rest",
