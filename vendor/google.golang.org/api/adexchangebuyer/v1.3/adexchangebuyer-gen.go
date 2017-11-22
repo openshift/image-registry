@@ -201,21 +201,12 @@ type Account struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BidderLocation") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Account) MarshalJSON() ([]byte, error) {
 	type noMethod Account
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type AccountBidderLocation struct {
@@ -241,20 +232,12 @@ type AccountBidderLocation struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "MaximumQps") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AccountBidderLocation) MarshalJSON() ([]byte, error) {
 	type noMethod AccountBidderLocation
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AccountsList: An account feed lists Ad Exchange buyer accounts that
@@ -278,20 +261,12 @@ type AccountsList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AccountsList) MarshalJSON() ([]byte, error) {
 	type noMethod AccountsList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // BillingInfo: The configuration data for an Ad Exchange billing info.
@@ -321,20 +296,12 @@ type BillingInfo struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AccountId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *BillingInfo) MarshalJSON() ([]byte, error) {
 	type noMethod BillingInfo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // BillingInfoList: A billing info feed lists Billing Info the Ad
@@ -358,20 +325,12 @@ type BillingInfoList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *BillingInfoList) MarshalJSON() ([]byte, error) {
 	type noMethod BillingInfoList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Budget: The configuration data for Ad Exchange RTB - Budget API.
@@ -410,20 +369,12 @@ type Budget struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AccountId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Budget) MarshalJSON() ([]byte, error) {
 	type noMethod Budget
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Creative: A creative and its classification data.
@@ -517,8 +468,8 @@ type Creative struct {
 	// not be set in requests.
 	Version int64 `json:"version,omitempty"`
 
-	// VideoURL: The URL to fetch a video ad. If set, HTMLSnippet and the
-	// nativeAd should not be set.
+	// VideoURL: The url to fetch a video ad. If set, HTMLSnippet should not
+	// be set.
 	VideoURL string `json:"videoURL,omitempty"`
 
 	// Width: Ad width.
@@ -535,20 +486,12 @@ type Creative struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "HTMLSnippet") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Creative) MarshalJSON() ([]byte, error) {
 	type noMethod Creative
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type CreativeCorrections struct {
@@ -565,20 +508,12 @@ type CreativeCorrections struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Details") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativeCorrections) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeCorrections
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type CreativeDisapprovalReasons struct {
@@ -595,20 +530,12 @@ type CreativeDisapprovalReasons struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Details") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativeDisapprovalReasons) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeDisapprovalReasons
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CreativeFilteringReasons: The filtering reasons for the creative.
@@ -628,20 +555,12 @@ type CreativeFilteringReasons struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Date") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativeFilteringReasons) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeFilteringReasons
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type CreativeFilteringReasonsReasons struct {
@@ -661,21 +580,12 @@ type CreativeFilteringReasonsReasons struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FilteringCount") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativeFilteringReasonsReasons) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeFilteringReasonsReasons
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CreativeNativeAd: If nativeAd is set, HTMLSnippet and videoURL should
@@ -727,34 +637,12 @@ type CreativeNativeAd struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Advertiser") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativeNativeAd) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeNativeAd
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *CreativeNativeAd) UnmarshalJSON(data []byte) error {
-	type noMethod CreativeNativeAd
-	var s1 struct {
-		StarRating gensupport.JSONFloat64 `json:"starRating"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.StarRating = float64(s1.StarRating)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CreativeNativeAdAppIcon: The app icon, for app download ads.
@@ -772,20 +660,12 @@ type CreativeNativeAdAppIcon struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Height") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativeNativeAdAppIcon) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeNativeAdAppIcon
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CreativeNativeAdImage: A large image.
@@ -803,20 +683,12 @@ type CreativeNativeAdImage struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Height") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativeNativeAdImage) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeNativeAdImage
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CreativeNativeAdLogo: A smaller image, for the advertiser logo.
@@ -834,20 +706,12 @@ type CreativeNativeAdLogo struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Height") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativeNativeAdLogo) MarshalJSON() ([]byte, error) {
 	type noMethod CreativeNativeAdLogo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // CreativesList: The creatives feed lists the active creatives for the
@@ -876,20 +740,12 @@ type CreativesList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *CreativesList) MarshalJSON() ([]byte, error) {
 	type noMethod CreativesList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DirectDeal: The configuration data for an Ad Exchange direct deal.
@@ -966,20 +822,12 @@ type DirectDeal struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AccountId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DirectDeal) MarshalJSON() ([]byte, error) {
 	type noMethod DirectDeal
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DirectDealsList: A direct deals feed lists Direct Deals the Ad
@@ -1003,20 +851,12 @@ type DirectDealsList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DirectDeals") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DirectDealsList) MarshalJSON() ([]byte, error) {
 	type noMethod DirectDealsList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PerformanceReport: The configuration data for an Ad Exchange
@@ -1112,66 +952,18 @@ type PerformanceReport struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BidRate") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PerformanceReport) MarshalJSON() ([]byte, error) {
 	type noMethod PerformanceReport
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *PerformanceReport) UnmarshalJSON(data []byte) error {
-	type noMethod PerformanceReport
-	var s1 struct {
-		BidRate                 gensupport.JSONFloat64 `json:"bidRate"`
-		BidRequestRate          gensupport.JSONFloat64 `json:"bidRequestRate"`
-		FilteredBidRate         gensupport.JSONFloat64 `json:"filteredBidRate"`
-		InventoryMatchRate      gensupport.JSONFloat64 `json:"inventoryMatchRate"`
-		Latency50thPercentile   gensupport.JSONFloat64 `json:"latency50thPercentile"`
-		Latency85thPercentile   gensupport.JSONFloat64 `json:"latency85thPercentile"`
-		Latency95thPercentile   gensupport.JSONFloat64 `json:"latency95thPercentile"`
-		NoQuotaInRegion         gensupport.JSONFloat64 `json:"noQuotaInRegion"`
-		OutOfQuota              gensupport.JSONFloat64 `json:"outOfQuota"`
-		PixelMatchRequests      gensupport.JSONFloat64 `json:"pixelMatchRequests"`
-		PixelMatchResponses     gensupport.JSONFloat64 `json:"pixelMatchResponses"`
-		QuotaConfiguredLimit    gensupport.JSONFloat64 `json:"quotaConfiguredLimit"`
-		QuotaThrottledLimit     gensupport.JSONFloat64 `json:"quotaThrottledLimit"`
-		SuccessfulRequestRate   gensupport.JSONFloat64 `json:"successfulRequestRate"`
-		UnsuccessfulRequestRate gensupport.JSONFloat64 `json:"unsuccessfulRequestRate"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.BidRate = float64(s1.BidRate)
-	s.BidRequestRate = float64(s1.BidRequestRate)
-	s.FilteredBidRate = float64(s1.FilteredBidRate)
-	s.InventoryMatchRate = float64(s1.InventoryMatchRate)
-	s.Latency50thPercentile = float64(s1.Latency50thPercentile)
-	s.Latency85thPercentile = float64(s1.Latency85thPercentile)
-	s.Latency95thPercentile = float64(s1.Latency95thPercentile)
-	s.NoQuotaInRegion = float64(s1.NoQuotaInRegion)
-	s.OutOfQuota = float64(s1.OutOfQuota)
-	s.PixelMatchRequests = float64(s1.PixelMatchRequests)
-	s.PixelMatchResponses = float64(s1.PixelMatchResponses)
-	s.QuotaConfiguredLimit = float64(s1.QuotaConfiguredLimit)
-	s.QuotaThrottledLimit = float64(s1.QuotaThrottledLimit)
-	s.SuccessfulRequestRate = float64(s1.SuccessfulRequestRate)
-	s.UnsuccessfulRequestRate = float64(s1.UnsuccessfulRequestRate)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PerformanceReportList: The configuration data for an Ad Exchange
 // performance report list.
+// https://sites.google.com/a/google.com/adx-integration/Home/engineering/binary-releases/rtb-api-release
+// https://cs.corp.google.com/#piper///depot/google3/contentads/adx/tools/rtb_api/adxrtb.py
 type PerformanceReportList struct {
 	// Kind: Resource type.
 	Kind string `json:"kind,omitempty"`
@@ -1191,20 +983,12 @@ type PerformanceReportList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PerformanceReportList) MarshalJSON() ([]byte, error) {
 	type noMethod PerformanceReportList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type PretargetingConfig struct {
@@ -1316,20 +1100,12 @@ type PretargetingConfig struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "BillingId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfig) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfig
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type PretargetingConfigDimensions struct {
@@ -1346,20 +1122,12 @@ type PretargetingConfigDimensions struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Height") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigDimensions) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigDimensions
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type PretargetingConfigExcludedPlacements struct {
@@ -1378,20 +1146,12 @@ type PretargetingConfigExcludedPlacements struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Token") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigExcludedPlacements) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigExcludedPlacements
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type PretargetingConfigPlacements struct {
@@ -1410,20 +1170,12 @@ type PretargetingConfigPlacements struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Token") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigPlacements) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigPlacements
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type PretargetingConfigList struct {
@@ -1444,20 +1196,12 @@ type PretargetingConfigList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PretargetingConfigList) MarshalJSON() ([]byte, error) {
 	type noMethod PretargetingConfigList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "adexchangebuyer.accounts.get":
@@ -1468,7 +1212,6 @@ type AccountsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets one account by ID.
@@ -1504,34 +1247,23 @@ func (c *AccountsGetCall) Context(ctx context.Context) *AccountsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AccountsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AccountsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "accounts/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": strconv.FormatInt(c.id, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.accounts.get" call.
@@ -1566,8 +1298,7 @@ func (c *AccountsGetCall) Do(opts ...googleapi.CallOption) (*Account, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -1605,7 +1336,6 @@ type AccountsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Retrieves the authenticated user's list of accounts.
@@ -1640,31 +1370,21 @@ func (c *AccountsListCall) Context(ctx context.Context) *AccountsListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AccountsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AccountsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "accounts")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.accounts.list" call.
@@ -1699,8 +1419,7 @@ func (c *AccountsListCall) Do(opts ...googleapi.CallOption) (*AccountsList, erro
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -1727,7 +1446,6 @@ type AccountsPatchCall struct {
 	account    *Account
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Patch: Updates an existing account. This method supports patch
@@ -1755,36 +1473,26 @@ func (c *AccountsPatchCall) Context(ctx context.Context) *AccountsPatchCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AccountsPatchCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AccountsPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.account)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "accounts/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": strconv.FormatInt(c.id, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.accounts.patch" call.
@@ -1819,8 +1527,7 @@ func (c *AccountsPatchCall) Do(opts ...googleapi.CallOption) (*Account, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -1862,7 +1569,6 @@ type AccountsUpdateCall struct {
 	account    *Account
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Update: Updates an existing account.
@@ -1889,36 +1595,26 @@ func (c *AccountsUpdateCall) Context(ctx context.Context) *AccountsUpdateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AccountsUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AccountsUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.account)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "accounts/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": strconv.FormatInt(c.id, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.accounts.update" call.
@@ -1953,8 +1649,7 @@ func (c *AccountsUpdateCall) Do(opts ...googleapi.CallOption) (*Account, error) 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -1996,7 +1691,6 @@ type BillingInfoGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Returns the billing information for one account specified by
@@ -2033,34 +1727,23 @@ func (c *BillingInfoGetCall) Context(ctx context.Context) *BillingInfoGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *BillingInfoGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *BillingInfoGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "billinginfo/{accountId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.billingInfo.get" call.
@@ -2095,8 +1778,7 @@ func (c *BillingInfoGetCall) Do(opts ...googleapi.CallOption) (*BillingInfo, err
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2134,7 +1816,6 @@ type BillingInfoListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Retrieves a list of billing information for all accounts of the
@@ -2170,31 +1851,21 @@ func (c *BillingInfoListCall) Context(ctx context.Context) *BillingInfoListCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *BillingInfoListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *BillingInfoListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "billinginfo")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.billingInfo.list" call.
@@ -2229,8 +1900,7 @@ func (c *BillingInfoListCall) Do(opts ...googleapi.CallOption) (*BillingInfoList
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2258,7 +1928,6 @@ type BudgetGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Returns the budget information for the adgroup specified by the
@@ -2296,35 +1965,24 @@ func (c *BudgetGetCall) Context(ctx context.Context) *BudgetGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *BudgetGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *BudgetGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "billinginfo/{accountId}/{billingId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"billingId": strconv.FormatInt(c.billingId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.budget.get" call.
@@ -2359,8 +2017,7 @@ func (c *BudgetGetCall) Do(opts ...googleapi.CallOption) (*Budget, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2408,7 +2065,6 @@ type BudgetPatchCall struct {
 	budget     *Budget
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Patch: Updates the budget amount for the budget of the adgroup
@@ -2438,37 +2094,27 @@ func (c *BudgetPatchCall) Context(ctx context.Context) *BudgetPatchCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *BudgetPatchCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *BudgetPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.budget)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "billinginfo/{accountId}/{billingId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"billingId": strconv.FormatInt(c.billingId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.budget.patch" call.
@@ -2503,8 +2149,7 @@ func (c *BudgetPatchCall) Do(opts ...googleapi.CallOption) (*Budget, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2555,7 +2200,6 @@ type BudgetUpdateCall struct {
 	budget     *Budget
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Update: Updates the budget amount for the budget of the adgroup
@@ -2585,37 +2229,27 @@ func (c *BudgetUpdateCall) Context(ctx context.Context) *BudgetUpdateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *BudgetUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *BudgetUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.budget)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "billinginfo/{accountId}/{billingId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"billingId": strconv.FormatInt(c.billingId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.budget.update" call.
@@ -2650,8 +2284,7 @@ func (c *BudgetUpdateCall) Do(opts ...googleapi.CallOption) (*Budget, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2702,7 +2335,6 @@ type CreativesGetCall struct {
 	urlParams_      gensupport.URLParams
 	ifNoneMatch_    string
 	ctx_            context.Context
-	header_         http.Header
 }
 
 // Get: Gets the status for a single creative. A creative will be
@@ -2740,35 +2372,24 @@ func (c *CreativesGetCall) Context(ctx context.Context) *CreativesGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *CreativesGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *CreativesGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "creatives/{accountId}/{buyerCreativeId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId":       strconv.FormatInt(c.accountId, 10),
 		"buyerCreativeId": c.buyerCreativeId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.creatives.get" call.
@@ -2803,8 +2424,7 @@ func (c *CreativesGetCall) Do(opts ...googleapi.CallOption) (*Creative, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2849,7 +2469,6 @@ type CreativesInsertCall struct {
 	creative   *Creative
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Insert: Submit a new creative.
@@ -2875,33 +2494,24 @@ func (c *CreativesInsertCall) Context(ctx context.Context) *CreativesInsertCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *CreativesInsertCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *CreativesInsertCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.creative)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "creatives")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.creatives.insert" call.
@@ -2936,8 +2546,7 @@ func (c *CreativesInsertCall) Do(opts ...googleapi.CallOption) (*Creative, error
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2966,7 +2575,6 @@ type CreativesListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Retrieves a list of the authenticated user's active creatives.
@@ -3050,31 +2658,21 @@ func (c *CreativesListCall) Context(ctx context.Context) *CreativesListCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *CreativesListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *CreativesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "creatives")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.creatives.list" call.
@@ -3109,8 +2707,7 @@ func (c *CreativesListCall) Do(opts ...googleapi.CallOption) (*CreativesList, er
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3201,7 +2798,6 @@ type DirectDealsGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets one direct deal by ID.
@@ -3237,34 +2833,23 @@ func (c *DirectDealsGetCall) Context(ctx context.Context) *DirectDealsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *DirectDealsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *DirectDealsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "directdeals/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": strconv.FormatInt(c.id, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.directDeals.get" call.
@@ -3299,8 +2884,7 @@ func (c *DirectDealsGetCall) Do(opts ...googleapi.CallOption) (*DirectDeal, erro
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3338,7 +2922,6 @@ type DirectDealsListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Retrieves the authenticated user's list of direct deals.
@@ -3373,31 +2956,21 @@ func (c *DirectDealsListCall) Context(ctx context.Context) *DirectDealsListCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *DirectDealsListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *DirectDealsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "directdeals")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.directDeals.list" call.
@@ -3432,8 +3005,7 @@ func (c *DirectDealsListCall) Do(opts ...googleapi.CallOption) (*DirectDealsList
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3459,7 +3031,6 @@ type PerformanceReportListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Retrieves the authenticated user's list of performance metrics.
@@ -3514,31 +3085,21 @@ func (c *PerformanceReportListCall) Context(ctx context.Context) *PerformanceRep
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PerformanceReportListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PerformanceReportListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "performancereport")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.performanceReport.list" call.
@@ -3573,8 +3134,7 @@ func (c *PerformanceReportListCall) Do(opts ...googleapi.CallOption) (*Performan
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3640,7 +3200,6 @@ type PretargetingConfigDeleteCall struct {
 	configId   int64
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Delete: Deletes an existing pretargeting config.
@@ -3667,32 +3226,21 @@ func (c *PretargetingConfigDeleteCall) Context(ctx context.Context) *Pretargetin
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PretargetingConfigDeleteCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PretargetingConfigDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "pretargetingconfigs/{accountId}/{configId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"configId":  strconv.FormatInt(c.configId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.delete" call.
@@ -3748,7 +3296,6 @@ type PretargetingConfigGetCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // Get: Gets a specific pretargeting configuration
@@ -3785,35 +3332,24 @@ func (c *PretargetingConfigGetCall) Context(ctx context.Context) *PretargetingCo
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PretargetingConfigGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PretargetingConfigGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "pretargetingconfigs/{accountId}/{configId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"configId":  strconv.FormatInt(c.configId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.get" call.
@@ -3848,8 +3384,7 @@ func (c *PretargetingConfigGetCall) Do(opts ...googleapi.CallOption) (*Pretarget
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3896,7 +3431,6 @@ type PretargetingConfigInsertCall struct {
 	pretargetingconfig *PretargetingConfig
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
-	header_            http.Header
 }
 
 // Insert: Inserts a new pretargeting configuration.
@@ -3923,36 +3457,26 @@ func (c *PretargetingConfigInsertCall) Context(ctx context.Context) *Pretargetin
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PretargetingConfigInsertCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PretargetingConfigInsertCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pretargetingconfig)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "pretargetingconfigs/{accountId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.insert" call.
@@ -3987,8 +3511,7 @@ func (c *PretargetingConfigInsertCall) Do(opts ...googleapi.CallOption) (*Pretar
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4030,7 +3553,6 @@ type PretargetingConfigListCall struct {
 	urlParams_   gensupport.URLParams
 	ifNoneMatch_ string
 	ctx_         context.Context
-	header_      http.Header
 }
 
 // List: Retrieves a list of the authenticated user's pretargeting
@@ -4067,34 +3589,23 @@ func (c *PretargetingConfigListCall) Context(ctx context.Context) *PretargetingC
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PretargetingConfigListCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PretargetingConfigListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "pretargetingconfigs/{accountId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.list" call.
@@ -4129,8 +3640,7 @@ func (c *PretargetingConfigListCall) Do(opts ...googleapi.CallOption) (*Pretarge
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4170,7 +3680,6 @@ type PretargetingConfigPatchCall struct {
 	pretargetingconfig *PretargetingConfig
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
-	header_            http.Header
 }
 
 // Patch: Updates an existing pretargeting config. This method supports
@@ -4199,37 +3708,27 @@ func (c *PretargetingConfigPatchCall) Context(ctx context.Context) *Pretargeting
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PretargetingConfigPatchCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PretargetingConfigPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pretargetingconfig)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "pretargetingconfigs/{accountId}/{configId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"configId":  strconv.FormatInt(c.configId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.patch" call.
@@ -4264,8 +3763,7 @@ func (c *PretargetingConfigPatchCall) Do(opts ...googleapi.CallOption) (*Pretarg
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4316,7 +3814,6 @@ type PretargetingConfigUpdateCall struct {
 	pretargetingconfig *PretargetingConfig
 	urlParams_         gensupport.URLParams
 	ctx_               context.Context
-	header_            http.Header
 }
 
 // Update: Updates an existing pretargeting config.
@@ -4344,37 +3841,27 @@ func (c *PretargetingConfigUpdateCall) Context(ctx context.Context) *Pretargetin
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PretargetingConfigUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PretargetingConfigUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pretargetingconfig)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "pretargetingconfigs/{accountId}/{configId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"accountId": strconv.FormatInt(c.accountId, 10),
 		"configId":  strconv.FormatInt(c.configId, 10),
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "adexchangebuyer.pretargetingConfig.update" call.
@@ -4409,8 +3896,7 @@ func (c *PretargetingConfigUpdateCall) Do(opts ...googleapi.CallOption) (*Pretar
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil

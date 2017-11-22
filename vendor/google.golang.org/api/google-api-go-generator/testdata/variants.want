@@ -146,20 +146,12 @@ type GeoJsonGeometryCollection struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Geometries") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonGeometryCollection) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonGeometryCollection
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonLineString struct {
@@ -179,20 +171,12 @@ type GeoJsonLineString struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonLineString) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonLineString
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GeoJsonMultiLineString: Multi Line String
@@ -214,20 +198,12 @@ type GeoJsonMultiLineString struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonMultiLineString) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonMultiLineString
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonMultiPoint struct {
@@ -247,20 +223,12 @@ type GeoJsonMultiPoint struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonMultiPoint) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonMultiPoint
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonMultiPolygon struct {
@@ -281,20 +249,12 @@ type GeoJsonMultiPolygon struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonMultiPolygon) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonMultiPolygon
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonPoint struct {
@@ -315,20 +275,12 @@ type GeoJsonPoint struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonPoint) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonPoint
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonPolygon struct {
@@ -353,20 +305,12 @@ type GeoJsonPolygon struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonPolygon) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonPolygon
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type MapFolder struct {
@@ -404,20 +348,12 @@ type MapFolder struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Contents") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *MapFolder) MarshalJSON() ([]byte, error) {
 	type noMethod MapFolder
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type MapItem map[string]interface{}
@@ -479,21 +415,12 @@ type MapKmlLink struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DefaultViewport") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *MapKmlLink) MarshalJSON() ([]byte, error) {
 	type noMethod MapKmlLink
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type MapLayer struct {
@@ -529,19 +456,10 @@ type MapLayer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DefaultViewport") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *MapLayer) MarshalJSON() ([]byte, error) {
 	type noMethod MapLayer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }

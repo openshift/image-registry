@@ -31,7 +31,7 @@ import (
 )
 
 // Scope is the OAuth2 scope necessary to use Google Cloud Logging.
-const Scope = api.LoggingWriteScope
+const Scope = api.CloudPlatformScope
 
 // Level is the log level.
 type Level int
@@ -436,7 +436,7 @@ const userAgent = "gcloud-golang-logging/20150922"
 func NewClient(ctx context.Context, projectID, logName string, opts ...cloud.ClientOption) (*Client, error) {
 	httpClient, endpoint, err := transport.NewHTTPClient(ctx, append([]cloud.ClientOption{
 		cloud.WithEndpoint(prodAddr),
-		cloud.WithScopes(Scope),
+		cloud.WithScopes(api.CloudPlatformScope),
 		cloud.WithUserAgent(userAgent),
 	}, opts...)...)
 	if err != nil {

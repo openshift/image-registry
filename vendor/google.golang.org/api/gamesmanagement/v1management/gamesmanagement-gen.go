@@ -193,20 +193,12 @@ type AchievementResetAllResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementResetAllResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementResetAllResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementResetMultipleForAllRequest: This is a JSON template for
@@ -227,21 +219,12 @@ type AchievementResetMultipleForAllRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AchievementIds") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementResetMultipleForAllRequest) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementResetMultipleForAllRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AchievementResetResponse: This is a JSON template for an achievement
@@ -278,20 +261,12 @@ type AchievementResetResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CurrentState") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AchievementResetResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AchievementResetResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventsResetMultipleForAllRequest: This is a JSON template for
@@ -311,20 +286,12 @@ type EventsResetMultipleForAllRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "EventIds") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventsResetMultipleForAllRequest) MarshalJSON() ([]byte, error) {
 	type noMethod EventsResetMultipleForAllRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GamesPlayedResource: This is a JSON template for metadata about a
@@ -345,20 +312,12 @@ type GamesPlayedResource struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AutoMatched") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GamesPlayedResource) MarshalJSON() ([]byte, error) {
 	type noMethod GamesPlayedResource
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GamesPlayerExperienceInfoResource: This is a JSON template for 1P/3P
@@ -387,21 +346,12 @@ type GamesPlayerExperienceInfoResource struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "CurrentExperiencePoints")
-	// to include in API requests with the JSON null value. By default,
-	// fields with empty values are omitted from API requests. However, any
-	// field with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GamesPlayerExperienceInfoResource) MarshalJSON() ([]byte, error) {
 	type noMethod GamesPlayerExperienceInfoResource
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GamesPlayerLevelResource: This is a JSON template for 1P/3P metadata
@@ -423,20 +373,12 @@ type GamesPlayerLevelResource struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Level") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GamesPlayerLevelResource) MarshalJSON() ([]byte, error) {
 	type noMethod GamesPlayerLevelResource
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // HiddenPlayer: This is a JSON template for the HiddenPlayer resource.
@@ -458,21 +400,12 @@ type HiddenPlayer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "HiddenTimeMillis") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *HiddenPlayer) MarshalJSON() ([]byte, error) {
 	type noMethod HiddenPlayer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // HiddenPlayerList: This is a JSON template for a list of hidden
@@ -499,20 +432,12 @@ type HiddenPlayerList struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Items") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *HiddenPlayerList) MarshalJSON() ([]byte, error) {
 	type noMethod HiddenPlayerList
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Player: This is a JSON template for a Player resource.
@@ -558,10 +483,6 @@ type Player struct {
 	// PlayerId: The ID of the player.
 	PlayerId string `json:"playerId,omitempty"`
 
-	// ProfileSettings: The player's profile settings. Controls whether or
-	// not the player's profile is visible to other players.
-	ProfileSettings *ProfileSettings `json:"profileSettings,omitempty"`
-
 	// Title: The player's title rewarded for their game activities.
 	Title string `json:"title,omitempty"`
 
@@ -572,21 +493,12 @@ type Player struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AvatarImageUrl") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Player) MarshalJSON() ([]byte, error) {
 	type noMethod Player
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerName: An object representation of the individual components of
@@ -607,20 +519,12 @@ type PlayerName struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FamilyName") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerName) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerName
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerScoreResetAllResponse: This is a JSON template for a list of
@@ -644,20 +548,12 @@ type PlayerScoreResetAllResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerScoreResetAllResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerScoreResetAllResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PlayerScoreResetResponse: This is a JSON template for a list of reset
@@ -689,53 +585,12 @@ type PlayerScoreResetResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DefinitionId") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PlayerScoreResetResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PlayerScoreResetResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-// ProfileSettings: This is a JSON template for profile settings
-type ProfileSettings struct {
-	// Kind: Uniquely identifies the type of this resource. Value is always
-	// the fixed string gamesManagement#profileSettings.
-	Kind string `json:"kind,omitempty"`
-
-	// ProfileVisible: The player's current profile visibility. This field
-	// is visible to both 1P and 3P APIs.
-	ProfileVisible bool `json:"profileVisible,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "Kind") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *ProfileSettings) MarshalJSON() ([]byte, error) {
-	type noMethod ProfileSettings
-	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // QuestsResetMultipleForAllRequest: This is a JSON template for
@@ -755,20 +610,12 @@ type QuestsResetMultipleForAllRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *QuestsResetMultipleForAllRequest) MarshalJSON() ([]byte, error) {
 	type noMethod QuestsResetMultipleForAllRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ScoresResetMultipleForAllRequest: This is a JSON template for
@@ -788,20 +635,12 @@ type ScoresResetMultipleForAllRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ScoresResetMultipleForAllRequest) MarshalJSON() ([]byte, error) {
 	type noMethod ScoresResetMultipleForAllRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "gamesManagement.achievements.reset":
@@ -811,7 +650,6 @@ type AchievementsResetCall struct {
 	achievementId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Reset: Resets the achievement with the given ID for the currently
@@ -839,31 +677,20 @@ func (c *AchievementsResetCall) Context(ctx context.Context) *AchievementsResetC
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsResetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsResetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/{achievementId}/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"achievementId": c.achievementId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.achievements.reset" call.
@@ -898,8 +725,7 @@ func (c *AchievementsResetCall) Do(opts ...googleapi.CallOption) (*AchievementRe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -936,7 +762,6 @@ type AchievementsResetAllCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetAll: Resets all achievements for the currently authenticated
@@ -963,28 +788,18 @@ func (c *AchievementsResetAllCall) Context(ctx context.Context) *AchievementsRes
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsResetAllCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsResetAllCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.achievements.resetAll" call.
@@ -1019,8 +834,7 @@ func (c *AchievementsResetAllCall) Do(opts ...googleapi.CallOption) (*Achievemen
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -1046,7 +860,6 @@ type AchievementsResetAllForAllPlayersCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetAllForAllPlayers: Resets all draft achievements for all players.
@@ -1073,28 +886,18 @@ func (c *AchievementsResetAllForAllPlayersCall) Context(ctx context.Context) *Ac
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsResetAllForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsResetAllForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/resetAllForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.achievements.resetAllForAllPlayers" call.
@@ -1129,7 +932,6 @@ type AchievementsResetForAllPlayersCall struct {
 	achievementId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // ResetForAllPlayers: Resets the achievement with the given ID for all
@@ -1157,31 +959,20 @@ func (c *AchievementsResetForAllPlayersCall) Context(ctx context.Context) *Achie
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsResetForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsResetForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/{achievementId}/resetForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"achievementId": c.achievementId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.achievements.resetForAllPlayers" call.
@@ -1227,7 +1018,6 @@ type AchievementsResetMultipleForAllPlayersCall struct {
 	achievementresetmultipleforallrequest *AchievementResetMultipleForAllRequest
 	urlParams_                            gensupport.URLParams
 	ctx_                                  context.Context
-	header_                               http.Header
 }
 
 // ResetMultipleForAllPlayers: Resets achievements with the given IDs
@@ -1255,33 +1045,24 @@ func (c *AchievementsResetMultipleForAllPlayersCall) Context(ctx context.Context
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *AchievementsResetMultipleForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *AchievementsResetMultipleForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.achievementresetmultipleforallrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "achievements/resetMultipleForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.achievements.resetMultipleForAllPlayers" call.
@@ -1320,7 +1101,6 @@ type ApplicationsListHiddenCall struct {
 	urlParams_    gensupport.URLParams
 	ifNoneMatch_  string
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // ListHidden: Get the list of players hidden from the given
@@ -1374,34 +1154,23 @@ func (c *ApplicationsListHiddenCall) Context(ctx context.Context) *ApplicationsL
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ApplicationsListHiddenCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ApplicationsListHiddenCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "applications/{applicationId}/players/hidden")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"applicationId": c.applicationId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.applications.listHidden" call.
@@ -1436,8 +1205,7 @@ func (c *ApplicationsListHiddenCall) Do(opts ...googleapi.CallOption) (*HiddenPl
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -1509,7 +1277,6 @@ type EventsResetCall struct {
 	eventId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Reset: Resets all player progress on the event with the given ID for
@@ -1538,31 +1305,20 @@ func (c *EventsResetCall) Context(ctx context.Context) *EventsResetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EventsResetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *EventsResetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "events/{eventId}/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"eventId": c.eventId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.events.reset" call.
@@ -1607,7 +1363,6 @@ type EventsResetAllCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetAll: Resets all player progress on all events for the currently
@@ -1635,28 +1390,18 @@ func (c *EventsResetAllCall) Context(ctx context.Context) *EventsResetAllCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EventsResetAllCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *EventsResetAllCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "events/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.events.resetAll" call.
@@ -1690,7 +1435,6 @@ type EventsResetAllForAllPlayersCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetAllForAllPlayers: Resets all draft events for all players. This
@@ -1717,28 +1461,18 @@ func (c *EventsResetAllForAllPlayersCall) Context(ctx context.Context) *EventsRe
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EventsResetAllForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *EventsResetAllForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "events/resetAllForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.events.resetAllForAllPlayers" call.
@@ -1773,7 +1507,6 @@ type EventsResetForAllPlayersCall struct {
 	eventId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetForAllPlayers: Resets the event with the given ID for all
@@ -1802,31 +1535,20 @@ func (c *EventsResetForAllPlayersCall) Context(ctx context.Context) *EventsReset
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EventsResetForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *EventsResetForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "events/{eventId}/resetForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"eventId": c.eventId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.events.resetForAllPlayers" call.
@@ -1872,7 +1594,6 @@ type EventsResetMultipleForAllPlayersCall struct {
 	eventsresetmultipleforallrequest *EventsResetMultipleForAllRequest
 	urlParams_                       gensupport.URLParams
 	ctx_                             context.Context
-	header_                          http.Header
 }
 
 // ResetMultipleForAllPlayers: Resets events with the given IDs for all
@@ -1901,33 +1622,24 @@ func (c *EventsResetMultipleForAllPlayersCall) Context(ctx context.Context) *Eve
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EventsResetMultipleForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *EventsResetMultipleForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.eventsresetmultipleforallrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "events/resetMultipleForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.events.resetMultipleForAllPlayers" call.
@@ -1966,7 +1678,6 @@ type PlayersHideCall struct {
 	playerId      string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Hide: Hide the given player's leaderboard scores from the given
@@ -1995,32 +1706,21 @@ func (c *PlayersHideCall) Context(ctx context.Context) *PlayersHideCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PlayersHideCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PlayersHideCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "applications/{applicationId}/players/hidden/{playerId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"applicationId": c.applicationId,
 		"playerId":      c.playerId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.players.hide" call.
@@ -2074,7 +1774,6 @@ type PlayersUnhideCall struct {
 	playerId      string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Unhide: Unhide the given player's leaderboard scores from the given
@@ -2103,32 +1802,21 @@ func (c *PlayersUnhideCall) Context(ctx context.Context) *PlayersUnhideCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PlayersUnhideCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PlayersUnhideCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "applications/{applicationId}/players/hidden/{playerId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"applicationId": c.applicationId,
 		"playerId":      c.playerId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.players.unhide" call.
@@ -2181,7 +1869,6 @@ type QuestsResetCall struct {
 	questId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Reset: Resets all player progress on the quest with the given ID for
@@ -2209,31 +1896,20 @@ func (c *QuestsResetCall) Context(ctx context.Context) *QuestsResetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *QuestsResetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *QuestsResetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "quests/{questId}/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"questId": c.questId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.quests.reset" call.
@@ -2278,7 +1954,6 @@ type QuestsResetAllCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetAll: Resets all player progress on all quests for the currently
@@ -2305,28 +1980,18 @@ func (c *QuestsResetAllCall) Context(ctx context.Context) *QuestsResetAllCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *QuestsResetAllCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *QuestsResetAllCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "quests/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.quests.resetAll" call.
@@ -2360,7 +2025,6 @@ type QuestsResetAllForAllPlayersCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetAllForAllPlayers: Resets all draft quests for all players. This
@@ -2386,28 +2050,18 @@ func (c *QuestsResetAllForAllPlayersCall) Context(ctx context.Context) *QuestsRe
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *QuestsResetAllForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *QuestsResetAllForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "quests/resetAllForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.quests.resetAllForAllPlayers" call.
@@ -2442,7 +2096,6 @@ type QuestsResetForAllPlayersCall struct {
 	questId    string
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetForAllPlayers: Resets all player progress on the quest with the
@@ -2470,31 +2123,20 @@ func (c *QuestsResetForAllPlayersCall) Context(ctx context.Context) *QuestsReset
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *QuestsResetForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *QuestsResetForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "quests/{questId}/resetForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"questId": c.questId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.quests.resetForAllPlayers" call.
@@ -2540,7 +2182,6 @@ type QuestsResetMultipleForAllPlayersCall struct {
 	questsresetmultipleforallrequest *QuestsResetMultipleForAllRequest
 	urlParams_                       gensupport.URLParams
 	ctx_                             context.Context
-	header_                          http.Header
 }
 
 // ResetMultipleForAllPlayers: Resets quests with the given IDs for all
@@ -2568,33 +2209,24 @@ func (c *QuestsResetMultipleForAllPlayersCall) Context(ctx context.Context) *Que
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *QuestsResetMultipleForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *QuestsResetMultipleForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.questsresetmultipleforallrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "quests/resetMultipleForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.quests.resetMultipleForAllPlayers" call.
@@ -2631,7 +2263,6 @@ type RoomsResetCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Reset: Reset all rooms for the currently authenticated player for
@@ -2658,28 +2289,18 @@ func (c *RoomsResetCall) Context(ctx context.Context) *RoomsResetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsResetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsResetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.rooms.reset" call.
@@ -2713,7 +2334,6 @@ type RoomsResetForAllPlayersCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetForAllPlayers: Deletes rooms where the only room participants
@@ -2740,28 +2360,18 @@ func (c *RoomsResetForAllPlayersCall) Context(ctx context.Context) *RoomsResetFo
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *RoomsResetForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *RoomsResetForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rooms/resetForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.rooms.resetForAllPlayers" call.
@@ -2796,7 +2406,6 @@ type ScoresResetCall struct {
 	leaderboardId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Reset: Resets scores for the leaderboard with the given ID for the
@@ -2824,31 +2433,20 @@ func (c *ScoresResetCall) Context(ctx context.Context) *ScoresResetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresResetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresResetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "leaderboards/{leaderboardId}/scores/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"leaderboardId": c.leaderboardId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.scores.reset" call.
@@ -2883,8 +2481,7 @@ func (c *ScoresResetCall) Do(opts ...googleapi.CallOption) (*PlayerScoreResetRes
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2921,7 +2518,6 @@ type ScoresResetAllCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetAll: Resets all scores for all leaderboards for the currently
@@ -2948,28 +2544,18 @@ func (c *ScoresResetAllCall) Context(ctx context.Context) *ScoresResetAllCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresResetAllCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresResetAllCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "scores/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.scores.resetAll" call.
@@ -3004,8 +2590,7 @@ func (c *ScoresResetAllCall) Do(opts ...googleapi.CallOption) (*PlayerScoreReset
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3031,7 +2616,6 @@ type ScoresResetAllForAllPlayersCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetAllForAllPlayers: Resets scores for all draft leaderboards for
@@ -3058,28 +2642,18 @@ func (c *ScoresResetAllForAllPlayersCall) Context(ctx context.Context) *ScoresRe
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresResetAllForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresResetAllForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "scores/resetAllForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.scores.resetAllForAllPlayers" call.
@@ -3114,7 +2688,6 @@ type ScoresResetForAllPlayersCall struct {
 	leaderboardId string
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // ResetForAllPlayers: Resets scores for the leaderboard with the given
@@ -3142,31 +2715,20 @@ func (c *ScoresResetForAllPlayersCall) Context(ctx context.Context) *ScoresReset
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresResetForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresResetForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "leaderboards/{leaderboardId}/scores/resetForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"leaderboardId": c.leaderboardId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.scores.resetForAllPlayers" call.
@@ -3212,7 +2774,6 @@ type ScoresResetMultipleForAllPlayersCall struct {
 	scoresresetmultipleforallrequest *ScoresResetMultipleForAllRequest
 	urlParams_                       gensupport.URLParams
 	ctx_                             context.Context
-	header_                          http.Header
 }
 
 // ResetMultipleForAllPlayers: Resets scores for the leaderboards with
@@ -3241,33 +2802,24 @@ func (c *ScoresResetMultipleForAllPlayersCall) Context(ctx context.Context) *Sco
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *ScoresResetMultipleForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *ScoresResetMultipleForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.scoresresetmultipleforallrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "scores/resetMultipleForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.scores.resetMultipleForAllPlayers" call.
@@ -3304,7 +2856,6 @@ type TurnBasedMatchesResetCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // Reset: Reset all turn-based match data for a user. This method is
@@ -3330,28 +2881,18 @@ func (c *TurnBasedMatchesResetCall) Context(ctx context.Context) *TurnBasedMatch
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesResetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesResetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/reset")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.turnBasedMatches.reset" call.
@@ -3385,7 +2926,6 @@ type TurnBasedMatchesResetForAllPlayersCall struct {
 	s          *Service
 	urlParams_ gensupport.URLParams
 	ctx_       context.Context
-	header_    http.Header
 }
 
 // ResetForAllPlayers: Deletes turn-based matches where the only match
@@ -3413,28 +2953,18 @@ func (c *TurnBasedMatchesResetForAllPlayersCall) Context(ctx context.Context) *T
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *TurnBasedMatchesResetForAllPlayersCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *TurnBasedMatchesResetForAllPlayersCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "turnbasedmatches/resetForAllPlayers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "gamesManagement.turnBasedMatches.resetForAllPlayers" call.

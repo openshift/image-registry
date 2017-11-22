@@ -87,6 +87,10 @@ test-unit:
 	GOTEST_FLAGS="$(TESTFLAGS)" hack/test-go.sh $(WHAT) $(TESTS)
 .PHONY: test-unit
 
+test-integration:
+	go test ./test/integration/...
+.PHONY: test-integration
+
 # Remove all build artifacts.
 #
 # Example:

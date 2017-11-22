@@ -381,20 +381,12 @@ type AcquisitionTime struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "End") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AcquisitionTime) MarshalJSON() ([]byte, error) {
 	type noMethod AcquisitionTime
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Asset: An asset is any Google Maps Engine resource that has a
@@ -478,20 +470,12 @@ type Asset struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Bbox") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Asset) MarshalJSON() ([]byte, error) {
 	type noMethod Asset
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // AssetsListResponse: The response returned by a call to
@@ -514,20 +498,12 @@ type AssetsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Assets") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AssetsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod AssetsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Border: Border in line style. Both color and width are required.
@@ -548,20 +524,12 @@ type Border struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Color") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Border) MarshalJSON() ([]byte, error) {
 	type noMethod Border
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Color: Basic color used in styling.
@@ -580,20 +548,12 @@ type Color struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Color") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Color) MarshalJSON() ([]byte, error) {
 	type noMethod Color
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type Datasource struct {
@@ -607,20 +567,12 @@ type Datasource struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Id") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Datasource) MarshalJSON() ([]byte, error) {
 	type noMethod Datasource
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DisplayRule: A display rule of the vector style.
@@ -655,20 +607,12 @@ type DisplayRule struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Filters") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DisplayRule) MarshalJSON() ([]byte, error) {
 	type noMethod DisplayRule
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Feature: A feature within a table.
@@ -693,20 +637,12 @@ type Feature struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Geometry") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Feature) MarshalJSON() ([]byte, error) {
 	type noMethod Feature
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FeatureInfo: A feature info contains information about individual
@@ -723,20 +659,12 @@ type FeatureInfo struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Content") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FeatureInfo) MarshalJSON() ([]byte, error) {
 	type noMethod FeatureInfo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FeaturesBatchDeleteRequest: The request sent to features.BatchDelete.
@@ -752,20 +680,12 @@ type FeaturesBatchDeleteRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "GxIds") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FeaturesBatchDeleteRequest) MarshalJSON() ([]byte, error) {
 	type noMethod FeaturesBatchDeleteRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FeaturesBatchInsertRequest: The request sent to features.Insert.
@@ -789,20 +709,12 @@ type FeaturesBatchInsertRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Features") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FeaturesBatchInsertRequest) MarshalJSON() ([]byte, error) {
 	type noMethod FeaturesBatchInsertRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FeaturesBatchPatchRequest: The request sent to features.BatchPatch.
@@ -826,20 +738,12 @@ type FeaturesBatchPatchRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Features") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FeaturesBatchPatchRequest) MarshalJSON() ([]byte, error) {
 	type noMethod FeaturesBatchPatchRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FeaturesListResponse: The response returned by a call to
@@ -872,21 +776,12 @@ type FeaturesListResponse struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AllowedQueriesPerSecond")
-	// to include in API requests with the JSON null value. By default,
-	// fields with empty values are omitted from API requests. However, any
-	// field with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FeaturesListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod FeaturesListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // File: A single File, which is a component of an Asset.
@@ -913,20 +808,12 @@ type File struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Filename") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *File) MarshalJSON() ([]byte, error) {
 	type noMethod File
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Filter: Conditions for filtering features.
@@ -958,20 +845,12 @@ type Filter struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Column") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Filter) MarshalJSON() ([]byte, error) {
 	type noMethod Filter
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonGeometry map[string]interface{}
@@ -1056,20 +935,12 @@ type GeoJsonGeometryCollection struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Geometries") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonGeometryCollection) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonGeometryCollection
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonLineString struct {
@@ -1089,20 +960,12 @@ type GeoJsonLineString struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonLineString) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonLineString
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GeoJsonMultiLineString: Multi Line String
@@ -1124,20 +987,12 @@ type GeoJsonMultiLineString struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonMultiLineString) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonMultiLineString
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonMultiPoint struct {
@@ -1157,20 +1012,12 @@ type GeoJsonMultiPoint struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonMultiPoint) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonMultiPoint
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonMultiPolygon struct {
@@ -1191,20 +1038,12 @@ type GeoJsonMultiPolygon struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonMultiPolygon) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonMultiPolygon
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonPoint struct {
@@ -1225,20 +1064,12 @@ type GeoJsonPoint struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonPoint) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonPoint
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonPolygon struct {
@@ -1263,20 +1094,12 @@ type GeoJsonPolygon struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Coordinates") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoJsonPolygon) MarshalJSON() ([]byte, error) {
 	type noMethod GeoJsonPolygon
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type GeoJsonProperties interface{}
@@ -1304,20 +1127,12 @@ type Icon struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Description") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Icon) MarshalJSON() ([]byte, error) {
 	type noMethod Icon
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // IconStyle: Style for icon, this is part of point style.
@@ -1344,20 +1159,12 @@ type IconStyle struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Id") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *IconStyle) MarshalJSON() ([]byte, error) {
 	type noMethod IconStyle
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // IconsListResponse: The response returned by a call to icons.List.
@@ -1379,20 +1186,12 @@ type IconsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Icons") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *IconsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod IconsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // LabelStyle: Text label style.
@@ -1434,20 +1233,12 @@ type LabelStyle struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Color") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *LabelStyle) MarshalJSON() ([]byte, error) {
 	type noMethod LabelStyle
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Layer: A Layer combines multiple datasources, with styling
@@ -1581,20 +1372,12 @@ type Layer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Bbox") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Layer) MarshalJSON() ([]byte, error) {
 	type noMethod Layer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // LayersListResponse: The response returned by a call to layers.List.
@@ -1620,20 +1403,12 @@ type LayersListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Layers") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *LayersListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod LayersListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // LineStyle: Style for lines.
@@ -1660,20 +1435,12 @@ type LineStyle struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Border") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *LineStyle) MarshalJSON() ([]byte, error) {
 	type noMethod LineStyle
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // LineStyleStroke: Stroke of the line.
@@ -1695,20 +1462,12 @@ type LineStyleStroke struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Color") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *LineStyleStroke) MarshalJSON() ([]byte, error) {
 	type noMethod LineStyleStroke
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Map: A Map is a collection of Layers, optionally contained within
@@ -1823,20 +1582,12 @@ type Map struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Bbox") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Map) MarshalJSON() ([]byte, error) {
 	type noMethod Map
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type MapFolder struct {
@@ -1874,20 +1625,12 @@ type MapFolder struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Contents") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *MapFolder) MarshalJSON() ([]byte, error) {
 	type noMethod MapFolder
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type MapItem map[string]interface{}
@@ -1949,21 +1692,12 @@ type MapKmlLink struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DefaultViewport") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *MapKmlLink) MarshalJSON() ([]byte, error) {
 	type noMethod MapKmlLink
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type MapLayer struct {
@@ -1999,21 +1733,12 @@ type MapLayer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DefaultViewport") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *MapLayer) MarshalJSON() ([]byte, error) {
 	type noMethod MapLayer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // MapsListResponse: The response returned by a call to maps.List.
@@ -2035,20 +1760,12 @@ type MapsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Maps") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *MapsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod MapsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Parent: A list of the parents of an asset.
@@ -2063,20 +1780,12 @@ type Parent struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Id") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Parent) MarshalJSON() ([]byte, error) {
 	type noMethod Parent
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ParentsListResponse: The response returned by a call to parents.List.
@@ -2098,20 +1807,12 @@ type ParentsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ParentsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ParentsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Permission: A permission defines the user or group that has access to
@@ -2151,20 +1852,12 @@ type Permission struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Discoverable") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Permission) MarshalJSON() ([]byte, error) {
 	type noMethod Permission
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PermissionsBatchDeleteRequest: The request sent to
@@ -2182,20 +1875,12 @@ type PermissionsBatchDeleteRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Ids") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PermissionsBatchDeleteRequest) MarshalJSON() ([]byte, error) {
 	type noMethod PermissionsBatchDeleteRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PermissionsBatchDeleteResponse: The response returned by a call to
@@ -2219,20 +1904,12 @@ type PermissionsBatchUpdateRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Permissions") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PermissionsBatchUpdateRequest) MarshalJSON() ([]byte, error) {
 	type noMethod PermissionsBatchUpdateRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PermissionsBatchUpdateResponse: The response returned by a call to
@@ -2258,20 +1935,12 @@ type PermissionsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Permissions") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PermissionsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PermissionsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PointStyle: Style for points.
@@ -2290,20 +1959,12 @@ type PointStyle struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Icon") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PointStyle) MarshalJSON() ([]byte, error) {
 	type noMethod PointStyle
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PolygonStyle: Style for polygons.
@@ -2325,20 +1986,12 @@ type PolygonStyle struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Fill") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PolygonStyle) MarshalJSON() ([]byte, error) {
 	type noMethod PolygonStyle
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ProcessResponse: The response returned by a call to any asset's
@@ -2364,20 +2017,12 @@ type Project struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Id") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Project) MarshalJSON() ([]byte, error) {
 	type noMethod Project
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ProjectsListResponse: The response returned by a call to
@@ -2397,20 +2042,12 @@ type ProjectsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Projects") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ProjectsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod ProjectsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PublishResponse: The response returned by a call to any asset's
@@ -2456,20 +2093,12 @@ type PublishedLayer struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Description") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PublishedLayer) MarshalJSON() ([]byte, error) {
 	type noMethod PublishedLayer
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PublishedLayersListResponse: The response returned by a call to
@@ -2492,20 +2121,12 @@ type PublishedLayersListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Layers") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PublishedLayersListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PublishedLayersListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PublishedMap: The published version of a map asset.
@@ -2541,20 +2162,12 @@ type PublishedMap struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Contents") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PublishedMap) MarshalJSON() ([]byte, error) {
 	type noMethod PublishedMap
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PublishedMapsListResponse: The response returned by a call to
@@ -2577,20 +2190,12 @@ type PublishedMapsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Maps") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PublishedMapsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PublishedMapsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Raster: A geo-referenced raster.
@@ -2689,21 +2294,12 @@ type Raster struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AcquisitionTime") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Raster) MarshalJSON() ([]byte, error) {
 	type noMethod Raster
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RasterCollection: A raster collection groups multiple Raster
@@ -2807,20 +2403,12 @@ type RasterCollection struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Attribution") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RasterCollection) MarshalJSON() ([]byte, error) {
 	type noMethod RasterCollection
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RasterCollectionsListResponse: The response returned by a call to
@@ -2847,20 +2435,12 @@ type RasterCollectionsListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RasterCollectionsListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod RasterCollectionsListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RasterCollectionsRaster: A raster resource.
@@ -2903,20 +2483,12 @@ type RasterCollectionsRaster struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Bbox") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RasterCollectionsRaster) MarshalJSON() ([]byte, error) {
 	type noMethod RasterCollectionsRaster
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RasterCollectionsRasterBatchDeleteRequest: The request sent to
@@ -2933,20 +2505,12 @@ type RasterCollectionsRasterBatchDeleteRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Ids") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RasterCollectionsRasterBatchDeleteRequest) MarshalJSON() ([]byte, error) {
 	type noMethod RasterCollectionsRasterBatchDeleteRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RasterCollectionsRastersBatchDeleteResponse: The response returned by
@@ -2971,20 +2535,12 @@ type RasterCollectionsRastersBatchInsertRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Ids") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RasterCollectionsRastersBatchInsertRequest) MarshalJSON() ([]byte, error) {
 	type noMethod RasterCollectionsRastersBatchInsertRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RasterCollectionsRastersBatchInsertResponse: The response returned by
@@ -3015,20 +2571,12 @@ type RasterCollectionsRastersListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RasterCollectionsRastersListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod RasterCollectionsRastersListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RastersListResponse: The response returned by a call to rasters.List.
@@ -3050,20 +2598,12 @@ type RastersListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RastersListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod RastersListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ScaledShape: Parameters for styling points as scaled shapes.
@@ -3089,20 +2629,12 @@ type ScaledShape struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Border") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ScaledShape) MarshalJSON() ([]byte, error) {
 	type noMethod ScaledShape
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ScalingFunction: Parameters for scaling scaled shapes.
@@ -3132,20 +2664,12 @@ type ScalingFunction struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Column") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ScalingFunction) MarshalJSON() ([]byte, error) {
 	type noMethod ScalingFunction
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Schema: A schema indicating the properties which may be associated
@@ -3173,20 +2697,12 @@ type Schema struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Columns") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Schema) MarshalJSON() ([]byte, error) {
 	type noMethod Schema
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // SizeRange: Scaled shape size range in pixels. For circles, size
@@ -3205,20 +2721,12 @@ type SizeRange struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Max") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *SizeRange) MarshalJSON() ([]byte, error) {
 	type noMethod SizeRange
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Table: A collection of geographic features, and associated metadata.
@@ -3326,20 +2834,12 @@ type Table struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Bbox") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Table) MarshalJSON() ([]byte, error) {
 	type noMethod Table
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 type TableColumn struct {
@@ -3366,20 +2866,12 @@ type TableColumn struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Name") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TableColumn) MarshalJSON() ([]byte, error) {
 	type noMethod TableColumn
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // TablesListResponse: The response returned by a call to tables.List.
@@ -3405,20 +2897,12 @@ type TablesListResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "NextPageToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *TablesListResponse) MarshalJSON() ([]byte, error) {
 	type noMethod TablesListResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ValueRange: Range of values used for scaling shapes. The min/max
@@ -3437,20 +2921,12 @@ type ValueRange struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Max") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ValueRange) MarshalJSON() ([]byte, error) {
 	type noMethod ValueRange
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // VectorStyle: A vector style contains styling information for vector
@@ -3477,20 +2953,12 @@ type VectorStyle struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DisplayRules") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *VectorStyle) MarshalJSON() ([]byte, error) {
 	type noMethod VectorStyle
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // ZoomLevels: Zoom level range. Zoom levels are restricted between 0
@@ -3509,20 +2977,12 @@ type ZoomLevels struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Max") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *ZoomLevels) MarshalJSON() ([]byte, error) {
 	type noMethod ZoomLevels
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "mapsengine.assets.get":
@@ -3569,21 +3029,22 @@ func (c *AssetsGetCall) Context(ctx context.Context) *AssetsGetCall {
 }
 
 func (c *AssetsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "assets/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.assets.get" call.
@@ -3618,8 +3079,7 @@ func (c *AssetsGetCall) Do(opts ...googleapi.CallOption) (*Asset, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -3803,18 +3263,20 @@ func (c *AssetsListCall) Context(ctx context.Context) *AssetsListCall {
 }
 
 func (c *AssetsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "assets")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.assets.list" call.
@@ -3849,8 +3311,7 @@ func (c *AssetsListCall) Do(opts ...googleapi.CallOption) (*AssetsListResponse, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4034,21 +3495,22 @@ func (c *AssetsParentsListCall) Context(ctx context.Context) *AssetsParentsListC
 }
 
 func (c *AssetsParentsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "assets/{id}/parents")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.assets.parents.list" call.
@@ -4083,8 +3545,7 @@ func (c *AssetsParentsListCall) Do(opts ...googleapi.CallOption) (*ParentsListRe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4191,21 +3652,22 @@ func (c *AssetsPermissionsListCall) Context(ctx context.Context) *AssetsPermissi
 }
 
 func (c *AssetsPermissionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "assets/{id}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.assets.permissions.list" call.
@@ -4240,8 +3702,7 @@ func (c *AssetsPermissionsListCall) Do(opts ...googleapi.CallOption) (*Permissio
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4305,18 +3766,19 @@ func (c *LayersCancelProcessingCall) Context(ctx context.Context) *LayersCancelP
 }
 
 func (c *LayersCancelProcessingCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/cancelProcessing")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.cancelProcessing" call.
@@ -4351,8 +3813,7 @@ func (c *LayersCancelProcessingCall) Do(opts ...googleapi.CallOption) (*ProcessR
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4422,20 +3883,23 @@ func (c *LayersCreateCall) Context(ctx context.Context) *LayersCreateCall {
 }
 
 func (c *LayersCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.layer)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.create" call.
@@ -4470,8 +3934,7 @@ func (c *LayersCreateCall) Do(opts ...googleapi.CallOption) (*Layer, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4533,18 +3996,19 @@ func (c *LayersDeleteCall) Context(ctx context.Context) *LayersDeleteCall {
 }
 
 func (c *LayersDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.delete" call.
@@ -4640,21 +4104,22 @@ func (c *LayersGetCall) Context(ctx context.Context) *LayersGetCall {
 }
 
 func (c *LayersGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.get" call.
@@ -4689,8 +4154,7 @@ func (c *LayersGetCall) Do(opts ...googleapi.CallOption) (*Layer, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -4778,21 +4242,22 @@ func (c *LayersGetPublishedCall) Context(ctx context.Context) *LayersGetPublishe
 }
 
 func (c *LayersGetPublishedCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/published")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.getPublished" call.
@@ -4827,8 +4292,7 @@ func (c *LayersGetPublishedCall) Do(opts ...googleapi.CallOption) (*PublishedLay
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5016,18 +4480,20 @@ func (c *LayersListCall) Context(ctx context.Context) *LayersListCall {
 }
 
 func (c *LayersListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.list" call.
@@ -5062,8 +4528,7 @@ func (c *LayersListCall) Do(opts ...googleapi.CallOption) (*LayersListResponse, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5269,18 +4734,20 @@ func (c *LayersListPublishedCall) Context(ctx context.Context) *LayersListPublis
 }
 
 func (c *LayersListPublishedCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/published")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.listPublished" call.
@@ -5315,8 +4782,7 @@ func (c *LayersListPublishedCall) Do(opts ...googleapi.CallOption) (*PublishedLa
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5410,23 +4876,25 @@ func (c *LayersPatchCall) Context(ctx context.Context) *LayersPatchCall {
 }
 
 func (c *LayersPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.layer)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.patch" call.
@@ -5500,18 +4968,19 @@ func (c *LayersProcessCall) Context(ctx context.Context) *LayersProcessCall {
 }
 
 func (c *LayersProcessCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/process")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.process" call.
@@ -5546,8 +5015,7 @@ func (c *LayersProcessCall) Do(opts ...googleapi.CallOption) (*ProcessResponse, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5619,18 +5087,19 @@ func (c *LayersPublishCall) Context(ctx context.Context) *LayersPublishCall {
 }
 
 func (c *LayersPublishCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/publish")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.publish" call.
@@ -5665,8 +5134,7 @@ func (c *LayersPublishCall) Do(opts ...googleapi.CallOption) (*PublishResponse, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5734,18 +5202,19 @@ func (c *LayersUnpublishCall) Context(ctx context.Context) *LayersUnpublishCall 
 }
 
 func (c *LayersUnpublishCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/unpublish")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.unpublish" call.
@@ -5780,8 +5249,7 @@ func (c *LayersUnpublishCall) Do(opts ...googleapi.CallOption) (*PublishResponse
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -5872,21 +5340,22 @@ func (c *LayersParentsListCall) Context(ctx context.Context) *LayersParentsListC
 }
 
 func (c *LayersParentsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/parents")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.parents.list" call.
@@ -5921,8 +5390,7 @@ func (c *LayersParentsListCall) Do(opts ...googleapi.CallOption) (*ParentsListRe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6021,23 +5489,25 @@ func (c *LayersPermissionsBatchDeleteCall) Context(ctx context.Context) *LayersP
 }
 
 func (c *LayersPermissionsBatchDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchdeleterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/permissions/batchDelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.permissions.batchDelete" call.
@@ -6072,8 +5542,7 @@ func (c *LayersPermissionsBatchDeleteCall) Do(opts ...googleapi.CallOption) (*Pe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6145,23 +5614,25 @@ func (c *LayersPermissionsBatchUpdateCall) Context(ctx context.Context) *LayersP
 }
 
 func (c *LayersPermissionsBatchUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchupdaterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/permissions/batchUpdate")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.permissions.batchUpdate" call.
@@ -6196,8 +5667,7 @@ func (c *LayersPermissionsBatchUpdateCall) Do(opts ...googleapi.CallOption) (*Pe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6274,21 +5744,22 @@ func (c *LayersPermissionsListCall) Context(ctx context.Context) *LayersPermissi
 }
 
 func (c *LayersPermissionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "layers/{id}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.layers.permissions.list" call.
@@ -6323,8 +5794,7 @@ func (c *LayersPermissionsListCall) Do(opts ...googleapi.CallOption) (*Permissio
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6388,20 +5858,23 @@ func (c *MapsCreateCall) Context(ctx context.Context) *MapsCreateCall {
 }
 
 func (c *MapsCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.map_)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.create" call.
@@ -6436,8 +5909,7 @@ func (c *MapsCreateCall) Do(opts ...googleapi.CallOption) (*Map, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6492,18 +5964,19 @@ func (c *MapsDeleteCall) Context(ctx context.Context) *MapsDeleteCall {
 }
 
 func (c *MapsDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.delete" call.
@@ -6599,21 +6072,22 @@ func (c *MapsGetCall) Context(ctx context.Context) *MapsGetCall {
 }
 
 func (c *MapsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.get" call.
@@ -6648,8 +6122,7 @@ func (c *MapsGetCall) Do(opts ...googleapi.CallOption) (*Map, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6737,21 +6210,22 @@ func (c *MapsGetPublishedCall) Context(ctx context.Context) *MapsGetPublishedCal
 }
 
 func (c *MapsGetPublishedCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}/published")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.getPublished" call.
@@ -6786,8 +6260,7 @@ func (c *MapsGetPublishedCall) Do(opts ...googleapi.CallOption) (*PublishedMap, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -6974,18 +6447,20 @@ func (c *MapsListCall) Context(ctx context.Context) *MapsListCall {
 }
 
 func (c *MapsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.list" call.
@@ -7020,8 +6495,7 @@ func (c *MapsListCall) Do(opts ...googleapi.CallOption) (*MapsListResponse, erro
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7225,18 +6699,20 @@ func (c *MapsListPublishedCall) Context(ctx context.Context) *MapsListPublishedC
 }
 
 func (c *MapsListPublishedCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/published")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.listPublished" call.
@@ -7271,8 +6747,7 @@ func (c *MapsListPublishedCall) Do(opts ...googleapi.CallOption) (*PublishedMaps
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7366,23 +6841,25 @@ func (c *MapsPatchCall) Context(ctx context.Context) *MapsPatchCall {
 }
 
 func (c *MapsPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.map_)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.patch" call.
@@ -7464,18 +6941,19 @@ func (c *MapsPublishCall) Context(ctx context.Context) *MapsPublishCall {
 }
 
 func (c *MapsPublishCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}/publish")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.publish" call.
@@ -7510,8 +6988,7 @@ func (c *MapsPublishCall) Do(opts ...googleapi.CallOption) (*PublishResponse, er
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7579,18 +7056,19 @@ func (c *MapsUnpublishCall) Context(ctx context.Context) *MapsUnpublishCall {
 }
 
 func (c *MapsUnpublishCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}/unpublish")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.unpublish" call.
@@ -7625,8 +7103,7 @@ func (c *MapsUnpublishCall) Do(opts ...googleapi.CallOption) (*PublishResponse, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7692,23 +7169,25 @@ func (c *MapsPermissionsBatchDeleteCall) Context(ctx context.Context) *MapsPermi
 }
 
 func (c *MapsPermissionsBatchDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchdeleterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}/permissions/batchDelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.permissions.batchDelete" call.
@@ -7743,8 +7222,7 @@ func (c *MapsPermissionsBatchDeleteCall) Do(opts ...googleapi.CallOption) (*Perm
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7816,23 +7294,25 @@ func (c *MapsPermissionsBatchUpdateCall) Context(ctx context.Context) *MapsPermi
 }
 
 func (c *MapsPermissionsBatchUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchupdaterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}/permissions/batchUpdate")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.permissions.batchUpdate" call.
@@ -7867,8 +7347,7 @@ func (c *MapsPermissionsBatchUpdateCall) Do(opts ...googleapi.CallOption) (*Perm
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -7945,21 +7424,22 @@ func (c *MapsPermissionsListCall) Context(ctx context.Context) *MapsPermissionsL
 }
 
 func (c *MapsPermissionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "maps/{id}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.maps.permissions.list" call.
@@ -7994,8 +7474,7 @@ func (c *MapsPermissionsListCall) Do(opts ...googleapi.CallOption) (*Permissions
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8068,18 +7547,20 @@ func (c *ProjectsListCall) Context(ctx context.Context) *ProjectsListCall {
 }
 
 func (c *ProjectsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "projects")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.projects.list" call.
@@ -8114,8 +7595,7 @@ func (c *ProjectsListCall) Do(opts ...googleapi.CallOption) (*ProjectsListRespon
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8143,7 +7623,7 @@ type ProjectsIconsCreateCall struct {
 	icon             *Icon
 	urlParams_       gensupport.URLParams
 	media_           io.Reader
-	mediaBuffer_     *gensupport.MediaBuffer
+	resumableBuffer_ *gensupport.ResumableBuffer
 	mediaType_       string
 	mediaSize_       int64 // mediaSize, if known.  Used only for calls to progressUpdater_.
 	progressUpdater_ googleapi.ProgressUpdater
@@ -8172,7 +7652,7 @@ func (c *ProjectsIconsCreateCall) Media(r io.Reader, options ...googleapi.MediaO
 	if !opts.ForceEmptyContentType {
 		r, c.mediaType_ = gensupport.DetermineContentType(r, opts.ContentType)
 	}
-	c.media_, c.mediaBuffer_ = gensupport.PrepareUpload(r, chunkSize)
+	c.media_, c.resumableBuffer_ = gensupport.PrepareUpload(r, chunkSize)
 	return c
 }
 
@@ -8189,7 +7669,7 @@ func (c *ProjectsIconsCreateCall) ResumableMedia(ctx context.Context, r io.Reade
 	c.ctx_ = ctx
 	rdr := gensupport.ReaderAtToReader(r, size)
 	rdr, c.mediaType_ = gensupport.DetermineContentType(rdr, mediaType)
-	c.mediaBuffer_ = gensupport.NewMediaBuffer(rdr, googleapi.DefaultUploadChunkSize)
+	c.resumableBuffer_ = gensupport.NewResumableBuffer(rdr, googleapi.DefaultUploadChunkSize)
 	c.media_ = nil
 	c.mediaSize_ = size
 	return c
@@ -8223,44 +7703,42 @@ func (c *ProjectsIconsCreateCall) Context(ctx context.Context) *ProjectsIconsCre
 }
 
 func (c *ProjectsIconsCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.icon)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "projects/{projectId}/icons")
-	if c.media_ != nil || c.mediaBuffer_ != nil {
+	if c.media_ != nil || c.resumableBuffer_ != nil {
 		urls = strings.Replace(urls, "https://www.googleapis.com/", "https://www.googleapis.com/upload/", 1)
 		protocol := "multipart"
-		if c.mediaBuffer_ != nil {
+		if c.resumableBuffer_ != nil {
 			protocol = "resumable"
 		}
 		c.urlParams_.Set("uploadType", protocol)
 	}
-	if body == nil {
-		body = new(bytes.Buffer)
-		reqHeaders.Set("Content-Type", "application/json")
-	}
+	urls += "?" + c.urlParams_.Encode()
 	if c.media_ != nil {
-		combined, ctype := gensupport.CombineBodyMedia(body, "application/json", c.media_, c.mediaType_)
+		var combined io.ReadCloser
+		combined, ctype = gensupport.CombineBodyMedia(body, ctype, c.media_, c.mediaType_)
 		defer combined.Close()
-		reqHeaders.Set("Content-Type", ctype)
 		body = combined
 	}
-	if c.mediaBuffer_ != nil && c.mediaType_ != "" {
-		reqHeaders.Set("X-Upload-Content-Type", c.mediaType_)
-	}
-	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	if c.resumableBuffer_ != nil && c.mediaType_ != "" {
+		req.Header.Set("X-Upload-Content-Type", c.mediaType_)
+	}
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.projects.icons.create" call.
@@ -8272,7 +7750,9 @@ func (c *ProjectsIconsCreateCall) doRequest(alt string) (*http.Response, error) 
 // returned.
 func (c *ProjectsIconsCreateCall) Do(opts ...googleapi.CallOption) (*Icon, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
+	res, err := gensupport.Retry(c.ctx_, func() (*http.Response, error) {
+		return c.doRequest("json")
+	}, gensupport.DefaultBackoffStrategy())
 	if res != nil && res.StatusCode == http.StatusNotModified {
 		if res.Body != nil {
 			res.Body.Close()
@@ -8289,13 +7769,13 @@ func (c *ProjectsIconsCreateCall) Do(opts ...googleapi.CallOption) (*Icon, error
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
-	if c.mediaBuffer_ != nil {
+	if c.resumableBuffer_ != nil {
 		loc := res.Header.Get("Location")
 		rx := &gensupport.ResumableUpload{
 			Client:    c.s.client,
 			UserAgent: c.s.userAgent(),
 			URI:       loc,
-			Media:     c.mediaBuffer_,
+			Media:     c.resumableBuffer_,
 			MediaType: c.mediaType_,
 			Callback: func(curr int64) {
 				if c.progressUpdater_ != nil {
@@ -8322,8 +7802,7 @@ func (c *ProjectsIconsCreateCall) Do(opts ...googleapi.CallOption) (*Icon, error
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8419,22 +7898,23 @@ func (c *ProjectsIconsGetCall) Context(ctx context.Context) *ProjectsIconsGetCal
 }
 
 func (c *ProjectsIconsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "projects/{projectId}/icons/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 		"id":        c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Download fetches the API endpoint's "media" value, instead of the normal
@@ -8485,8 +7965,7 @@ func (c *ProjectsIconsGetCall) Do(opts ...googleapi.CallOption) (*Icon, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8586,21 +8065,22 @@ func (c *ProjectsIconsListCall) Context(ctx context.Context) *ProjectsIconsListC
 }
 
 func (c *ProjectsIconsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "projects/{projectId}/icons")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"projectId": c.projectId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.projects.icons.list" call.
@@ -8635,8 +8115,7 @@ func (c *ProjectsIconsListCall) Do(opts ...googleapi.CallOption) (*IconsListResp
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8732,18 +8211,19 @@ func (c *RasterCollectionsCancelProcessingCall) Context(ctx context.Context) *Ra
 }
 
 func (c *RasterCollectionsCancelProcessingCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/cancelProcessing")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.cancelProcessing" call.
@@ -8778,8 +8258,7 @@ func (c *RasterCollectionsCancelProcessingCall) Do(opts ...googleapi.CallOption)
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8842,20 +8321,23 @@ func (c *RasterCollectionsCreateCall) Context(ctx context.Context) *RasterCollec
 }
 
 func (c *RasterCollectionsCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rastercollection)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.create" call.
@@ -8890,8 +8372,7 @@ func (c *RasterCollectionsCreateCall) Do(opts ...googleapi.CallOption) (*RasterC
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -8946,18 +8427,19 @@ func (c *RasterCollectionsDeleteCall) Context(ctx context.Context) *RasterCollec
 }
 
 func (c *RasterCollectionsDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.delete" call.
@@ -9039,21 +8521,22 @@ func (c *RasterCollectionsGetCall) Context(ctx context.Context) *RasterCollectio
 }
 
 func (c *RasterCollectionsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.get" call.
@@ -9088,8 +8571,7 @@ func (c *RasterCollectionsGetCall) Do(opts ...googleapi.CallOption) (*RasterColl
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9277,18 +8759,20 @@ func (c *RasterCollectionsListCall) Context(ctx context.Context) *RasterCollecti
 }
 
 func (c *RasterCollectionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.list" call.
@@ -9323,8 +8807,7 @@ func (c *RasterCollectionsListCall) Do(opts ...googleapi.CallOption) (*RasterCol
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9495,23 +8978,25 @@ func (c *RasterCollectionsPatchCall) Context(ctx context.Context) *RasterCollect
 }
 
 func (c *RasterCollectionsPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rastercollection)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.patch" call.
@@ -9585,18 +9070,19 @@ func (c *RasterCollectionsProcessCall) Context(ctx context.Context) *RasterColle
 }
 
 func (c *RasterCollectionsProcessCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/process")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.process" call.
@@ -9631,8 +9117,7 @@ func (c *RasterCollectionsProcessCall) Do(opts ...googleapi.CallOption) (*Proces
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9723,21 +9208,22 @@ func (c *RasterCollectionsParentsListCall) Context(ctx context.Context) *RasterC
 }
 
 func (c *RasterCollectionsParentsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/parents")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.parents.list" call.
@@ -9772,8 +9258,7 @@ func (c *RasterCollectionsParentsListCall) Do(opts ...googleapi.CallOption) (*Pa
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9872,23 +9357,25 @@ func (c *RasterCollectionsPermissionsBatchDeleteCall) Context(ctx context.Contex
 }
 
 func (c *RasterCollectionsPermissionsBatchDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchdeleterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/permissions/batchDelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.permissions.batchDelete" call.
@@ -9923,8 +9410,7 @@ func (c *RasterCollectionsPermissionsBatchDeleteCall) Do(opts ...googleapi.CallO
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -9996,23 +9482,25 @@ func (c *RasterCollectionsPermissionsBatchUpdateCall) Context(ctx context.Contex
 }
 
 func (c *RasterCollectionsPermissionsBatchUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchupdaterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/permissions/batchUpdate")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.permissions.batchUpdate" call.
@@ -10047,8 +9535,7 @@ func (c *RasterCollectionsPermissionsBatchUpdateCall) Do(opts ...googleapi.CallO
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10125,21 +9612,22 @@ func (c *RasterCollectionsPermissionsListCall) Context(ctx context.Context) *Ras
 }
 
 func (c *RasterCollectionsPermissionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.permissions.list" call.
@@ -10174,8 +9662,7 @@ func (c *RasterCollectionsPermissionsListCall) Do(opts ...googleapi.CallOption) 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10244,23 +9731,25 @@ func (c *RasterCollectionsRastersBatchDeleteCall) Context(ctx context.Context) *
 }
 
 func (c *RasterCollectionsRastersBatchDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rastercollectionsrasterbatchdeleterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/rasters/batchDelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.rasters.batchDelete" call.
@@ -10297,8 +9786,7 @@ func (c *RasterCollectionsRastersBatchDeleteCall) Do(opts ...googleapi.CallOptio
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10371,23 +9859,25 @@ func (c *RasterCollectionsRastersBatchInsertCall) Context(ctx context.Context) *
 }
 
 func (c *RasterCollectionsRastersBatchInsertCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rastercollectionsrastersbatchinsertrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/rasters/batchInsert")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.rasters.batchInsert" call.
@@ -10424,8 +9914,7 @@ func (c *RasterCollectionsRastersBatchInsertCall) Do(opts ...googleapi.CallOptio
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10594,21 +10083,22 @@ func (c *RasterCollectionsRastersListCall) Context(ctx context.Context) *RasterC
 }
 
 func (c *RasterCollectionsRastersListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasterCollections/{id}/rasters")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasterCollections.rasters.list" call.
@@ -10644,8 +10134,7 @@ func (c *RasterCollectionsRastersListCall) Do(opts ...googleapi.CallOption) (*Ra
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -10800,18 +10289,19 @@ func (c *RastersDeleteCall) Context(ctx context.Context) *RastersDeleteCall {
 }
 
 func (c *RastersDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.delete" call.
@@ -10893,21 +10383,22 @@ func (c *RastersGetCall) Context(ctx context.Context) *RastersGetCall {
 }
 
 func (c *RastersGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.get" call.
@@ -10942,8 +10433,7 @@ func (c *RastersGetCall) Do(opts ...googleapi.CallOption) (*Raster, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11122,18 +10612,20 @@ func (c *RastersListCall) Context(ctx context.Context) *RastersListCall {
 }
 
 func (c *RastersListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.list" call.
@@ -11168,8 +10660,7 @@ func (c *RastersListCall) Do(opts ...googleapi.CallOption) (*RastersListResponse
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11344,23 +10835,25 @@ func (c *RastersPatchCall) Context(ctx context.Context) *RastersPatchCall {
 }
 
 func (c *RastersPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.raster)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.patch" call.
@@ -11434,18 +10927,19 @@ func (c *RastersProcessCall) Context(ctx context.Context) *RastersProcessCall {
 }
 
 func (c *RastersProcessCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}/process")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.process" call.
@@ -11480,8 +10974,7 @@ func (c *RastersProcessCall) Do(opts ...googleapi.CallOption) (*ProcessResponse,
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11544,20 +11037,23 @@ func (c *RastersUploadCall) Context(ctx context.Context) *RastersUploadCall {
 }
 
 func (c *RastersUploadCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.raster)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/upload")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.upload" call.
@@ -11592,8 +11088,7 @@ func (c *RastersUploadCall) Do(opts ...googleapi.CallOption) (*Raster, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -11622,7 +11117,7 @@ type RastersFilesInsertCall struct {
 	id               string
 	urlParams_       gensupport.URLParams
 	media_           io.Reader
-	mediaBuffer_     *gensupport.MediaBuffer
+	resumableBuffer_ *gensupport.ResumableBuffer
 	mediaType_       string
 	mediaSize_       int64 // mediaSize, if known.  Used only for calls to progressUpdater_.
 	progressUpdater_ googleapi.ProgressUpdater
@@ -11651,7 +11146,7 @@ func (c *RastersFilesInsertCall) Media(r io.Reader, options ...googleapi.MediaOp
 	if !opts.ForceEmptyContentType {
 		r, c.mediaType_ = gensupport.DetermineContentType(r, opts.ContentType)
 	}
-	c.media_, c.mediaBuffer_ = gensupport.PrepareUpload(r, chunkSize)
+	c.media_, c.resumableBuffer_ = gensupport.PrepareUpload(r, chunkSize)
 	return c
 }
 
@@ -11668,7 +11163,7 @@ func (c *RastersFilesInsertCall) ResumableMedia(ctx context.Context, r io.Reader
 	c.ctx_ = ctx
 	rdr := gensupport.ReaderAtToReader(r, size)
 	rdr, c.mediaType_ = gensupport.DetermineContentType(rdr, mediaType)
-	c.mediaBuffer_ = gensupport.NewMediaBuffer(rdr, googleapi.DefaultUploadChunkSize)
+	c.resumableBuffer_ = gensupport.NewResumableBuffer(rdr, googleapi.DefaultUploadChunkSize)
 	c.media_ = nil
 	c.mediaSize_ = size
 	return c
@@ -11702,45 +11197,47 @@ func (c *RastersFilesInsertCall) Context(ctx context.Context) *RastersFilesInser
 }
 
 func (c *RastersFilesInsertCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}/files")
-	if c.media_ != nil || c.mediaBuffer_ != nil {
+	if c.media_ != nil || c.resumableBuffer_ != nil {
 		urls = strings.Replace(urls, "https://www.googleapis.com/", "https://www.googleapis.com/upload/", 1)
 		protocol := "multipart"
-		if c.mediaBuffer_ != nil {
+		if c.resumableBuffer_ != nil {
 			protocol = "resumable"
 		}
 		c.urlParams_.Set("uploadType", protocol)
 	}
-	if body == nil {
-		body = new(bytes.Buffer)
-		reqHeaders.Set("Content-Type", "application/json")
-	}
+	urls += "?" + c.urlParams_.Encode()
+	body = new(bytes.Buffer)
+	ctype := "application/json"
 	if c.media_ != nil {
-		combined, ctype := gensupport.CombineBodyMedia(body, "application/json", c.media_, c.mediaType_)
+		var combined io.ReadCloser
+		combined, ctype = gensupport.CombineBodyMedia(body, ctype, c.media_, c.mediaType_)
 		defer combined.Close()
-		reqHeaders.Set("Content-Type", ctype)
 		body = combined
 	}
-	if c.mediaBuffer_ != nil && c.mediaType_ != "" {
-		reqHeaders.Set("X-Upload-Content-Type", c.mediaType_)
-	}
-	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	if c.resumableBuffer_ != nil && c.mediaType_ != "" {
+		req.Header.Set("X-Upload-Content-Type", c.mediaType_)
+	}
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.files.insert" call.
 func (c *RastersFilesInsertCall) Do(opts ...googleapi.CallOption) error {
 	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
+	res, err := gensupport.Retry(c.ctx_, func() (*http.Response, error) {
+		return c.doRequest("json")
+	}, gensupport.DefaultBackoffStrategy())
 	if err != nil {
 		return err
 	}
@@ -11748,13 +11245,13 @@ func (c *RastersFilesInsertCall) Do(opts ...googleapi.CallOption) error {
 	if err := googleapi.CheckResponse(res); err != nil {
 		return err
 	}
-	if c.mediaBuffer_ != nil {
+	if c.resumableBuffer_ != nil {
 		loc := res.Header.Get("Location")
 		rx := &gensupport.ResumableUpload{
 			Client:    c.s.client,
 			UserAgent: c.s.userAgent(),
 			URI:       loc,
-			Media:     c.mediaBuffer_,
+			Media:     c.resumableBuffer_,
 			MediaType: c.mediaType_,
 			Callback: func(curr int64) {
 				if c.progressUpdater_ != nil {
@@ -11884,21 +11381,22 @@ func (c *RastersParentsListCall) Context(ctx context.Context) *RastersParentsLis
 }
 
 func (c *RastersParentsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}/parents")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.parents.list" call.
@@ -11933,8 +11431,7 @@ func (c *RastersParentsListCall) Do(opts ...googleapi.CallOption) (*ParentsListR
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12033,23 +11530,25 @@ func (c *RastersPermissionsBatchDeleteCall) Context(ctx context.Context) *Raster
 }
 
 func (c *RastersPermissionsBatchDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchdeleterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}/permissions/batchDelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.permissions.batchDelete" call.
@@ -12084,8 +11583,7 @@ func (c *RastersPermissionsBatchDeleteCall) Do(opts ...googleapi.CallOption) (*P
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12157,23 +11655,25 @@ func (c *RastersPermissionsBatchUpdateCall) Context(ctx context.Context) *Raster
 }
 
 func (c *RastersPermissionsBatchUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchupdaterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}/permissions/batchUpdate")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.permissions.batchUpdate" call.
@@ -12208,8 +11708,7 @@ func (c *RastersPermissionsBatchUpdateCall) Do(opts ...googleapi.CallOption) (*P
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12286,21 +11785,22 @@ func (c *RastersPermissionsListCall) Context(ctx context.Context) *RastersPermis
 }
 
 func (c *RastersPermissionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "rasters/{id}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.rasters.permissions.list" call.
@@ -12335,8 +11835,7 @@ func (c *RastersPermissionsListCall) Do(opts ...googleapi.CallOption) (*Permissi
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12400,20 +11899,23 @@ func (c *TablesCreateCall) Context(ctx context.Context) *TablesCreateCall {
 }
 
 func (c *TablesCreateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.table)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.create" call.
@@ -12448,8 +11950,7 @@ func (c *TablesCreateCall) Do(opts ...googleapi.CallOption) (*Table, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12504,18 +12005,19 @@ func (c *TablesDeleteCall) Context(ctx context.Context) *TablesDeleteCall {
 }
 
 func (c *TablesDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.delete" call.
@@ -12607,21 +12109,22 @@ func (c *TablesGetCall) Context(ctx context.Context) *TablesGetCall {
 }
 
 func (c *TablesGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.get" call.
@@ -12656,8 +12159,7 @@ func (c *TablesGetCall) Do(opts ...googleapi.CallOption) (*Table, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -12857,18 +12359,20 @@ func (c *TablesListCall) Context(ctx context.Context) *TablesListCall {
 }
 
 func (c *TablesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.list" call.
@@ -12903,8 +12407,7 @@ func (c *TablesListCall) Do(opts ...googleapi.CallOption) (*TablesListResponse, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13075,23 +12578,25 @@ func (c *TablesPatchCall) Context(ctx context.Context) *TablesPatchCall {
 }
 
 func (c *TablesPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.table)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.patch" call.
@@ -13165,18 +12670,19 @@ func (c *TablesProcessCall) Context(ctx context.Context) *TablesProcessCall {
 }
 
 func (c *TablesProcessCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/process")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.process" call.
@@ -13211,8 +12717,7 @@ func (c *TablesProcessCall) Do(opts ...googleapi.CallOption) (*ProcessResponse, 
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13281,20 +12786,23 @@ func (c *TablesUploadCall) Context(ctx context.Context) *TablesUploadCall {
 }
 
 func (c *TablesUploadCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.table)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/upload")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.upload" call.
@@ -13329,8 +12837,7 @@ func (c *TablesUploadCall) Do(opts ...googleapi.CallOption) (*Table, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13387,23 +12894,25 @@ func (c *TablesFeaturesBatchDeleteCall) Context(ctx context.Context) *TablesFeat
 }
 
 func (c *TablesFeaturesBatchDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.featuresbatchdeleterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/features/batchDelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.features.batchDelete" call.
@@ -13490,23 +12999,25 @@ func (c *TablesFeaturesBatchInsertCall) Context(ctx context.Context) *TablesFeat
 }
 
 func (c *TablesFeaturesBatchInsertCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.featuresbatchinsertrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/features/batchInsert")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.features.batchInsert" call.
@@ -13603,23 +13114,25 @@ func (c *TablesFeaturesBatchPatchCall) Context(ctx context.Context) *TablesFeatu
 }
 
 func (c *TablesFeaturesBatchPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.featuresbatchpatchrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/features/batchPatch")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.features.batchPatch" call.
@@ -13725,22 +13238,23 @@ func (c *TablesFeaturesGetCall) Context(ctx context.Context) *TablesFeaturesGetC
 }
 
 func (c *TablesFeaturesGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{tableId}/features/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"tableId": c.tableId,
 		"id":      c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.features.get" call.
@@ -13775,8 +13289,7 @@ func (c *TablesFeaturesGetCall) Do(opts ...googleapi.CallOption) (*Feature, erro
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -13949,21 +13462,22 @@ func (c *TablesFeaturesListCall) Context(ctx context.Context) *TablesFeaturesLis
 }
 
 func (c *TablesFeaturesListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/features")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.features.list" call.
@@ -13998,8 +13512,7 @@ func (c *TablesFeaturesListCall) Do(opts ...googleapi.CallOption) (*FeaturesList
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -14113,7 +13626,7 @@ type TablesFilesInsertCall struct {
 	id               string
 	urlParams_       gensupport.URLParams
 	media_           io.Reader
-	mediaBuffer_     *gensupport.MediaBuffer
+	resumableBuffer_ *gensupport.ResumableBuffer
 	mediaType_       string
 	mediaSize_       int64 // mediaSize, if known.  Used only for calls to progressUpdater_.
 	progressUpdater_ googleapi.ProgressUpdater
@@ -14145,7 +13658,7 @@ func (c *TablesFilesInsertCall) Media(r io.Reader, options ...googleapi.MediaOpt
 	if !opts.ForceEmptyContentType {
 		r, c.mediaType_ = gensupport.DetermineContentType(r, opts.ContentType)
 	}
-	c.media_, c.mediaBuffer_ = gensupport.PrepareUpload(r, chunkSize)
+	c.media_, c.resumableBuffer_ = gensupport.PrepareUpload(r, chunkSize)
 	return c
 }
 
@@ -14162,7 +13675,7 @@ func (c *TablesFilesInsertCall) ResumableMedia(ctx context.Context, r io.ReaderA
 	c.ctx_ = ctx
 	rdr := gensupport.ReaderAtToReader(r, size)
 	rdr, c.mediaType_ = gensupport.DetermineContentType(rdr, mediaType)
-	c.mediaBuffer_ = gensupport.NewMediaBuffer(rdr, googleapi.DefaultUploadChunkSize)
+	c.resumableBuffer_ = gensupport.NewResumableBuffer(rdr, googleapi.DefaultUploadChunkSize)
 	c.media_ = nil
 	c.mediaSize_ = size
 	return c
@@ -14196,45 +13709,47 @@ func (c *TablesFilesInsertCall) Context(ctx context.Context) *TablesFilesInsertC
 }
 
 func (c *TablesFilesInsertCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/files")
-	if c.media_ != nil || c.mediaBuffer_ != nil {
+	if c.media_ != nil || c.resumableBuffer_ != nil {
 		urls = strings.Replace(urls, "https://www.googleapis.com/", "https://www.googleapis.com/upload/", 1)
 		protocol := "multipart"
-		if c.mediaBuffer_ != nil {
+		if c.resumableBuffer_ != nil {
 			protocol = "resumable"
 		}
 		c.urlParams_.Set("uploadType", protocol)
 	}
-	if body == nil {
-		body = new(bytes.Buffer)
-		reqHeaders.Set("Content-Type", "application/json")
-	}
+	urls += "?" + c.urlParams_.Encode()
+	body = new(bytes.Buffer)
+	ctype := "application/json"
 	if c.media_ != nil {
-		combined, ctype := gensupport.CombineBodyMedia(body, "application/json", c.media_, c.mediaType_)
+		var combined io.ReadCloser
+		combined, ctype = gensupport.CombineBodyMedia(body, ctype, c.media_, c.mediaType_)
 		defer combined.Close()
-		reqHeaders.Set("Content-Type", ctype)
 		body = combined
 	}
-	if c.mediaBuffer_ != nil && c.mediaType_ != "" {
-		reqHeaders.Set("X-Upload-Content-Type", c.mediaType_)
-	}
-	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	if c.resumableBuffer_ != nil && c.mediaType_ != "" {
+		req.Header.Set("X-Upload-Content-Type", c.mediaType_)
+	}
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.files.insert" call.
 func (c *TablesFilesInsertCall) Do(opts ...googleapi.CallOption) error {
 	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
+	res, err := gensupport.Retry(c.ctx_, func() (*http.Response, error) {
+		return c.doRequest("json")
+	}, gensupport.DefaultBackoffStrategy())
 	if err != nil {
 		return err
 	}
@@ -14242,13 +13757,13 @@ func (c *TablesFilesInsertCall) Do(opts ...googleapi.CallOption) error {
 	if err := googleapi.CheckResponse(res); err != nil {
 		return err
 	}
-	if c.mediaBuffer_ != nil {
+	if c.resumableBuffer_ != nil {
 		loc := res.Header.Get("Location")
 		rx := &gensupport.ResumableUpload{
 			Client:    c.s.client,
 			UserAgent: c.s.userAgent(),
 			URI:       loc,
-			Media:     c.mediaBuffer_,
+			Media:     c.resumableBuffer_,
 			MediaType: c.mediaType_,
 			Callback: func(curr int64) {
 				if c.progressUpdater_ != nil {
@@ -14378,21 +13893,22 @@ func (c *TablesParentsListCall) Context(ctx context.Context) *TablesParentsListC
 }
 
 func (c *TablesParentsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/parents")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.parents.list" call.
@@ -14427,8 +13943,7 @@ func (c *TablesParentsListCall) Do(opts ...googleapi.CallOption) (*ParentsListRe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -14527,23 +14042,25 @@ func (c *TablesPermissionsBatchDeleteCall) Context(ctx context.Context) *TablesP
 }
 
 func (c *TablesPermissionsBatchDeleteCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchdeleterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/permissions/batchDelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.permissions.batchDelete" call.
@@ -14578,8 +14095,7 @@ func (c *TablesPermissionsBatchDeleteCall) Do(opts ...googleapi.CallOption) (*Pe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -14651,23 +14167,25 @@ func (c *TablesPermissionsBatchUpdateCall) Context(ctx context.Context) *TablesP
 }
 
 func (c *TablesPermissionsBatchUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.permissionsbatchupdaterequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/permissions/batchUpdate")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.permissions.batchUpdate" call.
@@ -14702,8 +14220,7 @@ func (c *TablesPermissionsBatchUpdateCall) Do(opts ...googleapi.CallOption) (*Pe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -14780,21 +14297,22 @@ func (c *TablesPermissionsListCall) Context(ctx context.Context) *TablesPermissi
 }
 
 func (c *TablesPermissionsListCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "tables/{id}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"id": c.id,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "mapsengine.tables.permissions.list" call.
@@ -14829,8 +14347,7 @@ func (c *TablesPermissionsListCall) Do(opts ...googleapi.CallOption) (*Permissio
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil

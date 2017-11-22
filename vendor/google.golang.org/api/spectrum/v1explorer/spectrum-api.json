@@ -1,18 +1,18 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"tbys6C40o18GZwyMen5GMkdK-3s/yqKB9BQKsZgrBWW3iONCdWrCiGU\"",
+ "etag": "\"ye6orv2F-1npMW3u9suM3a7C5Bo/MBdb_2wPLVZ-z9ZaAuo8xEjfMbY\"",
  "discoveryVersion": "v1",
  "id": "spectrum:v1explorer",
  "name": "spectrum",
  "version": "v1explorer",
- "revision": "20160606",
+ "revision": "20150112",
  "title": "Google Spectrum Database API",
  "description": "API for spectrum-management functions.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
-  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
+  "x16": "http://www.google.com/images/icons/product/search-16.gif",
+  "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "documentationLink": "http://developers.google.com/spectrum",
  "protocol": "rest",

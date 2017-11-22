@@ -104,36 +104,12 @@ type AntennaCharacteristics struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Height") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *AntennaCharacteristics) MarshalJSON() ([]byte, error) {
 	type noMethod AntennaCharacteristics
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *AntennaCharacteristics) UnmarshalJSON(data []byte) error {
-	type noMethod AntennaCharacteristics
-	var s1 struct {
-		Height            gensupport.JSONFloat64 `json:"height"`
-		HeightUncertainty gensupport.JSONFloat64 `json:"heightUncertainty"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.Height = float64(s1.Height)
-	s.HeightUncertainty = float64(s1.HeightUncertainty)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DatabaseSpec: This message contains the name and URI of a database.
@@ -151,20 +127,12 @@ type DatabaseSpec struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Name") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DatabaseSpec) MarshalJSON() ([]byte, error) {
 	type noMethod DatabaseSpec
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DbUpdateSpec: This message is provided by the database to notify
@@ -182,20 +150,12 @@ type DbUpdateSpec struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Databases") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DbUpdateSpec) MarshalJSON() ([]byte, error) {
 	type noMethod DbUpdateSpec
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DeviceCapabilities: Device capabilities provide additional
@@ -218,21 +178,12 @@ type DeviceCapabilities struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "FrequencyRanges") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DeviceCapabilities) MarshalJSON() ([]byte, error) {
 	type noMethod DeviceCapabilities
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DeviceDescriptor: The device descriptor contains parameters that
@@ -309,21 +260,12 @@ type DeviceDescriptor struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "EtsiEnDeviceCategory") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DeviceDescriptor) MarshalJSON() ([]byte, error) {
 	type noMethod DeviceDescriptor
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DeviceOwner: This parameter contains device-owner information
@@ -357,20 +299,12 @@ type DeviceOwner struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Operator") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DeviceOwner) MarshalJSON() ([]byte, error) {
 	type noMethod DeviceOwner
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // DeviceValidity: The device validity element describes whether a
@@ -396,20 +330,12 @@ type DeviceValidity struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DeviceDesc") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *DeviceValidity) MarshalJSON() ([]byte, error) {
 	type noMethod DeviceValidity
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // EventTime: The start and stop times of an event. This is used to
@@ -431,20 +357,12 @@ type EventTime struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "StartTime") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *EventTime) MarshalJSON() ([]byte, error) {
 	type noMethod EventTime
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // FrequencyRange: A specific range of frequencies together with the
@@ -480,38 +398,12 @@ type FrequencyRange struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "ChannelId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *FrequencyRange) MarshalJSON() ([]byte, error) {
 	type noMethod FrequencyRange
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *FrequencyRange) UnmarshalJSON(data []byte) error {
-	type noMethod FrequencyRange
-	var s1 struct {
-		MaxPowerDBm gensupport.JSONFloat64 `json:"maxPowerDBm"`
-		StartHz     gensupport.JSONFloat64 `json:"startHz"`
-		StopHz      gensupport.JSONFloat64 `json:"stopHz"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.MaxPowerDBm = float64(s1.MaxPowerDBm)
-	s.StartHz = float64(s1.StartHz)
-	s.StopHz = float64(s1.StopHz)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GeoLocation: This parameter is used to specify the geolocation of the
@@ -543,20 +435,12 @@ type GeoLocation struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Confidence") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoLocation) MarshalJSON() ([]byte, error) {
 	type noMethod GeoLocation
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GeoLocationEllipse: A "point" with uncertainty is represented using
@@ -594,38 +478,12 @@ type GeoLocationEllipse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Center") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoLocationEllipse) MarshalJSON() ([]byte, error) {
 	type noMethod GeoLocationEllipse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *GeoLocationEllipse) UnmarshalJSON(data []byte) error {
-	type noMethod GeoLocationEllipse
-	var s1 struct {
-		Orientation   gensupport.JSONFloat64 `json:"orientation"`
-		SemiMajorAxis gensupport.JSONFloat64 `json:"semiMajorAxis"`
-		SemiMinorAxis gensupport.JSONFloat64 `json:"semiMinorAxis"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.Orientation = float64(s1.Orientation)
-	s.SemiMajorAxis = float64(s1.SemiMajorAxis)
-	s.SemiMinorAxis = float64(s1.SemiMinorAxis)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GeoLocationPoint: A single geolocation on the globe.
@@ -649,36 +507,12 @@ type GeoLocationPoint struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Latitude") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoLocationPoint) MarshalJSON() ([]byte, error) {
 	type noMethod GeoLocationPoint
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *GeoLocationPoint) UnmarshalJSON(data []byte) error {
-	type noMethod GeoLocationPoint
-	var s1 struct {
-		Latitude  gensupport.JSONFloat64 `json:"latitude"`
-		Longitude gensupport.JSONFloat64 `json:"longitude"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.Latitude = float64(s1.Latitude)
-	s.Longitude = float64(s1.Longitude)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GeoLocationPolygon: A region is represented using the polygonal
@@ -708,20 +542,12 @@ type GeoLocationPolygon struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Exterior") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoLocationPolygon) MarshalJSON() ([]byte, error) {
 	type noMethod GeoLocationPolygon
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // GeoSpectrumSchedule: The schedule of spectrum profiles available at a
@@ -745,20 +571,12 @@ type GeoSpectrumSchedule struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Location") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *GeoSpectrumSchedule) MarshalJSON() ([]byte, error) {
 	type noMethod GeoSpectrumSchedule
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsGetSpectrumBatchRequest: The request message for a batch
@@ -843,20 +661,12 @@ type PawsGetSpectrumBatchRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Antenna") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsGetSpectrumBatchRequest) MarshalJSON() ([]byte, error) {
 	type noMethod PawsGetSpectrumBatchRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsGetSpectrumBatchResponse: The response message for the batch
@@ -957,37 +767,12 @@ type PawsGetSpectrumBatchResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DatabaseChange") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsGetSpectrumBatchResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PawsGetSpectrumBatchResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *PawsGetSpectrumBatchResponse) UnmarshalJSON(data []byte) error {
-	type noMethod PawsGetSpectrumBatchResponse
-	var s1 struct {
-		MaxContiguousBwHz gensupport.JSONFloat64 `json:"maxContiguousBwHz"`
-		MaxTotalBwHz      gensupport.JSONFloat64 `json:"maxTotalBwHz"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.MaxContiguousBwHz = float64(s1.MaxContiguousBwHz)
-	s.MaxTotalBwHz = float64(s1.MaxTotalBwHz)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsGetSpectrumRequest: The request message for the available
@@ -1066,20 +851,12 @@ type PawsGetSpectrumRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Antenna") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsGetSpectrumRequest) MarshalJSON() ([]byte, error) {
 	type noMethod PawsGetSpectrumRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsGetSpectrumResponse: The response message for the available
@@ -1175,37 +952,12 @@ type PawsGetSpectrumResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DatabaseChange") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsGetSpectrumResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PawsGetSpectrumResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *PawsGetSpectrumResponse) UnmarshalJSON(data []byte) error {
-	type noMethod PawsGetSpectrumResponse
-	var s1 struct {
-		MaxContiguousBwHz gensupport.JSONFloat64 `json:"maxContiguousBwHz"`
-		MaxTotalBwHz      gensupport.JSONFloat64 `json:"maxTotalBwHz"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.MaxContiguousBwHz = float64(s1.MaxContiguousBwHz)
-	s.MaxTotalBwHz = float64(s1.MaxTotalBwHz)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsInitRequest: The initialization request message allows the master
@@ -1238,20 +990,12 @@ type PawsInitRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DeviceDesc") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsInitRequest) MarshalJSON() ([]byte, error) {
 	type noMethod PawsInitRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsInitResponse: The initialization response message communicates
@@ -1298,21 +1042,12 @@ type PawsInitResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DatabaseChange") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsInitResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PawsInitResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsNotifySpectrumUseRequest: The spectrum-use notification message
@@ -1363,20 +1098,12 @@ type PawsNotifySpectrumUseRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DeviceDesc") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsNotifySpectrumUseRequest) MarshalJSON() ([]byte, error) {
 	type noMethod PawsNotifySpectrumUseRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsNotifySpectrumUseResponse: An empty response to the notification.
@@ -1407,20 +1134,12 @@ type PawsNotifySpectrumUseResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Kind") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsNotifySpectrumUseResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PawsNotifySpectrumUseResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsRegisterRequest: The registration request message contains the
@@ -1457,20 +1176,12 @@ type PawsRegisterRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Antenna") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsRegisterRequest) MarshalJSON() ([]byte, error) {
 	type noMethod PawsRegisterRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsRegisterResponse: The registration response message simply
@@ -1510,21 +1221,12 @@ type PawsRegisterResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DatabaseChange") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsRegisterResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PawsRegisterResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsVerifyDeviceRequest: The device validation request message.
@@ -1551,20 +1253,12 @@ type PawsVerifyDeviceRequest struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DeviceDescs") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsVerifyDeviceRequest) MarshalJSON() ([]byte, error) {
 	type noMethod PawsVerifyDeviceRequest
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // PawsVerifyDeviceResponse: The device validation response message.
@@ -1610,21 +1304,12 @@ type PawsVerifyDeviceResponse struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "DatabaseChange") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *PawsVerifyDeviceResponse) MarshalJSON() ([]byte, error) {
 	type noMethod PawsVerifyDeviceResponse
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // RulesetInfo: This contains parameters for the ruleset of a regulatory
@@ -1679,34 +1364,12 @@ type RulesetInfo struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Authority") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *RulesetInfo) MarshalJSON() ([]byte, error) {
 	type noMethod RulesetInfo
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *RulesetInfo) UnmarshalJSON(data []byte) error {
-	type noMethod RulesetInfo
-	var s1 struct {
-		MaxLocationChange gensupport.JSONFloat64 `json:"maxLocationChange"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.MaxLocationChange = float64(s1.MaxLocationChange)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // SpectrumMessage: Available spectrum can be logically characterized by
@@ -1733,34 +1396,12 @@ type SpectrumMessage struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Bandwidth") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *SpectrumMessage) MarshalJSON() ([]byte, error) {
 	type noMethod SpectrumMessage
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
-func (s *SpectrumMessage) UnmarshalJSON(data []byte) error {
-	type noMethod SpectrumMessage
-	var s1 struct {
-		Bandwidth gensupport.JSONFloat64 `json:"bandwidth"`
-		*noMethod
-	}
-	s1.noMethod = (*noMethod)(s)
-	if err := json.Unmarshal(data, &s1); err != nil {
-		return err
-	}
-	s.Bandwidth = float64(s1.Bandwidth)
-	return nil
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // SpectrumSchedule: The spectrum schedule element combines an event
@@ -1783,20 +1424,12 @@ type SpectrumSchedule struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "EventTime") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *SpectrumSchedule) MarshalJSON() ([]byte, error) {
 	type noMethod SpectrumSchedule
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // Vcard: A vCard-in-JSON message that contains only the fields needed
@@ -1829,20 +1462,12 @@ type Vcard struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Adr") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Vcard) MarshalJSON() ([]byte, error) {
 	type noMethod Vcard
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // VcardAddress: The structure used to represent a street address.
@@ -1875,20 +1500,12 @@ type VcardAddress struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Code") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *VcardAddress) MarshalJSON() ([]byte, error) {
 	type noMethod VcardAddress
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // VcardTelephone: The structure used to represent a telephone number.
@@ -1903,20 +1520,12 @@ type VcardTelephone struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Uri") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *VcardTelephone) MarshalJSON() ([]byte, error) {
 	type noMethod VcardTelephone
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // VcardTypedText: The structure used to represent an organization and
@@ -1933,20 +1542,12 @@ type VcardTypedText struct {
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Text") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *VcardTypedText) MarshalJSON() ([]byte, error) {
 	type noMethod VcardTypedText
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "spectrum.paws.getSpectrum":
@@ -1956,7 +1557,6 @@ type PawsGetSpectrumCall struct {
 	pawsgetspectrumrequest *PawsGetSpectrumRequest
 	urlParams_             gensupport.URLParams
 	ctx_                   context.Context
-	header_                http.Header
 }
 
 // GetSpectrum: Requests information about the available spectrum for a
@@ -1984,33 +1584,24 @@ func (c *PawsGetSpectrumCall) Context(ctx context.Context) *PawsGetSpectrumCall 
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PawsGetSpectrumCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PawsGetSpectrumCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pawsgetspectrumrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "getSpectrum")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "spectrum.paws.getSpectrum" call.
@@ -2045,8 +1636,7 @@ func (c *PawsGetSpectrumCall) Do(opts ...googleapi.CallOption) (*PawsGetSpectrum
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2072,7 +1662,6 @@ type PawsGetSpectrumBatchCall struct {
 	pawsgetspectrumbatchrequest *PawsGetSpectrumBatchRequest
 	urlParams_                  gensupport.URLParams
 	ctx_                        context.Context
-	header_                     http.Header
 }
 
 // GetSpectrumBatch: The Google Spectrum Database does not support batch
@@ -2099,33 +1688,24 @@ func (c *PawsGetSpectrumBatchCall) Context(ctx context.Context) *PawsGetSpectrum
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PawsGetSpectrumBatchCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PawsGetSpectrumBatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pawsgetspectrumbatchrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "getSpectrumBatch")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "spectrum.paws.getSpectrumBatch" call.
@@ -2160,8 +1740,7 @@ func (c *PawsGetSpectrumBatchCall) Do(opts ...googleapi.CallOption) (*PawsGetSpe
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2187,7 +1766,6 @@ type PawsInitCall struct {
 	pawsinitrequest *PawsInitRequest
 	urlParams_      gensupport.URLParams
 	ctx_            context.Context
-	header_         http.Header
 }
 
 // Init: Initializes the connection between a white space device and the
@@ -2214,33 +1792,24 @@ func (c *PawsInitCall) Context(ctx context.Context) *PawsInitCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PawsInitCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PawsInitCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pawsinitrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "init")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "spectrum.paws.init" call.
@@ -2275,8 +1844,7 @@ func (c *PawsInitCall) Do(opts ...googleapi.CallOption) (*PawsInitResponse, erro
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2302,7 +1870,6 @@ type PawsNotifySpectrumUseCall struct {
 	pawsnotifyspectrumuserequest *PawsNotifySpectrumUseRequest
 	urlParams_                   gensupport.URLParams
 	ctx_                         context.Context
-	header_                      http.Header
 }
 
 // NotifySpectrumUse: Notifies the database that the device has selected
@@ -2332,33 +1899,24 @@ func (c *PawsNotifySpectrumUseCall) Context(ctx context.Context) *PawsNotifySpec
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PawsNotifySpectrumUseCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PawsNotifySpectrumUseCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pawsnotifyspectrumuserequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "notifySpectrumUse")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "spectrum.paws.notifySpectrumUse" call.
@@ -2393,8 +1951,7 @@ func (c *PawsNotifySpectrumUseCall) Do(opts ...googleapi.CallOption) (*PawsNotif
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2420,7 +1977,6 @@ type PawsRegisterCall struct {
 	pawsregisterrequest *PawsRegisterRequest
 	urlParams_          gensupport.URLParams
 	ctx_                context.Context
-	header_             http.Header
 }
 
 // Register: The Google Spectrum Database implements registration in the
@@ -2448,33 +2004,24 @@ func (c *PawsRegisterCall) Context(ctx context.Context) *PawsRegisterCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PawsRegisterCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PawsRegisterCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pawsregisterrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "register")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "spectrum.paws.register" call.
@@ -2509,8 +2056,7 @@ func (c *PawsRegisterCall) Do(opts ...googleapi.CallOption) (*PawsRegisterRespon
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -2536,7 +2082,6 @@ type PawsVerifyDeviceCall struct {
 	pawsverifydevicerequest *PawsVerifyDeviceRequest
 	urlParams_              gensupport.URLParams
 	ctx_                    context.Context
-	header_                 http.Header
 }
 
 // VerifyDevice: Validates a device for white space use in accordance
@@ -2565,33 +2110,24 @@ func (c *PawsVerifyDeviceCall) Context(ctx context.Context) *PawsVerifyDeviceCal
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *PawsVerifyDeviceCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *PawsVerifyDeviceCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.pawsverifydevicerequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "verifyDevice")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
-	req.Header = reqHeaders
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "spectrum.paws.verifyDevice" call.
@@ -2626,8 +2162,7 @@ func (c *PawsVerifyDeviceCall) Do(opts ...googleapi.CallOption) (*PawsVerifyDevi
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil

@@ -27,9 +27,10 @@ type openshiftConfig struct {
 }
 
 type Configuration struct {
-	Version  configuration.Version `yaml:"version"`
-	Metrics  Metrics               `yaml:"metrics"`
-	Requests Requests              `yaml:"requests"`
+	Version    configuration.Version `yaml:"version"`
+	Metrics    Metrics               `yaml:"metrics"`
+	Requests   Requests              `yaml:"requests"`
+	KubeConfig string                `yaml:"kubeconfig"`
 }
 
 type Metrics struct {

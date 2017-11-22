@@ -1,19 +1,19 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"tbys6C40o18GZwyMen5GMkdK-3s/051s09LXCbLXHThlLxO7901w_8Y\"",
+ "etag": "\"bRFOOrZKfO9LweMbPqu0kcu6De8/03JbCoHD4kokI3MZJGmWPXhRI6U\"",
  "discoveryVersion": "v1",
  "id": "gamesManagement:v1management",
  "name": "gamesManagement",
  "canonicalName": "Games Management",
  "version": "v1management",
- "revision": "20161103",
+ "revision": "20160127",
  "title": "Google Play Game Services Management API",
  "description": "The Management API for Google Play Game Services.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
-  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
+  "x16": "http://www.google.com/images/icons/product/search-16.gif",
+  "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "documentationLink": "https://developers.google.com/games/services",
  "protocol": "rest",
@@ -324,10 +324,6 @@
      "type": "string",
      "description": "The ID of the player."
     },
-    "profileSettings": {
-     "$ref": "ProfileSettings",
-     "description": "The player's profile settings. Controls whether or not the player's profile is visible to other players."
-    },
     "title": {
      "type": "string",
      "description": "The player's title rewarded for their game activities."
@@ -373,22 +369,6 @@
      "items": {
       "type": "string"
      }
-    }
-   }
-  },
-  "ProfileSettings": {
-   "id": "ProfileSettings",
-   "type": "object",
-   "description": "This is a JSON template for profile settings",
-   "properties": {
-    "kind": {
-     "type": "string",
-     "description": "Uniquely identifies the type of this resource. Value is always the fixed string gamesManagement#profileSettings.",
-     "default": "gamesManagement#profileSettings"
-    },
-    "profileVisible": {
-     "type": "boolean",
-     "description": "The player's current profile visibility. This field is visible to both 1P and 3P APIs."
     }
    }
   },

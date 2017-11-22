@@ -40,21 +40,22 @@ import (
 
 	kubeversion "k8s.io/kubernetes/pkg/version"
 
+	"github.com/openshift/origin/pkg/version"
+
 	"github.com/openshift/image-registry/pkg/dockerregistry/server"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/prune"
-	"github.com/openshift/origin/pkg/cmd/server/crypto"
-	"github.com/openshift/origin/pkg/cmd/util/clientcmd"
-	"github.com/openshift/origin/pkg/version"
+	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
+	"github.com/openshift/image-registry/pkg/origin-common/crypto"
 )
 
 var pruneMode = flag.String("prune", "", "prune blobs from the storage and exit (check, delete)")
 
-func versionFields() log.Fields {
-	return log.Fields{
+func versionFields() map[interface{}]interface{} {
+	return map[interface{}]interface{}{
 		"distribution_version": distversion.Version,
 		"kubernetes_version":   kubeversion.Get(),
 		"openshift_version":    version.Get(),
@@ -63,7 +64,7 @@ func versionFields() log.Fields {
 
 // ExecutePruner runs the pruner.
 func ExecutePruner(configFile io.Reader, dryRun bool) {
-	config, _, err := registryconfig.Parse(configFile)
+	config, extraConfig, err := registryconfig.Parse(configFile)
 	if err != nil {
 		log.Fatalf("error parsing configuration file: %s", err)
 	}
@@ -90,9 +91,9 @@ func ExecutePruner(configFile io.Reader, dryRun bool) {
 	} else {
 		registryOptions = append(registryOptions, storage.EnableDelete)
 	}
-	log.WithFields(versionFields()).Info(startPrune)
+	context.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
 
-	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile())
+	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig))
 
 	storageDriver, err := factory.Create(config.Storage.Type(), config.Storage.Parameters())
 	if err != nil {
@@ -150,29 +151,29 @@ func Execute(configFile io.Reader) {
 		log.Fatalf("error parsing configuration file: %s", err)
 	}
 
-	err = Start(dockerConfig, extraConfig)
+	ctx := context.Background()
+	ctx, err = configureLogging(ctx, dockerConfig)
+	if err != nil {
+		log.Fatalf("error configuring logger: %v", err)
+	}
+
+	err = Start(ctx, dockerConfig, extraConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 // Start runs the Docker registry. Start always returns a non-nil error.
-func Start(dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) error {
+func Start(ctx context.Context, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) error {
 	setDefaultMiddleware(dockerConfig)
 	setDefaultLogParameters(dockerConfig)
 
-	ctx := context.Background()
-	ctx, err := configureLogging(ctx, dockerConfig)
-	if err != nil {
-		return fmt.Errorf("error configuring logger: %v", err)
-	}
-
-	log.WithFields(versionFields()).Info("start registry")
+	context.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
 	// inject a logger into the uuid library. warns us if there is a problem
 	// with uuid generation under low entropy.
 	uuid.Loggerf = context.GetLogger(ctx).Warnf
 
-	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile())
+	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig))
 
 	readLimiter := newLimiter(extraConfig.Requests.Read)
 	writeLimiter := newLimiter(extraConfig.Requests.Write)
@@ -194,6 +195,7 @@ func Start(dockerConfig *configuration.Configuration, extraConfig *registryconfi
 	var (
 		minVersion   uint16
 		cipherSuites []uint16
+		err          error
 	)
 	if s := os.Getenv("REGISTRY_HTTP_TLS_MINVERSION"); len(s) > 0 {
 		minVersion, err = crypto.TLSVersion(s)

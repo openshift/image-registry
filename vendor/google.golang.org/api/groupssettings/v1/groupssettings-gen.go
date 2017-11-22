@@ -47,7 +47,7 @@ const basePath = "https://www.googleapis.com/groups/v1/groups/"
 
 // OAuth2 scopes used by this API.
 const (
-	// View and manage the settings of a G Suite group
+	// View and manage the settings of a Google Apps Group
 	AppsGroupsSettingsScope = "https://www.googleapis.com/auth/apps.groups.settings"
 )
 
@@ -98,9 +98,6 @@ type Groups struct {
 	// ArchiveOnly: If the group is archive only
 	ArchiveOnly string `json:"archiveOnly,omitempty"`
 
-	// CustomFooterText: Custom footer text.
-	CustomFooterText string `json:"customFooterText,omitempty"`
-
 	// CustomReplyTo: Default email to which reply to any message should go.
 	CustomReplyTo string `json:"customReplyTo,omitempty"`
 
@@ -113,9 +110,6 @@ type Groups struct {
 
 	// Email: Email id of the group
 	Email string `json:"email,omitempty"`
-
-	// IncludeCustomFooter: Whether to include custom footer.
-	IncludeCustomFooter string `json:"includeCustomFooter,omitempty"`
 
 	// IncludeInGlobalAddressList: If this groups should be included in
 	// global address list or not.
@@ -165,17 +159,13 @@ type Groups struct {
 	// Possible values are: ALLOW MODERATE SILENTLY_MODERATE REJECT
 	SpamModerationLevel string `json:"spamModerationLevel,omitempty"`
 
-	// WhoCanAdd: Permissions to add members. Possible values are:
-	// ALL_MANAGERS_CAN_ADD ALL_MEMBERS_CAN_ADD NONE_CAN_ADD
-	WhoCanAdd string `json:"whoCanAdd,omitempty"`
-
 	// WhoCanContactOwner: Permission to contact owner of the group via web
-	// UI. Possible values are: ANYONE_CAN_CONTACT ALL_IN_DOMAIN_CAN_CONTACT
+	// UI. Possbile values are: ANYONE_CAN_CONTACT ALL_IN_DOMAIN_CAN_CONTACT
 	// ALL_MEMBERS_CAN_CONTACT ALL_MANAGERS_CAN_CONTACT
 	WhoCanContactOwner string `json:"whoCanContactOwner,omitempty"`
 
-	// WhoCanInvite: Permissions to invite members. Possible values are:
-	// ALL_MEMBERS_CAN_INVITE ALL_MANAGERS_CAN_INVITE NONE_CAN_INVITE
+	// WhoCanInvite: Permissions to invite members. Possbile values are:
+	// ALL_MEMBERS_CAN_INVITE ALL_MANAGERS_CAN_INVITE
 	WhoCanInvite string `json:"whoCanInvite,omitempty"`
 
 	// WhoCanJoin: Permissions to join the group. Possible values are:
@@ -184,7 +174,7 @@ type Groups struct {
 	WhoCanJoin string `json:"whoCanJoin,omitempty"`
 
 	// WhoCanLeaveGroup: Permission to leave the group. Possible values are:
-	// ALL_MANAGERS_CAN_LEAVE ALL_MEMBERS_CAN_LEAVE NONE_CAN_LEAVE
+	// ALL_MANAGERS_CAN_LEAVE ALL_MEMBERS_CAN_LEAVE
 	WhoCanLeaveGroup string `json:"whoCanLeaveGroup,omitempty"`
 
 	// WhoCanPostMessage: Permissions to post messages to the group.
@@ -192,12 +182,12 @@ type Groups struct {
 	// ALL_MEMBERS_CAN_POST ALL_IN_DOMAIN_CAN_POST ANYONE_CAN_POST
 	WhoCanPostMessage string `json:"whoCanPostMessage,omitempty"`
 
-	// WhoCanViewGroup: Permissions to view group. Possible values are:
+	// WhoCanViewGroup: Permissions to view group. Possbile values are:
 	// ANYONE_CAN_VIEW ALL_IN_DOMAIN_CAN_VIEW ALL_MEMBERS_CAN_VIEW
 	// ALL_MANAGERS_CAN_VIEW
 	WhoCanViewGroup string `json:"whoCanViewGroup,omitempty"`
 
-	// WhoCanViewMembership: Permissions to view membership. Possible values
+	// WhoCanViewMembership: Permissions to view membership. Possbile values
 	// are: ALL_IN_DOMAIN_CAN_VIEW ALL_MEMBERS_CAN_VIEW
 	// ALL_MANAGERS_CAN_VIEW
 	WhoCanViewMembership string `json:"whoCanViewMembership,omitempty"`
@@ -214,21 +204,12 @@ type Groups struct {
 	// field is empty or not. This may be used to include empty fields in
 	// Patch requests.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AllowExternalMembers") to
-	// include in API requests with the JSON null value. By default, fields
-	// with empty values are omitted from API requests. However, any field
-	// with an empty value appearing in NullFields will be sent to the
-	// server as null. It is an error if a field in this list has a
-	// non-empty value. This may be used to include null fields in Patch
-	// requests.
-	NullFields []string `json:"-"`
 }
 
 func (s *Groups) MarshalJSON() ([]byte, error) {
 	type noMethod Groups
 	raw := noMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields)
 }
 
 // method id "groupsSettings.groups.get":
@@ -239,7 +220,6 @@ type GroupsGetCall struct {
 	urlParams_    gensupport.URLParams
 	ifNoneMatch_  string
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Get: Gets one resource by id.
@@ -275,34 +255,23 @@ func (c *GroupsGetCall) Context(ctx context.Context) *GroupsGetCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *GroupsGetCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *GroupsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "{groupUniqueId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"groupUniqueId": c.groupUniqueId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		req.Header.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "groupsSettings.groups.get" call.
@@ -337,8 +306,7 @@ func (c *GroupsGetCall) Do(opts ...googleapi.CallOption) (*Groups, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -376,7 +344,6 @@ type GroupsPatchCall struct {
 	groups        *Groups
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Patch: Updates an existing resource. This method supports patch
@@ -404,36 +371,26 @@ func (c *GroupsPatchCall) Context(ctx context.Context) *GroupsPatchCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *GroupsPatchCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *GroupsPatchCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.groups)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "{groupUniqueId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"groupUniqueId": c.groupUniqueId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "groupsSettings.groups.patch" call.
@@ -468,8 +425,7 @@ func (c *GroupsPatchCall) Do(opts ...googleapi.CallOption) (*Groups, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -510,7 +466,6 @@ type GroupsUpdateCall struct {
 	groups        *Groups
 	urlParams_    gensupport.URLParams
 	ctx_          context.Context
-	header_       http.Header
 }
 
 // Update: Updates an existing resource.
@@ -537,36 +492,26 @@ func (c *GroupsUpdateCall) Context(ctx context.Context) *GroupsUpdateCall {
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *GroupsUpdateCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
 func (c *GroupsUpdateCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	body, err := googleapi.WithoutDataWrapper.JSONReader(c.groups)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
+	ctype := "application/json"
 	c.urlParams_.Set("alt", alt)
 	urls := googleapi.ResolveRelative(c.s.BasePath, "{groupUniqueId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.Header = reqHeaders
 	googleapi.Expand(req.URL, map[string]string{
 		"groupUniqueId": c.groupUniqueId,
 	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", c.s.userAgent())
+	if c.ctx_ != nil {
+		return ctxhttp.Do(c.ctx_, c.s.client, req)
+	}
+	return c.s.client.Do(req)
 }
 
 // Do executes the "groupsSettings.groups.update" call.
@@ -601,8 +546,7 @@ func (c *GroupsUpdateCall) Do(opts ...googleapi.CallOption) (*Groups, error) {
 			HTTPStatusCode: res.StatusCode,
 		},
 	}
-	target := &ret
-	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 	return ret, nil

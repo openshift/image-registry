@@ -1,19 +1,19 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"tbys6C40o18GZwyMen5GMkdK-3s/hio_YKqxpICjgrIvvAJqH_YueMs\"",
+ "etag": "\"ye6orv2F-1npMW3u9suM3a7C5Bo/gwo7J97ILJAQ8gO-rmiOBs_ZkKc\"",
  "discoveryVersion": "v1",
  "id": "sqladmin:v1beta3",
  "name": "sqladmin",
  "canonicalName": "SQL Admin",
  "version": "v1beta3",
- "revision": "20161110",
+ "revision": "20150330",
  "title": "Cloud SQL Administration API",
- "description": "Creates and configures Cloud SQL instances, which provide fully-managed MySQL databases.",
+ "description": "API for Cloud SQL database instance management.",
  "ownerDomain": "google.com",
  "ownerName": "Google",
  "icons": {
-  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
-  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
+  "x16": "http://www.google.com/images/icons/product/search-16.gif",
+  "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "documentationLink": "https://cloud.google.com/sql/docs/reference/latest",
  "protocol": "rest",
@@ -244,10 +244,6 @@
    "type": "object",
    "description": "A Cloud SQL instance resource.",
    "properties": {
-    "connectionName": {
-     "type": "string",
-     "description": "Connection name of the Cloud SQL instance used in connection strings."
-    },
     "currentDiskSize": {
      "type": "string",
      "description": "The current disk usage of the instance in bytes.",
@@ -1100,7 +1096,7 @@
     },
     "region": {
      "type": "array",
-     "description": "The applicable regions for this tier.",
+     "description": "The applicable regions for this tier. Can be us-east1, europe-west1, or asia-east1.",
      "items": {
       "type": "string"
      }

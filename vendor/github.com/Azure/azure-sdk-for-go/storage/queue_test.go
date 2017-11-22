@@ -10,352 +10,123 @@ type StorageQueueSuite struct{}
 
 var _ = chk.Suite(&StorageQueueSuite{})
 
-func getQueueClient(c *chk.C) *QueueServiceClient {
-	cli := getBasicClient(c).GetQueueService()
-	return &cli
+func getQueueClient(c *chk.C) QueueServiceClient {
+	return getBasicClient(c).GetQueueService()
 }
 
 func (s *StorageQueueSuite) Test_pathForQueue(c *chk.C) {
-	c.Assert(getQueueClient(c).
-		GetQueueReference("q").
-		buildPath(), chk.Equals, "/q")
+	c.Assert(pathForQueue("q"), chk.Equals, "/q")
 }
 
 func (s *StorageQueueSuite) Test_pathForQueueMessages(c *chk.C) {
-	c.Assert(getQueueClient(c).
-		GetQueueReference("q").
-		buildPathMessages(), chk.Equals, "/q/messages")
+	c.Assert(pathForQueueMessages("q"), chk.Equals, "/q/messages")
+}
+
+func (s *StorageQueueSuite) Test_pathForMessage(c *chk.C) {
+	c.Assert(pathForMessage("q", "m"), chk.Equals, "/q/messages/m")
 }
 
 func (s *StorageQueueSuite) TestCreateQueue_DeleteQueue(c *chk.C) {
 	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	q := cli.GetQueueReference(queueName(c))
-	c.Assert(q.Create(nil), chk.IsNil)
-	c.Assert(q.Delete(nil), chk.IsNil)
+	name := randString(20)
+	c.Assert(cli.CreateQueue(name), chk.IsNil)
+	c.Assert(cli.DeleteQueue(name), chk.IsNil)
 }
 
 func (s *StorageQueueSuite) Test_GetMetadata_GetApproximateCount(c *chk.C) {
 	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
+	name := randString(20)
+	c.Assert(cli.CreateQueue(name), chk.IsNil)
+	defer cli.DeleteQueue(name)
 
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
-
-	err := queue1.GetMetadata(nil)
+	qm, err := cli.GetMetadata(name)
 	c.Assert(err, chk.IsNil)
-	c.Assert(queue1.AproxMessageCount, chk.Equals, uint64(0))
+	c.Assert(qm.ApproximateMessageCount, chk.Equals, 0)
 
-	queue2 := cli.GetQueueReference(queueName(c, "2"))
-	c.Assert(queue2.Create(nil), chk.IsNil)
-	defer queue2.Delete(nil)
 	for ix := 0; ix < 3; ix++ {
-		msg := queue2.GetMessageReference("lolrofl")
-		err = msg.Put(nil)
+		err = cli.PutMessage(name, "foobar", PutMessageParameters{})
 		c.Assert(err, chk.IsNil)
 	}
 	time.Sleep(1 * time.Second)
 
-	err = queue2.GetMetadata(nil)
+	qm, err = cli.GetMetadata(name)
 	c.Assert(err, chk.IsNil)
-	c.Assert(queue2.AproxMessageCount, chk.Equals, uint64(3))
+	c.Assert(qm.ApproximateMessageCount, chk.Equals, 3)
 }
 
 func (s *StorageQueueSuite) Test_SetMetadataGetMetadata_Roundtrips(c *chk.C) {
 	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
+	name := randString(20)
+	c.Assert(cli.CreateQueue(name), chk.IsNil)
+	defer cli.DeleteQueue(name)
 
 	metadata := make(map[string]string)
-	metadata["Lol1"] = "rofl1"
-	metadata["lolBaz"] = "rofl"
-	queue1.Metadata = metadata
-	err := queue1.SetMetadata(nil)
+	metadata["Foo1"] = "bar1"
+	metadata["fooBaz"] = "bar"
+	err := cli.SetMetadata(name, metadata)
 	c.Assert(err, chk.IsNil)
 
-	err = queue1.GetMetadata(nil)
+	qm, err := cli.GetMetadata(name)
 	c.Assert(err, chk.IsNil)
-	c.Assert(queue1.Metadata["lol1"], chk.Equals, metadata["Lol1"])
-	c.Assert(queue1.Metadata["lolbaz"], chk.Equals, metadata["lolBaz"])
+	c.Assert(qm.UserDefinedMetadata["foo1"], chk.Equals, "bar1")
+	c.Assert(qm.UserDefinedMetadata["foobaz"], chk.Equals, "bar")
 }
 
 func (s *StorageQueueSuite) TestQueueExists(c *chk.C) {
 	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "nonexistent"))
-	ok, err := queue1.Exists()
+	ok, err := cli.QueueExists("nonexistent-queue")
 	c.Assert(err, chk.IsNil)
 	c.Assert(ok, chk.Equals, false)
 
-	queue2 := cli.GetQueueReference(queueName(c, "exisiting"))
-	c.Assert(queue2.Create(nil), chk.IsNil)
-	defer queue2.Delete(nil)
+	name := randString(20)
+	c.Assert(cli.CreateQueue(name), chk.IsNil)
+	defer cli.DeleteQueue(name)
 
-	ok, err = queue2.Exists()
+	ok, err = cli.QueueExists(name)
 	c.Assert(err, chk.IsNil)
 	c.Assert(ok, chk.Equals, true)
 }
 
-func (s *StorageQueueSuite) TestGetMessages(c *chk.C) {
+func (s *StorageQueueSuite) TestPostMessage_PeekMessage_DeleteMessage(c *chk.C) {
+	q := randString(20)
 	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
+	c.Assert(cli.CreateQueue(q), chk.IsNil)
+	defer cli.DeleteQueue(q)
 
-	queue := cli.GetQueueReference(queueName(c))
-	c.Assert(queue.Create(nil), chk.IsNil)
-	defer queue.Delete(nil)
+	msg := randString(64 * 1024) // exercise max length
+	c.Assert(cli.PutMessage(q, msg, PutMessageParameters{}), chk.IsNil)
+	r, err := cli.PeekMessages(q, PeekMessagesParameters{})
+	c.Assert(err, chk.IsNil)
+	c.Assert(len(r.QueueMessagesList), chk.Equals, 1)
+	c.Assert(r.QueueMessagesList[0].MessageText, chk.Equals, msg)
+}
 
-	msg := queue.GetMessageReference("message")
+func (s *StorageQueueSuite) TestGetMessages(c *chk.C) {
+	q := randString(20)
+	cli := getQueueClient(c)
+	c.Assert(cli.CreateQueue(q), chk.IsNil)
+	defer cli.DeleteQueue(q)
+
 	n := 4
 	for i := 0; i < n; i++ {
-		c.Assert(msg.Put(nil), chk.IsNil)
+		c.Assert(cli.PutMessage(q, randString(10), PutMessageParameters{}), chk.IsNil)
 	}
 
-	list, err := queue.GetMessages(&GetMessagesOptions{NumOfMessages: n})
+	r, err := cli.GetMessages(q, GetMessagesParameters{NumOfMessages: n})
 	c.Assert(err, chk.IsNil)
-	c.Assert(len(list), chk.Equals, n)
+	c.Assert(len(r.QueueMessagesList), chk.Equals, n)
 }
 
 func (s *StorageQueueSuite) TestDeleteMessages(c *chk.C) {
+	q := randString(20)
 	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
+	c.Assert(cli.CreateQueue(q), chk.IsNil)
+	defer cli.DeleteQueue(q)
 
-	queue := cli.GetQueueReference(queueName(c))
-	c.Assert(queue.Create(nil), chk.IsNil)
-	defer queue.Delete(nil)
-
-	msg := queue.GetMessageReference("message")
-	c.Assert(msg.Put(nil), chk.IsNil)
-	list, err := queue.GetMessages(&GetMessagesOptions{VisibilityTimeout: 1})
+	c.Assert(cli.PutMessage(q, "message", PutMessageParameters{}), chk.IsNil)
+	r, err := cli.GetMessages(q, GetMessagesParameters{VisibilityTimeout: 1})
 	c.Assert(err, chk.IsNil)
-	c.Assert(len(list), chk.Equals, 1)
-	msg = &(list[0])
-	c.Assert(msg.Delete(nil), chk.IsNil)
-}
-
-func queueName(c *chk.C, extras ...string) string {
-	// 63 is the max len for shares
-	return nameGenerator(63, "queue-", alphanum, c, extras)
-}
-
-func (s *StorageQueueSuite) Test_SetPermissionsAllTrueNoTimeout(c *chk.C) {
-	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
-
-	perms := QueuePermissions{}
-	qapd := QueueAccessPolicy{
-		ID:         "GolangRocksOnAzure",
-		StartTime:  time.Date(2050, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6)),
-		ExpiryTime: time.Date(2051, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6)),
-		CanRead:    true,
-		CanAdd:     true,
-		CanUpdate:  true,
-		CanProcess: true,
-	}
-	perms.AccessPolicies = append(perms.AccessPolicies, qapd)
-	err := queue1.SetPermissions(perms, nil)
-	c.Assert(err, chk.IsNil)
-}
-
-func (s *StorageQueueSuite) Test_SetPermissionsAllTrueWithTimeout(c *chk.C) {
-	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
-
-	perms := QueuePermissions{}
-	qapd := QueueAccessPolicy{
-		ID:         "GolangRocksOnAzure",
-		StartTime:  time.Date(2050, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6)),
-		ExpiryTime: time.Date(2051, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6)),
-		CanRead:    true,
-		CanAdd:     true,
-		CanUpdate:  true,
-		CanProcess: true,
-	}
-	perms.AccessPolicies = append(perms.AccessPolicies, qapd)
-
-	options := SetQueuePermissionOptions{Timeout: 30}
-	err := queue1.SetPermissions(perms, &options)
-	c.Assert(err, chk.IsNil)
-
-}
-
-func (s *StorageQueueSuite) Test_SetPermissionsAlternateTrueNoTimeout(c *chk.C) {
-	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
-
-	perms := QueuePermissions{}
-	qapd := QueueAccessPolicy{
-		ID:         "GolangRocksOnAzure",
-		StartTime:  time.Date(2050, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6)),
-		ExpiryTime: time.Date(2051, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6)),
-		CanRead:    true,
-		CanAdd:     false,
-		CanUpdate:  true,
-		CanProcess: false,
-	}
-	perms.AccessPolicies = append(perms.AccessPolicies, qapd)
-	err := queue1.SetPermissions(perms, nil)
-	c.Assert(err, chk.IsNil)
-}
-
-func (s *StorageQueueSuite) Test_SetPermissionsAlternateTrueWithTimeout(c *chk.C) {
-	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
-
-	perms := QueuePermissions{}
-	qapd := QueueAccessPolicy{
-		ID:         "GolangRocksOnAzure",
-		StartTime:  time.Date(2050, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6)),
-		ExpiryTime: time.Date(2051, time.December, 20, 21, 55, 0, 0, time.FixedZone("GMT", -6)),
-		CanRead:    true,
-		CanAdd:     false,
-		CanUpdate:  true,
-		CanProcess: false,
-	}
-	perms.AccessPolicies = append(perms.AccessPolicies, qapd)
-
-	options := SetQueuePermissionOptions{Timeout: 30}
-	err := queue1.SetPermissions(perms, &options)
-	c.Assert(err, chk.IsNil)
-}
-
-func (s *StorageQueueSuite) Test_GetPermissionsAllTrueNoTimeout(c *chk.C) {
-	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
-
-	perms := QueuePermissions{}
-	qapd := QueueAccessPolicy{
-		ID:         "GolangRocksOnAzure",
-		StartTime:  time.Date(2050, time.December, 20, 21, 55, 0, 0, time.UTC),
-		ExpiryTime: time.Date(2051, time.December, 20, 21, 55, 0, 0, time.UTC),
-		CanRead:    true,
-		CanAdd:     true,
-		CanUpdate:  true,
-		CanProcess: true,
-	}
-	perms.AccessPolicies = append(perms.AccessPolicies, qapd)
-	err := queue1.SetPermissions(perms, nil)
-	c.Assert(err, chk.IsNil)
-
-	returnedPerms, err := queue1.GetPermissions(nil)
-	c.Assert(err, chk.IsNil)
-	c.Assert(returnedPerms.AccessPolicies, chk.HasLen, 1)
-
-	c.Assert(returnedPerms.AccessPolicies[0].CanRead, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].CanAdd, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].CanUpdate, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].CanProcess, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].ID, chk.Equals, "GolangRocksOnAzure")
-	c.Assert(returnedPerms.AccessPolicies[0].StartTime, chk.Equals, qapd.StartTime)
-	c.Assert(returnedPerms.AccessPolicies[0].ExpiryTime, chk.Equals, qapd.ExpiryTime)
-}
-
-func (s *StorageQueueSuite) Test_GetPermissionsAllTrueWithTimeout(c *chk.C) {
-	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
-
-	perms := QueuePermissions{}
-	qapd := QueueAccessPolicy{
-		ID:         "GolangRocksOnAzure",
-		StartTime:  time.Date(2050, time.December, 20, 21, 55, 0, 0, time.UTC),
-		ExpiryTime: time.Date(2051, time.December, 20, 21, 55, 0, 0, time.UTC),
-		CanRead:    true,
-		CanAdd:     true,
-		CanUpdate:  true,
-		CanProcess: true,
-	}
-	perms.AccessPolicies = append(perms.AccessPolicies, qapd)
-	err := queue1.SetPermissions(perms, nil)
-	c.Assert(err, chk.IsNil)
-
-	options := GetQueuePermissionOptions{Timeout: 30}
-	returnedPerms, err := queue1.GetPermissions(&options)
-	c.Assert(err, chk.IsNil)
-	c.Assert(returnedPerms.AccessPolicies, chk.HasLen, 1)
-
-	c.Assert(returnedPerms.AccessPolicies[0].CanRead, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].CanAdd, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].CanUpdate, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].CanProcess, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].ID, chk.Equals, "GolangRocksOnAzure")
-	c.Assert(returnedPerms.AccessPolicies[0].StartTime, chk.Equals, qapd.StartTime)
-	c.Assert(returnedPerms.AccessPolicies[0].ExpiryTime, chk.Equals, qapd.ExpiryTime)
-
-}
-
-func (s *StorageQueueSuite) Test_GetPermissionsAlternateTrueNoTimeout(c *chk.C) {
-	cli := getQueueClient(c)
-	rec := cli.client.appendRecorder(c)
-	defer rec.Stop()
-
-	queue1 := cli.GetQueueReference(queueName(c, "1"))
-	c.Assert(queue1.Create(nil), chk.IsNil)
-	defer queue1.Delete(nil)
-
-	perms := QueuePermissions{}
-	qapd := QueueAccessPolicy{
-		ID:         "GolangRocksOnAzure",
-		StartTime:  time.Date(2050, time.December, 20, 21, 55, 0, 0, time.UTC),
-		ExpiryTime: time.Date(2051, time.December, 20, 21, 55, 0, 0, time.UTC),
-		CanRead:    true,
-		CanAdd:     false,
-		CanUpdate:  true,
-		CanProcess: false,
-	}
-	perms.AccessPolicies = append(perms.AccessPolicies, qapd)
-	err := queue1.SetPermissions(perms, nil)
-	c.Assert(err, chk.IsNil)
-
-	returnedPerms, err := queue1.GetPermissions(nil)
-	c.Assert(err, chk.IsNil)
-	c.Assert(returnedPerms.AccessPolicies, chk.HasLen, 1)
-
-	c.Assert(returnedPerms.AccessPolicies[0].CanRead, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].CanAdd, chk.Equals, false)
-	c.Assert(returnedPerms.AccessPolicies[0].CanUpdate, chk.Equals, true)
-	c.Assert(returnedPerms.AccessPolicies[0].CanProcess, chk.Equals, false)
-	c.Assert(returnedPerms.AccessPolicies[0].ID, chk.Equals, "GolangRocksOnAzure")
-	c.Assert(returnedPerms.AccessPolicies[0].StartTime, chk.Equals, qapd.StartTime)
-	c.Assert(returnedPerms.AccessPolicies[0].ExpiryTime, chk.Equals, qapd.ExpiryTime)
+	c.Assert(len(r.QueueMessagesList), chk.Equals, 1)
+	m := r.QueueMessagesList[0]
+	c.Assert(cli.DeleteMessage(q, m.MessageID, m.PopReceipt), chk.IsNil)
 }

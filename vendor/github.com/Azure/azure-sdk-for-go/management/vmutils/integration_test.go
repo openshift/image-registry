@@ -321,9 +321,6 @@ func GetTestStorageAccount(t *testing.T, client management.Client) storage.Stora
 			t.Fatal(err)
 		}
 		sa, err = sc.GetStorageService(name)
-		if err != nil {
-			t.Fatal(err)
-		}
 	} else {
 
 		sa = ssl.StorageServices[rnd.Intn(len(ssl.StorageServices))]
