@@ -17,7 +17,10 @@ func FindFreeLocalPort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer l.Close()
+	defer func() {
+		// ignore error
+		_ = l.Close()
+	}()
 	_, portStr, err := net.SplitHostPort(l.Addr().String())
 	if err != nil {
 		return 0, err

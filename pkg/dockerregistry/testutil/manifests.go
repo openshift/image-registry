@@ -225,10 +225,10 @@ func AssertManifestsEqual(t *testing.T, description string, ma distribution.Mani
 	}
 
 	var va, vb manifest.Versioned
-	if err := json.Unmarshal([]byte(pa), &va); err != nil {
+	if err := json.Unmarshal(pa, &va); err != nil {
 		t.Fatalf("[%s] failed to unmarshal payload of the first manifest: %v", description, err)
 	}
-	if err := json.Unmarshal([]byte(pb), &vb); err != nil {
+	if err := json.Unmarshal(pb, &vb); err != nil {
 		t.Fatalf("[%s] failed to unmarshal payload of the second manifest: %v", description, err)
 	}
 

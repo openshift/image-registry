@@ -286,7 +286,10 @@ func ping(manager challenge.Manager, endpoint, versionHeader string) ([]auth.API
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		// TODO(dmage): log error?
+		_ = resp.Body.Close()
+	}()
 
 	if err := manager.AddResponse(resp); err != nil {
 		return nil, err

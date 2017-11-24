@@ -137,7 +137,7 @@ func TestSignatureGet(t *testing.T) {
 }
 
 func TestSignaturePut(t *testing.T) {
-	imageClient := &imagefakeclient.FakeImageV1{&clientgotesting.Fake{}}
+	imageClient := &imagefakeclient.FakeImageV1{Fake: &clientgotesting.Fake{}}
 
 	installFakeAccessController(t)
 

@@ -91,7 +91,7 @@ func ExecutePruner(configFile io.Reader, dryRun bool) {
 	} else {
 		registryOptions = append(registryOptions, storage.EnableDelete)
 	}
-	context.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
+	context.GetLoggerWithFields(ctx, versionFields()).Info(startPrune)
 
 	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig))
 
@@ -110,7 +110,7 @@ func ExecutePruner(configFile io.Reader, dryRun bool) {
 	if dryRun {
 		pruner = &prune.DryRunPruner{}
 	} else {
-		pruner = &prune.RegistryPruner{storageDriver}
+		pruner = &prune.RegistryPruner{StorageDriver: storageDriver}
 	}
 
 	stats, err := prune.Prune(ctx, registry, registryClient, pruner)

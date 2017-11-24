@@ -70,7 +70,10 @@ type blobHandler struct {
 
 // Delete deletes the blob from the storage backend.
 func (bh *blobHandler) Delete(w http.ResponseWriter, req *http.Request) {
-	defer req.Body.Close()
+	defer func() {
+		// TODO(dmage): log error?
+		_ = req.Body.Close()
+	}()
 
 	if len(bh.Digest) == 0 {
 		bh.Errors = append(bh.Errors, v2.ErrorCodeBlobUnknown)

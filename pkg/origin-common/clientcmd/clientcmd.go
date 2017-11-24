@@ -119,20 +119,28 @@ func (cfg *Config) bindEnv() error {
 		}
 
 		if !cfg.MasterAddr.Provided {
-			cfg.MasterAddr.Set(cfg.CommonConfig.Host)
+			if err := cfg.MasterAddr.Set(cfg.CommonConfig.Host); err != nil {
+				return fmt.Errorf("master addr: %v", err)
+			}
 		}
 		if !cfg.KubernetesAddr.Provided {
-			cfg.KubernetesAddr.Set(cfg.CommonConfig.Host)
+			if err := cfg.KubernetesAddr.Set(cfg.CommonConfig.Host); err != nil {
+				return fmt.Errorf("kubernetes addr: %v", err)
+			}
 		}
 		return nil
 	}
 
 	// Legacy path - preserve env vars set on pods that previously were honored.
 	if value, ok := getEnv("KUBERNETES_MASTER"); ok && !cfg.KubernetesAddr.Provided {
-		cfg.KubernetesAddr.Set(value)
+		if err := cfg.KubernetesAddr.Set(value); err != nil {
+			return fmt.Errorf("kubernetes addr: %v", err)
+		}
 	}
 	if value, ok := getEnv("OPENSHIFT_MASTER"); ok && !cfg.MasterAddr.Provided {
-		cfg.MasterAddr.Set(value)
+		if err := cfg.MasterAddr.Set(value); err != nil {
+			return fmt.Errorf("master addr: %v", err)
+		}
 	}
 	if value, ok := getEnv("BEARER_TOKEN"); ok && len(cfg.CommonConfig.BearerToken) == 0 {
 		cfg.CommonConfig.BearerToken = value

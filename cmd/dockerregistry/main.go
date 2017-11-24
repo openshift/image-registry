@@ -42,7 +42,9 @@ func main() {
 		os.Exit(1)
 	}
 	// Prevent a warning about unrecognized environment variable
-	os.Unsetenv("REGISTRY_CONFIGURATION_PATH")
+	if err := os.Unsetenv("REGISTRY_CONFIGURATION_PATH"); err != nil {
+		log.Fatalf("Unable to unset REGISTRY_CONFIGURATION_PATH: %v", err)
+	}
 
 	configFile, err := os.Open(configurationPath)
 	if err != nil {

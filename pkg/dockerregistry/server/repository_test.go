@@ -357,6 +357,9 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 	// remove repo layer repo link of the image's second blob
 	alg, hex := blob2Dgst.Algorithm(), blob2Dgst.Hex()
 	err = driver.Delete(ctx, fmt.Sprintf("/docker/registry/v2/repositories/%s/_layers/%s/%s", "nm/is", alg, hex))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
 	registrytest.AddImageStream(t, fos, "nm", "is", nil)
@@ -418,7 +421,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 	}
 
 	// fail because the blob isn't stored locally
-	desc, err = repo.Blobs(ctx).Stat(ctx, blob1Dgst)
+	_, err = repo.Blobs(ctx).Stat(ctx, blob1Dgst)
 	if err == nil {
 		t.Fatalf("got unexpected non error: %v", err)
 	}
@@ -483,7 +486,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 	}
 
 	// fail because the blob isn't stored locally
-	desc, err = repo.Blobs(ctx).Stat(ctx, blob2Dgst)
+	_, err = repo.Blobs(ctx).Stat(ctx, blob2Dgst)
 	if err == nil {
 		t.Fatalf("got unexpected non error: %v", err)
 	}

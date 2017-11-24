@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
@@ -34,7 +35,10 @@ func (b ByGeneration) Len() int           { return len(b) }
 func (b ByGeneration) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
 func init() {
-	middleware.RegisterOptions(storage.BlobDescriptorServiceFactory(&blobDescriptorServiceFactory{}))
+	err := middleware.RegisterOptions(storage.BlobDescriptorServiceFactory(&blobDescriptorServiceFactory{}))
+	if err != nil {
+		logrus.Fatalf("Unable to register BlobDescriptorServiceFactory: %v", err)
+	}
 }
 
 // blobDescriptorServiceFactory needs to be able to work with blobs
@@ -190,7 +194,7 @@ func imageHasBlob(
 	image, err := r.getImage(digest.Digest(imageName))
 	if err != nil {
 		if kerrors.IsNotFound(err) {
-			context.GetLogger(r.ctx).Debugf("image %q not found: imageName")
+			context.GetLogger(r.ctx).Debugf("image %q not found", imageName)
 		} else {
 			context.GetLogger(r.ctx).Errorf("failed to get image: %v", err)
 		}
