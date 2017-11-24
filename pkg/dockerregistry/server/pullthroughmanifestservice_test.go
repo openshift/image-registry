@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 
@@ -47,15 +46,7 @@ func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Serve
 		},
 	})
 
-	remoteRegistryServer := httptest.NewServer(remoteRegistryApp)
-
-	serverURL, err := url.Parse(remoteRegistryServer.URL)
-	if err != nil {
-		t.Fatalf("error parsing server url: %v", err)
-	}
-	os.Setenv("OPENSHIFT_DEFAULT_REGISTRY", serverURL.Host)
-
-	return remoteRegistryServer
+	return httptest.NewServer(remoteRegistryApp)
 }
 
 func TestPullthroughManifests(t *testing.T) {

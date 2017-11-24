@@ -46,7 +46,6 @@ func TestPullthroughServeBlob(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error parsing server url: %v", err)
 	}
-	os.Setenv("OPENSHIFT_DEFAULT_REGISTRY", serverURL.Host)
 	testImage.DockerImageReference = fmt.Sprintf("%s/%s@%s", serverURL.Host, repoName, testImage.Name)
 
 	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(backgroundCtx)

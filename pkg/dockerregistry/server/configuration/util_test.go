@@ -1,4 +1,4 @@
-package server
+package configuration
 
 import (
 	"os"
@@ -125,6 +125,9 @@ func TestGetBoolOption(t *testing.T) {
 		if d != tc.expected {
 			t.Errorf("[%s] got unexpected duration: %t != %t", tc.name, d, tc.expected)
 		}
+		for key := range tc.exportEnv {
+			os.Unsetenv(key)
+		}
 	}
 }
 
@@ -228,6 +231,9 @@ func TestGetDurationOption(t *testing.T) {
 		}
 		if d != tc.expectedDuration {
 			t.Errorf("[%s] got unexpected duration: %s != %s", tc.name, d.String(), tc.expectedDuration.String())
+		}
+		for key := range tc.exportEnv {
+			os.Unsetenv(key)
 		}
 	}
 }
