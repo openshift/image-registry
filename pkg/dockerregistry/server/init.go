@@ -3,6 +3,8 @@ package server
 import (
 	"fmt"
 
+	"github.com/Sirupsen/logrus"
+
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
@@ -47,7 +49,7 @@ func init() {
 		return app
 	}
 
-	registryauth.Register(middlewareOpenShift, func(options map[string]interface{}) (registryauth.AccessController, error) {
+	err := registryauth.Register(middlewareOpenShift, func(options map[string]interface{}) (registryauth.AccessController, error) {
 		app := getApp(options)
 		if app == nil {
 			return nil, fmt.Errorf("failed to find an application instance in the access controller")
@@ -57,8 +59,11 @@ func init() {
 
 		return app.newAccessController(app.extraConfig.Auth)
 	})
+	if err != nil {
+		logrus.Fatalf("Unable to register auth middleware: %v", err)
+	}
 
-	registrystorage.Register(middlewareOpenShift, func(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
+	err = registrystorage.Register(middlewareOpenShift, func(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
 		app := getApp(options)
 		if app == nil {
 			return nil, fmt.Errorf("failed to find an application instance in the storage driver middleware")
@@ -73,8 +78,11 @@ func init() {
 
 		return driver, nil
 	})
+	if err != nil {
+		logrus.Fatalf("Unable to register storage middleware: %v", err)
+	}
 
-	middleware.Register(middlewareOpenShift, func(ctx context.Context, registry distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error) {
+	err = middleware.Register(middlewareOpenShift, func(ctx context.Context, registry distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error) {
 		app := getApp(options)
 		if app == nil {
 			return nil, fmt.Errorf("failed to find an application instance in the registry middleware")
@@ -86,8 +94,11 @@ func init() {
 
 		return registry, nil
 	})
+	if err != nil {
+		logrus.Fatalf("Unable to register registry middleware: %v", err)
+	}
 
-	repomw.Register(middlewareOpenShift, func(ctx context.Context, repo distribution.Repository, options map[string]interface{}) (distribution.Repository, error) {
+	err = repomw.Register(middlewareOpenShift, func(ctx context.Context, repo distribution.Repository, options map[string]interface{}) (distribution.Repository, error) {
 		app := getApp(options)
 		if app == nil {
 			return nil, fmt.Errorf("failed to find an application instance in the repository middleware")
@@ -95,4 +106,7 @@ func init() {
 
 		return app.newRepository(ctx, repo, options)
 	})
+	if err != nil {
+		logrus.Fatalf("Unable to register repository middleware: %v", err)
+	}
 }

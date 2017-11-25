@@ -164,7 +164,9 @@ func Parse(rd io.Reader) (*configuration.Configuration, *Configuration, error) {
 	}
 
 	// We don't want to change the version from the environment variables.
-	os.Unsetenv("REGISTRY_OPENSHIFT_VERSION")
+	if err := os.Unsetenv("REGISTRY_OPENSHIFT_VERSION"); err != nil {
+		return nil, nil, err
+	}
 
 	openshiftEnv, err := popEnv("REGISTRY_OPENSHIFT_")
 	if err != nil {

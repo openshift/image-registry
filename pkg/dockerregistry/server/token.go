@@ -65,13 +65,15 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func (t *tokenHandler) writeError(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
-	json.NewEncoder(w).Encode(map[string]interface{}{"error": "invalid_request"})
+	// TODO(dmage): log error?
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{"error": "invalid_request"})
 }
 
 func (t *tokenHandler) writeToken(token string, w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	// TODO(dmage): log error?
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"token":        token,
 		"access_token": token,
 	})

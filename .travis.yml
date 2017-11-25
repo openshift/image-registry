@@ -3,8 +3,12 @@ language: go
 go:
   - 1.8
 
+before_install:
+  - go get github.com/alecthomas/gometalinter
+  - gometalinter --install
+
 script:
-  - PERMISSIVE_GO=y make verify
+  - PERMISSIVE_GO=y make verify -k
 
 notifications:
   irc: "chat.freenode.net#openshift-dev"

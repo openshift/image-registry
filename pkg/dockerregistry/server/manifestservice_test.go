@@ -44,7 +44,7 @@ func TestManifestServiceExists(t *testing.T) {
 		t.Errorf("ms.Exists(ctx, %q): got false, want true", testImage.Name)
 	}
 
-	ok, err = ms.Exists(ctx, unknownBlobDigest)
+	_, err = ms.Exists(ctx, unknownBlobDigest)
 	if err == nil {
 		t.Errorf("ms.Exists(ctx, %q): got success, want error", unknownBlobDigest)
 	}

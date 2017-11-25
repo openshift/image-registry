@@ -73,22 +73,23 @@ func StartMasterContainer(configDir string) (*MasterContainer, error) {
 
 	c.InspectResult, err = Inspect(c.ID)
 	if err != nil {
-		c.Stop()
+		// TODO(dmage): log error
+		_ = c.Stop()
 		return c, err
 	}
 
 	if err := WaitTCP(c.NetworkSettings.IPAddress + ":" + strconv.Itoa(c.Port)); err != nil {
-		c.Stop()
+		_ = c.Stop()
 		return c, err
 	}
 
 	if err := c.WriteConfigs(configDir); err != nil {
-		c.Stop()
+		_ = c.Stop()
 		return c, err
 	}
 
 	if err := c.WaitHealthz(configDir); err != nil {
-		c.Stop()
+		_ = c.Stop()
 		return c, err
 	}
 

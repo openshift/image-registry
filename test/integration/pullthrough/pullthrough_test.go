@@ -12,7 +12,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,10 +31,6 @@ var gzippedEmptyTar = []byte{
 	31, 139, 8, 0, 0, 9, 110, 136, 0, 255, 98, 24, 5, 163, 96, 20, 140, 88,
 	0, 8, 0, 0, 255, 255, 46, 175, 181, 239, 0, 4, 0, 0,
 }
-
-// digestSHA256GzippedEmptyTar is the canonical sha256 digest of
-// gzippedEmptyTar
-const digestSHA256GzippedEmptyTar = digest.Digest("sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4")
 
 func testPullThroughGetManifest(registryAddr string, stream *imageapiv1.ImageStreamImport, user, token, urlPart string) error {
 	url := fmt.Sprintf("http://%s/v2/%s/%s/manifests/%s", registryAddr, stream.Namespace, stream.Name, urlPart)
@@ -58,6 +53,9 @@ func testPullThroughGetManifest(registryAddr string, stream *imageapiv1.ImageStr
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("error reading manifest: %v", err)
+	}
 
 	var retrievedManifest schema1.Manifest
 

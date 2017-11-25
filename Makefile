@@ -45,23 +45,39 @@ all build:
 #
 # Example:
 #   make check
-check: | verify test-unit
+check: verify test-unit
 .PHONY: check
-
 
 # Verify code conventions are properly setup.
 #
 # Example:
 #   make verify
-verify:
-	{ \
-	hack/verify-gofmt.sh ||r=1;\
-	hack/verify-govet.sh ||r=1;\
-	hack/verify-imports.sh ||r=1;\
-	exit $$r ;\
-	}
+verify: verify-fmt verify-govet verify-imports verify-gometalinter
 .PHONY: verify
 
+verify-fmt:
+	hack/verify-gofmt.sh
+.PHONY: verify-fmt
+
+verify-govet:
+	hack/verify-govet.sh
+.PHONY: verify-govet
+
+verify-imports:
+	hack/verify-imports.sh
+.PHONY: verify-imports
+
+LOGFUNCS=Debug Info Warn Warning Error
+null  :=
+space := $(null) #
+comma := ,
+verify-gometalinter:
+	gometalinter \
+		--deadline=120s \
+		--linter='vet:go tool vet -printfuncs $(subst $(space),$(comma),$(foreach fn,$(LOGFUNCS),$(fn) $(fn)f $(fn)ln)),Fatalln:PATH:LINE:MESSAGE' \
+		--disable-all -E errcheck -E ineffassign -E unconvert -E varcheck -E vet \
+		./cmd/... ./pkg/... ./test/...
+.PHONY: verify-gometalinter
 
 # Verify commit comments.
 #

@@ -186,7 +186,8 @@ func (s *signatureHandler) Get(w http.ResponseWriter, req *http.Request) {
 	if data, err := json.Marshal(signatures); err != nil {
 		s.handleError(s.ctx, errcode.ErrorCodeUnknown.WithDetail(fmt.Sprintf("failed to serialize image signature %v", err)), w)
 	} else {
-		w.Write(data)
+		// TODO(dmage): log error?
+		_, _ = w.Write(data)
 	}
 }
 
