@@ -14,7 +14,6 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	restclient "k8s.io/client-go/rest"
 
@@ -104,15 +103,15 @@ func TestVerifyImageStreamAccess(t *testing.T) {
 
 // TestAccessController tests complete integration of the v2 registry auth package.
 func TestAccessController(t *testing.T) {
-	defaultOptions := map[string]interface{}{
-		"addr":                      "https://openshift-example.com/osapi",
-		"apiVersion":                schema.GroupVersion{Group: "", Version: "v1"},
-		configuration.RealmKey:      "myrealm",
-		configuration.TokenRealmKey: "http://tokenrealm.com",
+	const addr = "https://openshift-example.com/osapi"
+
+	authConfig := &configuration.Auth{
+		Realm:      "myrealm",
+		TokenRealm: "http://tokenrealm.com",
 	}
 
 	tests := map[string]struct {
-		options            map[string]interface{}
+		authConfig         *configuration.Auth
 		access             []auth.Access
 		basicToken         string
 		bearerToken        string
@@ -131,11 +130,9 @@ func TestAccessController(t *testing.T) {
 			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Bearer realm="http://tokenrealm.com/openshift/token"`}},
 		},
 		"no token, autodetected tokenrealm": {
-			options: map[string]interface{}{
-				"addr":                      "https://openshift-example.com/osapi",
-				"apiVersion":                schema.GroupVersion{Group: "", Version: "v1"},
-				configuration.RealmKey:      "myrealm",
-				configuration.TokenRealmKey: "",
+			authConfig: &configuration.Auth{
+				Realm:      "myrealm",
+				TokenRealm: "",
 			},
 			access:            []auth.Access{},
 			basicToken:        "",
@@ -389,20 +386,11 @@ func TestAccessController(t *testing.T) {
 	}
 
 	for k, test := range tests {
-		options := test.options
-		if options == nil {
-			options = defaultOptions
-		}
-		config := &dockercfg.Configuration{
-			Auth: dockercfg.Auth{
-				"openshift": options,
-			},
-		}
-		reqURL, err := url.Parse(options["addr"].(string))
+		reqURL, err := url.Parse(addr)
 		if err != nil {
 			t.Fatal(err)
 		}
-		req, err := http.NewRequest("GET", options["addr"].(string), nil)
+		req, err := http.NewRequest("GET", addr, nil)
 		if err != nil {
 			t.Errorf("%s: %v", k, err)
 			continue
@@ -428,6 +416,7 @@ func TestAccessController(t *testing.T) {
 			Host:            server.URL,
 			TLSClientConfig: restclient.TLSClientConfig{Insecure: true},
 		}
+		config := &dockercfg.Configuration{}
 		app := &App{
 			ctx:            ctx,
 			registryClient: client.NewRegistryClient(cfg),
@@ -435,7 +424,11 @@ func TestAccessController(t *testing.T) {
 				Server: &configuration.Server{
 					Addr: "localhost:5000",
 				},
+				Auth: test.authConfig,
 			},
+		}
+		if app.extraConfig.Auth == nil {
+			app.extraConfig.Auth = authConfig
 		}
 		if err := configuration.InitExtraConfig(config, app.extraConfig); err != nil {
 			t.Fatal(err)

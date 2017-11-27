@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"reflect"
 	"strings"
@@ -20,54 +21,55 @@ import (
 
 // Environment variables.
 const (
-	// DockerRegistryURLEnvVar is a mandatory environment variable name specifying url of internal docker
+	// dockerRegistryURLEnvVar is a mandatory environment variable name specifying url of internal docker
 	// registry. All references to pushed images will be prefixed with its value.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_SERVER_ADDR instead.
-	DockerRegistryURLEnvVar = "DOCKER_REGISTRY_URL"
+	dockerRegistryURLEnvVar = "DOCKER_REGISTRY_URL"
 
-	// OpenShiftDockerRegistryURLEnvVar is an optional environment that overrides the
+	// openShiftDockerRegistryURLEnvVar is an optional environment that overrides the
 	// DOCKER_REGISTRY_URL.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_SERVER_ADDR instead.
-	OpenShiftDockerRegistryURLEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_DOCKERREGISTRYURL"
+	openShiftDockerRegistryURLEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_DOCKERREGISTRYURL"
 
-	// OpenShiftDefaultRegistryEnvVar overrides the DockerRegistryURLEnvVar as in OpenShift the
+	// openShiftDefaultRegistryEnvVar overrides the dockerRegistryURLEnvVar as in OpenShift the
 	// default registry URL is controlled by this environment variable.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_SERVER_ADDR instead.
-	OpenShiftDefaultRegistryEnvVar = "OPENSHIFT_DEFAULT_REGISTRY"
+	openShiftDefaultRegistryEnvVar = "OPENSHIFT_DEFAULT_REGISTRY"
 
-	// EnforceQuotaEnvVar is a boolean environment variable that allows to turn quota enforcement on or off.
+	// enforceQuotaEnvVar is a boolean environment variable that allows to turn quota enforcement on or off.
 	// By default, quota enforcement is off. It overrides openshift middleware configuration option.
 	// Recognized values are "true" and "false".
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_QUOTA_ENABLED instead.
-	EnforceQuotaEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_ENFORCEQUOTA"
+	enforceQuotaEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_ENFORCEQUOTA"
 
-	// ProjectCacheTTLEnvVar is an environment variable specifying an eviction timeout for project quota
+	// projectCacheTTLEnvVar is an environment variable specifying an eviction timeout for project quota
 	// objects. It takes a valid time duration string (e.g. "2m"). If empty, you get the default timeout. If
 	// zero (e.g. "0m"), caching is disabled.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_CACHE_QUOTATTL instead.
-	ProjectCacheTTLEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_PROJECTCACHETTL"
+	projectCacheTTLEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_PROJECTCACHETTL"
 
-	// AcceptSchema2EnvVar is a boolean environment variable that allows to accept manifest schema v2
+	// acceptSchema2EnvVar is a boolean environment variable that allows to accept manifest schema v2
 	// on manifest put requests.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_COMPATIBILITY_ACCEPTSCHEMA2 instead.
-	AcceptSchema2EnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_ACCEPTSCHEMA2"
+	acceptSchema2EnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_ACCEPTSCHEMA2"
 
-	// BlobRepositoryCacheTTLEnvVar  is an environment variable specifying an eviction timeout for <blob
+	// blobRepositoryCacheTTLEnvVar  is an environment variable specifying an eviction timeout for <blob
 	// belongs to repository> entries. The higher the value, the faster queries but also a higher risk of
 	// leaking a blob that is no longer tagged in given repository.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_CACHE_BLOBREPOSITORYTTL instead.
-	BlobRepositoryCacheTTLEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_BLOBREPOSITORYCACHETTL"
+	blobRepositoryCacheTTLEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_BLOBREPOSITORYCACHETTL"
 
-	// Pullthrough is a boolean environment variable that controls whether pullthrough is enabled.
+	// pullthroughEnvVar is a boolean environment variable that controls whether pullthrough is enabled.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_PULLTHROUGH_ENABLED instead.
-	PullthroughEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_PULLTHROUGH"
+	pullthroughEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_PULLTHROUGH"
 
-	// MirrorPullthrough is a boolean environment variable that controls mirroring of blobs on pullthrough.
+	// mirrorPullthroughEnvVar is a boolean environment variable that controls mirroring of blobs on pullthrough.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_PULLTHROUGH_MIRROR instead.
-	MirrorPullthroughEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_MIRRORPULLTHROUGH"
+	mirrorPullthroughEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_MIRRORPULLTHROUGH"
 
-	RealmKey      = "realm"
-	TokenRealmKey = "tokenrealm"
+	realmKey         = "realm"
+	tokenRealmKey    = "tokenrealm"
+	defaultTokenPath = "/openshift/token"
 
 	middlewareName = "openshift"
 
@@ -75,6 +77,31 @@ const (
 	defaultBlobRepositoryCacheTTL = time.Minute * 10
 	defaultProjectCacheTTL        = time.Minute
 )
+
+// TokenRealm returns the template URL to use as the token realm redirect.
+// An empty scheme/host in the returned URL means to match the scheme/host on incoming requests.
+func TokenRealm(tokenRealmString string) (*url.URL, error) {
+	if len(tokenRealmString) == 0 {
+		// If not specified, default to "/openshift/token", auto-detecting the scheme and host
+		return &url.URL{Path: defaultTokenPath}, nil
+	}
+
+	tokenRealm, err := url.Parse(tokenRealmString)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing URL in %s config option: %v", tokenRealmKey, err)
+	}
+	if len(tokenRealm.RawQuery) > 0 || len(tokenRealm.Fragment) > 0 {
+		return nil, fmt.Errorf("%s config option may not contain query parameters or a fragment", tokenRealmKey)
+	}
+	if len(tokenRealm.Path) > 0 {
+		return nil, fmt.Errorf("%s config option may not contain a path (%q was specified)", tokenRealmKey, tokenRealm.Path)
+	}
+
+	// pin to "/openshift/token"
+	tokenRealm.Path = defaultTokenPath
+
+	return tokenRealm, nil
+}
 
 var (
 	// CurrentVersion is the most recent Version that can be parsed.
@@ -297,22 +324,22 @@ func getServerAddr(options configuration.Parameters) (registryAddr string, err e
 	var found bool
 
 	if len(registryAddr) == 0 {
-		registryAddr, found = os.LookupEnv(OpenShiftDefaultRegistryEnvVar)
+		registryAddr, found = os.LookupEnv(openShiftDefaultRegistryEnvVar)
 		if found {
-			log.Infof("DEPRECATED: %q is deprecated, use the 'REGISTRY_OPENSHIFT_SERVER_ADDR' instead", OpenShiftDefaultRegistryEnvVar)
+			log.Infof("DEPRECATED: %q is deprecated, use the 'REGISTRY_OPENSHIFT_SERVER_ADDR' instead", openShiftDefaultRegistryEnvVar)
 		}
 	}
 
 	if len(registryAddr) == 0 {
-		registryAddr, found = os.LookupEnv(DockerRegistryURLEnvVar)
+		registryAddr, found = os.LookupEnv(dockerRegistryURLEnvVar)
 		if found {
-			log.Infof("DEPRECATED: %q is deprecated, use the 'REGISTRY_OPENSHIFT_SERVER_ADDR' instead", DockerRegistryURLEnvVar)
+			log.Infof("DEPRECATED: %q is deprecated, use the 'REGISTRY_OPENSHIFT_SERVER_ADDR' instead", dockerRegistryURLEnvVar)
 		}
 	}
 
 	if len(registryAddr) == 0 {
 		// Legacy configuration
-		registryAddr, err = getStringOption(OpenShiftDockerRegistryURLEnvVar, "dockerregistryurl", registryAddr, options)
+		registryAddr, err = getStringOption(openShiftDockerRegistryURLEnvVar, "dockerregistryurl", registryAddr, options)
 		if err != nil {
 			return
 		}
@@ -356,12 +383,12 @@ func migrateQuotaSection(cfg *Configuration, options configuration.Parameters) (
 		cfg.Quota = &Quota{}
 	}
 
-	cfg.Quota.Enabled, err = getBoolOption(EnforceQuotaEnvVar, "enforcequota", defEnabled, options)
+	cfg.Quota.Enabled, err = getBoolOption(enforceQuotaEnvVar, "enforcequota", defEnabled, options)
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.quota.enabled: %v", err)
 		return
 	}
-	cfg.Quota.CacheTTL, err = getDurationOption(ProjectCacheTTLEnvVar, "projectcachettl", defCacheTTL, options)
+	cfg.Quota.CacheTTL, err = getDurationOption(projectCacheTTLEnvVar, "projectcachettl", defCacheTTL, options)
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.quota.cachettl: %v", err)
 	}
@@ -378,7 +405,7 @@ func migrateCacheSection(cfg *Configuration, options configuration.Parameters) (
 		cfg.Cache = &Cache{}
 	}
 
-	cfg.Cache.BlobRepositoryTTL, err = getDurationOption(BlobRepositoryCacheTTLEnvVar, "blobrepositorycachettl", defBlobRepositoryTTL, options)
+	cfg.Cache.BlobRepositoryTTL, err = getDurationOption(blobRepositoryCacheTTLEnvVar, "blobrepositorycachettl", defBlobRepositoryTTL, options)
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.cache.blobrepositoryttl: %v", err)
 		return
@@ -398,12 +425,12 @@ func migratePullthroughSection(cfg *Configuration, options configuration.Paramet
 		cfg.Pullthrough = &Pullthrough{}
 	}
 
-	cfg.Pullthrough.Enabled, err = getBoolOption(PullthroughEnvVar, "pullthrough", defEnabled, options)
+	cfg.Pullthrough.Enabled, err = getBoolOption(pullthroughEnvVar, "pullthrough", defEnabled, options)
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.pullthrough.enabled: %v", err)
 		return
 	}
-	cfg.Pullthrough.Mirror, err = getBoolOption(MirrorPullthroughEnvVar, "mirrorpullthrough", defMirror, options)
+	cfg.Pullthrough.Mirror, err = getBoolOption(mirrorPullthroughEnvVar, "mirrorpullthrough", defMirror, options)
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.pullthrough.mirror: %v", err)
 	}
@@ -420,7 +447,7 @@ func migrateCompatibilitySection(cfg *Configuration, options configuration.Param
 		cfg.Compatibility = &Compatibility{}
 	}
 
-	cfg.Compatibility.AcceptSchema2, err = getBoolOption(AcceptSchema2EnvVar, "acceptschema2", defAcceptSchema2, options)
+	cfg.Compatibility.AcceptSchema2, err = getBoolOption(acceptSchema2EnvVar, "acceptschema2", defAcceptSchema2, options)
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.compatibility.acceptschema2: %v", err)
 	}
@@ -444,12 +471,12 @@ func migrateMiddleware(dockercfg *configuration.Configuration, cfg *Configuratio
 
 	if cfg.Auth == nil {
 		cfg.Auth = &Auth{}
-		cfg.Auth.Realm, err = getStringOption("", RealmKey, "origin", dockercfg.Auth.Parameters())
+		cfg.Auth.Realm, err = getStringOption("", realmKey, "origin", dockercfg.Auth.Parameters())
 		if err != nil {
 			err = fmt.Errorf("configuration error in openshift.auth.realm: %v", err)
 			return
 		}
-		cfg.Auth.TokenRealm, err = getStringOption("", TokenRealmKey, "", dockercfg.Auth.Parameters())
+		cfg.Auth.TokenRealm, err = getStringOption("", tokenRealmKey, "", dockercfg.Auth.Parameters())
 		if err != nil {
 			err = fmt.Errorf("configuration error in openshift.auth.tokenrealm: %v", err)
 			return
