@@ -36,8 +36,7 @@ func (d deferredErrors) Empty() bool {
 }
 
 const (
-	defaultTokenPath = "/openshift/token"
-	defaultUserName  = "anonymous"
+	defaultUserName = "anonymous"
 )
 
 // WithUserInfoLogger creates a new context with provided user infomation.
@@ -90,33 +89,8 @@ var (
 	ErrUnsupportedResource = errors.New("unsupported resource")
 )
 
-// TokenRealm returns the template URL to use as the token realm redirect.
-// An empty scheme/host in the returned URL means to match the scheme/host on incoming requests.
-func TokenRealm(tokenRealmString string) (*url.URL, error) {
-	if len(tokenRealmString) == 0 {
-		// If not specified, default to "/openshift/token", auto-detecting the scheme and host
-		return &url.URL{Path: defaultTokenPath}, nil
-	}
-
-	tokenRealm, err := url.Parse(tokenRealmString)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing URL in %s config option: %v", configuration.TokenRealmKey, err)
-	}
-	if len(tokenRealm.RawQuery) > 0 || len(tokenRealm.Fragment) > 0 {
-		return nil, fmt.Errorf("%s config option may not contain query parameters or a fragment", configuration.TokenRealmKey)
-	}
-	if len(tokenRealm.Path) > 0 {
-		return nil, fmt.Errorf("%s config option may not contain a path (%q was specified)", configuration.TokenRealmKey, tokenRealm.Path)
-	}
-
-	// pin to "/openshift/token"
-	tokenRealm.Path = defaultTokenPath
-
-	return tokenRealm, nil
-}
-
 func (app *App) newAccessController(authcfg *configuration.Auth) (registryauth.AccessController, error) {
-	tokenRealm, err := TokenRealm(authcfg.TokenRealm)
+	tokenRealm, err := configuration.TokenRealm(authcfg.TokenRealm)
 	if err != nil {
 		return nil, err
 	}

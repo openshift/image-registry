@@ -54,7 +54,6 @@ type App struct {
 
 	// quotaEnforcing contains shared caches of quota objects keyed by project
 	// name. Will be initialized only if the quota is enforced.
-	// See EnforceQuotaEnvVar.
 	quotaEnforcing *quotaEnforcingConfig
 }
 
@@ -104,7 +103,7 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 
 	// Add a token handling endpoint
 	if dockerConfig.Auth.Type() == middlewareOpenShift {
-		tokenRealm, err := TokenRealm(extraConfig.Auth.TokenRealm)
+		tokenRealm, err := registryconfig.TokenRealm(extraConfig.Auth.TokenRealm)
 		if err != nil {
 			context.GetLogger(dockerApp).Fatalf("error setting up token auth: %s", err)
 		}
