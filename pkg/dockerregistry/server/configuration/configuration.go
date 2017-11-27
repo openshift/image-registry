@@ -294,7 +294,7 @@ func setDefaultMiddleware(config *configuration.Configuration) {
 }
 
 func getServerAddr(options configuration.Parameters) (registryAddr string, err error) {
-	found := false
+	var found bool
 
 	if len(registryAddr) == 0 {
 		registryAddr, found = os.LookupEnv(OpenShiftDefaultRegistryEnvVar)
@@ -359,6 +359,7 @@ func migrateQuotaSection(cfg *Configuration, options configuration.Parameters) (
 	cfg.Quota.Enabled, err = getBoolOption(EnforceQuotaEnvVar, "enforcequota", defEnabled, options)
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.quota.enabled: %v", err)
+		return
 	}
 	cfg.Quota.CacheTTL, err = getDurationOption(ProjectCacheTTLEnvVar, "projectcachettl", defCacheTTL, options)
 	if err != nil {

@@ -13,8 +13,6 @@
 package server
 
 import (
-	"time"
-
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 
@@ -24,10 +22,6 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	imageadmission "github.com/openshift/origin/pkg/image/admission"
-)
-
-const (
-	defaultProjectCacheTTL = time.Minute
 )
 
 // newQuotaEnforcingConfig creates caches for quota objects. The objects are stored with given eviction
