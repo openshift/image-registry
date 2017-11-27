@@ -45,7 +45,7 @@ all build:
 #
 # Example:
 #   make check
-check: verify test-unit
+check: verify test-unit test-integration
 .PHONY: check
 
 # Verify code conventions are properly setup.
