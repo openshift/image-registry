@@ -320,7 +320,7 @@ func setDefaultMiddleware(config *configuration.Configuration) {
 	*/
 }
 
-func getServerAddr(options configuration.Parameters) (registryAddr string, err error) {
+func getServerAddr(options configuration.Parameters, cfgValue string) (registryAddr string, err error) {
 	var found bool
 
 	if len(registryAddr) == 0 {
@@ -347,24 +347,29 @@ func getServerAddr(options configuration.Parameters) (registryAddr string, err e
 
 	// TODO: This is a fallback to assuming there is a service named 'docker-registry'. This
 	// might change in the future and we should make this configurable.
+	if len(registryAddr) == 0 && len(os.Getenv("DOCKER_REGISTRY_SERVICE_HOST")) > 0 && len(os.Getenv("DOCKER_REGISTRY_SERVICE_PORT")) > 0 {
+		registryAddr = os.Getenv("DOCKER_REGISTRY_SERVICE_HOST") + ":" + os.Getenv("DOCKER_REGISTRY_SERVICE_PORT")
+	}
+
+	if len(registryAddr) == 0 && len(cfgValue) > 0 {
+		registryAddr = cfgValue
+	}
+
 	if len(registryAddr) == 0 {
-		if len(os.Getenv("DOCKER_REGISTRY_SERVICE_HOST")) > 0 && len(os.Getenv("DOCKER_REGISTRY_SERVICE_PORT")) > 0 {
-			registryAddr = os.Getenv("DOCKER_REGISTRY_SERVICE_HOST") + ":" + os.Getenv("DOCKER_REGISTRY_SERVICE_PORT")
-		} else {
-			err = fmt.Errorf("REGISTRY_OPENSHIFT_SERVER_ADDR variable must be set when running outside of Kubernetes cluster")
-			return
-		}
+		err = fmt.Errorf("REGISTRY_OPENSHIFT_SERVER_ADDR variable must be set when running outside of Kubernetes cluster")
 	}
 
 	return
 }
 
 func migrateServerSection(cfg *Configuration, options configuration.Parameters) (err error) {
+	cfgAddr := ""
 	if cfg.Server != nil {
-		return
+		cfgAddr = cfg.Server.Addr
+	} else {
+		cfg.Server = &Server{}
 	}
-	cfg.Server = &Server{}
-	cfg.Server.Addr, err = getServerAddr(options)
+	cfg.Server.Addr, err = getServerAddr(options, cfgAddr)
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.server.addr: %v", err)
 	}

@@ -561,3 +561,98 @@ openshift:
 		t.Fatalf("expected compatibility section\n\t%#v\ngot\n\t%#v", expectConfig.Compatibility, currentConfig.Compatibility)
 	}
 }
+
+func TestServerAddrEnvOrder(t *testing.T) {
+	var configYaml = `
+version: 0.1
+http:
+  addr: :5000
+storage:
+  filesystem:
+    rootdirectory: /registry
+openshift:
+  version: 1.0
+  server:
+    addr: from-config
+`
+	type env struct {
+		name, value string
+	}
+	testCases := []struct {
+		setenv   []env
+		expected string
+	}{
+		{
+			setenv:   []env{},
+			expected: "from-config",
+		},
+		{
+			setenv:   []env{{name: "REGISTRY_OPENSHIFT_SERVER_ADDR", value: "REGISTRY_OPENSHIFT_SERVER_ADDR"}},
+			expected: "REGISTRY_OPENSHIFT_SERVER_ADDR",
+		},
+		{
+			setenv: []env{
+				{name: "DOCKER_REGISTRY_SERVICE_HOST", value: "DOCKER_REGISTRY_SERVICE_HOST"},
+				{name: "DOCKER_REGISTRY_SERVICE_PORT", value: "DOCKER_REGISTRY_SERVICE_PORT"},
+			},
+			expected: "DOCKER_REGISTRY_SERVICE_HOST:DOCKER_REGISTRY_SERVICE_PORT",
+		},
+		{
+			setenv:   []env{{name: "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_DOCKERREGISTRYURL", value: "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_DOCKERREGISTRYURL"}},
+			expected: "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_DOCKERREGISTRYURL",
+		},
+		{
+			setenv:   []env{{name: "DOCKER_REGISTRY_URL", value: "DOCKER_REGISTRY_URL"}},
+			expected: "DOCKER_REGISTRY_URL",
+		},
+		{
+			setenv:   []env{{name: "OPENSHIFT_DEFAULT_REGISTRY", value: "OPENSHIFT_DEFAULT_REGISTRY"}},
+			expected: "OPENSHIFT_DEFAULT_REGISTRY",
+		},
+	}
+
+	for _, test := range testCases {
+		for _, env := range test.setenv {
+			os.Setenv(env.name, env.value)
+			defer os.Unsetenv(env.name)
+		}
+		_, cfg, err := Parse(strings.NewReader(configYaml))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if cfg.Server.Addr != test.expected {
+			t.Fatalf("unexpected value: cfg.Server.Addr != %s, got %s", test.expected, cfg.Server.Addr)
+		}
+	}
+}
+
+func TestAudit(t *testing.T) {
+	var configYaml = `
+version: 0.1
+http:
+  addr: :5000
+storage:
+  filesystem:
+    rootdirectory: /registry
+auth:
+  openshift:
+    audit:
+      enabled: true
+    realm: openshift
+    tokenrealm: https://example.com:5000
+openshift:
+  version: 1.0
+  server:
+    addr: "localhost:5000"
+`
+	_, cfg, err := Parse(strings.NewReader(configYaml))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Audit == nil {
+		t.Fatalf("unexpected value: extraConfig.Audit == nil")
+	}
+	if !cfg.Audit.Enabled {
+		t.Fatalf("unexpected value: extraConfig.Audit.Enabled != true")
+	}
+}
