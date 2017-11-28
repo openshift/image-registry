@@ -1,3 +1,5 @@
+// +build !solaris
+
 package registry
 
 import (
@@ -9,9 +11,9 @@ import (
 	"testing"
 
 	"github.com/docker/distribution/registry/client/transport"
+	"github.com/docker/docker/api/types"
+	registrytypes "github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/reference"
-	"github.com/docker/engine-api/types"
-	registrytypes "github.com/docker/engine-api/types/registry"
 )
 
 var (
@@ -661,7 +663,7 @@ func TestMirrorEndpointLookup(t *testing.T) {
 		}
 		return false
 	}
-	s := Service{config: makeServiceConfig([]string{"my.mirror"}, nil)}
+	s := DefaultService{config: makeServiceConfig([]string{"my.mirror"}, nil)}
 
 	imageName, err := reference.WithName(IndexName + "/test/image")
 	if err != nil {
@@ -730,7 +732,7 @@ func TestPushImageJSONIndex(t *testing.T) {
 
 func TestSearchRepositories(t *testing.T) {
 	r := spawnTestRegistrySession(t)
-	results, err := r.SearchRepositories("fakequery")
+	results, err := r.SearchRepositories("fakequery", 25)
 	if err != nil {
 		t.Fatal(err)
 	}

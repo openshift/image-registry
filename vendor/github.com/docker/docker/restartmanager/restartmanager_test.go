@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/engine-api/types/container"
+	"github.com/docker/docker/api/types/container"
 )
 
 func TestRestartManagerTimeout(t *testing.T) {
-	rm := New(container.RestartPolicy{Name: "always", MaximumRetryCount: 0}).(*restartManager)
+	rm := New(container.RestartPolicy{Name: "always"}, 0).(*restartManager)
 	should, _, err := rm.ShouldRestart(0, false, 1*time.Second)
 	if err != nil {
 		t.Fatal(err)
@@ -22,7 +22,7 @@ func TestRestartManagerTimeout(t *testing.T) {
 }
 
 func TestRestartManagerTimeoutReset(t *testing.T) {
-	rm := New(container.RestartPolicy{Name: "always", MaximumRetryCount: 0}).(*restartManager)
+	rm := New(container.RestartPolicy{Name: "always"}, 0).(*restartManager)
 	rm.timeout = 5 * time.Second
 	_, _, err := rm.ShouldRestart(0, false, 10*time.Second)
 	if err != nil {

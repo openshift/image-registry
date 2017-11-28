@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -24,8 +25,8 @@ func (s *DockerSuite) TestStartAttachReturnsOnError(c *check.C) {
 	go func() {
 		// Attempt to start attached to the container that won't start
 		// This should return an error immediately since the container can't be started
-		if _, _, err := dockerCmdWithError("start", "-a", "test2"); err == nil {
-			ch <- fmt.Errorf("Expected error but got none")
+		if out, _, err := dockerCmdWithError("start", "-a", "test2"); err == nil {
+			ch <- fmt.Errorf("Expected error but got none:\n%s", out)
 		}
 		close(ch)
 	}()
@@ -94,10 +95,10 @@ func (s *DockerSuite) TestStartRecordError(c *check.C) {
 
 func (s *DockerSuite) TestStartPausedContainer(c *check.C) {
 	// Windows does not support pausing containers
-	testRequires(c, DaemonIsLinux)
+	testRequires(c, IsPausable)
 	defer unpauseAllContainers()
 
-	dockerCmd(c, "run", "-d", "--name", "testing", "busybox", "top")
+	runSleepingContainer(c, "-d", "--name", "testing")
 
 	dockerCmd(c, "pause", "testing")
 
@@ -170,4 +171,29 @@ func (s *DockerSuite) TestStartAttachMultipleContainers(c *check.C) {
 		// Container running state wrong
 		c.Assert(out, checker.Equals, expected)
 	}
+}
+
+// Test case for #23716
+func (s *DockerSuite) TestStartAttachWithRename(c *check.C) {
+	testRequires(c, DaemonIsLinux)
+	dockerCmd(c, "create", "-t", "--name", "before", "busybox")
+	go func() {
+		c.Assert(waitRun("before"), checker.IsNil)
+		dockerCmd(c, "rename", "before", "after")
+		dockerCmd(c, "stop", "--time=2", "after")
+	}()
+	_, stderr, _, _ := runCommandWithStdoutStderr(exec.Command(dockerBinary, "start", "-a", "before"))
+	c.Assert(stderr, checker.Not(checker.Contains), "No such container")
+}
+
+func (s *DockerSuite) TestStartReturnCorrectExitCode(c *check.C) {
+	dockerCmd(c, "create", "--restart=on-failure:2", "--name", "withRestart", "busybox", "sh", "-c", "exit 11")
+	dockerCmd(c, "create", "--rm", "--name", "withRm", "busybox", "sh", "-c", "exit 12")
+
+	_, exitCode, err := dockerCmdWithError("start", "-a", "withRestart")
+	c.Assert(err, checker.NotNil)
+	c.Assert(exitCode, checker.Equals, 11)
+	_, exitCode, err = dockerCmdWithError("start", "-a", "withRm")
+	c.Assert(err, checker.NotNil)
+	c.Assert(exitCode, checker.Equals, 12)
 }

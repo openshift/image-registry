@@ -74,7 +74,7 @@ func (s *DockerSuite) TestRestartWithVolumes(c *check.C) {
 }
 
 func (s *DockerSuite) TestRestartPolicyNO(c *check.C) {
-	out, _ := dockerCmd(c, "run", "-d", "--restart=no", "busybox", "false")
+	out, _ := dockerCmd(c, "create", "--restart=no", "busybox")
 
 	id := strings.TrimSpace(string(out))
 	name := inspectField(c, id, "HostConfig.RestartPolicy.Name")
@@ -82,7 +82,7 @@ func (s *DockerSuite) TestRestartPolicyNO(c *check.C) {
 }
 
 func (s *DockerSuite) TestRestartPolicyAlways(c *check.C) {
-	out, _ := dockerCmd(c, "run", "-d", "--restart=always", "busybox", "false")
+	out, _ := dockerCmd(c, "create", "--restart=always", "busybox")
 
 	id := strings.TrimSpace(string(out))
 	name := inspectField(c, id, "HostConfig.RestartPolicy.Name")
@@ -95,12 +95,36 @@ func (s *DockerSuite) TestRestartPolicyAlways(c *check.C) {
 }
 
 func (s *DockerSuite) TestRestartPolicyOnFailure(c *check.C) {
-	out, _ := dockerCmd(c, "run", "-d", "--restart=on-failure:1", "busybox", "false")
+	out, _, err := dockerCmdWithError("create", "--restart=on-failure:-1", "busybox")
+	c.Assert(err, check.NotNil, check.Commentf(out))
+	c.Assert(out, checker.Contains, "maximum retry count cannot be negative")
+
+	out, _ = dockerCmd(c, "create", "--restart=on-failure:1", "busybox")
 
 	id := strings.TrimSpace(string(out))
 	name := inspectField(c, id, "HostConfig.RestartPolicy.Name")
-	c.Assert(name, checker.Equals, "on-failure")
+	maxRetry := inspectField(c, id, "HostConfig.RestartPolicy.MaximumRetryCount")
 
+	c.Assert(name, checker.Equals, "on-failure")
+	c.Assert(maxRetry, checker.Equals, "1")
+
+	out, _ = dockerCmd(c, "create", "--restart=on-failure:0", "busybox")
+
+	id = strings.TrimSpace(string(out))
+	name = inspectField(c, id, "HostConfig.RestartPolicy.Name")
+	maxRetry = inspectField(c, id, "HostConfig.RestartPolicy.MaximumRetryCount")
+
+	c.Assert(name, checker.Equals, "on-failure")
+	c.Assert(maxRetry, checker.Equals, "0")
+
+	out, _ = dockerCmd(c, "create", "--restart=on-failure", "busybox")
+
+	id = strings.TrimSpace(string(out))
+	name = inspectField(c, id, "HostConfig.RestartPolicy.Name")
+	maxRetry = inspectField(c, id, "HostConfig.RestartPolicy.MaximumRetryCount")
+
+	c.Assert(name, checker.Equals, "on-failure")
+	c.Assert(maxRetry, checker.Equals, "0")
 }
 
 // a good container with --restart=on-failure:3
@@ -225,25 +249,30 @@ func (s *DockerSuite) TestRestartContainerwithRestartPolicy(c *check.C) {
 
 	id1 := strings.TrimSpace(string(out1))
 	id2 := strings.TrimSpace(string(out2))
-	err := waitInspect(id1, "{{ .State.Restarting }} {{ .State.Running }}", "false false", 30*time.Second)
+	waitTimeout := 15 * time.Second
+	if daemonPlatform == "windows" {
+		waitTimeout = 150 * time.Second
+	}
+	err := waitInspect(id1, "{{ .State.Restarting }} {{ .State.Running }}", "false false", waitTimeout)
 	c.Assert(err, checker.IsNil)
 
-	// TODO: fix racey problem during restart:
-	// https://jenkins.dockerproject.org/job/Docker-PRs-Win2Lin/24665/console
-	// Error response from daemon: Cannot restart container 6655f620d90b390527db23c0a15b3e46d86a58ecec20a5697ab228d860174251: remove /var/run/docker/libcontainerd/6655f620d90b390527db23c0a15b3e46d86a58ecec20a5697ab228d860174251/rootfs: device or resource busy
-	if _, _, err := dockerCmdWithError("restart", id1); err != nil {
-		// if restart met racey problem, try again
-		time.Sleep(500 * time.Millisecond)
-		dockerCmd(c, "restart", id1)
-	}
-	if _, _, err := dockerCmdWithError("restart", id2); err != nil {
-		// if restart met racey problem, try again
-		time.Sleep(500 * time.Millisecond)
-		dockerCmd(c, "restart", id2)
-	}
+	dockerCmd(c, "restart", id1)
+	dockerCmd(c, "restart", id2)
 
 	dockerCmd(c, "stop", id1)
 	dockerCmd(c, "stop", id2)
 	dockerCmd(c, "start", id1)
 	dockerCmd(c, "start", id2)
+}
+
+func (s *DockerSuite) TestRestartAutoRemoveContainer(c *check.C) {
+	out, _ := runSleepingContainer(c, "--rm")
+
+	id := strings.TrimSpace(string(out))
+	dockerCmd(c, "restart", id)
+	err := waitInspect(id, "{{ .State.Restarting }} {{ .State.Running }}", "false true", 15*time.Second)
+	c.Assert(err, checker.IsNil)
+
+	out, _ = dockerCmd(c, "ps")
+	c.Assert(out, checker.Contains, id[:12], check.Commentf("container should be restarted instead of removed: %v", out))
 }
