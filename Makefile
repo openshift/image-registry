@@ -104,7 +104,8 @@ test-unit:
 .PHONY: test-unit
 
 test-integration:
-	go test ./test/integration/...
+	# TODO(dmage): remove DOCKER_API_VERSION when our CI will upgrade Docker
+	DOCKER_API_VERSION=1.24 go test ./test/integration/... -v
 .PHONY: test-integration
 
 # Remove all build artifacts.

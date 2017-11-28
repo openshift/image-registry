@@ -48,3 +48,5 @@ import:
   version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
 - package: google.golang.org/api
   version: 9bf6e6e569ff057f75d9604a46c52928f17d2b54
+- package: github.com/docker/docker
+  version: ^1.13.0
