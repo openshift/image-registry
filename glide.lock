@@ -1,5 +1,5 @@
-hash: 440af28ccf237bddd1c68450eff50ee59b796b13af38b438839c558a34d18bcd
-updated: 2017-11-21T17:15:08.698030825+01:00
+hash: b7794dd8cdab3499c9dc242dfaf162b44ac551d7f37c0c07b8698d66c552d649
+updated: 2017-11-28T16:05:27.008433494+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -130,28 +130,34 @@ imports:
   - uuid
   - version
 - name: github.com/docker/docker
-  version: b9f10c951893f9a00865890a5232e85d770c1087
+  version: 092cba3727bb9b4a2f0e922cd6c0f93ea270e363
   subpackages:
-  - builder/dockerfile/command
-  - builder/dockerfile/parser
-  - cliconfig
-  - opts
+  - api/types
+  - api/types/blkiodev
+  - api/types/container
+  - api/types/events
+  - api/types/filters
+  - api/types/mount
+  - api/types/network
+  - api/types/reference
+  - api/types/registry
+  - api/types/strslice
+  - api/types/swarm
+  - api/types/time
+  - api/types/versions
+  - api/types/volume
+  - client
   - pkg/archive
   - pkg/fileutils
-  - pkg/homedir
   - pkg/idtools
   - pkg/ioutils
-  - pkg/jsonlog
-  - pkg/jsonmessage
   - pkg/longpath
-  - pkg/mount
   - pkg/pools
   - pkg/promise
-  - pkg/stdcopy
-  - pkg/symlink
   - pkg/system
   - pkg/term
   - pkg/term/windows
+  - pkg/tlsconfig
 - name: github.com/docker/engine-api
   version: dea108d3aa0c67d7162a3fd8aa65f38a430019fd
   subpackages:
@@ -319,12 +325,33 @@ imports:
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
   - pbutil
+- name: github.com/Microsoft/go-winio
+  version: f533f7a102197536779ea3a8cb881d639e21ec5a
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/mitchellh/mapstructure
   version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/ncw/swift
   version: ce444d6d47c51d4dda9202cd38f5094dd8e27e86
+- name: github.com/opencontainers/runc
+  version: d223e2adae83f62d58448a799a5da05730228089
+  subpackages:
+  - libcontainer
+  - libcontainer/apparmor
+  - libcontainer/cgroups
+  - libcontainer/cgroups/fs
+  - libcontainer/cgroups/systemd
+  - libcontainer/configs
+  - libcontainer/configs/validate
+  - libcontainer/criurpc
+  - libcontainer/keys
+  - libcontainer/label
+  - libcontainer/seccomp
+  - libcontainer/selinux
+  - libcontainer/stacktrace
+  - libcontainer/system
+  - libcontainer/user
+  - libcontainer/utils
 - name: github.com/openshift/origin
   version: 1daa267d0a1fdbd0569ce490c904391b4e77c70d
   subpackages:
@@ -397,6 +424,8 @@ imports:
   - tools/junitreport/pkg/parser/stack
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
+- name: github.com/pkg/errors
+  version: a22138067af1c4942683050411a841ade67fe1eb
 - name: github.com/pkg/profile
   version: c795610ec6e479e5795f7852db65ea15073674a6
 - name: github.com/prometheus/client_golang

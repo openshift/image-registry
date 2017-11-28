@@ -67,6 +67,9 @@ func TestMigrateContainers(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Failing on Windows")
 	}
+	if runtime.GOARCH != "amd64" {
+		t.Skip("Test tailored to amd64 architecture")
+	}
 	tmpdir, err := ioutil.TempDir("", "migrate-containers")
 	if err != nil {
 		t.Fatal(err)
@@ -141,6 +144,9 @@ func TestMigrateImages(t *testing.T) {
 	// TODO Windows: Figure out why this is failing
 	if runtime.GOOS == "windows" {
 		t.Skip("Failing on Windows")
+	}
+	if runtime.GOARCH != "amd64" {
+		t.Skip("Test tailored to amd64 architecture")
 	}
 	tmpdir, err := ioutil.TempDir("", "migrate-images")
 	if err != nil {
@@ -327,14 +333,14 @@ type mockTagAdder struct {
 	refs map[string]string
 }
 
-func (t *mockTagAdder) AddTag(ref reference.Named, id image.ID, force bool) error {
+func (t *mockTagAdder) AddTag(ref reference.Named, id digest.Digest, force bool) error {
 	if t.refs == nil {
 		t.refs = make(map[string]string)
 	}
 	t.refs[ref.String()] = id.String()
 	return nil
 }
-func (t *mockTagAdder) AddDigest(ref reference.Canonical, id image.ID, force bool) error {
+func (t *mockTagAdder) AddDigest(ref reference.Canonical, id digest.Digest, force bool) error {
 	return t.AddTag(ref, id, force)
 }
 
@@ -398,6 +404,9 @@ type mockLayer struct {
 }
 
 func (l *mockLayer) TarStream() (io.ReadCloser, error) {
+	return nil, nil
+}
+func (l *mockLayer) TarStreamFrom(layer.ChainID) (io.ReadCloser, error) {
 	return nil, nil
 }
 

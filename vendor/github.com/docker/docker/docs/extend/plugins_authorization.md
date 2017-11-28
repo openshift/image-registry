@@ -1,21 +1,29 @@
-<!--[metadata]>
-+++
-title = "Access authorization plugin"
-description = "How to create authorization plugins to manage access control to your Docker daemon."
-keywords = ["security, authorization, authentication, docker, documentation, plugin, extend"]
-aliases = ["/engine/extend/authorization/"]
-[menu.main]
-parent = "engine_extend"
-weight = -1
-+++
-<![end-metadata]-->
+---
+title: "Access authorization plugin"
+description: "How to create authorization plugins to manage access control to your Docker daemon."
+keywords: "security, authorization, authentication, docker, documentation, plugin, extend"
+redirect_from:
+- "/engine/extend/authorization/"
+---
 
+<!-- This file is maintained within the docker/docker Github
+     repository at https://github.com/docker/docker/. Make all
+     pull requests against that repo. If you see this file in
+     another repository, consider it read-only there, as it will
+     periodically be overwritten by the definitive file. Pull
+     requests which include edits to this file in other repositories
+     will be rejected.
+-->
 
 # Create an authorization plugin
 
+This document describes the Docker Engine plugins generally available in Docker
+Engine. To view information on plugins managed by Docker Engine,
+refer to [Docker Engine plugin system](index.md).
+
 Docker's out-of-the-box authorization model is all or nothing. Any user with
 permission to access the Docker daemon can run any Docker client command. The
-same is true for callers using Docker's remote API to contact the daemon. If you
+same is true for callers using Docker's Engine API to contact the daemon. If you
 require greater access control, you can create authorization plugins and add
 them to your Docker daemon configuration. Using an authorization plugin, a
 Docker administrator can configure granular access policies for managing access
@@ -49,6 +57,11 @@ Each plugin must reside within directories described under the
 **Note**: the abbreviations `AuthZ` and `AuthN` mean authorization and authentication
 respectively.
 
+## Default user authorization mechanism
+
+If TLS is enabled in the [Docker daemon](https://docs.docker.com/engine/security/https/), the default user authorization flow extracts the user details from the certificate subject name.
+That is, the `User` field is set to the client certificate subject common name, and the `AuthenticationMethod` field is set to `TLS`.
+
 ## Basic architecture
 
 You are responsible for registering your plugin as part of the Docker daemon
@@ -57,7 +70,7 @@ can be ordered. Each request to the daemon passes in order through the chain.
 Only when all the plugins grant access to the resource, is the access granted.
 
 When an HTTP request is made to the Docker daemon through the CLI or via the
-remote API, the authentication subsystem passes the request to the installed
+Engine API, the authentication subsystem passes the request to the installed
 authentication plugin(s). The request contains the user (caller) and command
 context. The plugin is responsible for deciding whether to allow or deny the
 request.
@@ -99,9 +112,11 @@ support the Docker client interactions detailed in this section.
 Enable the authorization plugin with a dedicated command line flag in the
 `--authorization-plugin=PLUGIN_ID` format. The flag supplies a `PLUGIN_ID`
 value. This value can be the plugin’s socket or a path to a specification file.
+Authorization plugins can be loaded without restarting the daemon. Refer
+to the [`dockerd` documentation](../reference/commandline/dockerd.md#configuration-reloading) for more information.
 
 ```bash
-$ docker daemon --authorization-plugin=plugin1 --authorization-plugin=plugin2,...
+$ dockerd --authorization-plugin=plugin1 --authorization-plugin=plugin2,...
 ```
 
 Docker's authorization subsystem supports multiple `--authorization-plugin` parameters.
@@ -136,11 +151,11 @@ docker: Error response from daemon: plugin PLUGIN_NAME failed with error: AuthZP
 In addition to Docker's standard plugin registration method, each plugin
 should implement the following two methods:
 
-* `/AuthzPlugin.AuthZReq` This authorize request method is called before the Docker daemon processes the client request.
+* `/AuthZPlugin.AuthZReq` This authorize request method is called before the Docker daemon processes the client request.
 
-* `/AuthzPlugin.AuthZRes` This authorize response method is called before the response is returned from Docker daemon to the client.
+* `/AuthZPlugin.AuthZRes` This authorize response method is called before the response is returned from Docker daemon to the client.
 
-#### /AuthzPlugin.AuthZReq
+#### /AuthZPlugin.AuthZReq
 
 **Request**:
 
@@ -151,8 +166,7 @@ should implement the following two methods:
     "RequestMethod":     "The HTTP method",
     "RequestURI":        "The HTTP request URI",
     "RequestBody":       "Byte array containing the raw HTTP request body",
-    "RequestHeader":     "Byte array containing the raw HTTP request header as a map[string][]string ",
-    "RequestStatusCode": "Request status code"
+    "RequestHeader":     "Byte array containing the raw HTTP request header as a map[string][]string "
 }
 ```
 
@@ -165,7 +179,7 @@ should implement the following two methods:
     "Err":   "The error message if things go wrong"
 }
 ```
-#### /AuthzPlugin.AuthZRes
+#### /AuthZPlugin.AuthZRes
 
 **Request**:
 
@@ -177,7 +191,6 @@ should implement the following two methods:
     "RequestURI":        "The HTTP request URI",
     "RequestBody":       "Byte array containing the raw HTTP request body",
     "RequestHeader":     "Byte array containing the raw HTTP request header as a map[string][]string",
-    "RequestStatusCode": "Request status code",
     "ResponseBody":      "Byte array containing the raw HTTP response body",
     "ResponseHeader":    "Byte array containing the raw HTTP response header as a map[string][]string",
     "ResponseStatusCode":"Response status code"
@@ -190,16 +203,9 @@ should implement the following two methods:
 {
    "Allow":              "Determined whether the user is allowed or not",
    "Msg":                "The authorization message",
-   "Err":                "The error message if things go wrong",
-   "ModifiedBody":       "Byte array containing a modified body of the raw HTTP body (or nil if no changes required)",
-   "ModifiedHeader":     "Byte array containing a modified header of the HTTP response (or nil if no changes required)",
-   "ModifiedStatusCode": "int containing the modified version of the status code (or 0 if not change is required)"
+   "Err":                "The error message if things go wrong"
 }
 ```
-
-The modified response enables the authorization plugin to manipulate the content
-of the HTTP response. In case of more than one plugin, each subsequent plugin
-receives a response (optionally) modified by a previous plugin.
 
 ### Request authorization
 

@@ -2,13 +2,18 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"context"
 	"io"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/integration/checker"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/go-check/check"
 	"golang.org/x/net/websocket"
 )
@@ -17,7 +22,7 @@ func (s *DockerSuite) TestGetContainersAttachWebsocket(c *check.C) {
 	testRequires(c, DaemonIsLinux)
 	out, _ := dockerCmd(c, "run", "-dit", "busybox", "cat")
 
-	rwc, err := sockConn(time.Duration(10 * time.Second))
+	rwc, err := sockConn(time.Duration(10*time.Second), "")
 	c.Assert(err, checker.IsNil)
 
 	cleanedContainerID := strings.TrimSpace(out)
@@ -36,7 +41,7 @@ func (s *DockerSuite) TestGetContainersAttachWebsocket(c *check.C) {
 
 	outChan := make(chan error)
 	go func() {
-		_, err := ws.Read(actual)
+		_, err := io.ReadFull(ws, actual)
 		outChan <- err
 		close(outChan)
 	}()
@@ -67,19 +72,26 @@ func (s *DockerSuite) TestGetContainersAttachWebsocket(c *check.C) {
 
 // regression gh14320
 func (s *DockerSuite) TestPostContainersAttachContainerNotFound(c *check.C) {
-	status, body, err := sockRequest("POST", "/containers/doesnotexist/attach", nil)
-	c.Assert(status, checker.Equals, http.StatusNotFound)
+	req, client, err := newRequestClient("POST", "/containers/doesnotexist/attach", nil, "", "")
 	c.Assert(err, checker.IsNil)
-	expected := "No such container: doesnotexist\n"
-	c.Assert(string(body), checker.Contains, expected)
+
+	resp, err := client.Do(req)
+	// connection will shutdown, err should be "persistent connection closed"
+	c.Assert(err, checker.NotNil) // Server shutdown connection
+
+	body, err := readBody(resp.Body)
+	c.Assert(err, checker.IsNil)
+	c.Assert(resp.StatusCode, checker.Equals, http.StatusNotFound)
+	expected := "No such container: doesnotexist\r\n"
+	c.Assert(string(body), checker.Equals, expected)
 }
 
 func (s *DockerSuite) TestGetContainersWsAttachContainerNotFound(c *check.C) {
 	status, body, err := sockRequest("GET", "/containers/doesnotexist/attach/ws", nil)
 	c.Assert(status, checker.Equals, http.StatusNotFound)
 	c.Assert(err, checker.IsNil)
-	expected := "No such container: doesnotexist\n"
-	c.Assert(string(body), checker.Contains, expected)
+	expected := "No such container: doesnotexist"
+	c.Assert(getErrorMessage(c, body), checker.Contains, expected)
 }
 
 func (s *DockerSuite) TestPostContainersAttach(c *check.C) {
@@ -161,4 +173,38 @@ func (s *DockerSuite) TestPostContainersAttach(c *check.C) {
 	// Nothing should be received because both the stdout and stderr of the container will be
 	// sent to the client as stdout when tty is enabled.
 	expectTimeout(conn, br, "stdout")
+
+	// Test the client API
+	// Make sure we don't see "hello" if Logs is false
+	client, err := client.NewEnvClient()
+	c.Assert(err, checker.IsNil)
+
+	cid, _ = dockerCmd(c, "run", "-di", "busybox", "/bin/sh", "-c", "echo hello; cat")
+	cid = strings.TrimSpace(cid)
+
+	attachOpts := types.ContainerAttachOptions{
+		Stream: true,
+		Stdin:  true,
+		Stdout: true,
+	}
+
+	resp, err := client.ContainerAttach(context.Background(), cid, attachOpts)
+	c.Assert(err, checker.IsNil)
+	expectSuccess(resp.Conn, resp.Reader, "stdout", false)
+
+	// Make sure we do see "hello" if Logs is true
+	attachOpts.Logs = true
+	resp, err = client.ContainerAttach(context.Background(), cid, attachOpts)
+	c.Assert(err, checker.IsNil)
+
+	defer resp.Conn.Close()
+	resp.Conn.SetReadDeadline(time.Now().Add(time.Second))
+
+	_, err = resp.Conn.Write([]byte("success"))
+	c.Assert(err, checker.IsNil)
+
+	actualStdout := new(bytes.Buffer)
+	actualStderr := new(bytes.Buffer)
+	stdcopy.StdCopy(actualStdout, actualStderr, resp.Reader)
+	c.Assert(actualStdout.Bytes(), checker.DeepEquals, []byte("hello\nsuccess"), check.Commentf("Attach didn't return the expected data from stdout"))
 }
