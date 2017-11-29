@@ -24,17 +24,17 @@ const (
 	OpStatusOK    = "success"
 )
 
-// AuditLogger implements special audit log. We can't use the system logger because
+// Logger implements special audit log. We can't use the system logger because
 // the change of log level can hide the audit logs.
-type AuditLogger struct {
+type Logger struct {
 	mu     sync.Mutex
 	ctx    context.Context
 	logger *logrus.Logger
 }
 
-// MakeAuditLogger returns new audit logger which inherits fields from the system logger.
-func MakeAuditLogger(ctx context.Context) *AuditLogger {
-	logger := &AuditLogger{
+// NewLogger returns new audit logger which inherits fields from the system logger.
+func NewLogger(ctx context.Context) *Logger {
+	logger := &Logger{
 		logger: logrus.New(),
 		ctx:    ctx,
 	}
@@ -47,14 +47,14 @@ func MakeAuditLogger(ctx context.Context) *AuditLogger {
 }
 
 // SetFormatter sets the audit logger formatter.
-func (l *AuditLogger) SetFormatter(formatter logrus.Formatter) {
+func (l *Logger) SetFormatter(formatter logrus.Formatter) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.logger.Formatter = formatter
 }
 
 // Log logs record.
-func (l *AuditLogger) Log(args ...interface{}) {
+func (l *Logger) Log(args ...interface{}) {
 	auditFields := logrus.Fields{
 		LogEntryType:     AuditLoggerType,
 		AuditStatusEntry: OpStatusBegin,
@@ -63,7 +63,7 @@ func (l *AuditLogger) Log(args ...interface{}) {
 }
 
 // Logf formats record according to a format.
-func (l *AuditLogger) Logf(format string, args ...interface{}) {
+func (l *Logger) Logf(format string, args ...interface{}) {
 	auditFields := logrus.Fields{
 		LogEntryType: AuditLoggerType,
 	}
@@ -71,7 +71,7 @@ func (l *AuditLogger) Logf(format string, args ...interface{}) {
 }
 
 // LogResult logs record with additional operation status.
-func (l *AuditLogger) LogResult(err error, args ...interface{}) {
+func (l *Logger) LogResult(err error, args ...interface{}) {
 	auditFields := logrus.Fields{
 		LogEntryType:     AuditLoggerType,
 		AuditStatusEntry: OpStatusOK,
@@ -84,7 +84,7 @@ func (l *AuditLogger) LogResult(err error, args ...interface{}) {
 }
 
 // LogResultf formats record according to a format with additional operation status.
-func (l *AuditLogger) LogResultf(err error, format string, args ...interface{}) {
+func (l *Logger) LogResultf(err error, format string, args ...interface{}) {
 	auditFields := logrus.Fields{
 		LogEntryType:     AuditLoggerType,
 		AuditStatusEntry: OpStatusOK,
@@ -96,7 +96,7 @@ func (l *AuditLogger) LogResultf(err error, format string, args ...interface{}) 
 	l.getEntry().WithFields(auditFields).Infof(format, args...)
 }
 
-func (l *AuditLogger) getEntry() *logrus.Entry {
+func (l *Logger) getEntry() *logrus.Entry {
 	if entry, ok := context.GetLogger(l.ctx).(*logrus.Entry); ok {
 		return l.logger.WithFields(entry.Data)
 	}
@@ -105,19 +105,19 @@ func (l *AuditLogger) getEntry() *logrus.Entry {
 
 // LoggerExists checks audit logger existence.
 func LoggerExists(ctx context.Context) (exists bool) {
-	_, exists = ctx.Value(auditLoggerKey).(*AuditLogger)
+	_, exists = ctx.Value(auditLoggerKey).(*Logger)
 	return
 }
 
 // GetLogger returns the logger from the current context, if present. It will be created otherwise.
-func GetLogger(ctx context.Context) *AuditLogger {
-	if logger, ok := ctx.Value(auditLoggerKey).(*AuditLogger); ok {
+func GetLogger(ctx context.Context) *Logger {
+	if logger, ok := ctx.Value(auditLoggerKey).(*Logger); ok {
 		return logger
 	}
-	return MakeAuditLogger(ctx)
+	return NewLogger(ctx)
 }
 
 // WithLogger creates a new context with provided logger.
-func WithLogger(ctx context.Context, logger *AuditLogger) context.Context {
+func WithLogger(ctx context.Context, logger *Logger) context.Context {
 	return context.WithValue(ctx, auditLoggerKey, logger)
 }

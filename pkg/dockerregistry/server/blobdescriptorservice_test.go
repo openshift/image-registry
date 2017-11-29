@@ -401,7 +401,7 @@ func (m *testBlobDescriptorManager) getStats(minimumLimits map[string]int, timeo
 
 	var err error
 	select {
-	case <-time.After(end.Sub(time.Now())):
+	case <-time.After(time.Until(end)):
 		err = fmt.Errorf("timeout while waiting on expected stats")
 	case <-c:
 	}

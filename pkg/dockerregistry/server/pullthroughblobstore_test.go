@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strconv"
 	"testing"
 	"time"
@@ -266,8 +266,8 @@ func TestPullthroughServeNotSeekableBlob(t *testing.T) {
 	}
 	defer remoteBlob.Close()
 
-	if _, err := remoteBlob.Seek(0, os.SEEK_END); err == nil {
-		t.Fatal("expected non-seekable blob reader, but Seek(0, os.SEEK_END) succeed")
+	if _, err := remoteBlob.Seek(0, io.SeekEnd); err == nil {
+		t.Fatal("expected non-seekable blob reader, but Seek(0, io.SeekEnd) succeed")
 	}
 
 	// Test that the blob can be fetched.
@@ -765,11 +765,11 @@ func (fr *testBlobFileReader) Seek(offset int64, whence int) (int64, error) {
 	newOffset := fr.offset
 
 	switch whence {
-	case os.SEEK_CUR:
+	case io.SeekCurrent:
 		newOffset += int64(offset)
-	case os.SEEK_END:
+	case io.SeekEnd:
 		newOffset = int64(len(fr.content)) + offset
-	case os.SEEK_SET:
+	case io.SeekStart:
 		newOffset = int64(offset)
 	}
 

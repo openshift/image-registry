@@ -10,7 +10,7 @@ import (
 // write it in the audit log.
 type ManifestService struct {
 	manifests distribution.ManifestService
-	logger    *AuditLogger
+	logger    *Logger
 }
 
 func NewManifestService(ctx context.Context, manifests distribution.ManifestService) distribution.ManifestService {

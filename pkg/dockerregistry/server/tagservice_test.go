@@ -268,7 +268,6 @@ func TestTagDeletion(t *testing.T) {
 	testcases := []struct {
 		title                 string
 		tagName               string
-		tagValue              distribution.Descriptor
 		expectedError         bool
 		expectedNotFoundError bool
 		pullthrough           bool

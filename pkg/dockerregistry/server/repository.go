@@ -205,10 +205,10 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 
 // Tags returns a reference to this repository tag service.
 func (r *repository) Tags(ctx context.Context) distribution.TagService {
-	var ts distribution.TagService
+	ts := r.Repository.Tags(ctx)
 
 	ts = &tagService{
-		TagService: r.Repository.Tags(ctx),
+		TagService: ts,
 		repo:       r,
 	}
 
