@@ -131,7 +131,7 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 	context.GetLogger(r.ctx).Debugf("verifying presence of blob %q in image stream %s/%s", dgst.String(), r.namespace, r.name)
 	started := time.Now()
 	logFound := func(found bool) bool {
-		elapsed := time.Now().Sub(started)
+		elapsed := time.Since(started)
 		if found {
 			context.GetLogger(r.ctx).Debugf("verified presence of blob %q in image stream %s/%s after %s", dgst.String(), r.namespace, r.name, elapsed.String())
 		} else {

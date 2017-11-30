@@ -474,7 +474,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 	compareActions(t, "no roundrip to etcd", imageClient.Actions(), expectedActions)
 
 	t.Logf("sleeping %s while waiting for eviction of blob %q from cache", blobRepoCacheTTL.String(), blob2Dgst.String())
-	time.Sleep(blobRepoCacheTTL - (time.Now().Sub(lastStatTimestamp)))
+	time.Sleep(blobRepoCacheTTL - time.Since(lastStatTimestamp))
 
 	repo, err = reg.Repository(ctx, ref)
 	if err != nil {
@@ -613,9 +613,7 @@ func storeTestImage(
 			return nil, err
 		}
 
-		for _, signDigest := range signatures {
-			image.DockerImageSignatures = append(image.DockerImageSignatures, signDigest)
-		}
+		image.DockerImageSignatures = append(image.DockerImageSignatures, signatures...)
 	}
 
 	if err := util.ImageWithMetadata(image); err != nil {

@@ -134,7 +134,7 @@ func MakeManifestConfig() (ConfigPayload, distribution.Descriptor, error) {
 	return jsonBytes, cfgDesc, nil
 }
 
-// CreateUploadTestManifest generates a random manifest blob and uploads it to the given repository. For this
+// CreateAndUploadTestManifest generates a random manifest blob and uploads it to the given repository. For this
 // purpose, a given number of layers will be created and uploaded.
 func CreateAndUploadTestManifest(
 	ctx context.Context,
@@ -260,7 +260,7 @@ func AssertManifestsEqual(t *testing.T, description string, ma distribution.Mani
 	}
 }
 
-// NewImageManifest creates a new Image object for the given manifest string. Note that the manifest must
+// NewImageForManifest creates a new Image object for the given manifest string. Note that the manifest must
 // contain signatures if it is of schema 1.
 func NewImageForManifest(repoName string, rawManifest string, manifestConfig string, managedByOpenShift bool) (*imageapiv1.Image, error) {
 	var versioned manifest.Versioned

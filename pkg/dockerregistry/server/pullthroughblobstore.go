@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
@@ -75,7 +74,7 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 		if _, ok := inflight[dgst]; ok {
 			mu.Unlock()
 			context.GetLogger(ctx).Infof("Serving %q while mirroring in background", dgst)
-			_, err := copyContent(remoteGetter, ctx, dgst, w, req)
+			_, err := copyContent(ctx, remoteGetter, dgst, w, req)
 			return err
 		}
 		inflight[dgst] = struct{}{}
@@ -84,7 +83,7 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 		storeLocalInBackground(ctx, pbs.repo, pbs.BlobStore, dgst)
 	}
 
-	_, err = copyContent(remoteGetter, ctx, dgst, w, req)
+	_, err = copyContent(ctx, remoteGetter, dgst, w, req)
 	return err
 }
 
@@ -118,7 +117,7 @@ func serveRemoteContent(rw http.ResponseWriter, req *http.Request, desc distribu
 
 	// Check whether remoteReader is seekable. The remoteReader' Seek method must work: ServeContent uses
 	// a seek to the end of the content to determine its size.
-	if _, err := remoteReader.Seek(0, os.SEEK_END); err != nil {
+	if _, err := remoteReader.Seek(0, io.SeekEnd); err != nil {
 		// The remoteReader isn't seekable. It means that the remote response under the hood of remoteReader
 		// doesn't contain any Content-Range or Content-Length headers. In this case we need to rollback to
 		// simple Copy.
@@ -126,7 +125,7 @@ func serveRemoteContent(rw http.ResponseWriter, req *http.Request, desc distribu
 	}
 
 	// Move pointer back to begin.
-	if _, err := remoteReader.Seek(0, os.SEEK_SET); err != nil {
+	if _, err := remoteReader.Seek(0, io.SeekStart); err != nil {
 		return false, err
 	}
 
@@ -143,7 +142,7 @@ var mu sync.Mutex
 
 // copyContent attempts to load and serve the provided blob. If req != nil and writer is an instance of http.ResponseWriter,
 // response headers will be set and range requests honored.
-func copyContent(store BlobGetterService, ctx context.Context, dgst digest.Digest, writer io.Writer, req *http.Request) (distribution.Descriptor, error) {
+func copyContent(ctx context.Context, store BlobGetterService, dgst digest.Digest, writer io.Writer, req *http.Request) (distribution.Descriptor, error) {
 	desc, err := store.Stat(ctx, dgst)
 	if err != nil {
 		return distribution.Descriptor{}, err
@@ -210,31 +209,31 @@ func storeLocalInBackground(ctx context.Context, repo *repository, localBlobStor
 }
 
 // storeLocal retrieves the named blob from the provided store and writes it into the local store.
-func storeLocal(ctx context.Context, localBlobStore distribution.BlobStore, remoteGetter BlobGetterService, dgst digest.Digest) error {
+func storeLocal(ctx context.Context, localBlobStore distribution.BlobStore, remoteGetter BlobGetterService, dgst digest.Digest) (err error) {
 	defer func() {
 		mu.Lock()
 		delete(inflight, dgst)
 		mu.Unlock()
 	}()
 
-	var desc distribution.Descriptor
-	var err error
 	var bw distribution.BlobWriter
-
 	bw, err = localBlobStore.Create(ctx)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		cancelErr := bw.Cancel(ctx)
+		if err == nil {
+			err = cancelErr
+		}
+	}()
 
-	desc, err = copyContent(remoteGetter, ctx, dgst, bw, nil)
+	var desc distribution.Descriptor
+	desc, err = copyContent(ctx, remoteGetter, dgst, bw, nil)
 	if err != nil {
 		return err
 	}
 
 	_, err = bw.Commit(ctx, desc)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }

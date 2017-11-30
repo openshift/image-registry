@@ -9,7 +9,7 @@ import (
 // write it in the audit log.
 type TagService struct {
 	tags   distribution.TagService
-	logger *AuditLogger
+	logger *Logger
 }
 
 var _ distribution.TagService = &TagService{}

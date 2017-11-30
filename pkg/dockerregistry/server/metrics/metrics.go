@@ -29,8 +29,14 @@ func Register() {
 	prometheus.MustRegister(RegistryAPIRequests)
 }
 
+// Timer is a helper type to time functions.
+type Timer interface {
+	// Stop records the duration passed since the Timer was created with NewTimer.
+	Stop()
+}
+
 // NewTimer wraps the SummaryVec and used to track amount of time passed since the Timer was created.
-func NewTimer(collector *prometheus.SummaryVec, labels []string) *metricTimer {
+func NewTimer(collector *prometheus.SummaryVec, labels []string) Timer {
 	return &metricTimer{
 		collector: collector,
 		labels:    labels,
@@ -44,7 +50,6 @@ type metricTimer struct {
 	startTime time.Time
 }
 
-// Stop records the duration passed since the Timer was created with NewTimer.
 func (m *metricTimer) Stop() {
 	m.collector.WithLabelValues(m.labels...).Observe(float64(time.Since(m.startTime) / time.Second))
 }

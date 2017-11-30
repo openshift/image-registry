@@ -12,7 +12,7 @@ import (
 // write it in the audit log.
 type BlobStore struct {
 	store  distribution.BlobStore
-	logger *AuditLogger
+	logger *Logger
 }
 
 func NewBlobStore(ctx context.Context, store distribution.BlobStore) distribution.BlobStore {
@@ -83,7 +83,7 @@ func (b *BlobStore) Delete(ctx context.Context, dgst digest.Digest) error {
 
 type blobWriter struct {
 	distribution.BlobWriter
-	logger *AuditLogger
+	logger *Logger
 }
 
 func (bw *blobWriter) Commit(ctx context.Context, provisional distribution.Descriptor) (canonical distribution.Descriptor, err error) {
