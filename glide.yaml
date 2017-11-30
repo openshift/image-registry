@@ -3,7 +3,7 @@ import:
 - package: github.com/openshift/origin
   version: 1daa267d0a1fdbd0569ce490c904391b4e77c70d
 - package: github.com/docker/distribution
-  version: 1e2bbed6e09c6c8047f52af965a6e301f346d04e
+  version: image-registry-release-2.6.2
   repo: git@github.com:openshift/docker-distribution
 - package: k8s.io/code-generator
   version: master
