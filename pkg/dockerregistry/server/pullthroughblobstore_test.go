@@ -31,8 +31,10 @@ func TestPullthroughServeBlob(t *testing.T) {
 
 	namespace, name := "user", "app"
 	repoName := fmt.Sprintf("%s/%s", namespace, name)
-	installFakeAccessController(t)
-	setPassthroughBlobDescriptorServiceFactory()
+	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
+		&fakeAccessControllerMiddleware{t: t},
+		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
+	})
 
 	testImage, err := registrytest.NewImageForManifest(repoName, registrytest.SampleImageManifestSchema1, "", false)
 	if err != nil {
@@ -307,11 +309,13 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 	repo1Name := fmt.Sprintf("%s/%s", namespace, repo1)
 	repo2Name := fmt.Sprintf("%s/%s", namespace, repo2)
 
-	installFakeAccessController(t)
-	setPassthroughBlobDescriptorServiceFactory()
-
 	backgroundCtx := context.Background()
 	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
+
+	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
+		&fakeAccessControllerMiddleware{t: t},
+		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
+	})
 
 	remoteRegistryServer := createTestRegistryServer(t, backgroundCtx)
 	defer remoteRegistryServer.Close()

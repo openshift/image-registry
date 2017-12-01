@@ -9,8 +9,8 @@ import (
 type contextKey string
 
 const (
-	// repositoryKey serves to store/retrieve repository object to/from context.
-	repositoryKey contextKey = "repository"
+	// appMiddlewareKey is for testing purposes.
+	appMiddlewareKey contextKey = "appMiddleware"
 
 	// remoteBlobAccessCheckEnabledKey is the key for the flag in Contexts
 	// to allow blobDescriptorService to stat remote blobs.
@@ -28,15 +28,9 @@ const (
 	deferredErrorsKey contextKey = "deferredErrors"
 )
 
-// withRepository returns a new Context that carries value repo.
-func withRepository(parent context.Context, repo *repository) context.Context {
-	return context.WithValue(parent, repositoryKey, repo)
-}
-
-// repositoryFrom returns the repository value stored in ctx, if any.
-func repositoryFrom(ctx context.Context) (repo *repository, found bool) {
-	repo, found = ctx.Value(repositoryKey).(*repository)
-	return
+func appMiddlewareFrom(ctx context.Context) appMiddleware {
+	am, _ := ctx.Value(appMiddlewareKey).(appMiddleware)
+	return am
 }
 
 // withRemoteBlobAccessCheckEnabled returns a new Context that allows

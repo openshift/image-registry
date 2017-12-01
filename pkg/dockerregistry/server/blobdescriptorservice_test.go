@@ -17,11 +17,10 @@ import (
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	registryauth "github.com/docker/distribution/registry/auth"
-	"github.com/docker/distribution/registry/middleware/registry"
-	"github.com/docker/distribution/registry/storage"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	srvconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/supermiddleware"
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 )
 
@@ -36,6 +35,15 @@ func GetTestPassThroughToUpstream(ctx context.Context) bool {
 	return found && passthrough
 }
 
+type appMiddlewareChain []appMiddleware
+
+func (m appMiddlewareChain) Apply(app supermiddleware.App) supermiddleware.App {
+	for _, am := range m {
+		app = am.Apply(app)
+	}
+	return app
+}
+
 // TestBlobDescriptorServiceIsApplied ensures that blobDescriptorService middleware gets applied.
 // It relies on the fact that blobDescriptorService requires higher levels to set repository object on given
 // context. If the object isn't given, its method will err out.
@@ -43,11 +51,11 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 	ctx := context.Background()
 	ctx = registrytest.WithTestLogger(ctx, t)
 
-	// don't do any authorization check
-	installFakeAccessController(t)
-	m := fakeBlobDescriptorService(t)
-	// to make other unit tests working
-	defer m.changeUnsetRepository(false)
+	m := NewTestBlobDescriptorManager()
+	ctx = withAppMiddleware(ctx, &appMiddlewareChain{
+		&fakeAccessControllerMiddleware{t: t},
+		&fakeBlobDescriptorServiceMiddleware{t: t, m: m},
+	})
 
 	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
 	testImage := registrytest.AddRandomImage(t, fos, "user", "app", "latest")
@@ -55,7 +63,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 	dockercfg := &configuration.Configuration{
 		Loglevel: "debug",
 		Auth: map[string]configuration.Parameters{
-			fakeAuthorizerName: {"realm": fakeAuthorizerName},
+			"openshift": nil,
 		},
 		Storage: configuration.Storage{
 			"inmemory": configuration.Parameters{},
@@ -106,14 +114,12 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		method                    string
 		endpoint                  string
 		vars                      []string
-		unsetRepository           bool
 		expectedStatus            int
 		expectedMethodInvocations map[string]int
 	}
 
 	doTest := func(tc testCase) {
 		m.clearStats()
-		m.changeUnsetRepository(tc.unsetRepository)
 
 		route := router.GetRoute(tc.endpoint).Host(serverURL.Host)
 		u, err := route.URL(tc.vars...)
@@ -174,19 +180,6 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 
 	for _, tc := range []testCase{
 		{
-			name:     "get blob with repository unset",
-			method:   http.MethodGet,
-			endpoint: v2.RouteNameBlob,
-			vars: []string{
-				"name", "user/app",
-				"digest", desc.Digest.String(),
-			},
-			unsetRepository:           true,
-			expectedStatus:            http.StatusInternalServerError,
-			expectedMethodInvocations: map[string]int{"Stat": 1},
-		},
-
-		{
 			name:     "get blob",
 			method:   http.MethodGet,
 			endpoint: v2.RouteNameBlob,
@@ -201,19 +194,6 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 			// 3rd stat is done by (*blobServiceListener).ServeBlob once the blob serving is finished;
 			//     it may happen with a slight delay after the blob was served
 			expectedMethodInvocations: map[string]int{"Stat": 3},
-		},
-
-		{
-			name:     "stat blob with repository unset",
-			method:   http.MethodHead,
-			endpoint: v2.RouteNameBlob,
-			vars: []string{
-				"name", "user/app",
-				"digest", desc.Digest.String(),
-			},
-			unsetRepository:           true,
-			expectedStatus:            http.StatusInternalServerError,
-			expectedMethodInvocations: map[string]int{"Stat": 1},
 		},
 
 		{
@@ -234,19 +214,6 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		},
 
 		{
-			name:     "delete blob with repository unset",
-			method:   http.MethodDelete,
-			endpoint: v2.RouteNameBlob,
-			vars: []string{
-				"name", "user/app",
-				"digest", desc.Digest.String(),
-			},
-			unsetRepository:           true,
-			expectedStatus:            http.StatusInternalServerError,
-			expectedMethodInvocations: map[string]int{"Stat": 1},
-		},
-
-		{
 			name:     "delete blob",
 			method:   http.MethodDelete,
 			endpoint: v2.RouteNameBlob,
@@ -259,20 +226,6 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		},
 
 		{
-			name:     "delete manifest with repository unset",
-			method:   http.MethodDelete,
-			endpoint: v2.RouteNameManifest,
-			vars: []string{
-				"name", "user/app",
-				"reference", testImage.Name,
-			},
-			unsetRepository: true,
-			expectedStatus:  http.StatusInternalServerError,
-			// we don't allow to delete manifests from etcd; in this case, we attempt to delete layer link
-			expectedMethodInvocations: map[string]int{"Stat": 1},
-		},
-
-		{
 			name:     "delete manifest",
 			method:   http.MethodDelete,
 			endpoint: v2.RouteNameManifest,
@@ -282,21 +235,6 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 			},
 			expectedStatus: http.StatusNotFound,
 			// we don't allow to delete manifests from etcd; in this case, we attempt to delete layer link
-			expectedMethodInvocations: map[string]int{"Stat": 1},
-		},
-
-		{
-			name:     "get manifest with repository unset",
-			method:   http.MethodGet,
-			endpoint: v2.RouteNameManifest,
-			vars: []string{
-				"name", "user/app",
-				"reference", "latest",
-			},
-			unsetRepository: true,
-			// failed because we trying to get manifest from storage driver first.
-			expectedStatus: http.StatusNotFound,
-			// manifest can't be retrieved from etcd
 			expectedMethodInvocations: map[string]int{"Stat": 1},
 		},
 
@@ -318,10 +256,9 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 }
 
 type testBlobDescriptorManager struct {
-	mu              sync.Mutex
-	cond            *sync.Cond
-	stats           map[string]int
-	unsetRepository bool
+	mu    sync.Mutex
+	cond  *sync.Cond
+	stats map[string]int
 }
 
 // NewTestBlobDescriptorManager allows to control blobDescriptorService and collects statistics of called
@@ -352,24 +289,6 @@ func (m *testBlobDescriptorManager) methodInvoked(methodName string) int {
 	m.cond.Signal()
 
 	return newCount
-}
-
-// unsetRepository returns true if the testBlobDescriptorService should unset repository from context before
-// passing down the call
-func (m *testBlobDescriptorManager) getUnsetRepository() bool {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	return m.unsetRepository
-}
-
-// changeUnsetRepository allows to configure whether the testBlobDescriptorService should unset repository
-// from context before passing down the call
-func (m *testBlobDescriptorManager) changeUnsetRepository(unset bool) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	m.unsetRepository = unset
 }
 
 // getStats waits until blob descriptor service's methods are called specified number of times and returns
@@ -424,67 +343,99 @@ func statsGreaterThanOrEqual(stats, minimumLimits map[string]int) bool {
 	return true
 }
 
-// fakeBlobDescriptorService installs a fake blob descriptor on top of blobDescriptorService that collects
-// stats of method invocations. unsetRepository commands the controller to remove repository object from
-// context passed down to blobDescriptorService if true.
-func fakeBlobDescriptorService(t *testing.T) *testBlobDescriptorManager {
-	m := NewTestBlobDescriptorManager()
-	middleware.RegisterOptions(storage.BlobDescriptorServiceFactory(&testBlobDescriptorServiceFactory{t: t, m: m}))
-	return m
+type fakeBlobDescriptorServiceMiddleware struct {
+	t *testing.T
+	m *testBlobDescriptorManager
+
+	respectPassthrough bool
+}
+
+func (m *fakeBlobDescriptorServiceMiddleware) Apply(app supermiddleware.App) supermiddleware.App {
+	return &fakeBlobDescriptorServiceApp{App: app, t: m.t, m: m.m, respectPassthrough: m.respectPassthrough}
+}
+
+type fakeBlobDescriptorServiceApp struct {
+	supermiddleware.App
+	t *testing.T
+	m *testBlobDescriptorManager
+
+	respectPassthrough bool
+}
+
+func (app *fakeBlobDescriptorServiceApp) Repository(ctx context.Context, repo distribution.Repository, crossmount bool) (distribution.Repository, distribution.BlobDescriptorServiceFactory, error) {
+	repo, bdsf, err := app.App.Repository(ctx, repo, crossmount)
+	if err != nil {
+		return repo, bdsf, err
+	}
+	return repo, &testBlobDescriptorServiceFactory{upstream: bdsf, t: app.t, m: app.m, respectPassthrough: app.respectPassthrough}, nil
 }
 
 type testBlobDescriptorServiceFactory struct {
-	t *testing.T
-	m *testBlobDescriptorManager
+	upstream distribution.BlobDescriptorServiceFactory
+	t        *testing.T
+	m        *testBlobDescriptorManager
+
+	respectPassthrough bool
 }
 
 func (bf *testBlobDescriptorServiceFactory) BlobAccessController(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
-	if _, ok := svc.(*blobDescriptorService); !ok {
-		svc = (&blobDescriptorServiceFactory{}).BlobAccessController(svc)
-	}
-	return &testBlobDescriptorService{BlobDescriptorService: svc, t: bf.t, m: bf.m}
+	return &testBlobDescriptorService{BlobDescriptorService: svc, t: bf.t, m: bf.m, upstreamFactory: bf.upstream, respectPassthrough: bf.respectPassthrough}
 }
 
 type testBlobDescriptorService struct {
 	distribution.BlobDescriptorService
 	t *testing.T
 	m *testBlobDescriptorManager
+
+	upstreamFactory    distribution.BlobDescriptorServiceFactory
+	respectPassthrough bool
 }
 
 func (bs *testBlobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	bs.m.methodInvoked("Stat")
-	if bs.m.getUnsetRepository() {
-		bs.t.Logf("unsetting repository from the context")
-		ctx = withRepository(ctx, nil)
+	if bs.m != nil {
+		bs.m.methodInvoked("Stat")
 	}
 
-	return bs.BlobDescriptorService.Stat(ctx, dgst)
+	svc := bs.BlobDescriptorService
+	if bs.respectPassthrough && !GetTestPassThroughToUpstream(ctx) {
+		svc = bs.upstreamFactory.BlobAccessController(svc)
+	}
+
+	return svc.Stat(ctx, dgst)
 }
 func (bs *testBlobDescriptorService) Clear(ctx context.Context, dgst digest.Digest) error {
-	bs.m.methodInvoked("Clear")
-	if bs.m.getUnsetRepository() {
-		bs.t.Logf("unsetting repository from the context")
-		ctx = withRepository(ctx, nil)
+	if bs.m != nil {
+		bs.m.methodInvoked("Clear")
 	}
-	return bs.BlobDescriptorService.Clear(ctx, dgst)
+
+	svc := bs.BlobDescriptorService
+	if bs.respectPassthrough && !GetTestPassThroughToUpstream(ctx) {
+		svc = bs.upstreamFactory.BlobAccessController(svc)
+	}
+
+	return svc.Clear(ctx, dgst)
 }
 
-const fakeAuthorizerName = "fake"
+type fakeAccessControllerMiddleware struct {
+	t *testing.T
+}
 
-// installFakeAccessController installs an authorizer that allows access anywhere to anybody.
-func installFakeAccessController(t *testing.T) {
-	registryauth.Register(fakeAuthorizerName, registryauth.InitFunc(
-		func(options map[string]interface{}) (registryauth.AccessController, error) {
-			t.Log("instantiating fake access controller")
-			return &fakeAccessController{t: t}, nil
-		}))
+func (m *fakeAccessControllerMiddleware) Apply(app supermiddleware.App) supermiddleware.App {
+	return &fakeAccessControllerApp{App: app, t: m.t}
+}
+
+type fakeAccessControllerApp struct {
+	supermiddleware.App
+	t *testing.T
+}
+
+func (app *fakeAccessControllerApp) Auth(map[string]interface{}) (registryauth.AccessController, error) {
+	return &fakeAccessController{t: app.t}, nil
 }
 
 type fakeAccessController struct {
 	t *testing.T
 }
-
-var _ registryauth.AccessController = &fakeAccessController{}
 
 func (f *fakeAccessController) Authorized(ctx context.Context, access ...registryauth.Access) (context.Context, error) {
 	for _, access := range access {
@@ -493,43 +444,4 @@ func (f *fakeAccessController) Authorized(ctx context.Context, access ...registr
 
 	ctx = withAuthPerformed(ctx)
 	return ctx, nil
-}
-
-// passthroughBlobDescriptorService passes all Stat and Clear requests to
-// custom blobDescriptorService by default. If
-// "openshift.test.passthrough-to-upstream" is set on context with value
-// "true", all the requests will be passed straight to the upstream blob
-// descriptor service.
-type passthroughBlobDescriptorService struct {
-	distribution.BlobDescriptorService
-}
-
-func (pbds *passthroughBlobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	passthrough := GetTestPassThroughToUpstream(ctx)
-	if passthrough {
-		context.GetLogger(ctx).Debugf("(*passthroughBlobDescriptorService).Stat: passing down to upstream blob descriptor service")
-		return pbds.BlobDescriptorService.Stat(ctx, dgst)
-	}
-	context.GetLogger(ctx).Debugf("(*passthroughBlobDescriptorService).Stat: passing to openshift wrapper")
-	return (&blobDescriptorServiceFactory{}).BlobAccessController(pbds.BlobDescriptorService).Stat(ctx, dgst)
-}
-
-func (pbds *passthroughBlobDescriptorService) Clear(ctx context.Context, dgst digest.Digest) error {
-	passthrough := GetTestPassThroughToUpstream(ctx)
-	if passthrough {
-		context.GetLogger(ctx).Debugf("(*passthroughBlobDescriptorService).Clear: passing down to upstream blob descriptor service")
-		return pbds.BlobDescriptorService.Clear(ctx, dgst)
-	}
-	context.GetLogger(ctx).Debugf("(*passthroughBlobDescriptorService).Clear: passing to openshift wrapper")
-	return (&blobDescriptorServiceFactory{}).BlobAccessController(pbds.BlobDescriptorService).Clear(ctx, dgst)
-}
-
-type passthroughBlobDescriptorServiceFactory struct{}
-
-func (pbf *passthroughBlobDescriptorServiceFactory) BlobAccessController(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
-	return &passthroughBlobDescriptorService{svc}
-}
-
-func setPassthroughBlobDescriptorServiceFactory() {
-	middleware.RegisterOptions(storage.BlobDescriptorServiceFactory(&passthroughBlobDescriptorServiceFactory{}))
 }
