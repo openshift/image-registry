@@ -115,7 +115,7 @@ func (h *manifestSchema1Handler) Verify(ctx context.Context, skipDependencyVerif
 	// successful. This means that the docker client will not attempt to send them
 	// to us as it will assume that the registry has them.
 
-	if len(path.Join(h.repo.config.registryAddr, h.manifest.Name)) > reference.NameTotalLengthMax {
+	if len(path.Join(h.repo.app.extraConfig.Server.Addr, h.manifest.Name)) > reference.NameTotalLengthMax {
 		errs = append(errs,
 			distribution.ErrManifestNameInvalid{
 				Name:   h.manifest.Name,

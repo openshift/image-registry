@@ -1,17 +1,13 @@
 package server
 
 import (
-	"fmt"
 	"sort"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
-	"github.com/docker/distribution/registry/middleware/registry"
-	"github.com/docker/distribution/registry/storage"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 
@@ -34,24 +30,19 @@ func (b ByGeneration) Less(i, j int) bool { return b[i].Generation > b[j].Genera
 func (b ByGeneration) Len() int           { return len(b) }
 func (b ByGeneration) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
-func init() {
-	err := middleware.RegisterOptions(storage.BlobDescriptorServiceFactory(&blobDescriptorServiceFactory{}))
-	if err != nil {
-		logrus.Fatalf("Unable to register BlobDescriptorServiceFactory: %v", err)
-	}
-}
+type blobDescriptorServiceFactoryFunc func(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService
 
-// blobDescriptorServiceFactory needs to be able to work with blobs
-// directly without using links. This allows us to ignore the distribution
-// of blobs between repositories.
-type blobDescriptorServiceFactory struct{}
-
-func (bf *blobDescriptorServiceFactory) BlobAccessController(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
-	return &blobDescriptorService{svc}
+func (f blobDescriptorServiceFactoryFunc) BlobAccessController(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
+	return f(svc)
 }
 
 type blobDescriptorService struct {
 	distribution.BlobDescriptorService
+	repo *repository
+}
+
+func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
+	return &blobDescriptorService{svc, r}
 }
 
 // Stat returns a a blob descriptor if the given blob is either linked in repository or is referenced in
@@ -59,36 +50,30 @@ type blobDescriptorService struct {
 // a proper repository object to be set on given context by upper openshift middleware wrappers.
 func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
 	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: starting with digest=%s", dgst.String())
-	repo, found := repositoryFrom(ctx)
-	if !found || repo == nil {
-		err := fmt.Errorf("failed to retrieve repository from context")
-		context.GetLogger(ctx).Error(err)
-		return distribution.Descriptor{}, err
-	}
 
 	// if there is a repo layer link, return its descriptor
 	desc, err := bs.BlobDescriptorService.Stat(ctx, dgst)
 	if err == nil {
 		// and remember the association
-		repo.cachedLayers.RememberDigest(dgst, repo.config.blobRepositoryCacheTTL, imageapi.DockerImageReference{
-			Namespace: repo.namespace,
-			Name:      repo.name,
+		bs.repo.cachedLayers.RememberDigest(dgst, bs.repo.app.extraConfig.Cache.BlobRepositoryTTL, imageapi.DockerImageReference{
+			Namespace: bs.repo.namespace,
+			Name:      bs.repo.name,
 		}.Exact())
 		return desc, nil
 	}
 
-	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: could not stat layer link %s in repository %s: %v", dgst.String(), repo.Named().Name(), err)
+	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: could not stat layer link %s in repository %s: %v", dgst.String(), bs.repo.Named().Name(), err)
 
 	// First attempt: looking for the blob locally
-	desc, err = repo.app.registry.BlobStatter().Stat(ctx, dgst)
+	desc, err = bs.repo.app.registry.BlobStatter().Stat(ctx, dgst)
 	if err == nil {
 		context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s exists in the global blob store", dgst.String())
 		// only non-empty layers is wise to check for existence in the image stream.
 		// schema v2 has no empty layers.
 		if !isEmptyDigest(dgst) {
 			// ensure it's referenced inside of corresponding image stream
-			if !imageStreamHasBlob(repo, dgst) {
-				context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s is neither empty nor referenced in image stream %s", dgst.String(), repo.Named().Name())
+			if !imageStreamHasBlob(bs.repo, dgst) {
+				context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s is neither empty nor referenced in image stream %s", dgst.String(), bs.repo.Named().Name())
 				return distribution.Descriptor{}, distribution.ErrBlobUnknown
 			}
 		}
@@ -97,23 +82,16 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 
 	if err == distribution.ErrBlobUnknown && remoteBlobAccessCheckEnabledFrom(ctx) {
 		// Second attempt: looking for the blob on a remote server
-		desc, err = repo.remoteBlobGetter.Stat(ctx, dgst)
+		desc, err = bs.repo.remoteBlobGetter.Stat(ctx, dgst)
 	}
 
 	return desc, err
 }
 
 func (bs *blobDescriptorService) Clear(ctx context.Context, dgst digest.Digest) error {
-	repo, found := repositoryFrom(ctx)
-	if !found || repo == nil {
-		err := fmt.Errorf("failed to retrieve repository from context")
-		context.GetLogger(ctx).Error(err)
-		return err
-	}
-
-	repo.cachedLayers.ForgetDigest(dgst, imageapi.DockerImageReference{
-		Namespace: repo.namespace,
-		Name:      repo.name,
+	bs.repo.cachedLayers.ForgetDigest(dgst, imageapi.DockerImageReference{
+		Namespace: bs.repo.namespace,
+		Name:      bs.repo.name,
 	}.Exact())
 	return bs.BlobDescriptorService.Clear(ctx, dgst)
 }
@@ -166,7 +144,7 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 		if _, processed := processedImages[tagEvent.Image]; processed {
 			continue
 		}
-		if imageHasBlob(r, repoCacheName, tagEvent.Image, dgst.String(), !r.config.pullthrough) {
+		if imageHasBlob(r, repoCacheName, tagEvent.Image, dgst.String(), !r.app.extraConfig.Pullthrough.Enabled) {
 			tagName := event2Name[tagEvent]
 			context.GetLogger(r.ctx).Debugf("blob found under istag %s/%s:%s in image %s", r.namespace, r.name, tagName, tagEvent.Image)
 			return logFound(true)

@@ -28,8 +28,6 @@ import (
 )
 
 func TestSignatureGet(t *testing.T) {
-	installFakeAccessController(t)
-
 	testSignature := imageapiv1.ImageSignature{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "sha256:4028782c08eae4a8c9a28bf661c0a8d1c2fc8e19dbaae2b018b21011197e1484@cddeb7006d914716e2728000746a0b23",
@@ -47,6 +45,7 @@ func TestSignatureGet(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = registrytest.WithTestLogger(ctx, t)
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
 	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
 	registrytest.AddImageStream(t, fos, "user", "app", map[string]string{
@@ -63,7 +62,7 @@ func TestSignatureGet(t *testing.T) {
 	dockercfg := &configuration.Configuration{
 		Loglevel: "debug",
 		Auth: map[string]configuration.Parameters{
-			fakeAuthorizerName: {"realm": fakeAuthorizerName},
+			"openshift": nil,
 		},
 		Storage: configuration.Storage{
 			"inmemory": configuration.Parameters{},
@@ -145,8 +144,6 @@ func TestSignatureGet(t *testing.T) {
 func TestSignaturePut(t *testing.T) {
 	imageClient := &imagefakeclient.FakeImageV1{Fake: &clientgotesting.Fake{}}
 
-	installFakeAccessController(t)
-
 	testSignature := signature{
 		Version: 2,
 		Name:    "sha256:4028782c08eae4a8c9a28bf661c0a8d1c2fc8e19dbaae2b018b21011197e1484@cddeb7006d914716e2728000746a0b23",
@@ -171,13 +168,14 @@ func TestSignaturePut(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = registrytest.WithTestLogger(ctx, t)
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 	ctx = withUserClient(ctx, osclient)
 
 	config := &registryconfig.Configuration{}
 	dockercfg := &configuration.Configuration{
 		Loglevel: "debug",
 		Auth: map[string]configuration.Parameters{
-			fakeAuthorizerName: {"realm": fakeAuthorizerName},
+			"openshift": nil,
 		},
 		Storage: configuration.Storage{
 			"inmemory": configuration.Parameters{},

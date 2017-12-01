@@ -43,6 +43,8 @@ func TestRepositoryBlobStat(t *testing.T) {
 	backgroundCtx := context.Background()
 	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
 
+	backgroundCtx = withAppMiddleware(backgroundCtx, &fakeAccessControllerMiddleware{t: t})
+
 	cfg := &configuration.Configuration{
 		Server: &configuration.Server{
 			Addr: "localhost:5000",
@@ -276,71 +278,66 @@ func TestRepositoryBlobStat(t *testing.T) {
 			expectedError:  ErrOpenShiftAccessDenied,
 		},
 	} {
-		ref, err := reference.Parse(tc.stat)
-		if err != nil {
-			t.Errorf("[%s] failed to parse blob reference %q: %v", tc.name, tc.stat, err)
-			continue
-		}
-		canonical, ok := ref.(reference.Canonical)
-		if !ok {
-			t.Errorf("[%s] not a canonical reference %q", tc.name, ref.String())
-			continue
-		}
-
-		ctx := backgroundCtx
-		if !tc.skipAuth {
-			ctx = withAuthPerformed(ctx)
-		}
-		if tc.deferredErrors != nil {
-			ctx = withDeferredErrors(ctx, tc.deferredErrors)
-		}
-
-		fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
-
-		for _, is := range tc.imageStreams {
-			_, err = fos.CreateImageStream(is.Namespace, &is)
+		t.Run(tc.name, func(t *testing.T) {
+			ref, err := reference.Parse(tc.stat)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("failed to parse blob reference %q: %v", tc.stat, err)
 			}
-		}
+			canonical, ok := ref.(reference.Canonical)
+			if !ok {
+				t.Fatalf("not a canonical reference %q", ref.String())
+			}
 
-		for _, image := range tc.images {
-			_, err = fos.CreateImage(&image)
+			ctx := backgroundCtx
+			if !tc.skipAuth {
+				ctx = withAuthPerformed(ctx)
+			}
+			if tc.deferredErrors != nil {
+				ctx = withDeferredErrors(ctx, tc.deferredErrors)
+			}
+
+			fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
+
+			for _, is := range tc.imageStreams {
+				_, err = fos.CreateImageStream(is.Namespace, &is)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			for _, image := range tc.images {
+				_, err = fos.CreateImage(&image)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, cfg.Cache.BlobRepositoryTTL, tc.pullthrough, true)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("unexpected error: %v", err)
 			}
-		}
 
-		reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, cfg.Cache.BlobRepositoryTTL, tc.pullthrough, true)
-		if err != nil {
-			t.Errorf("[%s] unexpected error: %v", tc.name, err)
-			continue
-		}
+			repo, err := reg.Repository(ctx, canonical)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 
-		repo, err := reg.Repository(ctx, canonical)
-		if err != nil {
-			t.Errorf("[%s] unexpected error: %v", tc.name, err)
-			continue
-		}
+			desc, err := repo.Blobs(ctx).Stat(ctx, canonical.Digest())
+			if err != nil && tc.expectedError == nil {
+				t.Fatalf("got unexpected stat error: %v", err)
+			}
+			if err == nil && tc.expectedError != nil {
+				t.Fatalf("got unexpected non-error")
+			}
+			if !reflect.DeepEqual(err, tc.expectedError) {
+				t.Fatalf("got unexpected error: %s", diff.ObjectGoPrintDiff(err, tc.expectedError))
+			}
+			if tc.expectedError == nil && !reflect.DeepEqual(desc, tc.expectedDescriptor) {
+				t.Fatalf("got unexpected descriptor: %s", diff.ObjectGoPrintDiff(desc, tc.expectedDescriptor))
+			}
 
-		desc, err := repo.Blobs(ctx).Stat(ctx, canonical.Digest())
-		if err != nil && tc.expectedError == nil {
-			t.Errorf("[%s] got unexpected stat error: %v", tc.name, err)
-			continue
-		}
-		if err == nil && tc.expectedError != nil {
-			t.Errorf("[%s] got unexpected non-error", tc.name)
-			continue
-		}
-		if !reflect.DeepEqual(err, tc.expectedError) {
-			t.Errorf("[%s] got unexpected error: %s", tc.name, diff.ObjectGoPrintDiff(err, tc.expectedError))
-			continue
-		}
-		if tc.expectedError == nil && !reflect.DeepEqual(desc, tc.expectedDescriptor) {
-			t.Errorf("[%s] got unexpected descriptor: %s", tc.name, diff.ObjectGoPrintDiff(desc, tc.expectedDescriptor))
-		}
-
-		compareActions(t, tc.name, imageClient.Actions(), tc.expectedActions)
+			compareActions(t, tc.name, imageClient.Actions(), tc.expectedActions)
+		})
 	}
 }
 

@@ -11,6 +11,14 @@ type blobWriter struct {
 	wrapper Wrapper
 }
 
+// NewBlobWriter returns a wrapped distribution.BlobWriter.
+func NewBlobWriter(bw distribution.BlobWriter, wrapper Wrapper) distribution.BlobWriter {
+	return &blobWriter{
+		BlobWriter: bw,
+		wrapper:    wrapper,
+	}
+}
+
 func (bw *blobWriter) Commit(ctx context.Context, provisional distribution.Descriptor) (canonical distribution.Descriptor, err error) {
 	err = bw.wrapper(ctx, "BlobWriter.Commit", func(ctx context.Context) error {
 		canonical, err = bw.BlobWriter.Commit(ctx, provisional)

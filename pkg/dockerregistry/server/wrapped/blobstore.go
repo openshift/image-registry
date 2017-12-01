@@ -61,7 +61,7 @@ func (bs *blobStore) Create(ctx context.Context, options ...distribution.BlobCre
 		w, err = bs.blobStore.Create(ctx, options...)
 		return err
 	})
-	if err != nil {
+	if err == nil {
 		w = &blobWriter{
 			BlobWriter: w,
 			wrapper:    bs.wrapper,
@@ -75,7 +75,7 @@ func (bs *blobStore) Resume(ctx context.Context, id string) (w distribution.Blob
 		w, err = bs.blobStore.Resume(ctx, id)
 		return err
 	})
-	if err != nil {
+	if err == nil {
 		w = &blobWriter{
 			BlobWriter: w,
 			wrapper:    bs.wrapper,
