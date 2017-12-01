@@ -1,5 +1,5 @@
-hash: b7794dd8cdab3499c9dc242dfaf162b44ac551d7f37c0c07b8698d66c552d649
-updated: 2017-11-28T16:05:27.008433494+01:00
+hash: 68e66e396fe1d148b422e5175c936b9e0201eb4693ee5f841a484c957c1bea1e
+updated: 2017-11-30T13:44:53.963922749-05:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -83,7 +83,7 @@ imports:
   - oss
   - util
 - name: github.com/docker/distribution
-  version: 1e2bbed6e09c6c8047f52af965a6e301f346d04e
+  version: 588ea2c42a2ebb5c06cd01dbeabfe60e4a7075df
   repo: git@github.com:openshift/docker-distribution
   subpackages:
   - configuration
@@ -389,6 +389,9 @@ imports:
   - pkg/image/generated/clientset/scheme
   - pkg/image/generated/clientset/typed/image/v1
   - pkg/image/generated/clientset/typed/image/v1/fake
+  - pkg/image/generated/internalclientset
+  - pkg/image/generated/internalclientset/scheme
+  - pkg/image/generated/internalclientset/typed/image/internalversion
   - pkg/image/importer
   - pkg/image/importer/dockerv1client
   - pkg/image/util
