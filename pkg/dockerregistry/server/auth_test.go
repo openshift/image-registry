@@ -386,119 +386,110 @@ func TestAccessController(t *testing.T) {
 	}
 
 	for k, test := range tests {
-		reqURL, err := url.Parse(addr)
-		if err != nil {
-			t.Fatal(err)
-		}
-		req, err := http.NewRequest("GET", addr, nil)
-		if err != nil {
-			t.Errorf("%s: %v", k, err)
-			continue
-		}
-		// Simulate a secure request to the specified server
-		req.Host = reqURL.Host
-		req.TLS = &tls.ConnectionState{ServerName: reqURL.Host}
-		if len(test.basicToken) > 0 {
-			req.Header.Set("Authorization", fmt.Sprintf("Basic %s", test.basicToken))
-		}
-		if len(test.bearerToken) > 0 {
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", test.bearerToken))
-		}
+		t.Run(k, func(t *testing.T) {
+			reqURL, err := url.Parse(addr)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req, err := http.NewRequest("GET", addr, nil)
+			if err != nil {
+				t.Fatalf("%s: %v", k, err)
+			}
+			// Simulate a secure request to the specified server
+			req.Host = reqURL.Host
+			req.TLS = &tls.ConnectionState{ServerName: reqURL.Host}
+			if len(test.basicToken) > 0 {
+				req.Header.Set("Authorization", fmt.Sprintf("Basic %s", test.basicToken))
+			}
+			if len(test.bearerToken) > 0 {
+				req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", test.bearerToken))
+			}
 
-		ctx := context.Background()
-		ctx = testutil.WithTestLogger(ctx, t)
+			ctx := context.Background()
+			ctx = testutil.WithTestLogger(ctx, t)
 
-		server, actions := simulateOpenShiftMaster(test.openshiftResponses)
-		cfg := clientcmd.NewConfig()
-		cfg.SkipEnv = true
-		cfg.KubernetesAddr.Set(server.URL)
-		cfg.CommonConfig = restclient.Config{
-			Host:            server.URL,
-			TLSClientConfig: restclient.TLSClientConfig{Insecure: true},
-		}
-		config := &dockercfg.Configuration{}
-		app := &App{
-			ctx:            ctx,
-			registryClient: client.NewRegistryClient(cfg),
-			extraConfig: &configuration.Configuration{
-				Server: &configuration.Server{
-					Addr: "localhost:5000",
+			server, actions := simulateOpenShiftMaster(test.openshiftResponses)
+			cfg := clientcmd.NewConfig()
+			cfg.SkipEnv = true
+			cfg.KubernetesAddr.Set(server.URL)
+			cfg.CommonConfig = restclient.Config{
+				Host:            server.URL,
+				TLSClientConfig: restclient.TLSClientConfig{Insecure: true},
+			}
+			config := &dockercfg.Configuration{}
+			app := &App{
+				ctx:            ctx,
+				registryClient: client.NewRegistryClient(cfg),
+				extraConfig: &configuration.Configuration{
+					Server: &configuration.Server{
+						Addr: "localhost:5000",
+					},
+					Auth: test.authConfig,
 				},
-				Auth: test.authConfig,
-			},
-		}
-		if app.extraConfig.Auth == nil {
-			app.extraConfig.Auth = authConfig
-		}
-		if err := configuration.InitExtraConfig(config, app.extraConfig); err != nil {
-			t.Fatal(err)
-		}
-		accessController, err := app.newAccessController(app.extraConfig.Auth)
-		if err != nil {
-			t.Fatal(err)
-		}
-		ctx = context.WithRequest(ctx, req)
-		authCtx, err := accessController.Authorized(ctx, test.access...)
-		server.Close()
+			}
+			if app.extraConfig.Auth == nil {
+				app.extraConfig.Auth = authConfig
+			}
+			if err := configuration.InitExtraConfig(config, app.extraConfig); err != nil {
+				t.Fatal(err)
+			}
+			accessController, err := app.newAccessController(app.extraConfig.Auth)
+			if err != nil {
+				t.Fatal(err)
+			}
+			ctx = context.WithRequest(ctx, req)
+			authCtx, err := accessController.Authorized(ctx, test.access...)
+			server.Close()
 
-		expectedActions := test.expectedActions
-		if expectedActions == nil {
-			expectedActions = []string{}
-		}
-		if !reflect.DeepEqual(actions, &expectedActions) {
-			t.Errorf("\n%s:\n expected:\n\t%#v\ngot:\n\t%#v", k, &expectedActions, actions)
-			continue
-		}
+			expectedActions := test.expectedActions
+			if expectedActions == nil {
+				expectedActions = []string{}
+			}
+			if !reflect.DeepEqual(actions, &expectedActions) {
+				t.Fatalf("expected: %#v, got: %#v", &expectedActions, actions)
+			}
 
-		if err == nil || test.expectedError == nil {
-			if err != test.expectedError {
-				t.Errorf("%s: accessController did not get expected error - got %+#v - expected %v", k, err, test.expectedError)
-				continue
-			}
-			if authCtx == nil {
-				t.Errorf("%s: expected auth context but got nil", k)
-				continue
-			}
-			if !authPerformed(authCtx) {
-				t.Errorf("%s: expected AuthPerformed to be true", k)
-				continue
-			}
-			deferredErrors, hasDeferred := deferredErrorsFrom(authCtx)
-			if len(test.expectedRepoErr) > 0 {
-				if !hasDeferred || deferredErrors[test.expectedRepoErr] == nil {
-					t.Errorf("%s: expected deferred error for repo %s, got none", k, test.expectedRepoErr)
-					continue
+			if err == nil || test.expectedError == nil {
+				if err != test.expectedError {
+					t.Fatalf("accessController did not get expected error - got %#+v - expected %v", err, test.expectedError)
+				}
+				if authCtx == nil {
+					t.Fatalf("expected auth context but got nil")
+				}
+				if !authPerformed(authCtx) {
+					t.Fatalf("expected AuthPerformed to be true")
+				}
+				deferredErrors, hasDeferred := deferredErrorsFrom(authCtx)
+				if len(test.expectedRepoErr) > 0 {
+					if !hasDeferred || deferredErrors[test.expectedRepoErr] == nil {
+						t.Fatalf("expected deferred error for repo %s, got none", test.expectedRepoErr)
+					}
+				} else {
+					if hasDeferred && len(deferredErrors) > 0 {
+						t.Fatalf("didn't expect deferred errors, got %#v", deferredErrors)
+					}
 				}
 			} else {
-				if hasDeferred && len(deferredErrors) > 0 {
-					t.Errorf("%s: didn't expect deferred errors, got %#v", k, deferredErrors)
-					continue
+				challengeErr, isChallenge := err.(auth.Challenge)
+				if test.expectedChallenge != isChallenge {
+					t.Fatalf("expected challenge=%v, accessController returned challenge=%v", test.expectedChallenge, isChallenge)
 				}
-			}
-		} else {
-			challengeErr, isChallenge := err.(auth.Challenge)
-			if test.expectedChallenge != isChallenge {
-				t.Errorf("%s: expected challenge=%v, accessController returned challenge=%v", k, test.expectedChallenge, isChallenge)
-				continue
-			}
-			if isChallenge {
-				recorder := httptest.NewRecorder()
-				challengeErr.SetHeaders(recorder)
-				if !reflect.DeepEqual(recorder.HeaderMap, test.expectedHeaders) {
-					t.Errorf("%s: expected headers\n%#v\ngot\n%#v", k, test.expectedHeaders, recorder.HeaderMap)
-					continue
+				if isChallenge {
+					recorder := httptest.NewRecorder()
+					challengeErr.SetHeaders(recorder)
+					if !reflect.DeepEqual(recorder.HeaderMap, test.expectedHeaders) {
+						t.Fatalf("expected headers %#v, got %#v", test.expectedHeaders, recorder.HeaderMap)
+					}
 				}
-			}
 
-			if err.Error() != test.expectedError.Error() {
-				t.Errorf("%s: accessController did not get expected error - got %+v - expected %s", k, err, test.expectedError)
-				continue
+				if err.Error() != test.expectedError.Error() {
+					t.Fatalf("accessController did not get expected error - got %+v - expected %s", err, test.expectedError)
+				}
+				if authCtx != nil {
+					t.Fatalf("expected nil auth context but got %s", authCtx)
+				}
 			}
-			if authCtx != nil {
-				t.Errorf("%s: expected nil auth context but got %s", k, authCtx)
-				continue
-			}
-		}
+		})
 	}
 }
 

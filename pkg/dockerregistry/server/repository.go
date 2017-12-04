@@ -125,13 +125,12 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 	// we do a verification of our own
 	// TODO: let upstream do the verification once they pass correct context object to their manifest handler
 	opts := append(options, registrystorage.SkipLayerVerification())
-	ms, err := r.Repository.Manifests(withRepository(ctx, r), opts...)
+	ms, err := r.Repository.Manifests(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
 	ms = &manifestService{
-		ctx:           withRepository(ctx, r),
 		repo:          r,
 		manifests:     ms,
 		acceptschema2: r.config.acceptSchema2,
@@ -144,20 +143,16 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 		}
 	}
 
-	ms = &errorManifestService{
-		manifests: ms,
-		repo:      r,
-	}
+	ms = newWithRepositoryManifestService(ms, r)
+
+	ms = newPendingErrorsManifestService(ms, r)
 
 	if audit.LoggerExists(ctx) {
 		ms = audit.NewManifestService(ctx, ms)
 	}
 
 	if r.enabledMetrics {
-		ms = &metrics.ManifestService{
-			Manifests: ms,
-			Reponame:  r.Named().Name(),
-		}
+		ms = metrics.NewManifestService(ms, r.Named().Name())
 	}
 
 	return ms, nil
@@ -185,19 +180,20 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 	}
 
 	bs = &errorBlobStore{
-		store: bs,
-		repo:  r,
+		BlobStore: bs,
+		repo:      r,
 	}
+
+	bs = newWithRepositoryBlobStore(bs, r)
+
+	bs = newPendingErrorsBlobStore(bs, r)
 
 	if audit.LoggerExists(ctx) {
 		bs = audit.NewBlobStore(ctx, bs)
 	}
 
 	if r.enabledMetrics {
-		bs = &metrics.BlobStore{
-			Store:    bs,
-			Reponame: r.Named().Name(),
-		}
+		bs = metrics.NewBlobStore(bs, r.Named().Name())
 	}
 
 	return bs
@@ -212,20 +208,16 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 		repo:       r,
 	}
 
-	ts = &errorTagService{
-		tags: ts,
-		repo: r,
-	}
+	ts = newWithRepositoryTagService(ts, r)
+
+	ts = newPendingErrorsTagService(ts, r)
 
 	if audit.LoggerExists(ctx) {
 		ts = audit.NewTagService(ctx, ts)
 	}
 
 	if r.enabledMetrics {
-		ts = &metrics.TagService{
-			Tags:     ts,
-			Reponame: r.Named().Name(),
-		}
+		ts = metrics.NewTagService(ts, r.Named().Name())
 	}
 
 	return ts
