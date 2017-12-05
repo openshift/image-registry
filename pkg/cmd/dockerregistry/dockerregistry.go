@@ -157,20 +157,31 @@ func Execute(configFile io.Reader) {
 		log.Fatalf("error configuring logger: %v", err)
 	}
 
-	err = Start(ctx, dockerConfig, extraConfig)
+	// inject a logger into the uuid library. warns us if there is a problem
+	// with uuid generation under low entropy.
+	uuid.Loggerf = context.GetLogger(ctx).Warnf
+
+	context.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
+
+	srv, err := NewServer(ctx, dockerConfig, extraConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if dockerConfig.HTTP.TLS.Certificate == "" {
+		context.GetLogger(ctx).Infof("listening on %s", srv.Addr)
+		err = srv.ListenAndServe()
+	} else {
+		context.GetLogger(ctx).Infof("listening on %s, tls", srv.Addr)
+		err = srv.ListenAndServeTLS(dockerConfig.HTTP.TLS.Certificate, dockerConfig.HTTP.TLS.Key)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-// Start runs the Docker registry. Start always returns a non-nil error.
-func Start(ctx context.Context, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) error {
+func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) (*http.Server, error) {
 	setDefaultLogParameters(dockerConfig)
-
-	context.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
-	// inject a logger into the uuid library. warns us if there is a problem
-	// with uuid generation under low entropy.
-	uuid.Loggerf = context.GetLogger(ctx).Warnf
 
 	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig))
 
@@ -186,67 +197,62 @@ func Start(ctx context.Context, dockerConfig *configuration.Configuration, extra
 	handler = panicHandler(handler)
 	handler = gorillahandlers.CombinedLoggingHandler(os.Stdout, handler)
 
-	if dockerConfig.HTTP.TLS.Certificate == "" {
-		context.GetLogger(ctx).Infof("listening on %v", dockerConfig.HTTP.Addr)
-		return http.ListenAndServe(dockerConfig.HTTP.Addr, handler)
-	}
-
-	var (
-		minVersion   uint16
-		cipherSuites []uint16
-		err          error
-	)
-	if s := os.Getenv("REGISTRY_HTTP_TLS_MINVERSION"); len(s) > 0 {
-		minVersion, err = crypto.TLSVersion(s)
-		if err != nil {
-			return fmt.Errorf("invalid TLS version %q specified in REGISTRY_HTTP_TLS_MINVERSION: %v (valid values are %q)", s, err, crypto.ValidTLSVersions())
-		}
-	}
-	if s := os.Getenv("REGISTRY_HTTP_TLS_CIPHERSUITES"); len(s) > 0 {
-		for _, cipher := range strings.Split(s, ",") {
-			cipherSuite, err := crypto.CipherSuite(cipher)
+	var tlsConf *tls.Config
+	if dockerConfig.HTTP.TLS.Certificate != "" {
+		var (
+			minVersion   uint16
+			cipherSuites []uint16
+			err          error
+		)
+		if s := os.Getenv("REGISTRY_HTTP_TLS_MINVERSION"); len(s) > 0 {
+			minVersion, err = crypto.TLSVersion(s)
 			if err != nil {
-				return fmt.Errorf("invalid cipher suite %q specified in REGISTRY_HTTP_TLS_CIPHERSUITES: %v (valid suites are %q)", s, err, crypto.ValidCipherSuites())
+				return nil, fmt.Errorf("invalid TLS version %q specified in REGISTRY_HTTP_TLS_MINVERSION: %v (valid values are %q)", s, err, crypto.ValidTLSVersions())
 			}
-			cipherSuites = append(cipherSuites, cipherSuite)
+		}
+		if s := os.Getenv("REGISTRY_HTTP_TLS_CIPHERSUITES"); len(s) > 0 {
+			for _, cipher := range strings.Split(s, ",") {
+				cipherSuite, err := crypto.CipherSuite(cipher)
+				if err != nil {
+					return nil, fmt.Errorf("invalid cipher suite %q specified in REGISTRY_HTTP_TLS_CIPHERSUITES: %v (valid suites are %q)", s, err, crypto.ValidCipherSuites())
+				}
+				cipherSuites = append(cipherSuites, cipherSuite)
+			}
+		}
+		tlsConf = crypto.SecureTLSConfig(&tls.Config{
+			ClientAuth:   tls.NoClientCert,
+			MinVersion:   minVersion,
+			CipherSuites: cipherSuites,
+		})
+
+		if len(dockerConfig.HTTP.TLS.ClientCAs) != 0 {
+			pool := x509.NewCertPool()
+
+			for _, ca := range dockerConfig.HTTP.TLS.ClientCAs {
+				caPem, err := ioutil.ReadFile(ca)
+				if err != nil {
+					return nil, err
+				}
+
+				if ok := pool.AppendCertsFromPEM(caPem); !ok {
+					return nil, fmt.Errorf("could not add CA to pool")
+				}
+			}
+
+			for _, subj := range pool.Subjects() {
+				context.GetLogger(ctx).Debugf("CA Subject: %s", string(subj))
+			}
+
+			tlsConf.ClientAuth = tls.RequireAndVerifyClientCert
+			tlsConf.ClientCAs = pool
 		}
 	}
 
-	tlsConf := crypto.SecureTLSConfig(&tls.Config{
-		ClientAuth:   tls.NoClientCert,
-		MinVersion:   minVersion,
-		CipherSuites: cipherSuites,
-	})
-
-	if len(dockerConfig.HTTP.TLS.ClientCAs) != 0 {
-		pool := x509.NewCertPool()
-
-		for _, ca := range dockerConfig.HTTP.TLS.ClientCAs {
-			caPem, err := ioutil.ReadFile(ca)
-			if err != nil {
-				return err
-			}
-
-			if ok := pool.AppendCertsFromPEM(caPem); !ok {
-				return fmt.Errorf("could not add CA to pool")
-			}
-		}
-
-		for _, subj := range pool.Subjects() {
-			context.GetLogger(ctx).Debugf("CA Subject: %s", string(subj))
-		}
-
-		tlsConf.ClientAuth = tls.RequireAndVerifyClientCert
-		tlsConf.ClientCAs = pool
-	}
-
-	context.GetLogger(ctx).Infof("listening on %v, tls", dockerConfig.HTTP.Addr)
-	server := &http.Server{
+	return &http.Server{
 		Addr:      dockerConfig.HTTP.Addr,
 		Handler:   handler,
 		TLSConfig: tlsConf,
-	}
-	return server.ListenAndServeTLS(dockerConfig.HTTP.TLS.Certificate, dockerConfig.HTTP.TLS.Key)
+	}, nil
 }
 
 // configureLogging prepares the context with a logger using the

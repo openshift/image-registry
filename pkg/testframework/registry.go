@@ -1,9 +1,9 @@
 package testframework
 
 import (
-	"errors"
 	"fmt"
 	"net"
+	"sync/atomic"
 	"testing"
 
 	"github.com/docker/distribution/configuration"
@@ -14,47 +14,18 @@ import (
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 )
 
-// ErrorNoDefaultIP is returned when no suitable non-loopback address can be found.
-var ErrorNoDefaultIP = errors.New("no suitable IP address")
+type CloseFunc func() error
 
-// DefaultLocalIP4 returns an IPv4 address that this host can be reached
-// on. Will return NoDefaultIP if no suitable address can be found.
-func DefaultLocalIP4() (net.IP, error) {
-	devices, err := net.Interfaces()
-	if err != nil {
-		return nil, err
-	}
-	for _, dev := range devices {
-		if (dev.Flags&net.FlagUp != 0) && (dev.Flags&net.FlagLoopback == 0) {
-			addrs, err := dev.Addrs()
-			if err != nil {
-				continue
-			}
-			for i := range addrs {
-				if ip, ok := addrs[i].(*net.IPNet); ok {
-					if ip.IP.To4() != nil {
-						return ip.IP, nil
-					}
-				}
-			}
-		}
-	}
-	return nil, ErrorNoDefaultIP
-}
-
-func StartTestRegistry(t *testing.T, kubeConfigPath string) (string, error) {
-	port, err := FindFreeLocalPort()
-	if err != nil {
-		return "", fmt.Errorf("unable to find a free local port for the registry: %v", err)
-	}
-
+func StartTestRegistry(t *testing.T, kubeConfigPath string) (net.Listener, CloseFunc) {
 	localIPv4, err := DefaultLocalIP4()
 	if err != nil {
-		return "", err
+		t.Fatalf("failed to detect an IPv4 address which would be reachable from containers: %v", err)
 	}
 
-	// FIXME(dmage): the port can be claimed by someone else before the registry is started.
-	registryAddr := fmt.Sprintf("%s:%d", localIPv4, port)
+	ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", localIPv4, 0))
+	if err != nil {
+		t.Fatalf("failed to listen on a port: %v", err)
+	}
 
 	dockerConfig := &configuration.Configuration{
 		Version: "0.1",
@@ -71,7 +42,7 @@ func StartTestRegistry(t *testing.T, kubeConfigPath string) (string, error) {
 			"repository": {{
 				Name: "openshift",
 				Options: configuration.Parameters{
-					"dockerregistryurl":      registryAddr,
+					"dockerregistryurl":      ln.Addr().String(),
 					"acceptschema2":          true,
 					"pullthrough":            true,
 					"enforcequota":           false,
@@ -85,23 +56,76 @@ func StartTestRegistry(t *testing.T, kubeConfigPath string) (string, error) {
 		},
 	}
 	dockerConfig.Log.Level = "debug"
-	dockerConfig.HTTP.Addr = registryAddr
 
 	extraConfig := &registryconfig.Configuration{
 		KubeConfig: kubeConfigPath,
 	}
 
 	if err := registryconfig.InitExtraConfig(dockerConfig, extraConfig); err != nil {
-		return "", fmt.Errorf("unable to init registry config: %v", err)
+		t.Fatalf("unable to init registry config: %v", err)
 	}
 
-	go func() {
-		ctx := context.Background()
-		ctx = registrytest.WithTestLogger(ctx, t)
-		err := dockerregistry.Start(ctx, dockerConfig, extraConfig)
-		// We cannot call t.Fatal here, because it's a different goroutine.
-		panic(fmt.Errorf("failed to start the image registry: %v", err))
-	}()
+	ctx := context.Background()
+	ctx = registrytest.WithTestLogger(ctx, t)
+	srv, err := dockerregistry.NewServer(ctx, dockerConfig, extraConfig)
+	if err != nil {
+		t.Fatalf("failed to create a new server: %v", err)
+	}
 
-	return registryAddr, WaitTCP(registryAddr)
+	closed := int32(0)
+	go func() {
+		err := srv.Serve(ln)
+		if atomic.LoadInt32(&closed) == 0 {
+			// We cannot call t.Fatal here, because it's a different goroutine.
+			panic(fmt.Errorf("failed to serve the image registry: %v", err))
+		}
+	}()
+	close := func() error {
+		atomic.StoreInt32(&closed, 1)
+		return ln.Close()
+	}
+
+	return ln, close
+}
+
+type Registry struct {
+	t        *testing.T
+	listener net.Listener
+	closeFn  CloseFunc
+}
+
+func (r *Registry) Close() {
+	if err := r.closeFn(); err != nil {
+		r.t.Fatalf("failed to close the registry's listener: %v", err)
+	}
+}
+
+func (r *Registry) BaseURL() string {
+	return "http://" + r.listener.Addr().String()
+}
+
+func (r *Registry) Repository(namespace string, imagestream string, user *User) *Repository {
+	creds := registrytest.NewBasicCredentialStore(user.Name, user.Token)
+
+	baseURL := r.BaseURL()
+	repoName := fmt.Sprintf("%s/%s", namespace, imagestream)
+
+	transport, err := registrytest.NewTransport(baseURL, repoName, creds)
+	if err != nil {
+		r.t.Fatalf("failed to get transport for %s: %v", repoName, err)
+	}
+
+	ctx := context.Background()
+
+	repo, err := registrytest.NewRepository(ctx, repoName, baseURL, transport)
+	if err != nil {
+		r.t.Fatalf("failed to get repository %s: %v", repoName, err)
+	}
+
+	return &Repository{
+		Repository: repo,
+		baseURL:    baseURL,
+		repoName:   repoName,
+		transport:  transport,
+	}
 }

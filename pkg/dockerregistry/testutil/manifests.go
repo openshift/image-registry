@@ -149,7 +149,7 @@ func CreateAndUploadTestManifest(
 	)
 
 	for i := 0; i < layerCount; i++ {
-		ds, _, err := UploadRandomTestBlob(ctx, serverURL, creds, repoName)
+		ds, _, err := UploadRandomTestBlob(ctx, serverURL.String(), creds, repoName)
 		if err != nil {
 			return "", "", "", nil, fmt.Errorf("unexpected error generating test blob layer: %v", err)
 		}
