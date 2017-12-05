@@ -73,7 +73,7 @@ space := $(null) #
 comma := ,
 verify-gometalinter:
 	gometalinter \
-		--deadline=120s \
+		--deadline=180s \
 		--linter='vet:go tool vet -printfuncs $(subst $(space),$(comma),$(foreach fn,$(LOGFUNCS),$(fn) $(fn)f $(fn)ln)),Fatalln:PATH:LINE:MESSAGE' \
 		--disable-all -E errcheck -E ineffassign -E unconvert -E varcheck -E vet \
 		./cmd/... ./pkg/... ./test/...
@@ -105,7 +105,7 @@ test-unit:
 
 test-integration:
 	# TODO(dmage): remove DOCKER_API_VERSION when our CI will upgrade Docker
-	DOCKER_API_VERSION=1.24 go test ./test/integration/... -v
+	DOCKER_API_VERSION=1.24 go test ./test/integration/...
 .PHONY: test-integration
 
 # Remove all build artifacts.

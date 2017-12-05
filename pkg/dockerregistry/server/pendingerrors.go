@@ -2,58 +2,44 @@ package server
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
 )
 
-// errorBlobStore wraps a distribution.BlobStore for a particular repo.
-// before delegating, it ensures auth completed and there were no errors relevant to the repo.
+// newPendingErrorsWrapper ensures auth completed and there were no errors relevant to the repo.
+func newPendingErrorsWrapper(repo *repository) wrapped.Wrapper {
+	return func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
+		if err := repo.checkPendingErrors(ctx); err != nil {
+			return err
+		}
+		return f(ctx)
+	}
+}
+
+func newPendingErrorsBlobStore(bs distribution.BlobStore, repo *repository) distribution.BlobStore {
+	return wrapped.NewBlobStore(bs, newPendingErrorsWrapper(repo))
+}
+
+func newPendingErrorsManifestService(ms distribution.ManifestService, repo *repository) distribution.ManifestService {
+	return wrapped.NewManifestService(ms, newPendingErrorsWrapper(repo))
+}
+
+func newPendingErrorsTagService(ts distribution.TagService, repo *repository) distribution.TagService {
+	return wrapped.NewTagService(ts, newPendingErrorsWrapper(repo))
+}
+
 type errorBlobStore struct {
-	store distribution.BlobStore
-	repo  *repository
+	distribution.BlobStore
+	repo *repository
 }
 
-var _ distribution.BlobStore = &errorBlobStore{}
-
-func (r *errorBlobStore) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	if err := r.repo.checkPendingErrors(ctx); err != nil {
-		return distribution.Descriptor{}, err
-	}
-	return r.store.Stat(withRepository(ctx, r.repo), dgst)
-}
-
-func (r *errorBlobStore) Get(ctx context.Context, dgst digest.Digest) ([]byte, error) {
-	if err := r.repo.checkPendingErrors(ctx); err != nil {
-		return nil, err
-	}
-	return r.store.Get(withRepository(ctx, r.repo), dgst)
-}
-
-func (r *errorBlobStore) Open(ctx context.Context, dgst digest.Digest) (distribution.ReadSeekCloser, error) {
-	if err := r.repo.checkPendingErrors(ctx); err != nil {
-		return nil, err
-	}
-	return r.store.Open(withRepository(ctx, r.repo), dgst)
-}
-
-func (r *errorBlobStore) Put(ctx context.Context, mediaType string, p []byte) (distribution.Descriptor, error) {
-	if err := r.repo.checkPendingErrors(ctx); err != nil {
-		return distribution.Descriptor{}, err
-	}
-	return r.store.Put(withRepository(ctx, r.repo), mediaType, p)
-}
-
+// FIXME(dmage): do we need this? Add a test case or remove this code.
 func (r *errorBlobStore) Create(ctx context.Context, options ...distribution.BlobCreateOption) (distribution.BlobWriter, error) {
-	if err := r.repo.checkPendingErrors(ctx); err != nil {
-		return nil, err
-	}
-
-	ctx = withRepository(ctx, r.repo)
-
 	opts, err := effectiveCreateOptions(options)
 	if err != nil {
 		return nil, err
@@ -73,28 +59,7 @@ func (r *errorBlobStore) Create(ctx context.Context, options ...distribution.Blo
 		})
 	}
 
-	return r.store.Create(ctx, options...)
-}
-
-func (r *errorBlobStore) Resume(ctx context.Context, id string) (distribution.BlobWriter, error) {
-	if err := r.repo.checkPendingErrors(ctx); err != nil {
-		return nil, err
-	}
-	return r.store.Resume(withRepository(ctx, r.repo), id)
-}
-
-func (r *errorBlobStore) ServeBlob(ctx context.Context, w http.ResponseWriter, req *http.Request, dgst digest.Digest) error {
-	if err := r.repo.checkPendingErrors(ctx); err != nil {
-		return err
-	}
-	return r.store.ServeBlob(withRepository(ctx, r.repo), w, req, dgst)
-}
-
-func (r *errorBlobStore) Delete(ctx context.Context, dgst digest.Digest) error {
-	if err := r.repo.checkPendingErrors(ctx); err != nil {
-		return err
-	}
-	return r.store.Delete(withRepository(ctx, r.repo), dgst)
+	return r.BlobStore.Create(ctx, options...)
 }
 
 // checkPendingCrossMountErrors returns true if a cross-repo mount has been requested with given create
