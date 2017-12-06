@@ -84,7 +84,8 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	case distribution.ErrManifestUnknownRevision:
 		break
 	case nil:
-		m.repo.rememberLayersOfManifest(dgst, manifest, ref.Exact())
+		_ = m.repo.cache.AddDigest(dgst, ref.Exact())
+		_ = m.repo.cache.AddManifest(manifest, ref.Exact())
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
 	default:

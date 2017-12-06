@@ -2,12 +2,14 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
@@ -16,6 +18,7 @@ import (
 
 const (
 	// Default values
+	defaultDescriptorCacheSize         = 4096
 	defaultDigestToRepositoryCacheSize = 2048
 )
 
@@ -46,19 +49,12 @@ type App struct {
 	// it. In other cases it is hidden from us.
 	registry distribution.Namespace
 
-	// cachedLayers is a shared cache of blob digests to repositories that have previously been identified as
-	// containing that blob. Thread safe and reused by all middleware layers. It contains two kinds of
-	// associations:
-	//  1. <blobdigest> <-> <registry>/<namespace>/<name>
-	//  2. <blobdigest> <-> <namespace>/<name>
-	// The first associates a blob with a remote repository. Such an entry is set and used by pullthrough
-	// middleware. The second associates a blob with a local repository. Such a blob is expected to reside on
-	// local storage. It's set and used by blobDescriptorService middleware.
-	cachedLayers digestToRepositoryCache
-
 	// quotaEnforcing contains shared caches of quota objects keyed by project
 	// name. Will be initialized only if the quota is enforced.
 	quotaEnforcing *quotaEnforcingConfig
+
+	// cache is a shared cache of digests and descriptors.
+	cache cache.DigestCache
 }
 
 func (app *App) Storage(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
@@ -69,6 +65,13 @@ func (app *App) Storage(driver storagedriver.StorageDriver, options map[string]i
 func (app *App) Registry(registry distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error) {
 	app.registry = registry
 	return registry, nil
+}
+
+func (app *App) BlobStatter() distribution.BlobStatter {
+	return &cache.BlobStatter{
+		Cache: app.cache,
+		Svc:   app.registry.BlobStatter(),
+	}
 }
 
 // NewApp configures the registry application and returns http.Handler for it.
@@ -82,11 +85,20 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 		quotaEnforcing: newQuotaEnforcingConfig(ctx, extraConfig.Quota),
 	}
 
-	cache, err := newDigestToRepositoryCache(defaultDigestToRepositoryCacheSize)
-	if err != nil {
-		panic(err)
+	cacheTTL := time.Duration(0)
+	if !app.config.Cache.Disabled {
+		cacheTTL = app.config.Cache.BlobRepositoryTTL
 	}
-	app.cachedLayers = cache
+
+	digestCache, err := cache.NewBlobDigest(
+		defaultDescriptorCacheSize,
+		defaultDigestToRepositoryCacheSize,
+		cacheTTL,
+	)
+	if err != nil {
+		context.GetLogger(ctx).Fatalf("unable to create cache: %v", err)
+	}
+	app.cache = digestCache
 
 	superapp := supermiddleware.App(app)
 	if am := appMiddlewareFrom(ctx); am != nil {
