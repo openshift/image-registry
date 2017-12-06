@@ -17,6 +17,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
@@ -58,12 +59,10 @@ type repository struct {
 	cachedImages map[digest.Digest]*imageapiv1.Image
 	// cachedImageStream stays cached for the entire time of handling signle repository-scoped request.
 	imageStreamGetter *cachedImageStreamGetter
-	// cachedLayers remembers a mapping of layer digest to repositories recently seen with that image to avoid
-	// having to check every potential upstream repository when a blob request is made. The cache is useful only
-	// when session affinity is on for the registry, but in practice the first pull will fill the cache.
-	cachedLayers digestToRepositoryCache
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
+	// cache is used to associate a digest with a repository name.
+	cache cache.RepositoryDigest
 }
 
 // newRepositoryWithClient returns a new repository middleware.
@@ -98,18 +97,20 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		name:              nameParts[1],
 		imageStreamGetter: imageStreamGetter,
 		cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
-		cachedLayers:      app.cachedLayers,
 		crossmount:        crossmount,
+	}
+
+	r.cache = &cache.RepoDigest{
+		Cache: app.cache,
 	}
 
 	if app.config.Pullthrough.Enabled {
 		r.remoteBlobGetter = NewBlobGetterService(
 			r.namespace,
 			r.name,
-			app.config.Cache.BlobRepositoryTTL,
 			imageStreamGetter.get,
 			registryOSClient,
-			app.cachedLayers)
+			r.cache)
 	}
 
 	bdsf := blobDescriptorServiceFactoryFunc(r.BlobDescriptorService)
@@ -210,6 +211,11 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 }
 
 func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
+	svc = &cache.RepositoryScopedBlobDescriptor{
+		Repo:  r.Named().String(),
+		Cache: r.app.cache,
+		Svc:   svc,
+	}
 	svc = &blobDescriptorService{svc, r}
 	svc = newPendingErrorsBlobDescriptorService(svc, r)
 	return svc
@@ -328,9 +334,18 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 		return
 	}
 
+	descCache := &cache.RepositoryScopedBlobDescriptor{
+		Repo:  cacheName,
+		Cache: r.app.cache,
+	}
+
 	if len(image.DockerImageLayers) > 0 {
 		for _, layer := range image.DockerImageLayers {
-			r.cachedLayers.RememberDigest(digest.Digest(layer.Name), r.app.config.Cache.BlobRepositoryTTL, cacheName)
+			_ = descCache.SetDescriptor(r.ctx, digest.Digest(layer.Name), distribution.Descriptor{
+				Digest:    digest.Digest(layer.Name),
+				Size:      layer.LayerSize,
+				MediaType: layer.MediaType,
+			})
 		}
 		meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
 		if !ok {
@@ -339,7 +354,7 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 		}
 		// remember reference to manifest config as well for schema 2
 		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
-			r.cachedLayers.RememberDigest(digest.Digest(meta.ID), r.app.config.Cache.BlobRepositoryTTL, cacheName)
+			_ = r.cache.AddDigest(digest.Digest(meta.ID), cacheName)
 		}
 		return
 	}
@@ -354,17 +369,8 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 		return
 	}
 
-	r.rememberLayersOfManifest(dgst, mh.Manifest(), cacheName)
-}
-
-// rememberLayersOfManifest caches the layer digests of given manifest
-func (r *repository) rememberLayersOfManifest(manifestDigest digest.Digest, manifest distribution.Manifest, cacheName string) {
-	r.cachedLayers.RememberDigest(manifestDigest, r.app.config.Cache.BlobRepositoryTTL, cacheName)
-
-	// remember the layers in the cache as an optimization to avoid searching all remote repositories
-	for _, layer := range manifest.References() {
-		r.cachedLayers.RememberDigest(layer.Digest, r.app.config.Cache.BlobRepositoryTTL, cacheName)
-	}
+	_ = r.cache.AddDigest(dgst, cacheName)
+	_ = r.cache.AddManifest(mh.Manifest(), cacheName)
 }
 
 // manifestFromImageWithCachedLayers loads the image and then caches any located layers
@@ -380,7 +386,8 @@ func (r *repository) manifestFromImageWithCachedLayers(image *imageapiv1.Image, 
 	}
 	manifest = mh.Manifest()
 
-	r.rememberLayersOfManifest(dgst, manifest, cacheName)
+	_ = r.cache.AddDigest(dgst, cacheName)
+	_ = r.cache.AddManifest(manifest, cacheName)
 	return
 }
 

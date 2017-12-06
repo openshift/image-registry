@@ -65,7 +65,8 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 	manifest, err := pullthroughManifestService.Get(ctx, dgst)
 	switch err.(type) {
 	case nil:
-		m.repo.rememberLayersOfManifest(dgst, manifest, ref.Exact())
+		_ = m.repo.cache.AddDigest(dgst, ref.Exact())
+		_ = m.repo.cache.AddManifest(manifest, ref.Exact())
 	case distribution.ErrManifestUnknownRevision:
 		break
 	default:

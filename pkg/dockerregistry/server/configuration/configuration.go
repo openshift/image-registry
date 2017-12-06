@@ -158,6 +158,7 @@ type Audit struct {
 }
 
 type Cache struct {
+	Disabled          bool          `yaml:"disabled"`
 	BlobRepositoryTTL time.Duration `yaml:"blobrepositoryttl"`
 }
 
@@ -471,6 +472,17 @@ func migrateMiddleware(dockercfg *configuration.Configuration, cfg *Configuratio
 		repoMiddleware = &configuration.Middleware{
 			Name:    middlewareName,
 			Options: make(configuration.Parameters),
+		}
+	}
+
+	if cc, ok := dockercfg.Storage["cache"]; ok {
+		v, ok := cc["blobdescriptor"]
+		if !ok {
+			// Backwards compatible: "layerinfo" == "blobdescriptor"
+			v = cc["layerinfo"]
+		}
+		if v == "inmemory" {
+			delete(dockercfg.Storage, "cache")
 		}
 	}
 

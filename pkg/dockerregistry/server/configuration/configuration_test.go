@@ -656,3 +656,70 @@ openshift:
 		t.Fatalf("unexpected value: extraConfig.Audit.Enabled != true")
 	}
 }
+
+func testDisableInmemoryCacheName(t *testing.T, field string) {
+	var configYaml = `
+version: 0.1
+http:
+  addr: :5000
+storage:
+  filesystem:
+    rootdirectory: /registry
+  cache:
+    ` + field + `: inmemory
+openshift:
+  version: 1.0
+  server:
+    addr: "localhost:5000"
+`
+	dockercfg, _, err := Parse(strings.NewReader(configYaml))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, ok := dockercfg.Storage["cache"]
+	if ok {
+		t.Fatalf("unexpected value: dockerConfig.Storage['cache'] != nil")
+	}
+}
+
+func TestDisableInmemoryCache(t *testing.T) {
+	testDisableInmemoryCacheName(t, "layerinfo")
+	testDisableInmemoryCacheName(t, "blobdescriptor")
+}
+
+func testPreserveRedisCacheName(t *testing.T, field string) {
+	var configYaml = `
+version: 0.1
+http:
+  addr: :5000
+storage:
+  filesystem:
+    rootdirectory: /registry
+  cache:
+    ` + field + `: redis
+openshift:
+  version: 1.0
+  server:
+    addr: "localhost:5000"
+`
+	dockercfg, _, err := Parse(strings.NewReader(configYaml))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cc, ok := dockercfg.Storage["cache"]
+	if !ok {
+		t.Fatalf("unexpected value: dockerConfig.Storage['cache'] == nil")
+	}
+	v, ok := cc[field]
+	if !ok {
+		t.Fatalf("unexpected value: dockerConfig.Storage['cache']['%s'] == nil", field)
+	}
+	if v != "redis" {
+		t.Fatalf("unexpected value: dockerConfig.Storage['cache']['%s'] != redis", field)
+	}
+}
+
+func TestPreserveRedisCache(t *testing.T) {
+	testPreserveRedisCacheName(t, "layerinfo")
+	testPreserveRedisCacheName(t, "blobdescriptor")
+}

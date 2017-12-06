@@ -50,18 +50,13 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 	// if there is a repo layer link, return its descriptor
 	desc, err := bs.BlobDescriptorService.Stat(ctx, dgst)
 	if err == nil {
-		// and remember the association
-		bs.repo.cachedLayers.RememberDigest(dgst, bs.repo.app.config.Cache.BlobRepositoryTTL, imageapi.DockerImageReference{
-			Namespace: bs.repo.namespace,
-			Name:      bs.repo.name,
-		}.Exact())
 		return desc, nil
 	}
 
 	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: could not stat layer link %s in repository %s: %v", dgst.String(), bs.repo.Named().Name(), err)
 
 	// First attempt: looking for the blob locally
-	desc, err = bs.repo.app.registry.BlobStatter().Stat(ctx, dgst)
+	desc, err = bs.repo.app.BlobStatter().Stat(ctx, dgst)
 	if err == nil {
 		context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s exists in the global blob store", dgst.String())
 		// only non-empty layers is wise to check for existence in the image stream.
@@ -84,20 +79,12 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 	return desc, err
 }
 
-func (bs *blobDescriptorService) Clear(ctx context.Context, dgst digest.Digest) error {
-	bs.repo.cachedLayers.ForgetDigest(dgst, imageapi.DockerImageReference{
-		Namespace: bs.repo.namespace,
-		Name:      bs.repo.name,
-	}.Exact())
-	return bs.BlobDescriptorService.Clear(ctx, dgst)
-}
-
 // imageStreamHasBlob returns true if the given blob digest is referenced in image stream corresponding to
 // given repository. If not found locally, image stream's images will be iterated and fetched from newest to
 // oldest until found. Each processed image will update local cache of blobs.
 func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 	repoCacheName := imageapi.DockerImageReference{Namespace: r.namespace, Name: r.name}.Exact()
-	if r.cachedLayers.RepositoryHasBlob(repoCacheName, dgst) {
+	if r.cache.ContainsRepository(dgst, repoCacheName) {
 		context.GetLogger(r.ctx).Debugf("found cached blob %q in repository %s", dgst.String(), r.Named().Name())
 		return true
 	}

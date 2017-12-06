@@ -10,11 +10,12 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage"
-	"github.com/docker/distribution/registry/storage/cache"
+	dockercache "github.com/docker/distribution/registry/storage/cache"
 	"github.com/docker/distribution/registry/storage/cache/memory"
 	"github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
@@ -41,11 +42,6 @@ func newTestRegistry(
 	pullthrough bool,
 	useBlobDescriptorCacheProvider bool,
 ) (distribution.Namespace, error) {
-	cachedLayers, err := newDigestToRepositoryCache(defaultDigestToRepositoryCacheSize)
-	if err != nil {
-		return nil, err
-	}
-
 	cfg := &configuration.Configuration{
 		Server: &configuration.Server{
 			Addr: "localhost:5000",
@@ -61,12 +57,17 @@ func newTestRegistry(
 		return nil, err
 	}
 
+	digestCache, err := cache.NewBlobDigest(defaultDescriptorCacheSize, defaultDigestToRepositoryCacheSize, cfg.Cache.BlobRepositoryTTL)
+	if err != nil {
+		return nil, err
+	}
+
 	app := &App{
 		registryClient: &testRegistryClient{
 			client: osClient,
 		},
-		config:       cfg,
-		cachedLayers: cachedLayers,
+		config: cfg,
+		cache:  digestCache,
 		quotaEnforcing: &quotaEnforcingConfig{
 			enforcementEnabled: false,
 		},
@@ -81,7 +82,7 @@ func newTestRegistry(
 		storage.EnableRedirect,
 	}
 	if useBlobDescriptorCacheProvider {
-		cacheProvider := cache.BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider())
+		cacheProvider := dockercache.BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider())
 		opts = append(opts, storage.BlobDescriptorCacheProvider(cacheProvider))
 	}
 

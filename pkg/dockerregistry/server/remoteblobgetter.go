@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 	"sort"
-	"time"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
@@ -11,6 +10,7 @@ import (
 	"github.com/docker/distribution/registry/api/errcode"
 	disterrors "github.com/docker/distribution/registry/api/v2"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
@@ -31,10 +31,9 @@ type ImageStreamGetter func() (*imageapiv1.ImageStream, error)
 type remoteBlobGetterService struct {
 	namespace           string
 	name                string
-	cacheTTL            time.Duration
 	getImageStream      ImageStreamGetter
 	isSecretsNamespacer client.ImageStreamSecretsNamespacer
-	cachedLayers        digestToRepositoryCache
+	cache               cache.RepositoryDigest
 	digestToStore       map[string]distribution.BlobStore
 }
 
@@ -44,18 +43,16 @@ var _ BlobGetterService = &remoteBlobGetterService{}
 // wrappers, which is a must at least for stat calls made on manifest's dependencies during its verification.
 func NewBlobGetterService(
 	namespace, name string,
-	cacheTTL time.Duration,
 	imageStreamGetter ImageStreamGetter,
 	isSecretsNamespacer client.ImageStreamSecretsNamespacer,
-	cachedLayers digestToRepositoryCache,
+	cache cache.RepositoryDigest,
 ) BlobGetterService {
 	return &remoteBlobGetterService{
 		namespace:           namespace,
 		name:                name,
 		getImageStream:      imageStreamGetter,
 		isSecretsNamespacer: isSecretsNamespacer,
-		cacheTTL:            cacheTTL,
-		cachedLayers:        cachedLayers,
+		cache:               cache,
 		digestToStore:       make(map[string]distribution.BlobStore),
 	}
 }
@@ -81,6 +78,8 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 		return distribution.Descriptor{}, err
 	}
 
+	cached, _ := rbgs.cache.Repositories(dgst)
+
 	var localRegistry string
 	if local, err := imageapi.ParseDockerImageReference(is.Status.DockerImageRepository); err == nil {
 		// TODO: normalize further?
@@ -88,7 +87,6 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 	}
 
 	retriever := getImportContext(ctx, rbgs.isSecretsNamespacer, rbgs.namespace, rbgs.name)
-	cached := rbgs.cachedLayers.RepositoriesForDigest(dgst)
 
 	// look at the first level of tagged repositories first
 	repositoryCandidates, search := identifyCandidateRepositories(is, localRegistry, true)
@@ -210,7 +208,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 	ctx context.Context,
 	repositoryCandidates []string,
 	search map[string]imagePullthroughSpec,
-	cachedLayers []string,
+	cachedRepos []string,
 	dgst digest.Digest,
 	retriever importer.RepositoryRetriever,
 ) (distribution.Descriptor, error) {
@@ -221,7 +219,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 	// see if any of the previously located repositories containing this digest are in this
 	// image stream
-	for _, repo := range cachedLayers {
+	for _, repo := range cachedRepos {
 		spec, ok := search[repo]
 		if !ok {
 			continue
@@ -245,7 +243,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 		if err != nil {
 			continue
 		}
-		rbgs.cachedLayers.RememberDigest(dgst, rbgs.cacheTTL, repo)
+		_ = rbgs.cache.AddDigest(dgst, repo)
 		context.GetLogger(ctx).Infof("Found digest location by search %q in %q", dgst, repo)
 		return desc, nil
 	}
