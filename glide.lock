@@ -1,5 +1,5 @@
 hash: 68e66e396fe1d148b422e5175c936b9e0201eb4693ee5f841a484c957c1bea1e
-updated: 2017-11-30T13:44:53.963922749-05:00
+updated: 2017-12-06T11:49:49.51215753-05:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -83,7 +83,7 @@ imports:
   - oss
   - util
 - name: github.com/docker/distribution
-  version: 588ea2c42a2ebb5c06cd01dbeabfe60e4a7075df
+  version: 632d0beac414091a582d7a2d2c8e55ac83788e5b
   repo: git@github.com:openshift/docker-distribution
   subpackages:
   - configuration
@@ -181,7 +181,7 @@ imports:
   - sockets
   - tlsconfig
 - name: github.com/docker/go-units
-  version: e30f1e79f3cd72542f2026ceec18d3bd67ab859c
+  version: 9e638d38cf6977a37a8ea0078f3ee75a7cdb2dd1
 - name: github.com/docker/libtrust
   version: c54fbb67c1f1e68d7d6f8d2ad7c9360404616a41
 - name: github.com/docker/spdystream
@@ -286,7 +286,7 @@ imports:
   - ptypes/duration
   - ptypes/timestamp
 - name: github.com/google/cadvisor
-  version: c683567ed073eb6bcab81cccee79cd64a0e33811
+  version: 0a835958eb76bd27224e5f098f93dfda50a58c09
   repo: git@github.com:openshift/google-cadvisor
 - name: github.com/google/certificate-transparency
   version: f9b891ace55b3d45f6c40d313b3b7a5fc258f96b
