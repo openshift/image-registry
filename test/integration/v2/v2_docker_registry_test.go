@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"os"
-	"path"
+	"strings"
 	"testing"
 
 	"github.com/docker/distribution/context"
@@ -20,7 +18,6 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/openshift/origin/pkg/cmd/util/tokencmd"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageclient "github.com/openshift/origin/pkg/image/generated/internalclientset"
 
@@ -87,49 +84,19 @@ func signedManifest(name string, blobs []digest.Digest) ([]byte, digest.Digest, 
 }
 
 func TestV2RegistryGetTags(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "image-registry-test-integration-")
-	if err != nil {
-		t.Fatalf("failed to create temporary directory: %s", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	configDir := path.Join(tmpDir, "config")
-	adminKubeConfigPath := path.Join(configDir, "master", "admin.kubeconfig")
-
-	masterContainer, err := testframework.StartMasterContainer(configDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		if err := masterContainer.Stop(); err != nil {
-			t.Log(err)
-		}
-	}()
-
-	clusterAdminClientConfig, err := testframework.ConfigFromFile(adminKubeConfigPath)
-	if err != nil {
-		t.Fatal(err)
-	}
+	master := testframework.NewMaster(t)
+	defer master.Close()
 
 	namespace := "namespace"
-	user := "admin"
-	password := "password"
+	testuser := master.CreateUser("admin", "password")
+	master.CreateProject(namespace, testuser.Name)
 
-	if err := testframework.CreateProject(clusterAdminClientConfig, namespace, user); err != nil {
-		t.Fatal(err)
-	}
+	registry := master.StartRegistry(t)
+	defer registry.Close()
 
-	token, err := tokencmd.RequestToken(clusterAdminClientConfig, nil, user, password)
-	if err != nil {
-		t.Fatalf("error requesting token: %v", err)
-	}
+	baseURL := registry.BaseURL()
 
-	registryAddr, err := testframework.StartTestRegistry(t, adminKubeConfigPath)
-	if err != nil {
-		t.Fatalf("start registry: %v", err)
-	}
-
-	adminImageClient := imageclient.NewForConfigOrDie(clusterAdminClientConfig)
+	adminImageClient := imageclient.NewForConfigOrDie(master.AdminKubeConfig())
 
 	stream := imageapi.ImageStream{
 		ObjectMeta: metav1.ObjectMeta{
@@ -141,7 +108,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 		t.Fatalf("error creating image stream: %s", err)
 	}
 
-	tags, err := getTags(registryAddr, namespace, stream.Name, user, token)
+	tags, err := getTags(baseURL, namespace, stream.Name, testuser.Name, testuser.Token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,17 +116,17 @@ func TestV2RegistryGetTags(t *testing.T) {
 		t.Fatalf("expected 0 tags, got: %#v", tags)
 	}
 
-	err = putEmptyBlob(registryAddr, namespace, stream.Name, user, token)
+	err = putEmptyBlob(baseURL, namespace, stream.Name, testuser.Name, testuser.Token)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	dgst, err := putManifest(registryAddr, namespace, stream.Name, user, token)
+	dgst, err := putManifest(baseURL, namespace, stream.Name, testuser.Name, testuser.Token)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	tags, err = getTags(registryAddr, namespace, stream.Name, user, token)
+	tags, err = getTags(baseURL, namespace, stream.Name, testuser.Name, testuser.Token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,12 +138,12 @@ func TestV2RegistryGetTags(t *testing.T) {
 	}
 
 	// test get by tag
-	url := fmt.Sprintf("http://%s/v2/%s/%s/manifests/%s", registryAddr, namespace, stream.Name, imageapi.DefaultImageTag)
+	url := fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, namespace, stream.Name, imageapi.DefaultImageTag)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf("error creating request: %v", err)
 	}
-	req.SetBasicAuth(user, token)
+	req.SetBasicAuth(testuser.Name, testuser.Token)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("error retrieving manifest from registry: %s", err)
@@ -201,12 +168,12 @@ func TestV2RegistryGetTags(t *testing.T) {
 	}
 
 	// test get by digest
-	url = fmt.Sprintf("http://%s/v2/%s/%s/manifests/%s", registryAddr, namespace, stream.Name, dgst.String())
+	url = fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, namespace, stream.Name, dgst.String())
 	req, err = http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf("error creating request: %v", err)
 	}
-	req.SetBasicAuth(user, token)
+	req.SetBasicAuth(testuser.Name, testuser.Token)
 	resp, err = http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("error retrieving manifest from registry: %s", err)
@@ -239,7 +206,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 	if e, a := dgst.String(), image.Image.Name; e != a {
 		t.Errorf("image name: expected %q, got %q", e, a)
 	}
-	if e, a := fmt.Sprintf("%s/%s/%s@%s", registryAddr, namespace, stream.Name, dgst.String()), image.Image.DockerImageReference; e != a {
+	if e, a := fmt.Sprintf("%s/%s/%s@%s", strings.TrimPrefix(baseURL, "http://"), namespace, stream.Name, dgst.String()), image.Image.DockerImageReference; e != a {
 		t.Errorf("image dockerImageReference: expected %q, got %q", e, a)
 	}
 	if e, a := "foo", image.Image.DockerImageMetadata.ID; e != a {
@@ -253,12 +220,12 @@ func TestV2RegistryGetTags(t *testing.T) {
 		t.Fatalf("expected error getting otherrepo")
 	}
 
-	err = putEmptyBlob(registryAddr, namespace, "otherrepo", user, token)
+	err = putEmptyBlob(baseURL, namespace, "otherrepo", testuser.Name, testuser.Token)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	otherDigest, err := putManifest(registryAddr, namespace, "otherrepo", user, token)
+	otherDigest, err := putManifest(baseURL, namespace, "otherrepo", testuser.Name, testuser.Token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -285,14 +252,14 @@ func TestV2RegistryGetTags(t *testing.T) {
 	}
 }
 
-func putManifest(registryAddr, namespace, name, user, token string) (digest.Digest, error) {
+func putManifest(baseURL, namespace, name, user, token string) (digest.Digest, error) {
 	creds := registryutil.NewBasicCredentialStore(user, token)
-	desc, _, err := registryutil.UploadRandomTestBlob(context.Background(), &url.URL{Host: registryAddr, Scheme: "http"}, creds, namespace+"/"+name)
+	desc, _, err := registryutil.UploadRandomTestBlob(context.Background(), baseURL, creds, namespace+"/"+name)
 	if err != nil {
 		return "", err
 	}
 
-	putUrl := fmt.Sprintf("http://%s/v2/%s/%s/manifests/%s", registryAddr, namespace, name, imageapi.DefaultImageTag)
+	putUrl := fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, namespace, name, imageapi.DefaultImageTag)
 	signedManifest, dgst, err := signedManifest(fmt.Sprintf("%s/%s", namespace, name), []digest.Digest{desc.Digest})
 	if err != nil {
 		return "", err
@@ -314,8 +281,8 @@ func putManifest(registryAddr, namespace, name, user, token string) (digest.Dige
 	return dgst, nil
 }
 
-func putEmptyBlob(registryAddr, namespace, name, user, token string) error {
-	putUrl := fmt.Sprintf("http://%s/v2/%s/%s/blobs/uploads/", registryAddr, namespace, name)
+func putEmptyBlob(baseURL, namespace, name, user, token string) error {
+	putUrl := fmt.Sprintf("%s/v2/%s/%s/blobs/uploads/", baseURL, namespace, name)
 	method := "POST"
 
 	for range []int{1, 2} {
@@ -345,8 +312,8 @@ func putEmptyBlob(registryAddr, namespace, name, user, token string) error {
 	return nil
 }
 
-func getTags(registryAddr, namespace, streamName, user, token string) ([]string, error) {
-	url := fmt.Sprintf("http://%s/v2/%s/%s/tags/list", registryAddr, namespace, streamName)
+func getTags(baseURL, namespace, streamName, user, token string) ([]string, error) {
+	url := fmt.Sprintf("%s/v2/%s/%s/tags/list", baseURL, namespace, streamName)
 	client := http.DefaultClient
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

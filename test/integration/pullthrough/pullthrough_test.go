@@ -7,8 +7,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
-	"path"
 	"strings"
 	"testing"
 
@@ -17,7 +15,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kapi "k8s.io/kubernetes/pkg/api/v1"
 
-	"github.com/openshift/origin/pkg/cmd/util/tokencmd"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
@@ -32,8 +29,8 @@ var gzippedEmptyTar = []byte{
 	0, 8, 0, 0, 255, 255, 46, 175, 181, 239, 0, 4, 0, 0,
 }
 
-func testPullThroughGetManifest(registryAddr string, stream *imageapiv1.ImageStreamImport, user, token, urlPart string) error {
-	url := fmt.Sprintf("http://%s/v2/%s/%s/manifests/%s", registryAddr, stream.Namespace, stream.Name, urlPart)
+func testPullThroughGetManifest(baseURL string, stream *imageapiv1.ImageStreamImport, user, token, urlPart string) error {
+	url := fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, stream.Namespace, stream.Name, urlPart)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -66,8 +63,8 @@ func testPullThroughGetManifest(registryAddr string, stream *imageapiv1.ImageStr
 	return nil
 }
 
-func testPullThroughStatBlob(registryAddr string, stream *imageapiv1.ImageStreamImport, user, token, digest string) error {
-	url := fmt.Sprintf("http://%s/v2/%s/%s/blobs/%s", registryAddr, stream.Namespace, stream.Name, digest)
+func testPullThroughStatBlob(baseURL string, stream *imageapiv1.ImageStreamImport, user, token, digest string) error {
+	url := fmt.Sprintf("%s/v2/%s/%s/blobs/%s", baseURL, stream.Namespace, stream.Name, digest)
 
 	req, err := http.NewRequest("HEAD", url, nil)
 	if err != nil {
@@ -94,43 +91,12 @@ func testPullThroughStatBlob(registryAddr string, stream *imageapiv1.ImageStream
 }
 
 func TestPullThroughInsecure(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "image-registry-test-integration-")
-	if err != nil {
-		t.Fatalf("failed to create temporary directory: %s", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	configDir := path.Join(tmpDir, "config")
-	adminKubeConfigPath := path.Join(configDir, "master", "admin.kubeconfig")
-
-	masterContainer, err := testframework.StartMasterContainer(configDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		if err := masterContainer.Stop(); err != nil {
-			t.Log(err)
-		}
-	}()
-
-	clusterAdminClientConfig, err := testframework.ConfigFromFile(adminKubeConfigPath)
-	if err != nil {
-		t.Fatal(err)
-	}
+	master := testframework.NewMaster(t)
+	defer master.Close()
 
 	namespace := "image-registry-test-integration"
-	//imageStreamName := "test-imagelayers"
-	user := "testuser"
-	password := "testp@ssw0rd"
-
-	if err := testframework.CreateProject(clusterAdminClientConfig, namespace, user); err != nil {
-		t.Fatal(err)
-	}
-
-	token, err := tokencmd.RequestToken(clusterAdminClientConfig, nil, user, password)
-	if err != nil {
-		t.Fatalf("error requesting token: %v", err)
-	}
+	testuser := master.CreateUser("testuser", "testp@ssw0rd")
+	master.CreateProject(namespace, testuser.Name)
 
 	// start regular HTTP server
 	reponame := "testrepo"
@@ -229,9 +195,7 @@ func TestPullThroughInsecure(t *testing.T) {
 		},
 	}
 
-	userClientConfig := testframework.UserClientConfig(clusterAdminClientConfig, token)
-
-	adminImageClient := imagev1.NewForConfigOrDie(userClientConfig)
+	adminImageClient := imagev1.NewForConfigOrDie(testuser.KubeConfig())
 
 	isi, err := adminImageClient.ImageStreamImports(namespace).Create(&stream)
 	if err != nil {
@@ -272,24 +236,22 @@ func TestPullThroughInsecure(t *testing.T) {
 	}
 
 	t.Logf("Run registry...")
-	registryAddr, err := testframework.StartTestRegistry(t, adminKubeConfigPath)
-	if err != nil {
-		t.Fatal(err)
-	}
+	registry := master.StartRegistry(t)
+	defer registry.Close()
 
 	t.Logf("Run testPullThroughGetManifest with tag...")
-	if err := testPullThroughGetManifest(registryAddr, &stream, user, token, repotag); err != nil {
+	if err := testPullThroughGetManifest(registry.BaseURL(), &stream, testuser.Name, testuser.Token, repotag); err != nil {
 		t.Fatal(err)
 	}
 
 	t.Logf("Run testPullThroughGetManifest with digest...")
-	if err := testPullThroughGetManifest(registryAddr, &stream, user, token, etcdDigest); err != nil {
+	if err := testPullThroughGetManifest(registry.BaseURL(), &stream, testuser.Name, testuser.Token, etcdDigest); err != nil {
 		t.Fatal(err)
 	}
 
 	t.Logf("Run testPullThroughStatBlob (%s == true, spec.tags[%q].importPolicy.insecure == true)...", imageapi.InsecureRepositoryAnnotation, repotag)
 	for digest := range descriptors {
-		if err := testPullThroughStatBlob(registryAddr, &stream, user, token, digest); err != nil {
+		if err := testPullThroughStatBlob(registry.BaseURL(), &stream, testuser.Name, testuser.Token, digest); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -307,7 +269,7 @@ func TestPullThroughInsecure(t *testing.T) {
 
 	t.Logf("Run testPullThroughStatBlob (%s == false, spec.tags[%q].importPolicy.insecure == true)...", imageapi.InsecureRepositoryAnnotation, repotag)
 	for digest := range descriptors {
-		if err := testPullThroughStatBlob(registryAddr, &stream, user, token, digest); err != nil {
+		if err := testPullThroughStatBlob(registry.BaseURL(), &stream, testuser.Name, testuser.Token, digest); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -329,7 +291,7 @@ func TestPullThroughInsecure(t *testing.T) {
 
 	t.Logf("Run testPullThroughStatBlob (%s == false, spec.tags[%q].importPolicy.insecure == false)...", imageapi.InsecureRepositoryAnnotation, repotag)
 	for digest := range descriptors {
-		if err := testPullThroughStatBlob(registryAddr, &stream, user, token, digest); err == nil {
+		if err := testPullThroughStatBlob(registry.BaseURL(), &stream, testuser.Name, testuser.Token, digest); err == nil {
 			t.Fatal("unexpexted access to insecure blobs")
 		} else {
 			t.Logf("%#+v", err)

@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"io"
 	mrand "math/rand"
@@ -106,18 +107,18 @@ func UploadManifest(ctx context.Context, repo distribution.Repository, tag strin
 }
 
 // UploadRandomTestBlob generates a random tar file and uploads it to the given repository.
-func UploadRandomTestBlob(ctx context.Context, serverURL *url.URL, creds auth.CredentialStore, repoName string) (distribution.Descriptor, []byte, error) {
+func UploadRandomTestBlob(ctx context.Context, baseURL string, creds auth.CredentialStore, repoName string) (distribution.Descriptor, []byte, error) {
 	payload, desc, err := MakeRandomLayer()
 	if err != nil {
 		return distribution.Descriptor{}, nil, fmt.Errorf("unexpected error generating test layer file: %v", err)
 	}
 
-	rt, err := NewTransport(serverURL.String(), repoName, creds)
+	rt, err := NewTransport(baseURL, repoName, creds)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
 
-	repo, err := NewRepository(ctx, repoName, serverURL.String(), rt)
+	repo, err := NewRepository(ctx, repoName, baseURL, rt)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
@@ -180,7 +181,7 @@ func CreateRandomTarFile() ([]byte, error) {
 
 // CreateRandomImage creates an image with a random content.
 func CreateRandomImage(namespace, name string) (*imageapiv1.Image, error) {
-	const layersCount = 3
+	const layersCount = 2
 
 	layersDescs := make([]distribution.Descriptor, layersCount)
 	for i := range layersDescs {
@@ -296,4 +297,56 @@ func ping(manager challenge.Manager, endpoint, versionHeader string) ([]auth.API
 	}
 
 	return auth.APIVersions(resp, versionHeader), nil
+}
+
+// UploadSchema2Image creates a random image with a schema 2 manifest and
+// uploads it to the repository.
+func UploadSchema2Image(ctx context.Context, repo distribution.Repository, tag string) (distribution.Manifest, error) {
+	const layersCount = 2
+
+	layers := make([]distribution.Descriptor, layersCount)
+	for i := range layers {
+		content, desc, err := MakeRandomLayer()
+		if err != nil {
+			return nil, fmt.Errorf("make random layer: %v", err)
+		}
+
+		if err := UploadBlob(ctx, repo, desc, content); err != nil {
+			return nil, fmt.Errorf("upload random blob: %v", err)
+		}
+
+		layers[i] = desc
+	}
+
+	cfg := map[string]interface{}{
+		"rootfs": map[string]interface{}{
+			"diff_ids": make([]string, len(layers)),
+		},
+		"history": make([]struct{}, len(layers)),
+	}
+
+	configContent, err := json.Marshal(&cfg)
+	if err != nil {
+		return nil, fmt.Errorf("marshal image config: %v", err)
+	}
+
+	config := distribution.Descriptor{
+		Digest: digest.FromBytes(configContent),
+		Size:   int64(len(configContent)),
+	}
+
+	if err := UploadBlob(ctx, repo, config, configContent); err != nil {
+		return nil, fmt.Errorf("upload image config: %v", err)
+	}
+
+	manifest, err := MakeSchema2Manifest(config, layers)
+	if err != nil {
+		return manifest, fmt.Errorf("make schema 2 manifest: %v", err)
+	}
+
+	if err := UploadManifest(ctx, repo, tag, manifest); err != nil {
+		return manifest, fmt.Errorf("upload schema 2 manifest: %v", err)
+	}
+
+	return manifest, nil
 }

@@ -54,11 +54,11 @@ func TestPullthroughServeBlob(t *testing.T) {
 	})
 	registrytest.AddImage(t, fos, testImage, namespace, name, "latest")
 
-	blob1Desc, blob1Content, err := registrytest.UploadRandomTestBlob(backgroundCtx, serverURL, nil, repoName)
+	blob1Desc, blob1Content, err := registrytest.UploadRandomTestBlob(backgroundCtx, serverURL.String(), nil, repoName)
 	if err != nil {
 		t.Fatal(err)
 	}
-	blob2Desc, blob2Content, err := registrytest.UploadRandomTestBlob(backgroundCtx, serverURL, nil, repoName)
+	blob2Desc, blob2Content, err := registrytest.UploadRandomTestBlob(backgroundCtx, serverURL.String(), nil, repoName)
 	if err != nil {
 		t.Fatal(err)
 	}

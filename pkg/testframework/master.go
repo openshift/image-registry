@@ -9,14 +9,22 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"path"
 	"strconv"
+	"testing"
 	"time"
 
+	"github.com/docker/distribution"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
+
+	"k8s.io/client-go/rest"
+
+	"github.com/openshift/origin/pkg/cmd/util/tokencmd"
+	projectapiv1 "github.com/openshift/origin/pkg/project/apis/project/v1"
 )
 
 type MasterContainer struct {
@@ -105,7 +113,9 @@ func (c *MasterContainer) WriteConfigs(configDir string) error {
 	}
 
 	ctx := context.Background()
-	srcPath := "/var/lib/origin/openshift.local.config"
+	// If SRC_PATH does end with `/.`, the content of the source directory is copied.
+	// https://docs.docker.com/engine/reference/commandline/cp/#extended-description
+	srcPath := "/var/lib/origin/openshift.local.config/."
 	dstPath := configDir
 
 	content, stat, err := cli.CopyFromContainer(ctx, c.ID, srcPath)
@@ -172,4 +182,120 @@ func (c *MasterContainer) Stop() error {
 	}
 
 	return nil
+}
+
+type User struct {
+	Name       string
+	Token      string
+	kubeConfig *rest.Config
+}
+
+func (u *User) KubeConfig() *rest.Config {
+	return u.kubeConfig
+}
+
+type Repository struct {
+	distribution.Repository
+	baseURL   string
+	repoName  string
+	transport http.RoundTripper
+}
+
+func (r *Repository) BaseURL() string {
+	return r.baseURL
+}
+
+func (r *Repository) RepoName() string {
+	return r.repoName
+}
+
+func (r *Repository) Transport() http.RoundTripper {
+	return r.transport
+}
+
+type Master struct {
+	t               *testing.T
+	tmpDir          string
+	container       *MasterContainer
+	adminKubeConfig *rest.Config
+}
+
+func NewMaster(t *testing.T) *Master {
+	tmpDir, err := ioutil.TempDir("", "image-registry-test-")
+	if err != nil {
+		t.Fatalf("failed to create a temporary directory for the master container: %v", err)
+	}
+
+	container, err := StartMasterContainer(tmpDir)
+	if err != nil {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Logf("failed to remove the temporary directory: %v", err)
+		}
+		t.Fatal(err)
+	}
+
+	return &Master{
+		t:         t,
+		tmpDir:    tmpDir,
+		container: container,
+	}
+}
+
+func (m *Master) Close() {
+	if err := m.container.Stop(); err != nil {
+		m.t.Logf("failed to stop the master container: %v", err)
+	}
+
+	if err := os.RemoveAll(m.tmpDir); err != nil {
+		m.t.Logf("failed to remove the temporary directory: %v", err)
+	}
+}
+
+func (m *Master) AdminKubeConfigPath() string {
+	return path.Join(m.tmpDir, "master", "admin.kubeconfig")
+}
+
+func (m *Master) AdminKubeConfig() *rest.Config {
+	if m.adminKubeConfig != nil {
+		return m.adminKubeConfig
+	}
+
+	config, err := ConfigFromFile(m.AdminKubeConfigPath())
+	if err != nil {
+		m.t.Fatalf("failed to read the admin kubeconfig file: %v", err)
+	}
+
+	m.adminKubeConfig = config
+
+	return config
+}
+
+func (m *Master) StartRegistry(t *testing.T) *Registry {
+	ln, closeFn := StartTestRegistry(t, m.AdminKubeConfigPath())
+	return &Registry{
+		t:        t,
+		listener: ln,
+		closeFn:  closeFn,
+	}
+}
+
+func (m *Master) CreateUser(username string, password string) *User {
+	token, err := tokencmd.RequestToken(m.AdminKubeConfig(), nil, username, password)
+	if err != nil {
+		m.t.Fatalf("failed to get a token for the user %s: %v", username, err)
+	}
+
+	return &User{
+		Name:       username,
+		Token:      token,
+		kubeConfig: UserClientConfig(m.AdminKubeConfig(), token),
+	}
+}
+
+func (m *Master) CreateProject(namespace, user string) *projectapiv1.Project {
+	project, err := CreateProject(m.AdminKubeConfig(), namespace, user)
+	if err != nil {
+		m.t.Fatal(err)
+	}
+	return project
 }
