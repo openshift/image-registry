@@ -2,14 +2,12 @@ package server
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/docker/distribution"
 	dockercfg "github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage"
 	"github.com/docker/distribution/registry/storage/cache"
@@ -17,22 +15,23 @@ import (
 	"github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
 
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/supermiddleware"
 )
 
-type testRegistry struct {
-	distribution.Namespace
-	app                    *App
-	osClient               registryclient.Interface
-	pullthrough            bool
-	blobrepositorycachettl time.Duration
+type testRegistryClient struct {
+	client client.Interface
 }
 
-var _ distribution.Namespace = &testRegistry{}
+func (rc *testRegistryClient) Client() (client.Interface, error) {
+	return rc.client, nil
+}
+
+func (rc *testRegistryClient) ClientFromToken(token string) (client.Interface, error) {
+	return rc.client, nil
+}
 
 func newTestRegistry(
 	ctx context.Context,
@@ -41,26 +40,7 @@ func newTestRegistry(
 	blobrepositorycachettl time.Duration,
 	pullthrough bool,
 	useBlobDescriptorCacheProvider bool,
-) (*testRegistry, error) {
-	if storageDriver == nil {
-		storageDriver = inmemory.New()
-	}
-
-	opts := []storage.RegistryOption{
-		storage.BlobDescriptorServiceFactory(&blobDescriptorServiceFactory{}),
-		storage.EnableDelete,
-		storage.EnableRedirect,
-	}
-	if useBlobDescriptorCacheProvider {
-		cacheProvider := cache.BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider())
-		opts = append(opts, storage.BlobDescriptorCacheProvider(cacheProvider))
-	}
-
-	reg, err := storage.NewRegistry(ctx, storageDriver, opts...)
-	if err != nil {
-		return nil, err
-	}
-
+) (distribution.Namespace, error) {
 	cachedLayers, err := newDigestToRepositoryCache(defaultDigestToRepositoryCacheSize)
 	if err != nil {
 		return nil, err
@@ -70,79 +50,42 @@ func newTestRegistry(
 		Server: &configuration.Server{
 			Addr: "localhost:5000",
 		},
+		Pullthrough: &configuration.Pullthrough{
+			Enabled: pullthrough,
+		},
+		Cache: &configuration.Cache{
+			BlobRepositoryTTL: blobrepositorycachettl,
+		},
 	}
 	if err := configuration.InitExtraConfig(&dockercfg.Configuration{}, cfg); err != nil {
 		return nil, err
 	}
 
 	app := &App{
+		registryClient: &testRegistryClient{
+			client: osClient,
+		},
 		extraConfig:  cfg,
-		driver:       storageDriver,
-		registry:     reg,
 		cachedLayers: cachedLayers,
 		quotaEnforcing: &quotaEnforcingConfig{
 			enforcementEnabled: false,
 		},
 	}
 
-	return &testRegistry{
-		Namespace:              reg,
-		app:                    app,
-		osClient:               osClient,
-		blobrepositorycachettl: blobrepositorycachettl,
-		pullthrough:            pullthrough,
-	}, nil
-}
-
-func (reg *testRegistry) Repository(ctx context.Context, ref reference.Named) (distribution.Repository, error) {
-	repo, err := reg.Namespace.Repository(ctx, ref)
-	if err != nil {
-		return nil, err
+	if storageDriver == nil {
+		storageDriver = inmemory.New()
 	}
 
-	parts := strings.SplitN(ref.Name(), "/", 3)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("failed to parse repository name %q", ref.Name())
+	opts := []storage.RegistryOption{
+		storage.EnableDelete,
+		storage.EnableRedirect,
+	}
+	if useBlobDescriptorCacheProvider {
+		cacheProvider := cache.BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider())
+		opts = append(opts, storage.BlobDescriptorCacheProvider(cacheProvider))
 	}
 
-	nm, name := parts[0], parts[1]
-
-	isGetter := &cachedImageStreamGetter{
-		ctx:          ctx,
-		namespace:    nm,
-		name:         name,
-		isNamespacer: reg.osClient,
-	}
-
-	r := &repository{
-		Repository: repo,
-
-		ctx:              ctx,
-		app:              reg.app,
-		registryOSClient: reg.osClient,
-		namespace:        nm,
-		name:             name,
-		config: repositoryConfig{
-			registryAddr:           "localhost:5000",
-			blobRepositoryCacheTTL: reg.blobrepositorycachettl,
-			pullthrough:            reg.pullthrough,
-		},
-		imageStreamGetter: isGetter,
-		cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
-		cachedLayers:      reg.app.cachedLayers,
-	}
-
-	if reg.pullthrough {
-		r.remoteBlobGetter = NewBlobGetterService(
-			nm,
-			name,
-			reg.app.extraConfig.Cache.BlobRepositoryTTL,
-			isGetter.get,
-			reg.osClient,
-			reg.app.cachedLayers)
-	}
-
-	return r, nil
+	return supermiddleware.NewRegistry(ctx, app, storageDriver, opts...)
 }
 
 type testRepository struct {
@@ -182,12 +125,12 @@ func newTestRepository(
 		t.Fatal(err)
 	}
 
-	repo, err := reg.Repository(ctx, named)
+	_, appRepo, err := supermiddleware.HackRegistry{Namespace: reg}.HackRepository(ctx, named)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	r := repo.(*repository)
+	r := appRepo.(*repository)
 	// TODO(dmage): can we avoid this replacement?
 	r.Repository = &testRepository{
 		name:  named,

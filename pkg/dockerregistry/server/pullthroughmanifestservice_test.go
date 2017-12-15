@@ -22,14 +22,9 @@ import (
 )
 
 func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Server {
-	ctx = WithTestPassthroughToUpstream(ctx, true)
-
 	// pullthrough middleware will attempt to pull from this registry instance
 	remoteRegistryApp := handlers.NewApp(ctx, &configuration.Configuration{
 		Loglevel: "debug",
-		Auth: map[string]configuration.Parameters{
-			fakeAuthorizerName: {"realm": fakeAuthorizerName},
-		},
 		Storage: configuration.Storage{
 			"inmemory": configuration.Parameters{},
 			"cache": configuration.Parameters{
@@ -45,7 +40,6 @@ func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Serve
 			},
 		},
 	})
-
 	return httptest.NewServer(remoteRegistryApp)
 }
 
@@ -55,11 +49,13 @@ func TestPullthroughManifests(t *testing.T) {
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
 	tag := "latest"
 
-	installFakeAccessController(t)
-	setPassthroughBlobDescriptorServiceFactory()
-
 	backgroundCtx := context.Background()
 	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
+
+	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
+		&fakeAccessControllerMiddleware{t: t},
+		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
+	})
 
 	remoteRegistryServer := createTestRegistryServer(t, backgroundCtx)
 	defer remoteRegistryServer.Close()
@@ -180,11 +176,13 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 	repo := "zapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
 
-	installFakeAccessController(t)
-	setPassthroughBlobDescriptorServiceFactory()
-
 	backgroundCtx := context.Background()
 	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
+
+	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
+		&fakeAccessControllerMiddleware{t: t},
+		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
+	})
 
 	remoteRegistryServer := createTestRegistryServer(t, backgroundCtx)
 	defer remoteRegistryServer.Close()
@@ -360,7 +358,6 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 				client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
 				enablePullThrough: true,
 			})
-			ctx = withRepository(ctx, repo)
 
 			ptms := &pullthroughManifestService{
 				ManifestService: localManifestService,
@@ -456,10 +453,10 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 	image2 := *img
 	image2.DockerImageReference = dockerImageReference(server2, "foo/bar")
 
-	backgroundCtx := context.Background()
-	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
+	ctx := context.Background()
+	ctx = registrytest.WithTestLogger(ctx, t)
 
-	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(backgroundCtx)
+	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
 	registrytest.AddImageStream(t, fos, namespace, repo1, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
@@ -492,7 +489,7 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 			s.touched = false
 		}
 
-		r := newTestRepository(backgroundCtx, t, namespace, tc.repoName, testRepositoryOptions{
+		r := newTestRepository(ctx, t, namespace, tc.repoName, testRepositoryOptions{
 			client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
 			enablePullThrough: true,
 		})
@@ -502,7 +499,6 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 			repo:            r,
 		}
 
-		ctx := withRepository(backgroundCtx, r)
 		ptms.Get(ctx, digest.Digest(img.Name))
 
 		for _, s := range tc.touchedServers {

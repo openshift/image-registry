@@ -433,7 +433,7 @@ func TestAccessController(t *testing.T) {
 			if err := configuration.InitExtraConfig(config, app.extraConfig); err != nil {
 				t.Fatal(err)
 			}
-			accessController, err := app.newAccessController(app.extraConfig.Auth)
+			accessController, err := app.Auth(nil)
 			if err != nil {
 				t.Fatal(err)
 			}

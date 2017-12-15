@@ -89,8 +89,8 @@ var (
 	ErrUnsupportedResource = errors.New("unsupported resource")
 )
 
-func (app *App) newAccessController(authcfg *configuration.Auth) (registryauth.AccessController, error) {
-	tokenRealm, err := configuration.TokenRealm(authcfg.TokenRealm)
+func (app *App) Auth(options map[string]interface{}) (registryauth.AccessController, error) {
+	tokenRealm, err := configuration.TokenRealm(app.extraConfig.Auth.TokenRealm)
 	if err != nil {
 		return nil, err
 	}

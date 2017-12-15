@@ -6,12 +6,12 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/registry/handlers"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/supermiddleware"
 )
 
 const (
@@ -19,16 +19,20 @@ const (
 	defaultDigestToRepositoryCacheSize = 2048
 )
 
+// appMiddleware should be used only in tests.
+type appMiddleware interface {
+	Apply(supermiddleware.App) supermiddleware.App
+}
+
 // App is a global registry application object. Shared resources can be placed
 // on this object that will be accessible from all requests.
 type App struct {
 	// ctx is the parent context.
 	ctx context.Context
 
-	registryClient   client.RegistryClient
-	extraConfig      *registryconfig.Configuration
-	repositoryConfig repositoryConfig
-	writeLimiter     maxconnections.Limiter
+	registryClient client.RegistryClient
+	extraConfig    *registryconfig.Configuration
+	writeLimiter   maxconnections.Limiter
 
 	// driver gives access to the blob store.
 	// This variable holds the object created by docker/distribution. We
@@ -57,6 +61,16 @@ type App struct {
 	quotaEnforcing *quotaEnforcingConfig
 }
 
+func (app *App) Storage(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
+	app.driver = driver
+	return driver, nil
+}
+
+func (app *App) Registry(registry distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error) {
+	app.registry = registry
+	return registry, nil
+}
+
 // NewApp configures the registry application and returns http.Handler for it.
 // The program will be terminated if an error happens.
 func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration, writeLimiter maxconnections.Limiter) http.Handler {
@@ -74,35 +88,21 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 	}
 	app.cachedLayers = cache
 
-	weaveAppIntoConfig(app, dockerConfig)
-
-	repositoryEnabled := false
-	for _, middleware := range dockerConfig.Middleware["repository"] {
-		if middleware.Name == middlewareOpenShift {
-			rc, err := newRepositoryConfig(ctx, extraConfig, middleware.Options)
-			if err != nil {
-				context.GetLogger(ctx).Fatalf("error configuring the repository middleware: %s", err)
-			}
-			app.repositoryConfig = rc
-			repositoryEnabled = true
-			break
-		}
+	superapp := supermiddleware.App(app)
+	if am := appMiddlewareFrom(ctx); am != nil {
+		superapp = am.Apply(superapp)
 	}
+	dockerApp := supermiddleware.NewApp(ctx, dockerConfig, superapp)
 
-	dockerApp := handlers.NewApp(ctx, dockerConfig)
-
-	if repositoryEnabled {
-		if app.driver == nil {
-			context.GetLogger(ctx).Fatalf("configuration error: the storage driver middleware %q is not activated", middlewareOpenShift)
-		}
-
-		if app.registry == nil {
-			context.GetLogger(ctx).Fatalf("configuration error: the registry middleware %q is not activated", middlewareOpenShift)
-		}
+	if app.driver == nil {
+		context.GetLogger(ctx).Fatalf("configuration error: the storage driver middleware %q is not activated", supermiddleware.Name)
+	}
+	if app.registry == nil {
+		context.GetLogger(ctx).Fatalf("configuration error: the registry middleware %q is not activated", supermiddleware.Name)
 	}
 
 	// Add a token handling endpoint
-	if dockerConfig.Auth.Type() == middlewareOpenShift {
+	if dockerConfig.Auth.Type() == supermiddleware.Name {
 		tokenRealm, err := registryconfig.TokenRealm(extraConfig.Auth.TokenRealm)
 		if err != nil {
 			context.GetLogger(dockerApp).Fatalf("error setting up token auth: %s", err)
