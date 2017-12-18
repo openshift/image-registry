@@ -1,8 +1,10 @@
+// +build !windows,!nacl,!plan9
+
 package logrus_syslog
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"log/syslog"
 	"os"
 )
@@ -48,12 +50,5 @@ func (hook *SyslogHook) Fire(entry *logrus.Entry) error {
 }
 
 func (hook *SyslogHook) Levels() []logrus.Level {
-	return []logrus.Level{
-		logrus.PanicLevel,
-		logrus.FatalLevel,
-		logrus.ErrorLevel,
-		logrus.WarnLevel,
-		logrus.InfoLevel,
-		logrus.DebugLevel,
-	}
+	return logrus.AllLevels
 }

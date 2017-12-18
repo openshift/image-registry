@@ -85,7 +85,6 @@ func (p testSubcontainersInfoProvider) SubcontainersInfo(string, *info.Container
 							ThrottledPeriods: 18,
 							ThrottledTime:    1724314000,
 						},
-						LoadAverage: 2,
 					},
 					Memory: info.MemoryStats{
 						Usage:      8,
@@ -126,25 +125,6 @@ func (p testSubcontainersInfoProvider) SubcontainersInfo(string, *info.Container
 								TxErrors:  20,
 								TxDropped: 21,
 							},
-						},
-						Tcp: info.TcpStat{
-							Established: 13,
-							SynSent:     0,
-							SynRecv:     0,
-							FinWait1:    0,
-							FinWait2:    0,
-							TimeWait:    0,
-							Close:       0,
-							CloseWait:   0,
-							LastAck:     0,
-							Listen:      3,
-							Closing:     0,
-						},
-						Udp: info.UdpStat{
-							Listen:   0,
-							Dropped:  0,
-							RxQueued: 0,
-							TxQueued: 0,
 						},
 					},
 					Filesystem: []info.FsStats{
