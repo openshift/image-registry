@@ -10,8 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Sirupsen/logrus"
-
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
@@ -21,11 +19,6 @@ import (
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 )
-
-func init() {
-	// FIXME(dmage): update logrus and remove next line.
-	logrus.WithField("init formatter", "suppress data race error").String()
-}
 
 type log struct {
 	records []string
