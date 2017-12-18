@@ -41,7 +41,7 @@ import:
   repo: https://github.com/openshift/skynetservices-skydns
 - package: github.com/RangelReale/osin
 - package: github.com/Sirupsen/logrus
-  version: 0.7.3
+  version: 1.0.2
 - package: github.com/Azure/azure-sdk-for-go
   version: 0b5fe2abe0271ba07049eacaa65922d67c319543
 - package: google.golang.org/cloud
