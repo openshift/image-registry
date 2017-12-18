@@ -13,18 +13,8 @@ type logrusHook struct {
 	t *testing.T
 }
 
-// FIXME(dmage): switch to logrus.AllLevels when it will be available in our codebase.
-var logrusAllLevels = []logrus.Level{
-	logrus.PanicLevel,
-	logrus.FatalLevel,
-	logrus.ErrorLevel,
-	logrus.WarnLevel,
-	logrus.InfoLevel,
-	logrus.DebugLevel,
-}
-
 func (h *logrusHook) Levels() []logrus.Level {
-	return logrusAllLevels
+	return logrus.AllLevels
 }
 
 func (h *logrusHook) Fire(e *logrus.Entry) error {
