@@ -33,7 +33,7 @@ func TestManifestServiceExists(t *testing.T) {
 	ms := &manifestService{
 		repo:          r,
 		manifests:     nil,
-		acceptschema2: r.app.extraConfig.Compatibility.AcceptSchema2,
+		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
 	ok, err := ms.Exists(ctx, digest.Digest(testImage.Name))
@@ -92,7 +92,7 @@ func TestManifestServiceGetDoesntChangeDockerImageReference(t *testing.T) {
 		manifests: newTestManifestService(repo, map[digest.Digest]distribution.Manifest{
 			digest.Digest(testImage.Name): &schema2.DeserializedManifest{},
 		}),
-		acceptschema2: r.app.extraConfig.Compatibility.AcceptSchema2,
+		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
 	_, err = ms.Get(ctx, digest.Digest(testImage.Name))
@@ -141,7 +141,7 @@ func TestManifestServicePut(t *testing.T) {
 	ms := &manifestService{
 		repo:          r,
 		manifests:     tms,
-		acceptschema2: r.app.extraConfig.Compatibility.AcceptSchema2,
+		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
 	manifest := &schema2.DeserializedManifest{
@@ -174,7 +174,7 @@ func TestManifestServicePut(t *testing.T) {
 	ms = &manifestService{
 		repo:          r,
 		manifests:     tms,
-		acceptschema2: r.app.extraConfig.Compatibility.AcceptSchema2,
+		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
 	_, err = ms.Get(ctx, dgst)

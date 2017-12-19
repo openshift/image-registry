@@ -90,16 +90,16 @@ var (
 )
 
 func (app *App) Auth(options map[string]interface{}) (registryauth.AccessController, error) {
-	tokenRealm, err := configuration.TokenRealm(app.extraConfig.Auth.TokenRealm)
+	tokenRealm, err := configuration.TokenRealm(app.config.Auth.TokenRealm)
 	if err != nil {
 		return nil, err
 	}
 	return &AccessController{
-		realm:          app.extraConfig.Auth.Realm,
+		realm:          app.config.Auth.Realm,
 		tokenRealm:     tokenRealm,
 		registryClient: app.registryClient,
-		metricsConfig:  app.extraConfig.Metrics,
-		auditLog:       app.extraConfig.Audit.Enabled,
+		metricsConfig:  app.config.Metrics,
+		auditLog:       app.config.Audit.Enabled,
 	}, nil
 }
 
