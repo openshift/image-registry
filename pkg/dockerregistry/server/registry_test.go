@@ -65,7 +65,7 @@ func newTestRegistry(
 		registryClient: &testRegistryClient{
 			client: osClient,
 		},
-		extraConfig:  cfg,
+		config:       cfg,
 		cachedLayers: cachedLayers,
 		quotaEnforcing: &quotaEnforcingConfig{
 			enforcementEnabled: false,

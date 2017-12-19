@@ -420,17 +420,17 @@ func TestAccessController(t *testing.T) {
 			app := &App{
 				ctx:            ctx,
 				registryClient: client.NewRegistryClient(cfg),
-				extraConfig: &configuration.Configuration{
+				config: &configuration.Configuration{
 					Server: &configuration.Server{
 						Addr: "localhost:5000",
 					},
 					Auth: test.authConfig,
 				},
 			}
-			if app.extraConfig.Auth == nil {
-				app.extraConfig.Auth = authConfig
+			if app.config.Auth == nil {
+				app.config.Auth = authConfig
 			}
-			if err := configuration.InitExtraConfig(config, app.extraConfig); err != nil {
+			if err := configuration.InitExtraConfig(config, app.config); err != nil {
 				t.Fatal(err)
 			}
 			accessController, err := app.Auth(nil)

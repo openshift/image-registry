@@ -31,7 +31,7 @@ type App struct {
 	ctx context.Context
 
 	registryClient client.RegistryClient
-	extraConfig    *registryconfig.Configuration
+	config         *registryconfig.Configuration
 	writeLimiter   maxconnections.Limiter
 
 	// driver gives access to the blob store.
@@ -77,7 +77,7 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 	app := &App{
 		ctx:            ctx,
 		registryClient: registryClient,
-		extraConfig:    extraConfig,
+		config:         extraConfig,
 		writeLimiter:   writeLimiter,
 		quotaEnforcing: newQuotaEnforcingConfig(ctx, extraConfig.Quota),
 	}
