@@ -45,7 +45,7 @@ all build:
 #
 # Example:
 #   make check
-check: verify test-unit test-integration
+check: verify test
 .PHONY: check
 
 # Verify code conventions are properly setup.
@@ -86,6 +86,13 @@ verify-gometalinter:
 verify-commits:
 	hack/verify-upstream-commits.sh
 .PHONY: verify-commits
+
+# Build and run all self contained tests.
+#
+# Example:
+#   make test
+test: test-unit test-integration
+.PHONY: test
 
 # Run unit tests.
 #
