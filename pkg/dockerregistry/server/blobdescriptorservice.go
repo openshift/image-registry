@@ -55,7 +55,7 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 	desc, err := bs.BlobDescriptorService.Stat(ctx, dgst)
 	if err == nil {
 		// and remember the association
-		bs.repo.cachedLayers.RememberDigest(dgst, bs.repo.app.extraConfig.Cache.BlobRepositoryTTL, imageapi.DockerImageReference{
+		bs.repo.cachedLayers.RememberDigest(dgst, bs.repo.app.config.Cache.BlobRepositoryTTL, imageapi.DockerImageReference{
 			Namespace: bs.repo.namespace,
 			Name:      bs.repo.name,
 		}.Exact())
@@ -144,7 +144,7 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 		if _, processed := processedImages[tagEvent.Image]; processed {
 			continue
 		}
-		if imageHasBlob(r, repoCacheName, tagEvent.Image, dgst.String(), !r.app.extraConfig.Pullthrough.Enabled) {
+		if imageHasBlob(r, repoCacheName, tagEvent.Image, dgst.String(), !r.app.config.Pullthrough.Enabled) {
 			tagName := event2Name[tagEvent]
 			context.GetLogger(r.ctx).Debugf("blob found under istag %s/%s:%s in image %s", r.namespace, r.name, tagName, tagEvent.Image)
 			return logFound(true)

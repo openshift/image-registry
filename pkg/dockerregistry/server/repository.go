@@ -73,7 +73,7 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		return nil, nil, err
 	}
 
-	context.GetLogger(ctx).Infof("Using %q as Docker Registry URL", app.extraConfig.Server.Addr)
+	context.GetLogger(ctx).Infof("Using %q as Docker Registry URL", app.config.Server.Addr)
 
 	nameParts := strings.SplitN(repo.Named().Name(), "/", 2)
 	if len(nameParts) != 2 {
@@ -102,11 +102,11 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		crossmount:        crossmount,
 	}
 
-	if app.extraConfig.Pullthrough.Enabled {
+	if app.config.Pullthrough.Enabled {
 		r.remoteBlobGetter = NewBlobGetterService(
 			r.namespace,
 			r.name,
-			app.extraConfig.Cache.BlobRepositoryTTL,
+			app.config.Cache.BlobRepositoryTTL,
 			imageStreamGetter.get,
 			registryOSClient,
 			app.cachedLayers)
@@ -130,10 +130,10 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 	ms = &manifestService{
 		repo:          r,
 		manifests:     ms,
-		acceptschema2: r.app.extraConfig.Compatibility.AcceptSchema2,
+		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
-	if r.app.extraConfig.Pullthrough.Enabled {
+	if r.app.config.Pullthrough.Enabled {
 		ms = &pullthroughManifestService{
 			ManifestService: ms,
 			repo:            r,
@@ -146,7 +146,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 		ms = audit.NewManifestService(ctx, ms)
 	}
 
-	if r.app.extraConfig.Metrics.Enabled {
+	if r.app.config.Metrics.Enabled {
 		ms = metrics.NewManifestService(ms, r.Named().Name())
 	}
 
@@ -165,12 +165,12 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 		}
 	}
 
-	if r.app.extraConfig.Pullthrough.Enabled {
+	if r.app.config.Pullthrough.Enabled {
 		bs = &pullthroughBlobStore{
 			BlobStore: bs,
 
 			repo:   r,
-			mirror: r.app.extraConfig.Pullthrough.Mirror,
+			mirror: r.app.config.Pullthrough.Mirror,
 		}
 	}
 
@@ -185,7 +185,7 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 		bs = audit.NewBlobStore(ctx, bs)
 	}
 
-	if r.app.extraConfig.Metrics.Enabled {
+	if r.app.config.Metrics.Enabled {
 		bs = metrics.NewBlobStore(bs, r.Named().Name())
 	}
 
@@ -207,7 +207,7 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 		ts = audit.NewTagService(ctx, ts)
 	}
 
-	if r.app.extraConfig.Metrics.Enabled {
+	if r.app.config.Metrics.Enabled {
 		ts = metrics.NewTagService(ts, r.Named().Name())
 	}
 
@@ -329,7 +329,7 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 
 	if len(image.DockerImageLayers) > 0 {
 		for _, layer := range image.DockerImageLayers {
-			r.cachedLayers.RememberDigest(digest.Digest(layer.Name), r.app.extraConfig.Cache.BlobRepositoryTTL, cacheName)
+			r.cachedLayers.RememberDigest(digest.Digest(layer.Name), r.app.config.Cache.BlobRepositoryTTL, cacheName)
 		}
 		meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
 		if !ok {
@@ -338,7 +338,7 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 		}
 		// remember reference to manifest config as well for schema 2
 		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
-			r.cachedLayers.RememberDigest(digest.Digest(meta.ID), r.app.extraConfig.Cache.BlobRepositoryTTL, cacheName)
+			r.cachedLayers.RememberDigest(digest.Digest(meta.ID), r.app.config.Cache.BlobRepositoryTTL, cacheName)
 		}
 		return
 	}
@@ -358,11 +358,11 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 
 // rememberLayersOfManifest caches the layer digests of given manifest
 func (r *repository) rememberLayersOfManifest(manifestDigest digest.Digest, manifest distribution.Manifest, cacheName string) {
-	r.cachedLayers.RememberDigest(manifestDigest, r.app.extraConfig.Cache.BlobRepositoryTTL, cacheName)
+	r.cachedLayers.RememberDigest(manifestDigest, r.app.config.Cache.BlobRepositoryTTL, cacheName)
 
 	// remember the layers in the cache as an optimization to avoid searching all remote repositories
 	for _, layer := range manifest.References() {
-		r.cachedLayers.RememberDigest(layer.Digest, r.app.extraConfig.Cache.BlobRepositoryTTL, cacheName)
+		r.cachedLayers.RememberDigest(layer.Digest, r.app.config.Cache.BlobRepositoryTTL, cacheName)
 	}
 }
 
