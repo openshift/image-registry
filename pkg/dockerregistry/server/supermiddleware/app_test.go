@@ -13,11 +13,12 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/auth"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
 )
 
 type log struct {
@@ -66,19 +67,6 @@ func (reg *testRegistry) Repository(ctx context.Context, named reference.Named) 
 	return reg.Namespace.Repository(ctx, named)
 }
 
-type testBlobDesctiptorService struct {
-	distribution.BlobDescriptorService
-	log  *log
-	repo string
-	name string
-}
-
-func (bds *testBlobDesctiptorService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	bds.log.Record("%s: enter BlobDescriptorService(%s).Stat", bds.repo, bds.name)
-	defer bds.log.Record("%s: leave BlobDescriptorService(%s).Stat", bds.repo, bds.name)
-	return bds.BlobDescriptorService.Stat(ctx, dgst)
-}
-
 type testApp struct {
 	log *log
 }
@@ -106,13 +94,15 @@ func (app *testApp) Repository(ctx context.Context, repo distribution.Repository
 		name = "crossmount"
 	}
 
+	wrapper := func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
+		app.log.Record("%s(%s): enter %s", repo.Named(), name, funcname)
+		defer app.log.Record("%s(%s): leave %s", repo.Named(), name, funcname)
+		return f(ctx)
+	}
+
+	repo = wrapped.NewRepository(repo, wrapper)
 	bdsf := blobDescriptorServiceFactoryFunc(func(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
-		return &testBlobDesctiptorService{
-			BlobDescriptorService: svc,
-			log:  app.log,
-			repo: repo.Named().String(),
-			name: name,
-		}
+		return wrapped.NewBlobDescriptorService(svc, wrapper)
 	})
 
 	return repo, bdsf, nil
@@ -165,8 +155,10 @@ func TestApp(t *testing.T) {
 				"AccessController(repository::foo:pull)",
 				"foo: enter Registry.Repository",
 				"foo: leave Registry.Repository",
-				"foo: enter BlobDescriptorService(regular).Stat",
-				"foo: leave BlobDescriptorService(regular).Stat",
+				"foo(regular): enter BlobStore.Stat",
+				"foo(regular): enter BlobDescriptorService.Stat",
+				"foo(regular): leave BlobDescriptorService.Stat",
+				"foo(regular): leave BlobStore.Stat",
 			},
 		},
 		{
@@ -178,6 +170,8 @@ func TestApp(t *testing.T) {
 				"AccessController(repository::foo:pull, repository::foo:push)",
 				"foo: enter Registry.Repository",
 				"foo: leave Registry.Repository",
+				"foo(regular): enter BlobStore.Create",
+				"foo(regular): leave BlobStore.Create",
 			},
 		},
 		{
@@ -190,6 +184,12 @@ func TestApp(t *testing.T) {
 				"AccessController(repository::foo:pull, repository::foo:push)",
 				"foo: enter Registry.Repository",
 				"foo: leave Registry.Repository",
+				"foo(regular): enter BlobStore.Resume",
+				"foo(regular): leave BlobStore.Resume",
+				"foo(regular): enter BlobWriter.Commit",
+				"foo(regular): enter BlobDescriptorService.SetDescriptor",
+				"foo(regular): leave BlobDescriptorService.SetDescriptor",
+				"foo(regular): leave BlobWriter.Commit",
 			},
 		},
 		{
@@ -201,8 +201,10 @@ func TestApp(t *testing.T) {
 				"AccessController(repository::bar:pull, repository::bar:push, repository::foo:pull)",
 				"bar: enter Registry.Repository",
 				"bar: leave Registry.Repository",
-				"foo: enter BlobDescriptorService(crossmount).Stat",
-				"foo: leave BlobDescriptorService(crossmount).Stat",
+				"bar(regular): enter BlobStore.Create",
+				"foo(crossmount): enter BlobDescriptorService.Stat",
+				"foo(crossmount): leave BlobDescriptorService.Stat",
+				"bar(regular): leave BlobStore.Create",
 			},
 		},
 	} {
