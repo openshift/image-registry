@@ -174,11 +174,6 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 		}
 	}
 
-	bs = &errorBlobStore{
-		BlobStore: bs,
-		repo:      r,
-	}
-
 	bs = newPendingErrorsBlobStore(bs, r)
 
 	if audit.LoggerExists(ctx) {
@@ -212,6 +207,12 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 	}
 
 	return ts
+}
+
+func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
+	svc = &blobDescriptorService{svc, r}
+	svc = newPendingErrorsBlobDescriptorService(svc, r)
+	return svc
 }
 
 // createImageStream creates a new image stream corresponding to r and caches it.

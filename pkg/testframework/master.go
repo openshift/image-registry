@@ -293,9 +293,5 @@ func (m *Master) CreateUser(username string, password string) *User {
 }
 
 func (m *Master) CreateProject(namespace, user string) *projectapiv1.Project {
-	project, err := CreateProject(m.AdminKubeConfig(), namespace, user)
-	if err != nil {
-		m.t.Fatal(err)
-	}
-	return project
+	return CreateProject(m.t, m.AdminKubeConfig(), namespace, user)
 }

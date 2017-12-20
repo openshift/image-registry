@@ -47,38 +47,26 @@ type blobDescriptorService struct {
 
 var _ distribution.BlobDescriptorService = &blobDescriptorService{}
 
-func (bds *blobDescriptorService) getImpl(ctx context.Context) (distribution.BlobDescriptorService, error) {
+func (bds *blobDescriptorService) getImpl(ctx context.Context) distribution.BlobDescriptorService {
 	if bds.impl == nil {
 		bds.impl = bds.upstream
 		if factory := blobDescriptorServiceFactoryFrom(ctx); factory != nil {
 			bds.impl = factory.BlobAccessController(bds.impl)
 		}
 	}
-	return bds.impl, nil
+	return bds.impl
 }
 
 func (bds *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	impl, err := bds.getImpl(ctx)
-	if err != nil {
-		return distribution.Descriptor{}, err
-	}
-	return impl.Stat(ctx, dgst)
+	return bds.getImpl(ctx).Stat(ctx, dgst)
 }
 
 func (bds *blobDescriptorService) SetDescriptor(ctx context.Context, dgst digest.Digest, desc distribution.Descriptor) error {
-	impl, err := bds.getImpl(ctx)
-	if err != nil {
-		return err
-	}
-	return impl.SetDescriptor(ctx, dgst, desc)
+	return bds.getImpl(ctx).SetDescriptor(ctx, dgst, desc)
 }
 
 func (bds *blobDescriptorService) Clear(ctx context.Context, dgst digest.Digest) error {
-	impl, err := bds.getImpl(ctx)
-	if err != nil {
-		return err
-	}
-	return impl.Clear(ctx, dgst)
+	return bds.getImpl(ctx).Clear(ctx, dgst)
 }
 
 func init() {
@@ -90,8 +78,7 @@ func init() {
 
 func newBlobDescriptorServiceRepository(repo distribution.Repository, factory distribution.BlobDescriptorServiceFactory) distribution.Repository {
 	return wrapped.NewRepository(repo, func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
-		ctx = withBlobDescriptorServiceFactory(ctx, factory)
-		return f(ctx)
+		return f(withBlobDescriptorServiceFactory(ctx, factory))
 	})
 }
 
@@ -99,8 +86,7 @@ func newBlobDescriptorServiceRepository(repo distribution.Repository, factory di
 func effectiveCreateOptions(options []distribution.BlobCreateOption) (*distribution.CreateOptions, error) {
 	opts := &distribution.CreateOptions{}
 	for _, createOptions := range options {
-		err := createOptions.Apply(opts)
-		if err != nil {
+		if err := createOptions.Apply(opts); err != nil {
 			return nil, err
 		}
 	}
@@ -143,9 +129,8 @@ type blobDescriptorServiceRepository struct {
 }
 
 func (r blobDescriptorServiceRepository) Blobs(ctx context.Context) distribution.BlobStore {
-	bs := r.Repository.Blobs(ctx)
 	return blobDescriptorServiceBlobStore{
-		BlobStore: bs,
+		BlobStore: r.Repository.Blobs(ctx),
 		inst:      r.inst,
 	}
 }
