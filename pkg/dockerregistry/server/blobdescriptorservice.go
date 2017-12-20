@@ -41,10 +41,6 @@ type blobDescriptorService struct {
 	repo *repository
 }
 
-func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
-	return &blobDescriptorService{svc, r}
-}
-
 // Stat returns a a blob descriptor if the given blob is either linked in repository or is referenced in
 // corresponding image stream. This method is invoked from inside of upstream's linkedBlobStore. It expects
 // a proper repository object to be set on given context by upper openshift middleware wrappers.
