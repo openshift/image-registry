@@ -10,7 +10,9 @@ import (
 	"github.com/docker/distribution/registry/client"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kapiv1 "k8s.io/kubernetes/pkg/api/v1"
 
+	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
 
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
@@ -50,15 +52,22 @@ func crossMountImage(ctx context.Context, destRepo distribution.Repository, tag 
 	return nil
 }
 
-func copyISTag(imageClient imagev1.ImageV1Interface, destNamespace, destISTag, sourceNamespace, sourceISTag string) error {
-	istag, err := imageClient.ImageStreamTags(sourceNamespace).Get(sourceISTag, metav1.GetOptions{})
-	if err != nil {
-		return fmt.Errorf("copy istag %s/%s to %s/%s: get source: %v", sourceNamespace, sourceISTag, destNamespace, destISTag, err)
+func copyISTag(t *testing.T, imageClient imagev1.ImageV1Interface, destNamespace, destISTag, sourceNamespace, sourceISTag string) error {
+	istag := &imageapiv1.ImageStreamTag{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: destISTag,
+		},
+		Tag: &imageapiv1.TagReference{
+			From: &kapiv1.ObjectReference{
+				Kind:      "ImageStreamTag",
+				Name:      sourceISTag,
+				Namespace: sourceNamespace,
+			},
+		},
 	}
-	istag.Name = destISTag
-	_, err = imageClient.ImageStreamTags(destNamespace).Create(istag)
+	_, err := imageClient.ImageStreamTags(destNamespace).Create(istag)
 	if err != nil {
-		return fmt.Errorf("copy istag %s/%s to %s/%s: create destination: %v", sourceNamespace, sourceISTag, destNamespace, destISTag, err)
+		return fmt.Errorf("copy istag %s/%s to %s/%s: %v", sourceNamespace, sourceISTag, destNamespace, destISTag, err)
 	}
 	return nil
 }
@@ -69,8 +78,9 @@ func TestCrossMount(t *testing.T) {
 
 	alice := master.CreateUser("alice", "qwerty")
 	bob := master.CreateUser("bob", "123456")
-	aliceproject := master.CreateProject("aliceproject", alice.Name)
-	bobproject := master.CreateProject("bobproject", bob.Name)
+
+	const aliceprojectName = "aliceproject"
+	const bobprojectName = "bobproject"
 
 	wantCrossMountError := func(err error) error {
 		if _, ok := err.(errRegistryWantsContent); !ok {
@@ -87,28 +97,39 @@ func TestCrossMount(t *testing.T) {
 
 	for _, test := range []struct {
 		name                                       string
+		prefix                                     string
 		actor                                      *testframework.User
 		destinationProject, destinationImageStream string
 		sourceProject, sourceImageStream           string
 		check                                      func(error) error
 	}{
 		{
-			"alice_from_foo",
-			alice, aliceproject.Name, "mounted-foo", aliceproject.Name, "foo",
+			"alice_from_foo", "a1-",
+			alice, aliceprojectName, "mounted-foo", aliceprojectName, "foo",
 			wantSuccess,
 		},
 		{
-			"bob_from_foo",
-			bob, bobproject.Name, "from-foo", aliceproject.Name, "foo",
+			"alice_from_foo-copy", "a2-",
+			alice, aliceprojectName, "mounted-foo-copy", aliceprojectName, "foo-copy",
+			wantSuccess,
+		},
+		{
+			"bob_from_foo", "b1-",
+			bob, bobprojectName, "from-foo", aliceprojectName, "foo",
 			wantCrossMountError,
 		},
 		{
-			"bob_from_foo-copy",
-			bob, bobproject.Name, "from-foo-copy", aliceproject.Name, "foo-copy",
+			"bob_from_foo-copy", "b2-",
+			bob, bobprojectName, "from-foo-copy", aliceprojectName, "foo-copy",
 			wantCrossMountError,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
+			aliceproject := testframework.CreateProject(t, master.AdminKubeConfig(), test.prefix+aliceprojectName, alice.Name)
+			defer testframework.DeleteProject(t, master.AdminKubeConfig(), aliceproject.Name)
+			bobproject := testframework.CreateProject(t, master.AdminKubeConfig(), test.prefix+bobprojectName, bob.Name)
+			defer testframework.DeleteProject(t, master.AdminKubeConfig(), bobproject.Name)
+
 			registry := master.StartRegistry(t)
 			defer registry.Close()
 
@@ -118,16 +139,17 @@ func TestCrossMount(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			t.Logf("uploaded manifest %s: %v", aliceFooRepo.Named(), manifest)
 
 			// Copy image stream tag aliceproject/foo:latest to aliceproject/foo-copy:latest
 			aliceImageClient := imagev1.NewForConfigOrDie(alice.KubeConfig())
-			if err := copyISTag(aliceImageClient, aliceproject.Name, "foo-copy:latest", aliceproject.Name, "foo:latest"); err != nil {
+			if err := copyISTag(t, aliceImageClient, aliceproject.Name, "foo-copy:latest", aliceproject.Name, "foo:latest"); err != nil {
 				t.Fatal(err)
 			}
 
 			// Cross-mount image
-			repo := registry.Repository(test.destinationProject, test.destinationImageStream, test.actor)
-			sourceNamed, _ := reference.WithName(fmt.Sprintf("%s/%s", test.sourceProject, test.sourceImageStream))
+			repo := registry.Repository(test.prefix+test.destinationProject, test.destinationImageStream, test.actor)
+			sourceNamed, _ := reference.WithName(fmt.Sprintf("%s/%s", test.prefix+test.sourceProject, test.sourceImageStream))
 			err = test.check(crossMountImage(context.Background(), repo, "latest", sourceNamed, manifest))
 			if err != nil {
 				t.Error(err)
