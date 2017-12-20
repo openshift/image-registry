@@ -119,6 +119,9 @@ func TestApp(t *testing.T) {
 		},
 		Storage: configuration.Storage{
 			"inmemory": nil,
+			"delete": configuration.Parameters{
+				"enabled": true,
+			},
 		},
 		Middleware: map[string][]configuration.Middleware{
 			"registry":   {{Name: Name}},
@@ -205,6 +208,23 @@ func TestApp(t *testing.T) {
 				"foo(crossmount): enter BlobDescriptorService.Stat",
 				"foo(crossmount): leave BlobDescriptorService.Stat",
 				"bar(regular): leave BlobStore.Create",
+			},
+		},
+		{
+			name:         "foo_delete_blob",
+			method:       "DELETE",
+			url:          serverURL("/v2/foo/blobs/" + fooDigest),
+			expectStatus: http.StatusAccepted,
+			expectLog: []string{
+				"AccessController(repository::foo:*)",
+				"foo: enter Registry.Repository",
+				"foo: leave Registry.Repository",
+				"foo(regular): enter BlobStore.Delete",
+				"foo(regular): enter BlobDescriptorService.Stat",
+				"foo(regular): leave BlobDescriptorService.Stat",
+				"foo(regular): enter BlobDescriptorService.Clear",
+				"foo(regular): leave BlobDescriptorService.Clear",
+				"foo(regular): leave BlobStore.Delete",
 			},
 		},
 	} {
