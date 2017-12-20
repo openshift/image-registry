@@ -19,7 +19,6 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	quotautil "github.com/openshift/origin/pkg/quota/util"
@@ -212,7 +211,7 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 
 func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
 	svc = &blobDescriptorService{svc, r}
-	svc = wrapped.NewBlobDescriptorService(svc, newPendingErrorsWrapper(r))
+	svc = newPendingErrorsBlobDescriptorService(svc, r)
 	return svc
 }
 

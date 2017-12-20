@@ -36,18 +36,6 @@ func getNamespaceName(resourceName string) (string, string, error) {
 	return ns, name, nil
 }
 
-// effectiveCreateOptions find out what the blob creation options are going to do by dry-running them.
-func effectiveCreateOptions(options []distribution.BlobCreateOption) (*distribution.CreateOptions, error) {
-	opts := &distribution.CreateOptions{}
-	for _, createOptions := range options {
-		err := createOptions.Apply(opts)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return opts, nil
-}
-
 func isImageManaged(image *imageapiv1.Image) bool {
 	managed, ok := image.ObjectMeta.Annotations[imageapi.ManagedByOpenShiftAnnotation]
 	return ok && managed == "true"
