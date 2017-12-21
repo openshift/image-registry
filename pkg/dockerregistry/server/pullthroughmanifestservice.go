@@ -45,7 +45,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 
 	ref, err := imageapi.ParseDockerImageReference(image.DockerImageReference)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s/%s@%s: %v", image.DockerImageReference, m.repo.namespace, m.repo.name, dgst.String(), err)
+		context.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s/%s@%s: %v", image.DockerImageReference, m.repo.imageStream.namespace, m.repo.imageStream.name, dgst.String(), err)
 		return nil, err
 	}
 	ref = ref.DockerClientDefaults()
@@ -77,7 +77,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 }
 
 func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
-	retriever := getImportContext(ctx, m.repo.registryOSClient, m.repo.namespace, m.repo.name)
+	retriever := getImportContext(ctx, m.repo.registryOSClient, m.repo.imageStream.namespace, m.repo.imageStream.name)
 
 	// determine, whether to fall-back to insecure transport based on a specification of image's tag
 	// if the client pulls by tag, use that

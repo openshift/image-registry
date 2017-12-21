@@ -66,8 +66,8 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	}
 
 	ref := imageapi.DockerImageReference{
-		Namespace: m.repo.namespace,
-		Name:      m.repo.name,
+		Namespace: m.repo.imageStream.namespace,
+		Name:      m.repo.imageStream.name,
 		Registry:  m.repo.app.config.Server.Addr,
 	}
 	if isImageManaged(image) {
@@ -157,8 +157,8 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 	// Upload to openshift
 	ism := imageapiv1.ImageStreamMapping{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: m.repo.namespace,
-			Name:      m.repo.name,
+			Namespace: m.repo.imageStream.namespace,
+			Name:      m.repo.imageStream.name,
 		},
 		Image: imageapiv1.Image{
 			ObjectMeta: metav1.ObjectMeta{
@@ -169,7 +169,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 					imageapi.DockerImageLayersOrderAnnotation:  layerOrder,
 				},
 			},
-			DockerImageReference:         fmt.Sprintf("%s/%s/%s@%s", m.repo.app.config.Server.Addr, m.repo.namespace, m.repo.name, dgst.String()),
+			DockerImageReference:         fmt.Sprintf("%s/%s/%s@%s", m.repo.app.config.Server.Addr, m.repo.imageStream.namespace, m.repo.imageStream.name, dgst.String()),
 			DockerImageManifest:          string(payload),
 			DockerImageManifestMediaType: mediaType,
 			DockerImageConfig:            string(config),
@@ -184,7 +184,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		}
 	}
 
-	if _, err = m.repo.registryOSClient.ImageStreamMappings(m.repo.namespace).Create(&ism); err != nil {
+	if _, err = m.repo.registryOSClient.ImageStreamMappings(m.repo.imageStream.namespace).Create(&ism); err != nil {
 		// if the error was that the image stream wasn't found, try to auto provision it
 		statusErr, ok := err.(*kerrors.StatusError)
 		if !ok {
@@ -200,7 +200,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		status := statusErr.ErrStatus
 		kind := strings.ToLower(status.Details.Kind)
 		isValidKind := kind == "imagestream" /*pre-1.2*/ || kind == "imagestreams" /*1.2 to 1.6*/ || kind == "imagestreammappings" /*1.7+*/
-		if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != m.repo.name {
+		if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != m.repo.imageStream.name {
 			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
 			return "", err
 		}
@@ -214,7 +214,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		}
 
 		// try to create the ISM again
-		if _, err := m.repo.registryOSClient.ImageStreamMappings(m.repo.namespace).Create(&ism); err != nil {
+		if _, err := m.repo.registryOSClient.ImageStreamMappings(m.repo.imageStream.namespace).Create(&ism); err != nil {
 			if quotautil.IsErrorQuotaExceeded(err) {
 				context.GetLogger(ctx).Errorf("denied a creation of ImageStreamMapping: %v", err)
 				return "", distribution.ErrAccessDenied

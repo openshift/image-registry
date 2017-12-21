@@ -21,7 +21,7 @@ type tagService struct {
 func (t tagService) Get(ctx context.Context, tag string) (distribution.Descriptor, error) {
 	imageStream, err := t.repo.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s/%s: %v", t.repo.namespace, t.repo.name, err)
+		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return distribution.Descriptor{}, distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
 	}
 
@@ -53,7 +53,7 @@ func (t tagService) All(ctx context.Context) ([]string, error) {
 
 	imageStream, err := t.repo.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s/%s: %v", t.repo.namespace, t.repo.name, err)
+		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return tags, distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
 	}
 
@@ -80,7 +80,7 @@ func (t tagService) All(ctx context.Context) ([]string, error) {
 
 			image, err := t.repo.getImage(dgst)
 			if err != nil {
-				context.GetLogger(ctx).Errorf("unable to get image %s/%s %s: %v", t.repo.namespace, t.repo.name, dgst.String(), err)
+				context.GetLogger(ctx).Errorf("unable to get image %s %s: %v", t.repo.imageStream.Reference(), dgst.String(), err)
 				continue
 			}
 			managed = isImageManaged(image)
@@ -101,7 +101,7 @@ func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([
 
 	imageStream, err := t.repo.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s/%s: %v", t.repo.namespace, t.repo.name, err)
+		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return tags, distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
 	}
 
@@ -132,7 +132,7 @@ func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([
 		if !found {
 			image, err := t.repo.getImage(dgst)
 			if err != nil {
-				context.GetLogger(ctx).Errorf("unable to get image %s/%s %s: %v", t.repo.namespace, t.repo.name, dgst.String(), err)
+				context.GetLogger(ctx).Errorf("unable to get image %s %s: %v", t.repo.imageStream.Reference(), dgst.String(), err)
 				continue
 			}
 			managed = isImageManaged(image)
@@ -152,7 +152,7 @@ func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([
 func (t tagService) Tag(ctx context.Context, tag string, dgst distribution.Descriptor) error {
 	imageStream, err := t.repo.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s/%s: %v", t.repo.namespace, t.repo.name, err)
+		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
 	}
 
@@ -188,7 +188,7 @@ func (t tagService) Tag(ctx context.Context, tag string, dgst distribution.Descr
 func (t tagService) Untag(ctx context.Context, tag string) error {
 	imageStream, err := t.repo.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s/%s: %v", t.repo.namespace, t.repo.name, err)
+		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
 	}
 

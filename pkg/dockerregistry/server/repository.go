@@ -51,9 +51,9 @@ type repository struct {
 	ctx              context.Context
 	app              *App
 	registryOSClient client.Interface
-	namespace        string
-	name             string
 	crossmount       bool
+
+	imageStream imageStream
 
 	// cachedImages contains images cached for the lifetime of the request being handled.
 	cachedImages map[digest.Digest]*imageapiv1.Image
@@ -93,11 +93,14 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		ctx:               ctx,
 		app:               app,
 		registryOSClient:  registryOSClient,
-		namespace:         nameParts[0],
-		name:              nameParts[1],
 		imageStreamGetter: imageStreamGetter,
 		cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
 		crossmount:        crossmount,
+
+		imageStream: imageStream{
+			namespace: nameParts[0],
+			name:      nameParts[1],
+		},
 	}
 
 	r.cache = &cache.RepoDigest{
@@ -106,8 +109,8 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 
 	if app.config.Pullthrough.Enabled {
 		r.remoteBlobGetter = NewBlobGetterService(
-			r.namespace,
-			r.name,
+			r.imageStream.namespace,
+			r.imageStream.name,
 			imageStreamGetter.get,
 			registryOSClient,
 			r.cache)
@@ -224,7 +227,7 @@ func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorServic
 // createImageStream creates a new image stream corresponding to r and caches it.
 func (r *repository) createImageStream(ctx context.Context) (*imageapiv1.ImageStream, error) {
 	stream := imageapiv1.ImageStream{}
-	stream.Name = r.name
+	stream.Name = r.imageStream.name
 
 	uclient, ok := userClientFrom(ctx)
 	if !ok {
@@ -233,7 +236,7 @@ func (r *repository) createImageStream(ctx context.Context) (*imageapiv1.ImageSt
 		return nil, errcode.ErrorCodeUnknown.WithDetail(errmsg)
 	}
 
-	is, err := uclient.ImageStreams(r.namespace).Create(&stream)
+	is, err := uclient.ImageStreams(r.imageStream.namespace).Create(&stream)
 	switch {
 	case kerrors.IsAlreadyExists(err), kerrors.IsConflict(err):
 		context.GetLogger(ctx).Infof("conflict while creating ImageStream: %v", err)
@@ -260,7 +263,7 @@ func (r *repository) getImage(dgst digest.Digest) (*imageapiv1.Image, error) {
 	image, err := r.registryOSClient.Images().Get(dgst.String(), metav1.GetOptions{})
 	if err != nil {
 		context.GetLogger(r.ctx).Errorf("failed to get image: %v", err)
-		return nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
+		return nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
 	}
 
 	context.GetLogger(r.ctx).Infof("(*repository).getImage: got image %s", image.Name)
@@ -286,18 +289,18 @@ func (r *repository) getStoredImageOfImageStream(dgst digest.Digest) (*imageapiv
 	stream, err := r.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(r.ctx).Errorf("failed to get ImageStream: %v", err)
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
+		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
 	}
 
 	tagEvent, err := imageapiv1.ResolveImageID(stream, dgst.String())
 	if err != nil {
-		context.GetLogger(r.ctx).Errorf("failed to resolve image %s in ImageStream %s/%s: %v", dgst.String(), r.namespace, r.name, err)
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
+		context.GetLogger(r.ctx).Errorf("failed to resolve image %s in ImageStream %s: %v", dgst.String(), r.imageStream.Reference(), err)
+		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
 	}
 
 	image, err := r.getImage(dgst)
 	if err != nil {
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
+		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
 	}
 
 	return image, tagEvent, stream, nil
@@ -392,7 +395,7 @@ func (r *repository) manifestFromImageWithCachedLayers(image *imageapiv1.Image, 
 }
 
 func (r *repository) checkPendingErrors(ctx context.Context) error {
-	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.namespace, r.name)
+	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.imageStream.namespace, r.imageStream.name)
 }
 
 func checkPendingErrors(ctx context.Context, logger context.Logger, namespace, name string) error {

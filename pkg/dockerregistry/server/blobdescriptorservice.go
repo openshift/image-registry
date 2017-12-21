@@ -83,20 +83,20 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 // given repository. If not found locally, image stream's images will be iterated and fetched from newest to
 // oldest until found. Each processed image will update local cache of blobs.
 func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
-	repoCacheName := imageapi.DockerImageReference{Namespace: r.namespace, Name: r.name}.Exact()
+	repoCacheName := r.imageStream.Reference()
 	if r.cache.ContainsRepository(dgst, repoCacheName) {
 		context.GetLogger(r.ctx).Debugf("found cached blob %q in repository %s", dgst.String(), r.Named().Name())
 		return true
 	}
 
-	context.GetLogger(r.ctx).Debugf("verifying presence of blob %q in image stream %s/%s", dgst.String(), r.namespace, r.name)
+	context.GetLogger(r.ctx).Debugf("verifying presence of blob %q in image stream %s", dgst.String(), r.imageStream.Reference())
 	started := time.Now()
 	logFound := func(found bool) bool {
 		elapsed := time.Since(started)
 		if found {
-			context.GetLogger(r.ctx).Debugf("verified presence of blob %q in image stream %s/%s after %s", dgst.String(), r.namespace, r.name, elapsed.String())
+			context.GetLogger(r.ctx).Debugf("verified presence of blob %q in image stream %s after %s", dgst.String(), r.imageStream.Reference(), elapsed.String())
 		} else {
-			context.GetLogger(r.ctx).Debugf("detected absence of blob %q in image stream %s/%s after %s", dgst.String(), r.namespace, r.name, elapsed.String())
+			context.GetLogger(r.ctx).Debugf("detected absence of blob %q in image stream %s after %s", dgst.String(), r.imageStream.Reference(), elapsed.String())
 		}
 		return found
 	}
@@ -129,13 +129,13 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 		}
 		if imageHasBlob(r, repoCacheName, tagEvent.Image, dgst.String(), !r.app.config.Pullthrough.Enabled) {
 			tagName := event2Name[tagEvent]
-			context.GetLogger(r.ctx).Debugf("blob found under istag %s/%s:%s in image %s", r.namespace, r.name, tagName, tagEvent.Image)
+			context.GetLogger(r.ctx).Debugf("blob found under istag %s:%s in image %s", r.imageStream.Reference(), tagName, tagEvent.Image)
 			return logFound(true)
 		}
 		processedImages[tagEvent.Image] = struct{}{}
 	}
 
-	context.GetLogger(r.ctx).Warnf("blob %q exists locally but is not referenced in repository %s/%s", dgst.String(), r.namespace, r.name)
+	context.GetLogger(r.ctx).Warnf("blob %q exists locally but is not referenced in repository %s", dgst.String(), r.imageStream.Reference())
 
 	return logFound(false)
 }
