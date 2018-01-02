@@ -152,7 +152,7 @@ func imageHasBlob(
 	requireManaged bool,
 ) bool {
 	context.GetLogger(r.ctx).Debugf("getting image %s", imageName)
-	image, err := r.getImage(digest.Digest(imageName))
+	image, err := r.imageStream.getImage(r.ctx, digest.Digest(imageName))
 	if err != nil {
 		if kerrors.IsNotFound(err) {
 			context.GetLogger(r.ctx).Debugf("image %q not found", imageName)

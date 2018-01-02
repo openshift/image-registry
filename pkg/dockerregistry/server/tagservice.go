@@ -35,7 +35,7 @@ func (t tagService) Get(ctx context.Context, tag string) (distribution.Descripto
 	}
 
 	if !t.repo.app.config.Pullthrough.Enabled {
-		image, err := t.repo.getImage(dgst)
+		image, err := t.repo.imageStream.getImage(ctx, dgst)
 		if err != nil {
 			return distribution.Descriptor{}, err
 		}
@@ -78,7 +78,7 @@ func (t tagService) All(ctx context.Context) ([]string, error) {
 				continue
 			}
 
-			image, err := t.repo.getImage(dgst)
+			image, err := t.repo.imageStream.getImage(ctx, dgst)
 			if err != nil {
 				context.GetLogger(ctx).Errorf("unable to get image %s %s: %v", t.repo.imageStream.Reference(), dgst.String(), err)
 				continue
@@ -130,7 +130,7 @@ func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([
 
 		managed, found := managedImages[history.Items[0].Image]
 		if !found {
-			image, err := t.repo.getImage(dgst)
+			image, err := t.repo.imageStream.getImage(ctx, dgst)
 			if err != nil {
 				context.GetLogger(ctx).Errorf("unable to get image %s %s: %v", t.repo.imageStream.Reference(), dgst.String(), err)
 				continue
@@ -156,7 +156,7 @@ func (t tagService) Tag(ctx context.Context, tag string, dgst distribution.Descr
 		return distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
 	}
 
-	image, err := t.repo.registryOSClient.Images().Get(dgst.Digest.String(), metav1.GetOptions{})
+	image, err := t.repo.imageStream.registryOSClient.Images().Get(dgst.Digest.String(), metav1.GetOptions{})
 	if err != nil {
 		context.GetLogger(ctx).Errorf("unable to get image: %s", dgst.Digest.String())
 		return err
@@ -176,7 +176,7 @@ func (t tagService) Tag(ctx context.Context, tag string, dgst distribution.Descr
 		Image: *image,
 	}
 
-	_, err = t.repo.registryOSClient.ImageStreamMappings(imageStream.Namespace).Create(&ism)
+	_, err = t.repo.imageStream.registryOSClient.ImageStreamMappings(imageStream.Namespace).Create(&ism)
 	if quotautil.IsErrorQuotaExceeded(err) {
 		context.GetLogger(ctx).Errorf("denied creating ImageStreamMapping: %v", err)
 		return distribution.ErrAccessDenied
@@ -203,7 +203,7 @@ func (t tagService) Untag(ctx context.Context, tag string) error {
 			return err
 		}
 
-		image, err := t.repo.getImage(dgst)
+		image, err := t.repo.imageStream.getImage(ctx, dgst)
 		if err != nil {
 			return err
 		}
@@ -213,5 +213,5 @@ func (t tagService) Untag(ctx context.Context, tag string) error {
 		}
 	}
 
-	return t.repo.registryOSClient.ImageStreamTags(imageStream.Namespace).Delete(imageapi.JoinImageStreamTag(imageStream.Name, tag), &metav1.DeleteOptions{})
+	return t.repo.imageStream.registryOSClient.ImageStreamTags(imageStream.Namespace).Delete(imageapi.JoinImageStreamTag(imageStream.Name, tag), &metav1.DeleteOptions{})
 }

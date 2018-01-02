@@ -152,7 +152,7 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 		return nil
 	}
 
-	lrs, err := getLimitRangeList(ctx, repo.registryOSClient, repo.imageStream.namespace, repo.app.quotaEnforcing)
+	lrs, err := getLimitRangeList(ctx, repo.imageStream.registryOSClient, repo.imageStream.namespace, repo.app.quotaEnforcing)
 	if err != nil {
 		return err
 	}

@@ -1,10 +1,23 @@
 package server
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/docker/distribution/digest"
+
+	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+)
 
 type imageStream struct {
 	namespace string
 	name      string
+
+	registryOSClient client.Interface
+
+	// cachedImages contains images cached for the lifetime of the request being handled.
+	cachedImages map[digest.Digest]*imageapiv1.Image
 }
 
 func (is *imageStream) Reference() string {

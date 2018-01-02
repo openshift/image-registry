@@ -187,7 +187,7 @@ func storeLocalInBackground(ctx context.Context, repo *repository, localBlobStor
 		repo.imageStream.namespace,
 		repo.imageStream.name,
 		repo.imageStreamGetter.get,
-		repo.registryOSClient,
+		repo.imageStream.registryOSClient,
 		repo.cache)
 
 	go func(dgst digest.Digest) {

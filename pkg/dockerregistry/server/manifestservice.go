@@ -184,7 +184,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		}
 	}
 
-	if _, err = m.repo.registryOSClient.ImageStreamMappings(m.repo.imageStream.namespace).Create(&ism); err != nil {
+	if _, err = m.repo.imageStream.registryOSClient.ImageStreamMappings(m.repo.imageStream.namespace).Create(&ism); err != nil {
 		// if the error was that the image stream wasn't found, try to auto provision it
 		statusErr, ok := err.(*kerrors.StatusError)
 		if !ok {
@@ -214,7 +214,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		}
 
 		// try to create the ISM again
-		if _, err := m.repo.registryOSClient.ImageStreamMappings(m.repo.imageStream.namespace).Create(&ism); err != nil {
+		if _, err := m.repo.imageStream.registryOSClient.ImageStreamMappings(m.repo.imageStream.namespace).Create(&ism); err != nil {
 			if quotautil.IsErrorQuotaExceeded(err) {
 				context.GetLogger(ctx).Errorf("denied a creation of ImageStreamMapping: %v", err)
 				return "", distribution.ErrAccessDenied

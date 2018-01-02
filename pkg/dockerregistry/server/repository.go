@@ -18,7 +18,6 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
@@ -48,15 +47,12 @@ func init() {
 type repository struct {
 	distribution.Repository
 
-	ctx              context.Context
-	app              *App
-	registryOSClient client.Interface
-	crossmount       bool
+	ctx        context.Context
+	app        *App
+	crossmount bool
 
 	imageStream imageStream
 
-	// cachedImages contains images cached for the lifetime of the request being handled.
-	cachedImages map[digest.Digest]*imageapiv1.Image
 	// cachedImageStream stays cached for the entire time of handling signle repository-scoped request.
 	imageStreamGetter *cachedImageStreamGetter
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
@@ -92,14 +88,14 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 
 		ctx:               ctx,
 		app:               app,
-		registryOSClient:  registryOSClient,
 		imageStreamGetter: imageStreamGetter,
-		cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
 		crossmount:        crossmount,
 
 		imageStream: imageStream{
-			namespace: nameParts[0],
-			name:      nameParts[1],
+			namespace:        nameParts[0],
+			name:             nameParts[1],
+			registryOSClient: registryOSClient,
+			cachedImages:     make(map[digest.Digest]*imageapiv1.Image),
 		},
 	}
 
@@ -254,23 +250,23 @@ func (r *repository) createImageStream(ctx context.Context) (*imageapiv1.ImageSt
 }
 
 // getImage retrieves the Image with digest `dgst`. No authorization check is done.
-func (r *repository) getImage(dgst digest.Digest) (*imageapiv1.Image, error) {
-	if image, exists := r.cachedImages[dgst]; exists {
-		context.GetLogger(r.ctx).Infof("(*repository).getImage: returning cached copy of %s", image.Name)
+func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
+	if image, exists := is.cachedImages[dgst]; exists {
+		context.GetLogger(ctx).Infof("(*imageStream).getImage: returning cached copy of %s", image.Name)
 		return image, nil
 	}
 
-	image, err := r.registryOSClient.Images().Get(dgst.String(), metav1.GetOptions{})
+	image, err := is.registryOSClient.Images().Get(dgst.String(), metav1.GetOptions{})
 	if err != nil {
-		context.GetLogger(r.ctx).Errorf("failed to get image: %v", err)
-		return nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
+		context.GetLogger(ctx).Errorf("failed to get image: %v", err)
+		return nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
-	context.GetLogger(r.ctx).Infof("(*repository).getImage: got image %s", image.Name)
+	context.GetLogger(ctx).Infof("(*imageStream).getImage: got image %s", image.Name)
 	if err := imageapiv1.ImageWithMetadata(image); err != nil {
 		return nil, err
 	}
-	r.cachedImages[dgst] = image
+	is.cachedImages[dgst] = image
 	return image, nil
 }
 
@@ -298,7 +294,7 @@ func (r *repository) getStoredImageOfImageStream(dgst digest.Digest) (*imageapiv
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
 	}
 
-	image, err := r.getImage(dgst)
+	image, err := r.imageStream.getImage(r.ctx, dgst)
 	if err != nil {
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
 	}
@@ -327,7 +323,7 @@ func (r *repository) getImageOfImageStream(dgst digest.Digest) (*imageapiv1.Imag
 
 // updateImage modifies the Image.
 func (r *repository) updateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
-	return r.registryOSClient.Images().Update(image)
+	return r.imageStream.registryOSClient.Images().Update(image)
 }
 
 // rememberLayersOfImage caches the layer digests of given image

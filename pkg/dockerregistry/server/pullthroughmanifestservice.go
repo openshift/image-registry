@@ -77,7 +77,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 }
 
 func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
-	retriever := getImportContext(ctx, m.repo.registryOSClient, m.repo.imageStream.namespace, m.repo.imageStream.name)
+	retriever := getImportContext(ctx, m.repo.imageStream.registryOSClient, m.repo.imageStream.namespace, m.repo.imageStream.name)
 
 	// determine, whether to fall-back to insecure transport based on a specification of image's tag
 	// if the client pulls by tag, use that
