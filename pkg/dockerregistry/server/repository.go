@@ -360,13 +360,6 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 		context.GetLogger(r.ctx).Errorf("cannot remember layers of image %q: %v", image.Name, err)
 		return
 	}
-	dgst, err := mh.Digest()
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("cannot get manifest digest of image %q: %v", image.Name, err)
-		return
-	}
-
-	_ = r.cache.AddDigest(dgst, cacheName)
 	_ = r.cache.AddManifest(mh.Manifest(), cacheName)
 }
 
@@ -376,14 +369,7 @@ func (r *repository) manifestFromImageWithCachedLayers(image *imageapiv1.Image, 
 	if err != nil {
 		return
 	}
-	dgst, err := mh.Digest()
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("cannot get payload from manifest handler: %v", err)
-		return
-	}
 	manifest = mh.Manifest()
-
-	_ = r.cache.AddDigest(dgst, cacheName)
 	_ = r.cache.AddManifest(manifest, cacheName)
 	return
 }
