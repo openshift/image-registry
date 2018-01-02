@@ -53,8 +53,6 @@ type repository struct {
 
 	imageStream imageStream
 
-	// cachedImageStream stays cached for the entire time of handling signle repository-scoped request.
-	imageStreamGetter *cachedImageStreamGetter
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
 	// cache is used to associate a digest with a repository name.
@@ -86,16 +84,16 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 	r := &repository{
 		Repository: repo,
 
-		ctx:               ctx,
-		app:               app,
-		imageStreamGetter: imageStreamGetter,
-		crossmount:        crossmount,
+		ctx:        ctx,
+		app:        app,
+		crossmount: crossmount,
 
 		imageStream: imageStream{
-			namespace:        nameParts[0],
-			name:             nameParts[1],
-			registryOSClient: registryOSClient,
-			cachedImages:     make(map[digest.Digest]*imageapiv1.Image),
+			namespace:         nameParts[0],
+			name:              nameParts[1],
+			registryOSClient:  registryOSClient,
+			cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
+			imageStreamGetter: imageStreamGetter,
 		},
 	}
 
@@ -221,9 +219,9 @@ func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorServic
 }
 
 // createImageStream creates a new image stream corresponding to r and caches it.
-func (r *repository) createImageStream(ctx context.Context) (*imageapiv1.ImageStream, error) {
-	stream := imageapiv1.ImageStream{}
-	stream.Name = r.imageStream.name
+func (is *imageStream) createImageStream(ctx context.Context) (*imageapiv1.ImageStream, error) {
+	stream := &imageapiv1.ImageStream{}
+	stream.Name = is.name
 
 	uclient, ok := userClientFrom(ctx)
 	if !ok {
@@ -232,11 +230,11 @@ func (r *repository) createImageStream(ctx context.Context) (*imageapiv1.ImageSt
 		return nil, errcode.ErrorCodeUnknown.WithDetail(errmsg)
 	}
 
-	is, err := uclient.ImageStreams(r.imageStream.namespace).Create(&stream)
+	stream, err := uclient.ImageStreams(is.namespace).Create(stream)
 	switch {
 	case kerrors.IsAlreadyExists(err), kerrors.IsConflict(err):
 		context.GetLogger(ctx).Infof("conflict while creating ImageStream: %v", err)
-		return r.imageStreamGetter.get()
+		return is.imageStreamGetter.get()
 	case kerrors.IsForbidden(err), kerrors.IsUnauthorized(err), quotautil.IsErrorQuotaExceeded(err):
 		context.GetLogger(ctx).Errorf("denied creating ImageStream: %v", err)
 		return nil, errcode.ErrorCodeDenied.WithDetail(err)
@@ -245,8 +243,8 @@ func (r *repository) createImageStream(ctx context.Context) (*imageapiv1.ImageSt
 		return nil, errcode.ErrorCodeUnknown.WithDetail(err)
 	}
 
-	r.imageStreamGetter.cacheImageStream(is)
-	return is, nil
+	is.imageStreamGetter.cacheImageStream(stream)
+	return stream, nil
 }
 
 // getImage retrieves the Image with digest `dgst`. No authorization check is done.
@@ -281,22 +279,22 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 //
 // If you need the image object to be modified according to image stream tag,
 // please use getImageOfImageStream.
-func (r *repository) getStoredImageOfImageStream(dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error) {
-	stream, err := r.imageStreamGetter.get()
+func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error) {
+	stream, err := is.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(r.ctx).Errorf("failed to get ImageStream: %v", err)
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
+		context.GetLogger(ctx).Errorf("failed to get ImageStream: %v", err)
+		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
 	tagEvent, err := imageapiv1.ResolveImageID(stream, dgst.String())
 	if err != nil {
-		context.GetLogger(r.ctx).Errorf("failed to resolve image %s in ImageStream %s: %v", dgst.String(), r.imageStream.Reference(), err)
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
+		context.GetLogger(ctx).Errorf("failed to resolve image %s in ImageStream %s: %v", dgst.String(), is.Reference(), err)
+		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
-	image, err := r.imageStream.getImage(r.ctx, dgst)
+	image, err := is.getImage(ctx, dgst)
 	if err != nil {
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.imageStream.name, dgst, err)
+		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
 	return image, tagEvent, stream, nil
@@ -310,8 +308,8 @@ func (r *repository) getStoredImageOfImageStream(dgst digest.Digest) (*imageapiv
 // NOTE: due to on the fly modification, the returned image object should
 // not be sent to the master API. If you need unmodified version of the
 // image object, please use getStoredImageOfImageStream.
-func (r *repository) getImageOfImageStream(dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error) {
-	image, tagEvent, stream, err := r.getStoredImageOfImageStream(dgst)
+func (is *imageStream) getImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error) {
+	image, tagEvent, stream, err := is.getStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -322,8 +320,8 @@ func (r *repository) getImageOfImageStream(dgst digest.Digest) (*imageapiv1.Imag
 }
 
 // updateImage modifies the Image.
-func (r *repository) updateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
-	return r.imageStream.registryOSClient.Images().Update(image)
+func (is *imageStream) updateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
+	return is.registryOSClient.Images().Update(image)
 }
 
 // rememberLayersOfImage caches the layer digests of given image

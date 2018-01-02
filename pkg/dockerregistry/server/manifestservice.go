@@ -49,7 +49,7 @@ type manifestService struct {
 func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Exists")
 
-	image, _, err := m.repo.getImageOfImageStream(dgst)
+	image, _, err := m.repo.imageStream.getImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return false, err
 	}
@@ -60,7 +60,7 @@ func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool,
 func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Get")
 
-	image, _, _, err := m.repo.getStoredImageOfImageStream(dgst)
+	image, _, _, err := m.repo.imageStream.getStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 			return "", err
 		}
 
-		if _, err := m.repo.createImageStream(ctx); err != nil {
+		if _, err := m.repo.imageStream.createImageStream(ctx); err != nil {
 			if e, ok := err.(errcode.Error); ok && e.ErrorCode() == errcode.ErrorCodeUnknown {
 				// TODO: convert statusErr to distribution error
 				return "", statusErr
@@ -280,7 +280,7 @@ func (m *manifestService) storeManifestLocally(ctx context.Context, image *image
 	}
 	image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] = "true"
 
-	if _, err := m.repo.updateImage(image); err != nil {
+	if _, err := m.repo.imageStream.updateImage(image); err != nil {
 		context.GetLogger(ctx).Errorf("error updating Image: %v", err)
 	}
 }

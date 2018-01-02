@@ -38,7 +38,7 @@ func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest
 
 func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
-	image, _, err := m.repo.getImageOfImageStream(dgst)
+	image, _, err := m.repo.imageStream.getImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}
@@ -89,14 +89,14 @@ func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Conte
 		}
 	}
 	if len(tag) == 0 {
-		is, err := m.repo.imageStreamGetter.get()
+		is, err := m.repo.imageStream.imageStreamGetter.get()
 		if err != nil {
 			return nil, err // this is impossible
 		}
 		// if the client pulled by digest, find the corresponding tag in the image stream
 		tag, _ = imageapiv1.LatestImageTagEvent(is, dgst.String())
 	}
-	insecure := pullInsecureByDefault(m.repo.imageStreamGetter.get, tag)
+	insecure := pullInsecureByDefault(m.repo.imageStream.imageStreamGetter.get, tag)
 
 	return retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), insecure)
 }

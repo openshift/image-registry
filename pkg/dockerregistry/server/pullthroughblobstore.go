@@ -186,7 +186,7 @@ func storeLocalInBackground(ctx context.Context, repo *repository, localBlobStor
 	remoteGetter := NewBlobGetterService(
 		repo.imageStream.namespace,
 		repo.imageStream.name,
-		repo.imageStreamGetter.get,
+		repo.imageStream.imageStreamGetter.get,
 		repo.imageStream.registryOSClient,
 		repo.cache)
 

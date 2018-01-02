@@ -19,7 +19,7 @@ type tagService struct {
 }
 
 func (t tagService) Get(ctx context.Context, tag string) (distribution.Descriptor, error) {
-	imageStream, err := t.repo.imageStreamGetter.get()
+	imageStream, err := t.repo.imageStream.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return distribution.Descriptor{}, distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
@@ -51,7 +51,7 @@ func (t tagService) Get(ctx context.Context, tag string) (distribution.Descripto
 func (t tagService) All(ctx context.Context) ([]string, error) {
 	tags := []string{}
 
-	imageStream, err := t.repo.imageStreamGetter.get()
+	imageStream, err := t.repo.imageStream.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return tags, distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
@@ -99,7 +99,7 @@ func (t tagService) All(ctx context.Context) ([]string, error) {
 func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([]string, error) {
 	tags := []string{}
 
-	imageStream, err := t.repo.imageStreamGetter.get()
+	imageStream, err := t.repo.imageStream.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return tags, distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
@@ -150,7 +150,7 @@ func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([
 }
 
 func (t tagService) Tag(ctx context.Context, tag string, dgst distribution.Descriptor) error {
-	imageStream, err := t.repo.imageStreamGetter.get()
+	imageStream, err := t.repo.imageStream.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
@@ -186,7 +186,7 @@ func (t tagService) Tag(ctx context.Context, tag string, dgst distribution.Descr
 }
 
 func (t tagService) Untag(ctx context.Context, tag string) error {
-	imageStream, err := t.repo.imageStreamGetter.get()
+	imageStream, err := t.repo.imageStream.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("error retrieving ImageStream %s: %v", t.repo.imageStream.Reference(), err)
 		return distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}

@@ -102,7 +102,7 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 	}
 
 	// verify directly with etcd
-	is, err := r.imageStreamGetter.get()
+	is, err := r.imageStream.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(r.ctx).Errorf("failed to get image stream: %v", err)
 		return logFound(false)

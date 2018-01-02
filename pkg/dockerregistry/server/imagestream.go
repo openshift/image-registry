@@ -18,6 +18,8 @@ type imageStream struct {
 
 	// cachedImages contains images cached for the lifetime of the request being handled.
 	cachedImages map[digest.Digest]*imageapiv1.Image
+	// cachedImageStream stays cached for the entire time of handling signle repository-scoped request.
+	imageStreamGetter *cachedImageStreamGetter
 }
 
 func (is *imageStream) Reference() string {
