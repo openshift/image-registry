@@ -14,6 +14,7 @@ import (
 
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
+	projectapiv1 "github.com/openshift/origin/pkg/project/apis/project/v1"
 
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	"github.com/openshift/image-registry/pkg/testframework"
@@ -76,11 +77,82 @@ func TestCrossMount(t *testing.T) {
 	master := testframework.NewMaster(t)
 	defer master.Close()
 
+	adminKubeConfig := master.AdminKubeConfig()
+
 	alice := master.CreateUser("alice", "qwerty")
 	bob := master.CreateUser("bob", "123456")
 
-	const aliceprojectName = "aliceproject"
-	const bobprojectName = "bobproject"
+	type closeFn func()
+	type sourceGenerator func(t *testing.T, registry *testframework.Registry) (*projectapiv1.Project, reference.Named, distribution.Manifest, closeFn)
+	type destinationGenerator func(t *testing.T, sourceProject *projectapiv1.Project) (*projectapiv1.Project, string, closeFn)
+
+	noopClose := func() {}
+
+	// As deletion of a project is an async operation, we are going to create each new project with a unique name.
+	seq := 0
+	uniqueName := func(name string) string {
+		seq++
+		return fmt.Sprintf("uniq%d-%s", seq, name)
+	}
+
+	// Upload a random image to a new project.
+	uploadedImage := func(user *testframework.User, repoName string) sourceGenerator {
+		return func(t *testing.T, registry *testframework.Registry) (*projectapiv1.Project, reference.Named, distribution.Manifest, closeFn) {
+			project := testframework.CreateProject(t, adminKubeConfig, uniqueName(user.Name), user.Name)
+			close := func() {
+				testframework.DeleteProject(t, adminKubeConfig, project.Name)
+			}
+
+			repo := registry.Repository(project.Name, repoName, user)
+			manifest, err := registrytest.UploadSchema2Image(context.Background(), repo, "latest")
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("uploaded manifest %s: %v", repo.Named(), manifest)
+
+			named, err := reference.WithName(fmt.Sprintf("%s/%s", project.Name, repoName))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return project, named, manifest, close
+		}
+	}
+
+	// Upload a random image and tag it into a new image stream.
+	copiedImage := func(user *testframework.User, repoName string, copiedName string) sourceGenerator {
+		return func(t *testing.T, registry *testframework.Registry) (*projectapiv1.Project, reference.Named, distribution.Manifest, closeFn) {
+			project, _, manifest, close := uploadedImage(user, repoName)(t, registry)
+
+			imageClient := imagev1.NewForConfigOrDie(user.KubeConfig())
+			if err := copyISTag(t, imageClient, project.Name, copiedName+":latest", project.Name, repoName+":latest"); err != nil {
+				t.Fatal(err)
+			}
+
+			named, err := reference.WithName(fmt.Sprintf("%s/%s", project.Name, copiedName))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return project, named, manifest, close
+		}
+	}
+
+	sameProject := func(repoName string) destinationGenerator {
+		return func(t *testing.T, sourceProject *projectapiv1.Project) (*projectapiv1.Project, string, closeFn) {
+			return sourceProject, repoName, noopClose
+		}
+	}
+	anotherProject := func(user *testframework.User, repoName string) destinationGenerator {
+		return func(t *testing.T, sourceProject *projectapiv1.Project) (*projectapiv1.Project, string, closeFn) {
+			project := testframework.CreateProject(t, adminKubeConfig, uniqueName(user.Name), user.Name)
+			close := func() {
+				testframework.DeleteProject(t, adminKubeConfig, project.Name)
+			}
+
+			return project, repoName, close
+		}
+	}
 
 	wantCrossMountError := func(err error) error {
 		if _, ok := err.(errRegistryWantsContent); !ok {
@@ -96,61 +168,56 @@ func TestCrossMount(t *testing.T) {
 	}
 
 	for _, test := range []struct {
-		name                                       string
-		prefix                                     string
-		actor                                      *testframework.User
-		destinationProject, destinationImageStream string
-		sourceProject, sourceImageStream           string
-		check                                      func(error) error
+		name        string
+		prefix      string
+		actor       *testframework.User
+		source      sourceGenerator
+		destination destinationGenerator
+		check       func(error) error
 	}{
 		{
-			"alice_from_foo", "a1-",
-			alice, aliceprojectName, "mounted-foo", aliceprojectName, "foo",
-			wantSuccess,
+			name:        "mount own image into the same namespace",
+			actor:       alice,
+			source:      uploadedImage(alice, "foo"),
+			destination: sameProject("mounted-foo"),
+			check:       wantSuccess,
 		},
 		{
-			"alice_from_foo-copy", "a2-",
-			alice, aliceprojectName, "mounted-foo-copy", aliceprojectName, "foo-copy",
-			wantSuccess,
+			name:        "mount own copied image into the same namespace",
+			actor:       alice,
+			source:      copiedImage(alice, "foo", "foo-copy"),
+			destination: sameProject("mounted-foo-copy"),
+			check:       wantSuccess,
 		},
 		{
-			"bob_from_foo", "b1-",
-			bob, bobprojectName, "from-foo", aliceprojectName, "foo",
-			wantCrossMountError,
+			name:        "mount another's image",
+			actor:       bob,
+			source:      uploadedImage(alice, "foo"),
+			destination: anotherProject(bob, "from-foo"),
+			check:       wantCrossMountError,
 		},
 		{
-			"bob_from_foo-copy", "b2-",
-			bob, bobprojectName, "from-foo-copy", aliceprojectName, "foo-copy",
-			wantCrossMountError,
+			name:        "mount another's copied image",
+			actor:       bob,
+			source:      copiedImage(alice, "foo", "foo-copy"),
+			destination: anotherProject(bob, "from-foo-copy"),
+			check:       wantCrossMountError,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			aliceproject := testframework.CreateProject(t, master.AdminKubeConfig(), test.prefix+aliceprojectName, alice.Name)
-			defer testframework.DeleteProject(t, master.AdminKubeConfig(), aliceproject.Name)
-			bobproject := testframework.CreateProject(t, master.AdminKubeConfig(), test.prefix+bobprojectName, bob.Name)
-			defer testframework.DeleteProject(t, master.AdminKubeConfig(), bobproject.Name)
-
 			registry := master.StartRegistry(t)
 			defer registry.Close()
 
-			// Upload a random image to aliceproject/foo:latest
-			aliceFooRepo := registry.Repository(aliceproject.Name, "foo", alice)
-			manifest, err := registrytest.UploadSchema2Image(context.Background(), aliceFooRepo, "latest")
-			if err != nil {
-				t.Fatal(err)
-			}
-			t.Logf("uploaded manifest %s: %v", aliceFooRepo.Named(), manifest)
+			sourceProject, sourceNamed, manifest, sourceCloseFn := test.source(t, registry)
+			defer sourceCloseFn()
 
-			// Copy image stream tag aliceproject/foo:latest to aliceproject/foo-copy:latest
-			aliceImageClient := imagev1.NewForConfigOrDie(alice.KubeConfig())
-			if err := copyISTag(t, aliceImageClient, aliceproject.Name, "foo-copy:latest", aliceproject.Name, "foo:latest"); err != nil {
-				t.Fatal(err)
-			}
+			destinationProject, destinationImageStream, destinationCloseFn := test.destination(t, sourceProject)
+			defer destinationCloseFn()
 
-			// Cross-mount image
-			repo := registry.Repository(test.prefix+test.destinationProject, test.destinationImageStream, test.actor)
-			sourceNamed, _ := reference.WithName(fmt.Sprintf("%s/%s", test.prefix+test.sourceProject, test.sourceImageStream))
-			err = test.check(crossMountImage(context.Background(), repo, "latest", sourceNamed, manifest))
+			t.Log("environment is ready for test")
+
+			destinationRepo := registry.Repository(destinationProject.Name, destinationImageStream, test.actor)
+			err := test.check(crossMountImage(context.Background(), destinationRepo, "latest", sourceNamed, manifest))
 			if err != nil {
 				t.Error(err)
 			}
