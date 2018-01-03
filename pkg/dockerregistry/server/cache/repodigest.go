@@ -6,9 +6,9 @@ import (
 )
 
 type RepositoryDigest interface {
-	AddDigest(dgst digest.Digest, repository string) error
+	AddDigest(dgst digest.Digest, repository string, desc *distribution.Descriptor) error
 	RemoveDigest(dgst digest.Digest, repository string) error
-	AddManifest(manifest distribution.Manifest, repository string) error
+	AddManifest(manifest distribution.Manifest, repository string, isManaged bool) error
 	ContainsRepository(dgst digest.Digest, repository string) bool
 	Repositories(dgst digest.Digest) ([]string, error)
 }
@@ -19,9 +19,10 @@ type RepoDigest struct {
 
 var _ RepositoryDigest = &RepoDigest{}
 
-func (rd *RepoDigest) AddDigest(dgst digest.Digest, repository string) error {
+func (rd *RepoDigest) AddDigest(dgst digest.Digest, repository string, desc *distribution.Descriptor) error {
 	return rd.Cache.Add(dgst, &DigestValue{
 		repo: &repository,
+		desc: desc,
 	})
 }
 
@@ -29,11 +30,15 @@ func (rd *RepoDigest) RemoveDigest(dgst digest.Digest, repository string) error 
 	return rd.Cache.RemoveRepository(dgst, repository)
 }
 
-func (rd *RepoDigest) AddManifest(manifest distribution.Manifest, repository string) error {
+func (rd *RepoDigest) AddManifest(manifest distribution.Manifest, repository string, isManaged bool) error {
 	refs := manifest.References()
 	for i := range refs {
+		var desc *distribution.Descriptor
+		if isManaged {
+			desc = &refs[i]
+		}
 		err := rd.Cache.Add(refs[i].Digest, &DigestValue{
-			desc: &refs[i],
+			desc: desc,
 			repo: &repository,
 		})
 		if err != nil {

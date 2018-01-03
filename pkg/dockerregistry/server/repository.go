@@ -55,8 +55,6 @@ type repository struct {
 
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
-	// cache is used to associate a digest with a repository name.
-	cache cache.RepositoryDigest
 }
 
 // newRepositoryWithClient returns a new repository middleware.
@@ -94,11 +92,10 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 			registryOSClient:  registryOSClient,
 			cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
 			imageStreamGetter: imageStreamGetter,
+			cache: &cache.RepoDigest{
+				Cache: app.cache,
+			},
 		},
-	}
-
-	r.cache = &cache.RepoDigest{
-		Cache: app.cache,
 	}
 
 	if app.config.Pullthrough.Enabled {
@@ -107,7 +104,7 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 			r.imageStream.name,
 			imageStreamGetter.get,
 			registryOSClient,
-			r.cache)
+			r.imageStream.cache)
 	}
 
 	bdsf := blobDescriptorServiceFactoryFunc(r.BlobDescriptorService)
@@ -325,42 +322,41 @@ func (is *imageStream) updateImage(image *imageapiv1.Image) (*imageapiv1.Image, 
 }
 
 // rememberLayersOfImage caches the layer digests of given image
-func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName string) {
+func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageapiv1.Image, cacheName string) {
 	if len(image.DockerImageLayers) == 0 && len(image.DockerImageManifestMediaType) > 0 && len(image.DockerImageConfig) == 0 {
 		// image has no layers
 		return
 	}
 
-	descCache := &cache.RepositoryScopedBlobDescriptor{
-		Repo:  cacheName,
-		Cache: r.app.cache,
-	}
-
 	if len(image.DockerImageLayers) > 0 {
 		for _, layer := range image.DockerImageLayers {
-			_ = descCache.SetDescriptor(r.ctx, digest.Digest(layer.Name), distribution.Descriptor{
-				Digest:    digest.Digest(layer.Name),
-				Size:      layer.LayerSize,
-				MediaType: layer.MediaType,
-			})
+			var desc *distribution.Descriptor
+			if isImageManaged(image) {
+				desc = &distribution.Descriptor{
+					Digest:    digest.Digest(layer.Name),
+					Size:      layer.LayerSize,
+					MediaType: layer.MediaType,
+				}
+			}
+			_ = is.cache.AddDigest(digest.Digest(layer.Name), cacheName, desc)
 		}
 		meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
 		if !ok {
-			context.GetLogger(r.ctx).Errorf("image does not have metadata %s", image.Name)
+			context.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
 			return
 		}
 		// remember reference to manifest config as well for schema 2
 		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
-			_ = r.cache.AddDigest(digest.Digest(meta.ID), cacheName)
+			_ = is.cache.AddDigest(digest.Digest(meta.ID), cacheName, nil)
 		}
-		return
+	} else {
+		manifest, err := NewManifestFromImage(image)
+		if err != nil {
+			context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
+			return
+		}
+		_ = is.cache.AddManifest(manifest, cacheName, isImageManaged(image))
 	}
-	manifest, err := NewManifestFromImage(image)
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("cannot remember layers of image %q: %v", image.Name, err)
-		return
-	}
-	_ = r.cache.AddManifest(manifest, cacheName)
 }
 
 func (r *repository) checkPendingErrors(ctx context.Context) error {

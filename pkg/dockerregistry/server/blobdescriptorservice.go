@@ -84,7 +84,7 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 // oldest until found. Each processed image will update local cache of blobs.
 func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 	repoCacheName := r.imageStream.Reference()
-	if r.cache.ContainsRepository(dgst, repoCacheName) {
+	if r.imageStream.cache.ContainsRepository(dgst, repoCacheName) {
 		context.GetLogger(r.ctx).Debugf("found cached blob %q in repository %s", dgst.String(), r.Named().Name())
 		return true
 	}
@@ -142,8 +142,7 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 
 // imageHasBlob returns true if the image identified by imageName refers to the given blob. The image is
 // fetched. If requireManaged is true and the image is not managed (it refers to remote registry), the image
-// will not be processed. Fetched image will update local cache of blobs -> repositories with (blobDigest,
-// cacheName) pairs.
+// will not be processed.
 func imageHasBlob(
 	r *repository,
 	cacheName,
@@ -171,7 +170,7 @@ func imageHasBlob(
 
 	// someone asks for manifest
 	if imageName == blobDigest {
-		r.rememberLayersOfImage(image, cacheName)
+		r.imageStream.rememberLayersOfImage(r.ctx, image, cacheName)
 		return true
 	}
 
@@ -184,7 +183,7 @@ func imageHasBlob(
 	for _, layer := range image.DockerImageLayers {
 		if layer.Name == blobDigest {
 			// remember all the layers of matching image
-			r.rememberLayersOfImage(image, cacheName)
+			r.imageStream.rememberLayersOfImage(r.ctx, image, cacheName)
 			return true
 		}
 	}
@@ -198,7 +197,7 @@ func imageHasBlob(
 	// only manifest V2 schema2 has docker image config filled where dockerImage.Metadata.id is its digest
 	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && meta.ID == blobDigest {
 		// remember manifest config reference of schema 2 as well
-		r.rememberLayersOfImage(image, cacheName)
+		r.imageStream.rememberLayersOfImage(r.ctx, image, cacheName)
 		return true
 	}
 

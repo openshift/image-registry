@@ -188,7 +188,7 @@ func storeLocalInBackground(ctx context.Context, repo *repository, localBlobStor
 		repo.imageStream.name,
 		repo.imageStream.imageStreamGetter.get,
 		repo.imageStream.registryOSClient,
-		repo.cache)
+		repo.imageStream.cache)
 
 	go func(dgst digest.Digest) {
 		if writeLimiter != nil {

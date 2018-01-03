@@ -7,6 +7,7 @@ import (
 
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 )
 
@@ -20,6 +21,8 @@ type imageStream struct {
 	cachedImages map[digest.Digest]*imageapiv1.Image
 	// cachedImageStream stays cached for the entire time of handling signle repository-scoped request.
 	imageStreamGetter *cachedImageStreamGetter
+	// cache is used to associate a digest with a repository name.
+	cache cache.RepositoryDigest
 }
 
 func (is *imageStream) Reference() string {

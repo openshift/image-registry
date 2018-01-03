@@ -31,6 +31,10 @@ func getSchema1Manifest(repo *testframework.Repository, tag string) (distributio
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("get manifest %s:%s: %s", repo.RepoName(), tag, resp.Status)
+	}
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read manifest %s:%s: %v", repo.RepoName(), tag, err)
