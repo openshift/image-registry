@@ -87,7 +87,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	case distribution.ErrManifestUnknownRevision:
 		break
 	case nil:
-		_ = m.imageStream.cache.AddManifest(manifest, ref.Exact(), isImageManaged(image))
+		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
 	default:
@@ -106,7 +106,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 
 	manifest, err = NewManifestFromImage(image)
 	if err == nil {
-		_ = m.imageStream.cache.AddManifest(manifest, ref.Exact(), isImageManaged(image))
+		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
 		m.migrateManifest(ctx, image, dgst, manifest, false)
 	}
 

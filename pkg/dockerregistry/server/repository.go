@@ -357,7 +357,14 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 			context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
 			return
 		}
-		_ = is.cache.AddManifest(manifest, cacheName, isImageManaged(image))
+		refs := manifest.References()
+		for i := range refs {
+			var desc *distribution.Descriptor
+			if isImageManaged(image) {
+				desc = &refs[i]
+			}
+			_ = is.cache.AddDigest(refs[i].Digest, cacheName, desc)
+		}
 	}
 }
 

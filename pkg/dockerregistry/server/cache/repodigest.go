@@ -8,7 +8,6 @@ import (
 type RepositoryDigest interface {
 	AddDigest(dgst digest.Digest, repository string, desc *distribution.Descriptor) error
 	RemoveDigest(dgst digest.Digest, repository string) error
-	AddManifest(manifest distribution.Manifest, repository string, isManaged bool) error
 	ContainsRepository(dgst digest.Digest, repository string) bool
 	Repositories(dgst digest.Digest) ([]string, error)
 }
@@ -28,24 +27,6 @@ func (rd *RepoDigest) AddDigest(dgst digest.Digest, repository string, desc *dis
 
 func (rd *RepoDigest) RemoveDigest(dgst digest.Digest, repository string) error {
 	return rd.Cache.RemoveRepository(dgst, repository)
-}
-
-func (rd *RepoDigest) AddManifest(manifest distribution.Manifest, repository string, isManaged bool) error {
-	refs := manifest.References()
-	for i := range refs {
-		var desc *distribution.Descriptor
-		if isManaged {
-			desc = &refs[i]
-		}
-		err := rd.Cache.Add(refs[i].Digest, &DigestValue{
-			desc: desc,
-			repo: &repository,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (rd *RepoDigest) ContainsRepository(dgst digest.Digest, repository string) bool {
