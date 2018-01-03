@@ -19,7 +19,7 @@ type imageStream struct {
 
 	// cachedImages contains images cached for the lifetime of the request being handled.
 	cachedImages map[digest.Digest]*imageapiv1.Image
-	// cachedImageStream stays cached for the entire time of handling signle repository-scoped request.
+	// imageStreamGetter fetches and caches an image stream. The image stream stays cached for the entire time of handling single repository-scoped request.
 	imageStreamGetter *cachedImageStreamGetter
 	// cache is used to associate a digest with a repository name.
 	cache cache.RepositoryDigest

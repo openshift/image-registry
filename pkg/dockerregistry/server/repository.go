@@ -57,7 +57,7 @@ type repository struct {
 	remoteBlobGetter BlobGetterService
 }
 
-// newRepositoryWithClient returns a new repository middleware.
+// Repository returns a new repository middleware.
 func (app *App) Repository(ctx context.Context, repo distribution.Repository, crossmount bool) (distribution.Repository, distribution.BlobDescriptorServiceFactory, error) {
 	registryOSClient, err := app.registryClient.Client()
 	if err != nil {
@@ -217,7 +217,7 @@ func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorServic
 	return svc
 }
 
-// createImageStream creates a new image stream corresponding to r and caches it.
+// createImageStream creates a new image stream and caches it.
 func (is *imageStream) createImageStream(ctx context.Context) (*imageapiv1.ImageStream, error) {
 	stream := &imageapiv1.ImageStream{}
 	stream.Name = is.name
@@ -268,8 +268,8 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 }
 
 // getStoredImageOfImageStream retrieves the Image with digest `dgst` and
-// ensures that the image belongs to the ImageStream associated with r. It
-// uses two queries to master API:
+// ensures that the image belongs to the image stream `is`. It uses two
+// queries to master API:
 //
 //  1st to get a corresponding image stream
 //  2nd to get the image
@@ -299,10 +299,10 @@ func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst dig
 	return image, tagEvent, stream, nil
 }
 
-// getImageOfImageStream retrieves the Image with digest `dgst` for
-// the ImageStream associated with r. The image's field DockerImageReference
-// is modified on the fly to pretend that we've got the image from the source
-// from which the image was tagged.to match tag's DockerImageReference.
+// getImageOfImageStream retrieves the Image with digest `dgst` for the image
+// stream. The image's field DockerImageReference is modified on the fly to
+// pretend that we've got the image from the source from which the image was
+// tagged to match tag's DockerImageReference.
 //
 // NOTE: due to on the fly modification, the returned image object should
 // not be sent to the master API. If you need unmodified version of the
