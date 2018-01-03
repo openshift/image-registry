@@ -44,7 +44,8 @@ func unmarshalManifestSchema1(content []byte, signatures [][]byte) (distribution
 }
 
 type manifestSchema1Handler struct {
-	repo       *repository
+	serverAddr string
+	blobStore  distribution.BlobStore
 	manifest   *schema1.SignedManifest
 	blobsCache map[digest.Digest]distribution.Descriptor
 }
@@ -69,7 +70,7 @@ func (h *manifestSchema1Handler) statBlob(ctx context.Context, dgst digest.Diges
 		return desc, nil
 	}
 
-	desc, err := h.repo.Blobs(ctx).Stat(ctx, dgst)
+	desc, err := h.blobStore.Stat(ctx, dgst)
 	if err != nil {
 		return desc, err
 	}
@@ -115,7 +116,7 @@ func (h *manifestSchema1Handler) Verify(ctx context.Context, skipDependencyVerif
 	// successful. This means that the docker client will not attempt to send them
 	// to us as it will assume that the registry has them.
 
-	if len(path.Join(h.repo.app.config.Server.Addr, h.manifest.Name)) > reference.NameTotalLengthMax {
+	if len(path.Join(h.serverAddr, h.manifest.Name)) > reference.NameTotalLengthMax {
 		errs = append(errs,
 			distribution.ErrManifestNameInvalid{
 				Name:   h.manifest.Name,

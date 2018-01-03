@@ -26,14 +26,11 @@ func TestManifestServiceExists(t *testing.T) {
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testImage := testutil.AddRandomImage(t, fos, namespace, repo, tag)
 
-	r := newTestRepository(ctx, t, namespace, repo, testRepositoryOptions{
-		client: registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-	})
+	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &manifestService{
-		repo:          r,
-		manifests:     nil,
-		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
+		imageStream:   imageStream,
+		acceptSchema2: true,
 	}
 
 	ok, err := ms.Exists(ctx, digest.Digest(testImage.Name))
@@ -83,16 +80,14 @@ func TestManifestServiceGetDoesntChangeDockerImageReference(t *testing.T) {
 		t.Fatalf("img.DockerImageReference: want %q, got %q", "1", img.DockerImageReference)
 	}
 
-	r := newTestRepository(ctx, t, namespace, repo, testRepositoryOptions{
-		client: registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-	})
+	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &manifestService{
-		repo: r,
 		manifests: newTestManifestService(repo, map[digest.Digest]distribution.Manifest{
 			digest.Digest(testImage.Name): &schema2.DeserializedManifest{},
 		}),
-		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
+		imageStream:   imageStream,
+		acceptSchema2: true,
 	}
 
 	_, err = ms.Get(ctx, digest.Digest(testImage.Name))
@@ -133,15 +128,13 @@ func TestManifestServicePut(t *testing.T) {
 
 	tms := newTestManifestService(repoName, nil)
 
-	r := newTestRepository(ctx, t, namespace, repo, testRepositoryOptions{
-		client: registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-		blobs:  bs,
-	})
+	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &manifestService{
-		repo:          r,
 		manifests:     tms,
-		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
+		blobStore:     bs,
+		imageStream:   imageStream,
+		acceptSchema2: true,
 	}
 
 	manifest := &schema2.DeserializedManifest{
@@ -165,16 +158,13 @@ func TestManifestServicePut(t *testing.T) {
 		t.Fatalf("ms.Put(ctx, manifest): %s", err)
 	}
 
-	// recreate repository to reset cached image stream
-	r = newTestRepository(ctx, t, namespace, repo, testRepositoryOptions{
-		client: registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-		blobs:  bs,
-	})
+	// recreate objects to reset cached image streams
+	imageStream = newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms = &manifestService{
-		repo:          r,
 		manifests:     tms,
-		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
+		imageStream:   imageStream,
+		acceptSchema2: true,
 	}
 
 	_, err = ms.Get(ctx, dgst)

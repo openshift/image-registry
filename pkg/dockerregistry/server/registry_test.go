@@ -107,7 +107,6 @@ func (r *testRepository) Blobs(ctx context.Context) distribution.BlobStore {
 type testRepositoryOptions struct {
 	client            client.Interface
 	enablePullThrough bool
-	blobs             distribution.BlobStore
 }
 
 func newTestRepository(
@@ -132,10 +131,5 @@ func newTestRepository(
 	}
 
 	r := appRepo.(*repository)
-	// TODO(dmage): can we avoid this replacement?
-	r.Repository = &testRepository{
-		name:  named,
-		blobs: opts.blobs,
-	}
 	return r
 }

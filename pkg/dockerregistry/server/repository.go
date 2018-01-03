@@ -123,9 +123,11 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 	}
 
 	ms = &manifestService{
-		repo:          r,
 		manifests:     ms,
-		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
+		blobStore:     r.Blobs(ctx),
+		serverAddr:    r.app.config.Server.Addr,
+		imageStream:   r.imageStream,
+		acceptSchema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
 	if r.app.config.Pullthrough.Enabled {

@@ -36,7 +36,7 @@ func unmarshalManifestSchema2(content []byte) (distribution.Manifest, error) {
 }
 
 type manifestSchema2Handler struct {
-	repo         *repository
+	blobStore    distribution.BlobStore
 	manifest     *schema2.DeserializedManifest
 	cachedConfig []byte
 }
@@ -45,7 +45,7 @@ var _ ManifestHandler = &manifestSchema2Handler{}
 
 func (h *manifestSchema2Handler) Config(ctx context.Context) ([]byte, error) {
 	if h.cachedConfig == nil {
-		blob, err := h.repo.Blobs(ctx).Get(ctx, h.manifest.Config.Digest)
+		blob, err := h.blobStore.Get(ctx, h.manifest.Config.Digest)
 		if err != nil {
 			context.GetLogger(ctx).Errorf("failed to get manifest config: %v", err)
 			return nil, err
@@ -97,7 +97,7 @@ func (h *manifestSchema2Handler) verifyLayer(ctx context.Context, fsLayer distri
 		return errUnexpectedURL
 	}
 
-	desc, err := h.repo.Blobs(ctx).Stat(ctx, fsLayer.Digest)
+	desc, err := h.blobStore.Stat(ctx, fsLayer.Digest)
 	if err != nil {
 		return err
 	}

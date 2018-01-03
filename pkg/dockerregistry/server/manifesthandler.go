@@ -36,12 +36,12 @@ type ManifestHandler interface {
 }
 
 // NewManifestHandler creates a manifest handler for the given manifest.
-func NewManifestHandler(repo *repository, manifest distribution.Manifest) (ManifestHandler, error) {
+func NewManifestHandler(serverAddr string, blobStore distribution.BlobStore, manifest distribution.Manifest) (ManifestHandler, error) {
 	switch t := manifest.(type) {
 	case *schema1.SignedManifest:
-		return &manifestSchema1Handler{repo: repo, manifest: t}, nil
+		return &manifestSchema1Handler{serverAddr: serverAddr, blobStore: blobStore, manifest: t}, nil
 	case *schema2.DeserializedManifest:
-		return &manifestSchema2Handler{repo: repo, manifest: t}, nil
+		return &manifestSchema2Handler{blobStore: blobStore, manifest: t}, nil
 	default:
 		return nil, fmt.Errorf("unsupported manifest type %T", manifest)
 	}

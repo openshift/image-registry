@@ -142,7 +142,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		defer resp.Body.Close()
 
 		if resp.StatusCode != tc.expectedStatus {
-			t.Errorf("[%s] unexpected status code: %v != %v", tc.name, resp.StatusCode, tc.expectedStatus)
+			t.Errorf("[%s] unexpected status code: got %v, want %v", tc.name, resp.StatusCode, tc.expectedStatus)
 		}
 
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
