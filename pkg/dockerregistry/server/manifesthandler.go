@@ -47,25 +47,14 @@ func NewManifestHandler(repo *repository, manifest distribution.Manifest) (Manif
 	}
 }
 
-// NewManifestHandlerFromImage creates a new manifest handler for a manifest stored in the given image.
-func NewManifestHandlerFromImage(repo *repository, image *imageapiv1.Image) (ManifestHandler, error) {
-	var (
-		manifest distribution.Manifest
-		err      error
-	)
-
+// NewManifestFromImage creates a manifest for a manifest stored in the given image.
+func NewManifestFromImage(repo *repository, image *imageapiv1.Image) (distribution.Manifest, error) {
 	switch image.DockerImageManifestMediaType {
 	case "", schema1.MediaTypeManifest:
-		manifest, err = unmarshalManifestSchema1([]byte(image.DockerImageManifest), image.DockerImageSignatures)
+		return unmarshalManifestSchema1([]byte(image.DockerImageManifest), image.DockerImageSignatures)
 	case schema2.MediaTypeManifest:
-		manifest, err = unmarshalManifestSchema2([]byte(image.DockerImageManifest))
+		return unmarshalManifestSchema2([]byte(image.DockerImageManifest))
 	default:
 		return nil, fmt.Errorf("unsupported manifest media type %s", image.DockerImageManifestMediaType)
 	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return NewManifestHandler(repo, manifest)
 }
