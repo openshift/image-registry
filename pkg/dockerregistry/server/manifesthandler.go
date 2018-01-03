@@ -48,7 +48,7 @@ func NewManifestHandler(repo *repository, manifest distribution.Manifest) (Manif
 }
 
 // NewManifestFromImage creates a manifest for a manifest stored in the given image.
-func NewManifestFromImage(repo *repository, image *imageapiv1.Image) (distribution.Manifest, error) {
+func NewManifestFromImage(image *imageapiv1.Image) (distribution.Manifest, error) {
 	switch image.DockerImageManifestMediaType {
 	case "", schema1.MediaTypeManifest:
 		return unmarshalManifestSchema1([]byte(image.DockerImageManifest), image.DockerImageSignatures)

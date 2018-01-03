@@ -355,22 +355,12 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 		}
 		return
 	}
-	manifest, err := NewManifestFromImage(r, image)
+	manifest, err := NewManifestFromImage(image)
 	if err != nil {
 		context.GetLogger(r.ctx).Errorf("cannot remember layers of image %q: %v", image.Name, err)
 		return
 	}
 	_ = r.cache.AddManifest(manifest, cacheName)
-}
-
-// manifestFromImageWithCachedLayers loads the image and then caches any located layers
-func (r *repository) manifestFromImageWithCachedLayers(image *imageapiv1.Image, cacheName string) (manifest distribution.Manifest, err error) {
-	manifest, err = NewManifestFromImage(r, image)
-	if err != nil {
-		return
-	}
-	_ = r.cache.AddManifest(manifest, cacheName)
-	return
 }
 
 func (r *repository) checkPendingErrors(ctx context.Context) error {

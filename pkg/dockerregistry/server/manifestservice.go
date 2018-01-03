@@ -101,8 +101,9 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 		}
 	}
 
-	manifest, err = m.repo.manifestFromImageWithCachedLayers(image, ref.Exact())
+	manifest, err = NewManifestFromImage(image)
 	if err == nil {
+		_ = m.repo.cache.AddManifest(manifest, ref.Exact())
 		m.migrateManifest(ctx, image, dgst, manifest, false)
 	}
 
