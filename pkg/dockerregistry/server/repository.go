@@ -51,7 +51,7 @@ type repository struct {
 	app        *App
 	crossmount bool
 
-	imageStream imageStream
+	imageStream *imageStream
 
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
@@ -86,7 +86,7 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		app:        app,
 		crossmount: crossmount,
 
-		imageStream: imageStream{
+		imageStream: &imageStream{
 			namespace:         nameParts[0],
 			name:              nameParts[1],
 			registryOSClient:  registryOSClient,
