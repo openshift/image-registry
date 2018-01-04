@@ -10,6 +10,8 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
 )
 
 // pullthroughBlobStore wraps a distribution.BlobStore and allows remote repositories to serve blobs from remote
@@ -17,9 +19,10 @@ import (
 type pullthroughBlobStore struct {
 	distribution.BlobStore
 
-	// TODO: instead of including the whole repository, list only the essential attributes of it
-	repo   *repository
-	mirror bool
+	imageStream      *imageStream
+	remoteBlobGetter BlobGetterService
+	writeLimiter     maxconnections.Limiter
+	mirror           bool
 }
 
 var _ distribution.BlobStore = &pullthroughBlobStore{}
@@ -42,7 +45,7 @@ func (pbs *pullthroughBlobStore) Stat(ctx context.Context, dgst digest.Digest) (
 		return desc, err
 	}
 
-	return pbs.repo.remoteBlobGetter.Stat(ctx, dgst)
+	return pbs.remoteBlobGetter.Stat(ctx, dgst)
 }
 
 // ServeBlob attempts to serve the requested digest onto w, using a remote proxy store if necessary.
@@ -65,8 +68,6 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 		return err
 	}
 
-	remoteGetter := pbs.repo.remoteBlobGetter
-
 	// store the content locally if requested, but ensure only one instance at a time
 	// is storing to avoid excessive local writes
 	if pbs.mirror {
@@ -74,16 +75,16 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 		if _, ok := inflight[dgst]; ok {
 			mu.Unlock()
 			context.GetLogger(ctx).Infof("Serving %q while mirroring in background", dgst)
-			_, err := copyContent(ctx, remoteGetter, dgst, w, req)
+			_, err := copyContent(ctx, pbs.remoteBlobGetter, dgst, w, req)
 			return err
 		}
 		inflight[dgst] = struct{}{}
 		mu.Unlock()
 
-		storeLocalInBackground(ctx, pbs.repo, pbs.BlobStore, dgst)
+		storeLocalInBackground(ctx, pbs.imageStream, pbs.writeLimiter, pbs.BlobStore, dgst)
 	}
 
-	_, err = copyContent(ctx, remoteGetter, dgst, w, req)
+	_, err = copyContent(ctx, pbs.remoteBlobGetter, dgst, w, req)
 	return err
 }
 
@@ -95,7 +96,7 @@ func (pbs *pullthroughBlobStore) Get(ctx context.Context, dgst digest.Digest) ([
 		return data, nil
 	}
 
-	return pbs.repo.remoteBlobGetter.Get(ctx, dgst)
+	return pbs.remoteBlobGetter.Get(ctx, dgst)
 }
 
 // setResponseHeaders sets the appropriate content serving headers
@@ -176,19 +177,19 @@ func copyContent(ctx context.Context, store BlobGetterService, dgst digest.Diges
 // storeLocalInBackground spawns a separate thread to copy the remote blob from the remote registry to the
 // local blob store.
 // The function assumes that localBlobStore is thread-safe.
-func storeLocalInBackground(ctx context.Context, repo *repository, localBlobStore distribution.BlobStore, dgst digest.Digest) {
+func storeLocalInBackground(ctx context.Context, imageStream *imageStream, writeLimiter maxconnections.Limiter, localBlobStore distribution.BlobStore, dgst digest.Digest) {
 	// leave only the essential entries in the context (logger)
 	newCtx := context.WithLogger(context.Background(), context.GetLogger(ctx))
-	writeLimiter := repo.app.writeLimiter
 
 	// the blob getter service is not thread-safe, we need to setup a new one
 	// TODO: make it thread-safe instead of instantiating a new one
 	remoteGetter := NewBlobGetterService(
-		repo.imageStream.namespace,
-		repo.imageStream.name,
-		repo.imageStream.imageStreamGetter.get,
-		repo.imageStream.registryOSClient,
-		repo.imageStream.cache)
+		imageStream.namespace,
+		imageStream.name,
+		imageStream.imageStreamGetter.get,
+		imageStream.registryOSClient,
+		imageStream.cache,
+	)
 
 	go func(dgst digest.Digest) {
 		if writeLimiter != nil {

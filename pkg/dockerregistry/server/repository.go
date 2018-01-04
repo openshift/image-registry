@@ -166,8 +166,10 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 		bs = &pullthroughBlobStore{
 			BlobStore: bs,
 
-			repo:   r,
-			mirror: r.app.config.Pullthrough.Mirror,
+			imageStream:      r.imageStream,
+			remoteBlobGetter: r.remoteBlobGetter,
+			writeLimiter:     r.app.writeLimiter,
+			mirror:           r.app.config.Pullthrough.Mirror,
 		}
 	}
 
