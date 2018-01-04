@@ -8,21 +8,15 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
-	"github.com/docker/distribution/manifest/schema2"
-	"github.com/docker/distribution/registry/api/errcode"
 	registrystorage "github.com/docker/distribution/registry/storage"
 
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "k8s.io/client-go/rest"
+
+	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	quotautil "github.com/openshift/origin/pkg/quota/util"
 )
 
 var (
@@ -48,24 +42,17 @@ func init() {
 type repository struct {
 	distribution.Repository
 
-	ctx              context.Context
-	app              *App
-	registryOSClient client.Interface
-	namespace        string
-	name             string
-	crossmount       bool
+	ctx        context.Context
+	app        *App
+	crossmount bool
 
-	// cachedImages contains images cached for the lifetime of the request being handled.
-	cachedImages map[digest.Digest]*imageapiv1.Image
-	// cachedImageStream stays cached for the entire time of handling signle repository-scoped request.
-	imageStreamGetter *cachedImageStreamGetter
+	imageStream *imageStream
+
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
-	// cache is used to associate a digest with a repository name.
-	cache cache.RepositoryDigest
 }
 
-// newRepositoryWithClient returns a new repository middleware.
+// Repository returns a new repository middleware.
 func (app *App) Repository(ctx context.Context, repo distribution.Repository, crossmount bool) (distribution.Repository, distribution.BlobDescriptorServiceFactory, error) {
 	registryOSClient, err := app.registryClient.Client()
 	if err != nil {
@@ -90,27 +77,29 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 	r := &repository{
 		Repository: repo,
 
-		ctx:               ctx,
-		app:               app,
-		registryOSClient:  registryOSClient,
-		namespace:         nameParts[0],
-		name:              nameParts[1],
-		imageStreamGetter: imageStreamGetter,
-		cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
-		crossmount:        crossmount,
-	}
+		ctx:        ctx,
+		app:        app,
+		crossmount: crossmount,
 
-	r.cache = &cache.RepoDigest{
-		Cache: app.cache,
+		imageStream: &imageStream{
+			namespace:         nameParts[0],
+			name:              nameParts[1],
+			registryOSClient:  registryOSClient,
+			cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
+			imageStreamGetter: imageStreamGetter,
+			cache: &cache.RepoDigest{
+				Cache: app.cache,
+			},
+		},
 	}
 
 	if app.config.Pullthrough.Enabled {
 		r.remoteBlobGetter = NewBlobGetterService(
-			r.namespace,
-			r.name,
+			r.imageStream.namespace,
+			r.imageStream.name,
 			imageStreamGetter.get,
 			registryOSClient,
-			r.cache)
+			r.imageStream.cache)
 	}
 
 	bdsf := blobDescriptorServiceFactoryFunc(r.BlobDescriptorService)
@@ -129,15 +118,17 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 	}
 
 	ms = &manifestService{
-		repo:          r,
 		manifests:     ms,
-		acceptschema2: r.app.config.Compatibility.AcceptSchema2,
+		blobStore:     r.Blobs(ctx),
+		serverAddr:    r.app.config.Server.Addr,
+		imageStream:   r.imageStream,
+		acceptSchema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
 	if r.app.config.Pullthrough.Enabled {
 		ms = &pullthroughManifestService{
 			ManifestService: ms,
-			repo:            r,
+			imageStream:     r.imageStream,
 		}
 	}
 
@@ -170,8 +161,10 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 		bs = &pullthroughBlobStore{
 			BlobStore: bs,
 
-			repo:   r,
-			mirror: r.app.config.Pullthrough.Mirror,
+			imageStream:      r.imageStream,
+			remoteBlobGetter: r.remoteBlobGetter,
+			writeLimiter:     r.app.writeLimiter,
+			mirror:           r.app.config.Pullthrough.Mirror,
 		}
 	}
 
@@ -193,8 +186,9 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 	ts := r.Repository.Tags(ctx)
 
 	ts = &tagService{
-		TagService: ts,
-		repo:       r,
+		TagService:         ts,
+		imageStream:        r.imageStream,
+		pullthroughEnabled: r.app.config.Pullthrough.Enabled,
 	}
 
 	ts = newPendingErrorsTagService(ts, r)
@@ -221,178 +215,8 @@ func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorServic
 	return svc
 }
 
-// createImageStream creates a new image stream corresponding to r and caches it.
-func (r *repository) createImageStream(ctx context.Context) (*imageapiv1.ImageStream, error) {
-	stream := imageapiv1.ImageStream{}
-	stream.Name = r.name
-
-	uclient, ok := userClientFrom(ctx)
-	if !ok {
-		errmsg := "error creating user client to auto provision image stream: user client to master API unavailable"
-		context.GetLogger(ctx).Errorf(errmsg)
-		return nil, errcode.ErrorCodeUnknown.WithDetail(errmsg)
-	}
-
-	is, err := uclient.ImageStreams(r.namespace).Create(&stream)
-	switch {
-	case kerrors.IsAlreadyExists(err), kerrors.IsConflict(err):
-		context.GetLogger(ctx).Infof("conflict while creating ImageStream: %v", err)
-		return r.imageStreamGetter.get()
-	case kerrors.IsForbidden(err), kerrors.IsUnauthorized(err), quotautil.IsErrorQuotaExceeded(err):
-		context.GetLogger(ctx).Errorf("denied creating ImageStream: %v", err)
-		return nil, errcode.ErrorCodeDenied.WithDetail(err)
-	case err != nil:
-		context.GetLogger(ctx).Errorf("error auto provisioning ImageStream: %s", err)
-		return nil, errcode.ErrorCodeUnknown.WithDetail(err)
-	}
-
-	r.imageStreamGetter.cacheImageStream(is)
-	return is, nil
-}
-
-// getImage retrieves the Image with digest `dgst`. No authorization check is done.
-func (r *repository) getImage(dgst digest.Digest) (*imageapiv1.Image, error) {
-	if image, exists := r.cachedImages[dgst]; exists {
-		context.GetLogger(r.ctx).Infof("(*repository).getImage: returning cached copy of %s", image.Name)
-		return image, nil
-	}
-
-	image, err := r.registryOSClient.Images().Get(dgst.String(), metav1.GetOptions{})
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("failed to get image: %v", err)
-		return nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
-	}
-
-	context.GetLogger(r.ctx).Infof("(*repository).getImage: got image %s", image.Name)
-	if err := imageapiv1.ImageWithMetadata(image); err != nil {
-		return nil, err
-	}
-	r.cachedImages[dgst] = image
-	return image, nil
-}
-
-// getStoredImageOfImageStream retrieves the Image with digest `dgst` and
-// ensures that the image belongs to the ImageStream associated with r. It
-// uses two queries to master API:
-//
-//  1st to get a corresponding image stream
-//  2nd to get the image
-//
-// This allows us to cache the image stream for later use.
-//
-// If you need the image object to be modified according to image stream tag,
-// please use getImageOfImageStream.
-func (r *repository) getStoredImageOfImageStream(dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error) {
-	stream, err := r.imageStreamGetter.get()
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("failed to get ImageStream: %v", err)
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
-	}
-
-	tagEvent, err := imageapiv1.ResolveImageID(stream, dgst.String())
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("failed to resolve image %s in ImageStream %s/%s: %v", dgst.String(), r.namespace, r.name, err)
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
-	}
-
-	image, err := r.getImage(dgst)
-	if err != nil {
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
-	}
-
-	return image, tagEvent, stream, nil
-}
-
-// getImageOfImageStream retrieves the Image with digest `dgst` for
-// the ImageStream associated with r. The image's field DockerImageReference
-// is modified on the fly to pretend that we've got the image from the source
-// from which the image was tagged.to match tag's DockerImageReference.
-//
-// NOTE: due to on the fly modification, the returned image object should
-// not be sent to the master API. If you need unmodified version of the
-// image object, please use getStoredImageOfImageStream.
-func (r *repository) getImageOfImageStream(dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error) {
-	image, tagEvent, stream, err := r.getStoredImageOfImageStream(dgst)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	image.DockerImageReference = tagEvent.DockerImageReference
-
-	return image, stream, nil
-}
-
-// updateImage modifies the Image.
-func (r *repository) updateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
-	return r.registryOSClient.Images().Update(image)
-}
-
-// rememberLayersOfImage caches the layer digests of given image
-func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName string) {
-	if len(image.DockerImageLayers) == 0 && len(image.DockerImageManifestMediaType) > 0 && len(image.DockerImageConfig) == 0 {
-		// image has no layers
-		return
-	}
-
-	descCache := &cache.RepositoryScopedBlobDescriptor{
-		Repo:  cacheName,
-		Cache: r.app.cache,
-	}
-
-	if len(image.DockerImageLayers) > 0 {
-		for _, layer := range image.DockerImageLayers {
-			_ = descCache.SetDescriptor(r.ctx, digest.Digest(layer.Name), distribution.Descriptor{
-				Digest:    digest.Digest(layer.Name),
-				Size:      layer.LayerSize,
-				MediaType: layer.MediaType,
-			})
-		}
-		meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
-		if !ok {
-			context.GetLogger(r.ctx).Errorf("image does not have metadata %s", image.Name)
-			return
-		}
-		// remember reference to manifest config as well for schema 2
-		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
-			_ = r.cache.AddDigest(digest.Digest(meta.ID), cacheName)
-		}
-		return
-	}
-	mh, err := NewManifestHandlerFromImage(r, image)
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("cannot remember layers of image %q: %v", image.Name, err)
-		return
-	}
-	dgst, err := mh.Digest()
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("cannot get manifest digest of image %q: %v", image.Name, err)
-		return
-	}
-
-	_ = r.cache.AddDigest(dgst, cacheName)
-	_ = r.cache.AddManifest(mh.Manifest(), cacheName)
-}
-
-// manifestFromImageWithCachedLayers loads the image and then caches any located layers
-func (r *repository) manifestFromImageWithCachedLayers(image *imageapiv1.Image, cacheName string) (manifest distribution.Manifest, err error) {
-	mh, err := NewManifestHandlerFromImage(r, image)
-	if err != nil {
-		return
-	}
-	dgst, err := mh.Digest()
-	if err != nil {
-		context.GetLogger(r.ctx).Errorf("cannot get payload from manifest handler: %v", err)
-		return
-	}
-	manifest = mh.Manifest()
-
-	_ = r.cache.AddDigest(dgst, cacheName)
-	_ = r.cache.AddManifest(manifest, cacheName)
-	return
-}
-
 func (r *repository) checkPendingErrors(ctx context.Context) error {
-	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.namespace, r.name)
+	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.imageStream.namespace, r.imageStream.name)
 }
 
 func checkPendingErrors(ctx context.Context, logger context.Logger, namespace, name string) error {

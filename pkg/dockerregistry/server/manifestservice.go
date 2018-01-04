@@ -38,18 +38,21 @@ func (err ErrManifestBlobBadSize) Error() string {
 var _ distribution.ManifestService = &manifestService{}
 
 type manifestService struct {
-	repo      *repository
 	manifests distribution.ManifestService
+	blobStore distribution.BlobStore
 
-	// acceptschema2 allows to refuse the manifest schema version 2
-	acceptschema2 bool
+	serverAddr  string
+	imageStream *imageStream
+
+	// acceptSchema2 allows to refuse the manifest schema version 2
+	acceptSchema2 bool
 }
 
 // Exists returns true if the manifest specified by dgst exists.
 func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Exists")
 
-	image, _, err := m.repo.getImageOfImageStream(dgst)
+	image, _, err := m.imageStream.getImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return false, err
 	}
@@ -60,15 +63,15 @@ func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool,
 func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Get")
 
-	image, _, _, err := m.repo.getStoredImageOfImageStream(dgst)
+	image, _, _, err := m.imageStream.getStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}
 
 	ref := imageapi.DockerImageReference{
-		Namespace: m.repo.namespace,
-		Name:      m.repo.name,
-		Registry:  m.repo.app.config.Server.Addr,
+		Registry:  m.serverAddr,
+		Namespace: m.imageStream.namespace,
+		Name:      m.imageStream.name,
 	}
 	if isImageManaged(image) {
 		// Reference without a registry part refers to repository containing locally managed images.
@@ -80,41 +83,35 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	}
 
 	manifest, err := m.manifests.Get(ctx, dgst, options...)
-	switch err.(type) {
-	case distribution.ErrManifestUnknownRevision:
-		break
-	case nil:
-		_ = m.repo.cache.AddDigest(dgst, ref.Exact())
-		_ = m.repo.cache.AddManifest(manifest, ref.Exact())
+	if err == nil {
+		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
-	default:
+	} else if _, ok := err.(distribution.ErrManifestUnknownRevision); !ok {
 		context.GetLogger(ctx).Errorf("unable to get manifest from storage: %v", err)
 		return nil, err
 	}
 
-	if len(image.DockerImageManifest) == 0 {
-		// We don't have the manifest in the storage and we don't have the manifest
-		// inside the image so there is no point to continue.
-		return nil, distribution.ErrManifestUnknownRevision{
-			Name:     m.repo.Named().Name(),
-			Revision: dgst,
-		}
-	}
-
-	manifest, err = m.repo.manifestFromImageWithCachedLayers(image, ref.Exact())
+	manifest, err = NewManifestFromImage(image)
 	if err == nil {
+		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
 		m.migrateManifest(ctx, image, dgst, manifest, false)
+		return manifest, nil
+	} else {
+		context.GetLogger(ctx).Errorf("unable to get manifest from image object: %v", err)
 	}
 
-	return manifest, err
+	return nil, distribution.ErrManifestUnknownRevision{
+		Name:     m.imageStream.Reference(),
+		Revision: dgst,
+	}
 }
 
 // Put creates or updates the named manifest.
 func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifest, options ...distribution.ManifestServiceOption) (digest.Digest, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Put")
 
-	mh, err := NewManifestHandler(m.repo, manifest)
+	mh, err := NewManifestHandler(m.serverAddr, m.blobStore, manifest)
 	if err != nil {
 		return "", regapi.ErrorCodeManifestInvalid.WithDetail(err)
 	}
@@ -125,7 +122,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 	}
 
 	// this is fast to check, let's do it before verification
-	if !m.acceptschema2 && mediaType == schema2.MediaTypeManifest {
+	if !m.acceptSchema2 && mediaType == schema2.MediaTypeManifest {
 		return "", regapi.ErrorCodeManifestInvalid.WithDetail(fmt.Errorf("manifest V2 schema 2 not allowed"))
 	}
 
@@ -157,8 +154,8 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 	// Upload to openshift
 	ism := imageapiv1.ImageStreamMapping{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: m.repo.namespace,
-			Name:      m.repo.name,
+			Namespace: m.imageStream.namespace,
+			Name:      m.imageStream.name,
 		},
 		Image: imageapiv1.Image{
 			ObjectMeta: metav1.ObjectMeta{
@@ -169,7 +166,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 					imageapi.DockerImageLayersOrderAnnotation:  layerOrder,
 				},
 			},
-			DockerImageReference:         fmt.Sprintf("%s/%s/%s@%s", m.repo.app.config.Server.Addr, m.repo.namespace, m.repo.name, dgst.String()),
+			DockerImageReference:         fmt.Sprintf("%s/%s/%s@%s", m.serverAddr, m.imageStream.namespace, m.imageStream.name, dgst.String()),
 			DockerImageManifest:          string(payload),
 			DockerImageManifestMediaType: mediaType,
 			DockerImageConfig:            string(config),
@@ -184,7 +181,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		}
 	}
 
-	if _, err = m.repo.registryOSClient.ImageStreamMappings(m.repo.namespace).Create(&ism); err != nil {
+	if _, err = m.imageStream.registryOSClient.ImageStreamMappings(m.imageStream.namespace).Create(&ism); err != nil {
 		// if the error was that the image stream wasn't found, try to auto provision it
 		statusErr, ok := err.(*kerrors.StatusError)
 		if !ok {
@@ -200,12 +197,12 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		status := statusErr.ErrStatus
 		kind := strings.ToLower(status.Details.Kind)
 		isValidKind := kind == "imagestream" /*pre-1.2*/ || kind == "imagestreams" /*1.2 to 1.6*/ || kind == "imagestreammappings" /*1.7+*/
-		if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != m.repo.name {
+		if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != m.imageStream.name {
 			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
 			return "", err
 		}
 
-		if _, err := m.repo.createImageStream(ctx); err != nil {
+		if _, err := m.imageStream.createImageStream(ctx); err != nil {
 			if e, ok := err.(errcode.Error); ok && e.ErrorCode() == errcode.ErrorCodeUnknown {
 				// TODO: convert statusErr to distribution error
 				return "", statusErr
@@ -214,7 +211,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		}
 
 		// try to create the ISM again
-		if _, err := m.repo.registryOSClient.ImageStreamMappings(m.repo.namespace).Create(&ism); err != nil {
+		if _, err := m.imageStream.registryOSClient.ImageStreamMappings(m.imageStream.namespace).Create(&ism); err != nil {
 			if quotautil.IsErrorQuotaExceeded(err) {
 				context.GetLogger(ctx).Errorf("denied a creation of ImageStreamMapping: %v", err)
 				return "", distribution.ErrAccessDenied
@@ -280,7 +277,7 @@ func (m *manifestService) storeManifestLocally(ctx context.Context, image *image
 	}
 	image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] = "true"
 
-	if _, err := m.repo.updateImage(image); err != nil {
+	if _, err := m.imageStream.updateImage(image); err != nil {
 		context.GetLogger(ctx).Errorf("error updating Image: %v", err)
 	}
 }

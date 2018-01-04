@@ -36,36 +36,29 @@ type ManifestHandler interface {
 }
 
 // NewManifestHandler creates a manifest handler for the given manifest.
-func NewManifestHandler(repo *repository, manifest distribution.Manifest) (ManifestHandler, error) {
+func NewManifestHandler(serverAddr string, blobStore distribution.BlobStore, manifest distribution.Manifest) (ManifestHandler, error) {
 	switch t := manifest.(type) {
 	case *schema1.SignedManifest:
-		return &manifestSchema1Handler{repo: repo, manifest: t}, nil
+		return &manifestSchema1Handler{serverAddr: serverAddr, blobStore: blobStore, manifest: t}, nil
 	case *schema2.DeserializedManifest:
-		return &manifestSchema2Handler{repo: repo, manifest: t}, nil
+		return &manifestSchema2Handler{blobStore: blobStore, manifest: t}, nil
 	default:
 		return nil, fmt.Errorf("unsupported manifest type %T", manifest)
 	}
 }
 
-// NewManifestHandlerFromImage creates a new manifest handler for a manifest stored in the given image.
-func NewManifestHandlerFromImage(repo *repository, image *imageapiv1.Image) (ManifestHandler, error) {
-	var (
-		manifest distribution.Manifest
-		err      error
-	)
+// NewManifestFromImage creates a manifest for a manifest stored in the given image.
+func NewManifestFromImage(image *imageapiv1.Image) (distribution.Manifest, error) {
+	if len(image.DockerImageManifest) == 0 {
+		return nil, fmt.Errorf("manifest is not present in image object %s (mediatype=%q)", image.Name, image.DockerImageManifestMediaType)
+	}
 
 	switch image.DockerImageManifestMediaType {
 	case "", schema1.MediaTypeManifest:
-		manifest, err = unmarshalManifestSchema1([]byte(image.DockerImageManifest), image.DockerImageSignatures)
+		return unmarshalManifestSchema1([]byte(image.DockerImageManifest), image.DockerImageSignatures)
 	case schema2.MediaTypeManifest:
-		manifest, err = unmarshalManifestSchema2([]byte(image.DockerImageManifest))
+		return unmarshalManifestSchema2([]byte(image.DockerImageManifest))
 	default:
 		return nil, fmt.Errorf("unsupported manifest media type %s", image.DockerImageManifestMediaType)
 	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return NewManifestHandler(repo, manifest)
 }

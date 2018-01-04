@@ -50,7 +50,7 @@ func TestRepoDigest(t *testing.T) {
 	}
 
 	for _, v := range digests {
-		err := r.AddDigest(v.Digest, v.Repo)
+		err := r.AddDigest(v.Digest, v.Repo, nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -106,7 +106,7 @@ func TestRepoDigestRemove(t *testing.T) {
 	}
 
 	for _, v := range digests {
-		err := r.AddDigest(v.Digest, v.Repo)
+		err := r.AddDigest(v.Digest, v.Repo, nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

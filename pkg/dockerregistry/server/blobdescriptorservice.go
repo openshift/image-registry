@@ -63,7 +63,7 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 		// schema v2 has no empty layers.
 		if !isEmptyDigest(dgst) {
 			// ensure it's referenced inside of corresponding image stream
-			if !imageStreamHasBlob(bs.repo, dgst) {
+			if !imageStreamHasBlob(ctx, bs.repo.imageStream, dgst, !bs.repo.app.config.Pullthrough.Enabled) {
 				context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s is neither empty nor referenced in image stream %s", dgst.String(), bs.repo.Named().Name())
 				return distribution.Descriptor{}, distribution.ErrBlobUnknown
 			}
@@ -82,29 +82,29 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 // imageStreamHasBlob returns true if the given blob digest is referenced in image stream corresponding to
 // given repository. If not found locally, image stream's images will be iterated and fetched from newest to
 // oldest until found. Each processed image will update local cache of blobs.
-func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
-	repoCacheName := imageapi.DockerImageReference{Namespace: r.namespace, Name: r.name}.Exact()
-	if r.cache.ContainsRepository(dgst, repoCacheName) {
-		context.GetLogger(r.ctx).Debugf("found cached blob %q in repository %s", dgst.String(), r.Named().Name())
+func imageStreamHasBlob(ctx context.Context, imageStream *imageStream, dgst digest.Digest, requireManaged bool) bool {
+	repoCacheName := imageStream.Reference()
+	if imageStream.cache.ContainsRepository(dgst, repoCacheName) {
+		context.GetLogger(ctx).Debugf("found cached blob %q in repository %s", dgst.String(), imageStream.Reference())
 		return true
 	}
 
-	context.GetLogger(r.ctx).Debugf("verifying presence of blob %q in image stream %s/%s", dgst.String(), r.namespace, r.name)
+	context.GetLogger(ctx).Debugf("verifying presence of blob %q in image stream %s", dgst.String(), imageStream.Reference())
 	started := time.Now()
 	logFound := func(found bool) bool {
 		elapsed := time.Since(started)
 		if found {
-			context.GetLogger(r.ctx).Debugf("verified presence of blob %q in image stream %s/%s after %s", dgst.String(), r.namespace, r.name, elapsed.String())
+			context.GetLogger(ctx).Debugf("verified presence of blob %q in image stream %s after %s", dgst.String(), imageStream.Reference(), elapsed.String())
 		} else {
-			context.GetLogger(r.ctx).Debugf("detected absence of blob %q in image stream %s/%s after %s", dgst.String(), r.namespace, r.name, elapsed.String())
+			context.GetLogger(ctx).Debugf("detected absence of blob %q in image stream %s after %s", dgst.String(), imageStream.Reference(), elapsed.String())
 		}
 		return found
 	}
 
 	// verify directly with etcd
-	is, err := r.imageStreamGetter.get()
+	is, err := imageStream.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(r.ctx).Errorf("failed to get image stream: %v", err)
+		context.GetLogger(ctx).Errorf("failed to get image stream: %v", err)
 		return logFound(false)
 	}
 
@@ -127,51 +127,45 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 		if _, processed := processedImages[tagEvent.Image]; processed {
 			continue
 		}
-		if imageHasBlob(r, repoCacheName, tagEvent.Image, dgst.String(), !r.app.config.Pullthrough.Enabled) {
+
+		processedImages[tagEvent.Image] = struct{}{}
+
+		context.GetLogger(ctx).Debugf("getting image %s", tagEvent.Image)
+		image, err := imageStream.getImage(ctx, digest.Digest(tagEvent.Image))
+		if err != nil {
+			if kerrors.IsNotFound(err) {
+				context.GetLogger(ctx).Debugf("image %q not found", tagEvent.Image)
+			} else {
+				context.GetLogger(ctx).Errorf("failed to get image: %v", err)
+			}
+			continue
+		}
+
+		// in case of pullthrough disabled, client won't be able to download a blob belonging to not managed image
+		// (image stored in external registry), thus don't consider them as candidates
+		if requireManaged && !isImageManaged(image) {
+			context.GetLogger(ctx).Debugf("skipping not managed image")
+			continue
+		}
+
+		if imageHasBlob(ctx, image, dgst) {
 			tagName := event2Name[tagEvent]
-			context.GetLogger(r.ctx).Debugf("blob found under istag %s/%s:%s in image %s", r.namespace, r.name, tagName, tagEvent.Image)
+			context.GetLogger(ctx).Debugf("blob found under istag %s:%s in image %s", imageStream.Reference(), tagName, tagEvent.Image)
+			// remember all the layers of matching image
+			imageStream.rememberLayersOfImage(ctx, image, repoCacheName)
 			return logFound(true)
 		}
-		processedImages[tagEvent.Image] = struct{}{}
 	}
 
-	context.GetLogger(r.ctx).Warnf("blob %q exists locally but is not referenced in repository %s/%s", dgst.String(), r.namespace, r.name)
+	context.GetLogger(ctx).Warnf("blob %q exists locally but is not referenced in repository %s", dgst.String(), imageStream.Reference())
 
 	return logFound(false)
 }
 
-// imageHasBlob returns true if the image identified by imageName refers to the given blob. The image is
-// fetched. If requireManaged is true and the image is not managed (it refers to remote registry), the image
-// will not be processed. Fetched image will update local cache of blobs -> repositories with (blobDigest,
-// cacheName) pairs.
-func imageHasBlob(
-	r *repository,
-	cacheName,
-	imageName,
-	blobDigest string,
-	requireManaged bool,
-) bool {
-	context.GetLogger(r.ctx).Debugf("getting image %s", imageName)
-	image, err := r.getImage(digest.Digest(imageName))
-	if err != nil {
-		if kerrors.IsNotFound(err) {
-			context.GetLogger(r.ctx).Debugf("image %q not found", imageName)
-		} else {
-			context.GetLogger(r.ctx).Errorf("failed to get image: %v", err)
-		}
-		return false
-	}
-
-	// in case of pullthrough disabled, client won't be able to download a blob belonging to not managed image
-	// (image stored in external registry), thus don't consider them as candidates
-	if requireManaged && !isImageManaged(image) {
-		context.GetLogger(r.ctx).Debugf("skipping not managed image")
-		return false
-	}
-
+// imageHasBlob returns true if the image identified by imageName refers to the given blob.
+func imageHasBlob(ctx context.Context, image *imageapiv1.Image, blobDigest digest.Digest) bool {
 	// someone asks for manifest
-	if imageName == blobDigest {
-		r.rememberLayersOfImage(image, cacheName)
+	if image.Name == blobDigest.String() {
 		return true
 	}
 
@@ -182,23 +176,19 @@ func imageHasBlob(
 	}
 
 	for _, layer := range image.DockerImageLayers {
-		if layer.Name == blobDigest {
-			// remember all the layers of matching image
-			r.rememberLayersOfImage(image, cacheName)
+		if layer.Name == blobDigest.String() {
 			return true
 		}
 	}
 
 	meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
 	if !ok {
-		context.GetLogger(r.ctx).Errorf("image does not have metadata %s", imageName)
+		context.GetLogger(ctx).Errorf("image does not have metadata %s", image.Name)
 		return false
 	}
 
 	// only manifest V2 schema2 has docker image config filled where dockerImage.Metadata.id is its digest
-	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && meta.ID == blobDigest {
-		// remember manifest config reference of schema 2 as well
-		r.rememberLayersOfImage(image, cacheName)
+	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && meta.ID == blobDigest.String() {
 		return true
 	}
 

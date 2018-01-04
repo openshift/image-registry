@@ -16,7 +16,7 @@ import (
 type pullthroughManifestService struct {
 	distribution.ManifestService
 
-	repo *repository
+	imageStream *imageStream
 }
 
 var _ distribution.ManifestService = &pullthroughManifestService{}
@@ -38,14 +38,14 @@ func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest
 
 func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
-	image, _, err := m.repo.getImageOfImageStream(dgst)
+	image, _, err := m.imageStream.getImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}
 
 	ref, err := imageapi.ParseDockerImageReference(image.DockerImageReference)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s/%s@%s: %v", image.DockerImageReference, m.repo.namespace, m.repo.name, dgst.String(), err)
+		context.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s/%s@%s: %v", image.DockerImageReference, m.imageStream.namespace, m.imageStream.name, dgst.String(), err)
 		return nil, err
 	}
 	ref = ref.DockerClientDefaults()
@@ -65,8 +65,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 	manifest, err := pullthroughManifestService.Get(ctx, dgst)
 	switch err.(type) {
 	case nil:
-		_ = m.repo.cache.AddDigest(dgst, ref.Exact())
-		_ = m.repo.cache.AddManifest(manifest, ref.Exact())
+		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
 	case distribution.ErrManifestUnknownRevision:
 		break
 	default:
@@ -77,7 +76,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 }
 
 func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
-	retriever := getImportContext(ctx, m.repo.registryOSClient, m.repo.namespace, m.repo.name)
+	retriever := getImportContext(ctx, m.imageStream.registryOSClient, m.imageStream.namespace, m.imageStream.name)
 
 	// determine, whether to fall-back to insecure transport based on a specification of image's tag
 	// if the client pulls by tag, use that
@@ -89,14 +88,14 @@ func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Conte
 		}
 	}
 	if len(tag) == 0 {
-		is, err := m.repo.imageStreamGetter.get()
+		is, err := m.imageStream.imageStreamGetter.get()
 		if err != nil {
 			return nil, err // this is impossible
 		}
 		// if the client pulled by digest, find the corresponding tag in the image stream
 		tag, _ = imageapiv1.LatestImageTagEvent(is, dgst.String())
 	}
-	insecure := pullInsecureByDefault(m.repo.imageStreamGetter.get, tag)
+	insecure := pullInsecureByDefault(m.imageStream.imageStreamGetter.get, tag)
 
 	return retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), insecure)
 }

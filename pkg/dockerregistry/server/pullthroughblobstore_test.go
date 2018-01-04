@@ -140,13 +140,20 @@ func TestPullthroughServeBlob(t *testing.T) {
 		localBlobStore := newTestBlobStore(nil, tc.localBlobs)
 
 		ctx := WithTestPassthroughToUpstream(backgroundCtx, false)
-		repo := newTestRepository(ctx, t, namespace, name, testRepositoryOptions{
-			client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-			enablePullThrough: true,
-		})
+
+		imageStream := newTestImageStream(ctx, t, namespace, name, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+
+		remoteBlobGetter := NewBlobGetterService(
+			imageStream.namespace,
+			imageStream.name,
+			imageStream.imageStreamGetter.get,
+			imageStream.registryOSClient,
+			imageStream.cache)
+
 		ptbs := &pullthroughBlobStore{
-			BlobStore: localBlobStore,
-			repo:      repo,
+			BlobStore:        localBlobStore,
+			imageStream:      imageStream,
+			remoteBlobGetter: remoteBlobGetter,
 		}
 
 		req, err := http.NewRequest(tc.method, fmt.Sprintf("http://example.org/v2/user/app/blobs/%s", tc.blobDigest), nil)
@@ -274,11 +281,9 @@ func TestPullthroughServeNotSeekableBlob(t *testing.T) {
 
 	// Test that the blob can be fetched.
 	ptbs := &pullthroughBlobStore{
-		BlobStore: newTestBlobStore(nil, nil),
-		repo: &repository{
-			remoteBlobGetter: repoBlobs,
-		},
-		mirror: false,
+		BlobStore:        newTestBlobStore(nil, nil),
+		remoteBlobGetter: repoBlobs,
+		mirror:           false,
 	}
 
 	req := httptest.NewRequest("GET", "/unused", nil)
@@ -566,14 +571,19 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 
 			ctx = WithTestPassthroughToUpstream(ctx, false)
 
-			repo := newTestRepository(ctx, t, namespace, repo1, testRepositoryOptions{
-				client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-				enablePullThrough: true,
-			})
+			imageStream := newTestImageStream(ctx, t, namespace, repo1, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+
+			remoteBlobGetter := NewBlobGetterService(
+				imageStream.namespace,
+				imageStream.name,
+				imageStream.imageStreamGetter.get,
+				imageStream.registryOSClient,
+				imageStream.cache)
 
 			ptbs := &pullthroughBlobStore{
-				BlobStore: localBlobStore,
-				repo:      repo,
+				BlobStore:        localBlobStore,
+				imageStream:      imageStream,
+				remoteBlobGetter: remoteBlobGetter,
 			}
 
 			req, err := http.NewRequest(tc.method, fmt.Sprintf("http://example.org/v2/user/app/blobs/%s", tc.blobDigest), nil)
