@@ -191,8 +191,9 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 	ts := r.Repository.Tags(ctx)
 
 	ts = &tagService{
-		TagService: ts,
-		repo:       r,
+		TagService:         ts,
+		imageStream:        r.imageStream,
+		pullthroughEnabled: r.app.config.Pullthrough.Enabled,
 	}
 
 	ts = newPendingErrorsTagService(ts, r)
