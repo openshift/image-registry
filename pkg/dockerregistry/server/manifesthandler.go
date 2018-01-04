@@ -9,7 +9,7 @@ import (
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
+	imageapiv1 "github.com/openshift/api/image/v1"
 )
 
 // A ManifestHandler defines a common set of operations on all versions of manifest schema.

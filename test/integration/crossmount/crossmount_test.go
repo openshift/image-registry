@@ -10,11 +10,15 @@ import (
 	"github.com/docker/distribution/registry/client"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapiv1 "k8s.io/kubernetes/pkg/api/v1"
+	//kapiv1 "k8s.io/kubernetes/pkg/api/v1"
+	corev1 "k8s.io/api/core/v1"
 
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
-	projectapiv1 "github.com/openshift/origin/pkg/project/apis/project/v1"
+	//imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	//imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
+	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	//projectapiv1 "github.com/openshift/origin/pkg/project/apis/project/v1"
+	projectapiv1 "github.com/openshift/api/project/v1"
 
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	"github.com/openshift/image-registry/pkg/testframework"
@@ -53,13 +57,13 @@ func crossMountImage(ctx context.Context, destRepo distribution.Repository, tag 
 	return nil
 }
 
-func copyISTag(t *testing.T, imageClient imagev1.ImageV1Interface, destNamespace, destISTag, sourceNamespace, sourceISTag string) error {
+func copyISTag(t *testing.T, imageClient imageclientv1.ImageV1Interface, destNamespace, destISTag, sourceNamespace, sourceISTag string) error {
 	istag := &imageapiv1.ImageStreamTag{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: destISTag,
 		},
 		Tag: &imageapiv1.TagReference{
-			From: &kapiv1.ObjectReference{
+			From: &corev1.ObjectReference{
 				Kind:      "ImageStreamTag",
 				Name:      sourceISTag,
 				Namespace: sourceNamespace,
@@ -124,7 +128,7 @@ func TestCrossMount(t *testing.T) {
 		return func(t *testing.T, registry *testframework.Registry) (*projectapiv1.Project, reference.Named, distribution.Manifest, closeFn) {
 			project, _, manifest, close := uploadedImage(user, repoName)(t, registry)
 
-			imageClient := imagev1.NewForConfigOrDie(user.KubeConfig())
+			imageClient := imageclientv1.NewForConfigOrDie(user.KubeConfig())
 			if err := copyISTag(t, imageClient, project.Name, copiedName+":latest", project.Name, repoName+":latest"); err != nil {
 				t.Fatal(err)
 			}

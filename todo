@@ -1,0 +1,16 @@
+2) create v1 versions of DockerImageReference helpers
+  - stop using internal DockerImageReference type (it exists in api)
+  - would have to recreate a bunch of helpers from internal api as first class
+    functions, not really worth it.
+
+
+3) What to do about use of internal DockerImage type
+  - origin-common/util/util.go:ImageWithMetadata()
+  - is it being unmarshalled properly?
+  - can we use the v1 DockerImage type instead? (should we?)
+    - need to add DeepCopyObject to it
+
+4) Resolve use of ImageWithMetadata internal version in test code
+  - need to populate Image struct w/ layers for tests.
+  - search for ImageWithMetadata
+

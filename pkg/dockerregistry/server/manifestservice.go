@@ -16,9 +16,11 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	quotautil "github.com/openshift/origin/pkg/quota/util"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	//imageapi "github.com/openshift/origin/pkg/image/apis/image"
+	//consts "github.com/openshift/image-registry/pkg/origin-common/consts"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
 )
 
 // ErrManifestBlobBadSize is returned when the blob size in a manifest does
@@ -61,6 +63,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	context.GetLogger(ctx).Debugf("(*manifestService).Get")
 
 	image, _, _, err := m.repo.getStoredImageOfImageStream(dgst)
+	context.GetLogger(ctx).Debugf("get image %#v, err %v", image, err)
 	if err != nil {
 		return nil, err
 	}
@@ -79,13 +82,17 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 		ref = ref.DockerClientDefaults().AsRepository()
 	}
 
+	context.GetLogger(ctx).Debugf("getting manifest for %v", dgst)
 	manifest, err := m.manifests.Get(ctx, dgst, options...)
+	context.GetLogger(ctx).Debugf("got manifest %#v, err %v", manifest, err)
+
 	switch err.(type) {
 	case distribution.ErrManifestUnknownRevision:
 		break
 	case nil:
 		_ = m.repo.cache.AddDigest(dgst, ref.Exact())
 		_ = m.repo.cache.AddManifest(manifest, ref.Exact())
+		context.GetLogger(ctx).Debugf("migrating manifest")
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
 	default:
@@ -96,6 +103,8 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	if len(image.DockerImageManifest) == 0 {
 		// We don't have the manifest in the storage and we don't have the manifest
 		// inside the image so there is no point to continue.
+		context.GetLogger(ctx).Debugf("manifest unknown")
+
 		return nil, distribution.ErrManifestUnknownRevision{
 			Name:     m.repo.Named().Name(),
 			Revision: dgst,
@@ -103,6 +112,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	}
 
 	manifest, err = m.repo.manifestFromImageWithCachedLayers(image, ref.Exact())
+	context.GetLogger(ctx).Debugf("manifest from image with cached layers manifest=%#v, err=%v", manifest, err)
 	if err == nil {
 		m.migrateManifest(ctx, image, dgst, manifest, false)
 	}

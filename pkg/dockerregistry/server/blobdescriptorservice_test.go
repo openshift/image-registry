@@ -108,7 +108,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	t.Logf("created random blob: %#v", desc)
 	type testCase struct {
 		name                      string
 		method                    string
@@ -122,6 +122,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		m.clearStats()
 
 		route := router.GetRoute(tc.endpoint).Host(serverURL.Host)
+		t.Logf("building url for tc %s with vars %#v", tc.name, tc.vars)
 		u, err := route.URL(tc.vars...)
 		if err != nil {
 			t.Errorf("[%s] failed to build route: %v", tc.name, err)

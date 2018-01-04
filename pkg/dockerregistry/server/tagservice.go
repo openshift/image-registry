@@ -7,9 +7,10 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	quotautil "github.com/openshift/origin/pkg/quota/util"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
+	util "github.com/openshift/image-registry/pkg/origin-common/util"
 )
 
 type tagService struct {
@@ -25,7 +26,7 @@ func (t tagService) Get(ctx context.Context, tag string) (distribution.Descripto
 		return distribution.Descriptor{}, distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
 	}
 
-	te := imageapiv1.LatestTaggedImage(imageStream, tag)
+	te := util.LatestTaggedImage(imageStream, tag)
 	if te == nil {
 		return distribution.Descriptor{}, distribution.ErrTagUnknown{Tag: tag}
 	}
@@ -192,7 +193,7 @@ func (t tagService) Untag(ctx context.Context, tag string) error {
 		return distribution.ErrRepositoryUnknown{Name: t.repo.Named().Name()}
 	}
 
-	te := imageapiv1.LatestTaggedImage(imageStream, tag)
+	te := util.LatestTaggedImage(imageStream, tag)
 	if te == nil {
 		return distribution.ErrTagUnknown{Tag: tag}
 	}

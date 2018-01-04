@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"reflect"
@@ -24,14 +25,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/diff"
 	clientgotesting "k8s.io/client-go/testing"
-	kapi "k8s.io/kubernetes/pkg/api"
+	//kapi "k8s.io/kubernetes/pkg/api"
+	//	corev1 "k8s.io/api/core/v1"
 
+	imageapiv1 "github.com/openshift/api/image/v1"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	"github.com/openshift/origin/pkg/image/util"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/image-registry/pkg/origin-common/util"
 )
 
 const (
@@ -87,7 +89,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 		name    string
 		managed bool
 	}{{"nm/is", true}, {"registry.org:5000/user/app", false}} {
-		img, err := registrytest.NewImageForManifest(d.name, registrytest.SampleImageManifestSchema1, "", d.managed)
+		img, err := registrytest.NewImageForManifest(t, d.name, registrytest.SampleImageManifestSchema1, "", d.managed)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -519,6 +521,9 @@ func storeTestImage(
 	schemaVersion int,
 	managedByOpenShift bool,
 ) (*imageapiv1.Image, error) {
+	// TODO - bparees - fix ImageWithMetadata usage and re-enable
+	//return &imageapiv1.Image{}, nil
+
 	repo, err := reg.Repository(ctx, imageReference)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected error getting repo %q: %v", imageReference.Name(), err)
@@ -617,19 +622,42 @@ func storeTestImage(
 		image.DockerImageSignatures = append(image.DockerImageSignatures, signatures...)
 	}
 
-	if err := util.ImageWithMetadata(image); err != nil {
-		return nil, err
-	}
-	newImage := imageapiv1.Image{}
-	if err := kapi.Scheme.Converter().Convert(image, &newImage, 0, nil); err != nil {
+	if err := util.InternalImageWithMetadata(image); err != nil {
 		return nil, err
 	}
 
-	if err := imageapiv1.ImageWithMetadata(&newImage); err != nil {
+	newImage := imageapiv1.Image{}
+	// TODO - bparees - convert this properly
+	newImage.Name = image.Name
+	newImage.Annotations = image.Annotations
+	newImage.DockerImageReference = image.DockerImageReference
+	newImage.DockerImageManifest = image.DockerImageManifest
+	newImage.DockerImageConfig = image.DockerImageConfig
+
+	for _, layer := range image.DockerImageLayers {
+		newImage.DockerImageLayers = append(newImage.DockerImageLayers, imageapiv1.ImageLayer{
+			Name:      layer.Name,
+			LayerSize: layer.LayerSize,
+			MediaType: layer.MediaType,
+		})
+	}
+	b, err := json.Marshal(image.DockerImageMetadata)
+	if err != nil {
+		return nil, err
+	}
+	newImage.DockerImageMetadata.Raw = b
+
+	/*
+		if err := corev1.Scheme.Converter().Convert(image, &newImage, 0, nil); err != nil {
+			return nil, err
+		}
+	*/
+	if err := util.ImageWithMetadata(&newImage); err != nil {
 		return nil, fmt.Errorf("failed to fill image with metadata: %v", err)
 	}
 
 	return &newImage, nil
+
 }
 
 func populateTestStorage(

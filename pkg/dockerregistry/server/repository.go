@@ -16,13 +16,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "k8s.io/client-go/rest"
 
+	dockerapiv10 "github.com/openshift/api/image/docker10"
+	imageapiv1 "github.com/openshift/api/image/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	quotautil "github.com/openshift/origin/pkg/quota/util"
+	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
+	util "github.com/openshift/image-registry/pkg/origin-common/util"
 )
 
 var (
@@ -263,8 +264,8 @@ func (r *repository) getImage(dgst digest.Digest) (*imageapiv1.Image, error) {
 		return nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
 	}
 
-	context.GetLogger(r.ctx).Infof("(*repository).getImage: got image %s", image.Name)
-	if err := imageapiv1.ImageWithMetadata(image); err != nil {
+	context.GetLogger(r.ctx).Infof("(*repository).getImage: got image %s %#v", image.Name, *image)
+	if err := util.ImageWithMetadata(image); err != nil {
 		return nil, err
 	}
 	r.cachedImages[dgst] = image
@@ -289,13 +290,14 @@ func (r *repository) getStoredImageOfImageStream(dgst digest.Digest) (*imageapiv
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
 	}
 
-	tagEvent, err := imageapiv1.ResolveImageID(stream, dgst.String())
+	tagEvent, err := util.ResolveImageID(stream, dgst.String())
 	if err != nil {
 		context.GetLogger(r.ctx).Errorf("failed to resolve image %s in ImageStream %s/%s: %v", dgst.String(), r.namespace, r.name, err)
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
 	}
 
 	image, err := r.getImage(dgst)
+	context.GetLogger(r.ctx).Errorf("failed to get image from digest %v, err=%v", dgst, err)
 	if err != nil {
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(r.name, dgst, err)
 	}
@@ -347,7 +349,7 @@ func (r *repository) rememberLayersOfImage(image *imageapiv1.Image, cacheName st
 				MediaType: layer.MediaType,
 			})
 		}
-		meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
+		meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
 		if !ok {
 			context.GetLogger(r.ctx).Errorf("image does not have metadata %s", image.Name)
 			return

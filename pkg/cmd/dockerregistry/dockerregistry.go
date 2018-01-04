@@ -38,7 +38,7 @@ import (
 	_ "github.com/docker/distribution/registry/storage/driver/s3-aws"
 	_ "github.com/docker/distribution/registry/storage/driver/swift"
 
-	kubeversion "k8s.io/kubernetes/pkg/version"
+	//kubeversion "k8s.io/kubernetes/pkg/version"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
@@ -56,8 +56,8 @@ var pruneMode = flag.String("prune", "", "prune blobs from the storage and exit 
 func versionFields() map[interface{}]interface{} {
 	return map[interface{}]interface{}{
 		"distribution_version": distversion.Version,
-		"kubernetes_version":   kubeversion.Get(),
-		"openshift_version":    version.Get(),
+		//"kubernetes_version":   kubeversion.Get(),
+		"openshift_version": version.Get(),
 	}
 }
 

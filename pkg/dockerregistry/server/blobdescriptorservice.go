@@ -11,8 +11,9 @@ import (
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
+	dockerapiv10 "github.com/openshift/api/image/docker10"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 const (
@@ -189,7 +190,7 @@ func imageHasBlob(
 		}
 	}
 
-	meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
+	meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
 	if !ok {
 		context.GetLogger(r.ctx).Errorf("image does not have metadata %s", imageName)
 		return false

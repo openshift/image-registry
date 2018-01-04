@@ -12,8 +12,9 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/docker/libtrust"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	//imageapi "github.com/openshift/origin/pkg/image/apis/image"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 func unmarshalManifestSchema1(content []byte, signatures [][]byte) (distribution.Manifest, error) {

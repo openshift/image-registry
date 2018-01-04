@@ -18,11 +18,11 @@ import (
 	"github.com/docker/distribution/manifest/schema1"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
-	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	dockerregistryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	"github.com/openshift/origin/pkg/image/importer"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	originregistryclient "github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
 
 func TestPullthroughServeBlob(t *testing.T) {
@@ -36,7 +36,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
 	})
 
-	testImage, err := registrytest.NewImageForManifest(repoName, registrytest.SampleImageManifestSchema1, "", false)
+	testImage, err := registrytest.NewImageForManifest(t, repoName, registrytest.SampleImageManifestSchema1, "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 
 		ctx := WithTestPassthroughToUpstream(backgroundCtx, false)
 		repo := newTestRepository(ctx, t, namespace, name, testRepositoryOptions{
-			client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
+			client:            dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient),
 			enablePullThrough: true,
 		})
 		ptbs := &pullthroughBlobStore{
@@ -157,6 +157,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 
 		dgst := digest.Digest(tc.blobDigest)
 
+		t.Logf("Checking store %#v and repo %#v for digest %#v\n", ptbs.BlobStore, ptbs.repo, dgst)
 		_, err = ptbs.Stat(ctx, dgst)
 		if err != tc.expectedStatError {
 			t.Errorf("[%s] Stat returned unexpected error: %#+v != %#+v", tc.name, err, tc.expectedStatError)
@@ -253,7 +254,7 @@ func TestPullthroughServeNotSeekableBlob(t *testing.T) {
 	ctx := context.Background()
 	ctx = registrytest.WithTestLogger(ctx, t)
 
-	retriever := importer.NewContext(http.DefaultTransport, http.DefaultTransport).WithCredentials(importer.NoCredentials)
+	retriever := originregistryclient.NewContext(http.DefaultTransport, http.DefaultTransport).WithCredentials(originregistryclient.NoCredentials)
 	repo, err := retriever.Repository(ctx, externalRegistryURL, repoName, true)
 	if err != nil {
 		t.Fatal(err)
@@ -346,18 +347,21 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 	}
 	t.Logf("m2dgst=%s, m2manifest: %s", m2dgst, m2canonical)
 
-	m1img, err := registrytest.NewImageForManifest(repo1Name, string(m1payload), m1cfg, false)
+	m1img, err := registrytest.NewImageForManifest(t, repo1Name, string(m1payload), m1cfg, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	m1img.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo1, m1img.Name)
 	m1img.DockerImageManifest = ""
-	m2img, err := registrytest.NewImageForManifest(repo2Name, string(m2payload), m2cfg, false)
+	t.Logf("m1img=%#v", m1img)
+
+	m2img, err := registrytest.NewImageForManifest(t, repo2Name, string(m2payload), m2cfg, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	m2img.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo2, m2img.Name)
 	m2img.DockerImageManifest = ""
+	t.Logf("m2img=%#v", m2img)
 
 	for _, tc := range []struct {
 		name                       string
@@ -567,7 +571,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 			ctx = WithTestPassthroughToUpstream(ctx, false)
 
 			repo := newTestRepository(ctx, t, namespace, repo1, testRepositoryOptions{
-				client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
+				client:            dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient),
 				enablePullThrough: true,
 			})
 

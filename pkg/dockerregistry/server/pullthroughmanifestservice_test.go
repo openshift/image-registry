@@ -15,10 +15,10 @@ import (
 	"github.com/docker/distribution/registry/handlers"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
+	imageapiv1 "github.com/openshift/api/image/v1"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Server {
@@ -76,7 +76,7 @@ func TestPullthroughManifests(t *testing.T) {
 	}
 	t.Logf("ms1dgst=%s, ms1manifest: %s", ms1dgst, ms1canonical)
 
-	image, err := registrytest.NewImageForManifest(repoName, string(ms1payload), "", false)
+	image, err := registrytest.NewImageForManifest(t, repoName, string(ms1payload), "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,13 +213,13 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 	}
 	t.Logf("ms2dgst=%s, ms2manifest: %s", ms2dgst, ms2canonical)
 
-	ms1img, err := registrytest.NewImageForManifest(repoName, string(ms1payload), "", false)
+	ms1img, err := registrytest.NewImageForManifest(t, repoName, string(ms1payload), "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ms1img.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo, ms1img.Name)
 	ms1img.DockerImageManifest = ""
-	ms2img, err := registrytest.NewImageForManifest(repoName, string(ms2payload), ms2config, false)
+	ms2img, err := registrytest.NewImageForManifest(t, repoName, string(ms2payload), ms2config, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -298,7 +298,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 			name:           "pullthrough from insecure tag",
 			manifestDigest: ms1dgst,
 			fakeOpenShiftInit: func(fos *registrytest.FakeOpenShift) {
-				image, err := registrytest.NewImageForManifest(repoName, string(ms1payload), "", false)
+				image, err := registrytest.NewImageForManifest(t, repoName, string(ms1payload), "", false)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -322,7 +322,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 			name:           "pull insecure if either image stream is insecure or the tag",
 			manifestDigest: ms2dgst,
 			fakeOpenShiftInit: func(fos *registrytest.FakeOpenShift) {
-				image, err := registrytest.NewImageForManifest(repoName, string(ms2payload), ms2config, false)
+				image, err := registrytest.NewImageForManifest(t, repoName, string(ms2payload), ms2config, false)
 				if err != nil {
 					t.Fatal(err)
 				}

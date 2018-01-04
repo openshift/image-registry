@@ -1,13 +1,14 @@
 package client
 
 import (
+	authclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	restclient "k8s.io/client-go/rest"
-	authclientv1 "k8s.io/kubernetes/pkg/client/clientset_generated/clientset/typed/authorization/v1"
-	kcoreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
+	//kcoreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
+	coreclientv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
+	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	userclientv1 "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
-	imageclientv1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
-	userclientv1 "github.com/openshift/origin/pkg/user/generated/clientset/typed/user/v1"
 )
 
 // RegistryClient provides Origin and Kubernetes clients to Docker Registry.
@@ -35,14 +36,14 @@ type Interface interface {
 }
 
 type apiClient struct {
-	kube  kcoreclient.CoreInterface
+	kube  coreclientv1.CoreV1Interface
 	auth  authclientv1.AuthorizationV1Interface
 	image imageclientv1.ImageV1Interface
 	user  userclientv1.UserV1Interface
 }
 
 func newAPIClient(
-	kc kcoreclient.CoreInterface,
+	kc coreclientv1.CoreV1Interface,
 	authClient authclientv1.AuthorizationV1Interface,
 	imageClient imageclientv1.ImageV1Interface,
 	userClient userclientv1.UserV1Interface,
@@ -113,7 +114,7 @@ func NewRegistryClient(config *clientcmd.Config) RegistryClient {
 // Client returns the authenticated client to use with the server.
 func (c *registryClient) Client() (Interface, error) {
 	return newAPIClient(
-		kcoreclient.NewForConfigOrDie(c.kubeConfig),
+		coreclientv1.NewForConfigOrDie(c.kubeConfig),
 		authclientv1.NewForConfigOrDie(c.kubeConfig),
 		imageclientv1.NewForConfigOrDie(c.kubeConfig),
 		userclientv1.NewForConfigOrDie(c.kubeConfig),

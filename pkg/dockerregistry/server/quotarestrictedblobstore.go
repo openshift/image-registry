@@ -13,15 +13,19 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapi "k8s.io/kubernetes/pkg/api"
+	//kapi "k8s.io/kubernetes/pkg/api"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
-	imageadmission "github.com/openshift/origin/pkg/image/admission"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 // newQuotaEnforcingConfig creates caches for quota objects. The objects are stored with given eviction
@@ -119,11 +123,11 @@ func (bw *quotaRestrictedBlobWriter) Commit(ctx context.Context, provisional dis
 }
 
 // getLimitRangeList returns list of limit ranges for repo.
-func getLimitRangeList(ctx context.Context, limitClient client.LimitRangesGetter, namespace string, quotaEnforcing *quotaEnforcingConfig) (*kapi.LimitRangeList, error) {
+func getLimitRangeList(ctx context.Context, limitClient client.LimitRangesGetter, namespace string, quotaEnforcing *quotaEnforcingConfig) (*corev1.LimitRangeList, error) {
 	if quotaEnforcing.limitRanges != nil {
 		obj, exists, _ := quotaEnforcing.limitRanges.get(namespace)
 		if exists {
-			return obj.(*kapi.LimitRangeList), nil
+			return obj.(*corev1.LimitRangeList), nil
 		}
 	}
 
@@ -160,7 +164,7 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 	for _, limitrange := range lrs.Items {
 		context.GetLogger(ctx).Debugf("processing limit range %s/%s", limitrange.Namespace, limitrange.Name)
 		for _, limit := range limitrange.Spec.Limits {
-			if err := imageadmission.AdmitImage(size, limit); err != nil {
+			if err := admitImage(size, limit); err != nil {
 				context.GetLogger(ctx).Errorf("refusing to write blob exceeding limit range %s: %s", limitrange.Name, err.Error())
 				return distribution.ErrAccessDenied
 			}
@@ -173,4 +177,27 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 	// we have image stream cache in the registry
 
 	return nil
+}
+
+// admitImage checks if the size is greater than the limit range.
+func admitImage(size int64, limit corev1.LimitRangeItem) error {
+	if limit.Type != imageapi.LimitTypeImage {
+		return nil
+	}
+
+	limitQuantity, ok := limit.Max[corev1.ResourceStorage]
+	if !ok {
+		return nil
+	}
+
+	imageQuantity := resource.NewQuantity(size, resource.BinarySI)
+	if limitQuantity.Cmp(*imageQuantity) < 0 {
+		// image size is larger than the permitted limit range max size, image is forbidden
+		return newLimitExceededError(imageapi.LimitTypeImage, corev1.ResourceStorage, imageQuantity, &limitQuantity)
+	}
+	return nil
+}
+
+func newLimitExceededError(limitType corev1.LimitType, resourceName corev1.ResourceName, requested, limit *resource.Quantity) error {
+	return fmt.Errorf("requested usage of %s exceeds the maximum limit per %s (%s > %s)", resourceName, limitType, requested.String(), limit.String())
 }

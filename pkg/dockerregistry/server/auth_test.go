@@ -19,8 +19,10 @@ import (
 
 	dockercfg "github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
-	userapi "github.com/openshift/origin/pkg/user/apis/user"
-	authorizationapi "k8s.io/kubernetes/pkg/apis/authorization/v1"
+	//userapi "github.com/openshift/origin/pkg/user/apis/user"
+	userapi "github.com/openshift/api/user/v1"
+	//authorizationapi "k8s.io/kubernetes/pkg/apis/authorization/v1"
+	authorizationapi "k8s.io/api/authorization/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
