@@ -83,34 +83,28 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	}
 
 	manifest, err := m.manifests.Get(ctx, dgst, options...)
-	switch err.(type) {
-	case distribution.ErrManifestUnknownRevision:
-		break
-	case nil:
+	if err == nil {
 		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
-	default:
+	} else if _, ok := err.(distribution.ErrManifestUnknownRevision); !ok {
 		context.GetLogger(ctx).Errorf("unable to get manifest from storage: %v", err)
 		return nil, err
-	}
-
-	if len(image.DockerImageManifest) == 0 {
-		// We don't have the manifest in the storage and we don't have the manifest
-		// inside the image so there is no point to continue.
-		return nil, distribution.ErrManifestUnknownRevision{
-			Name:     m.imageStream.Reference(),
-			Revision: dgst,
-		}
 	}
 
 	manifest, err = NewManifestFromImage(image)
 	if err == nil {
 		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
 		m.migrateManifest(ctx, image, dgst, manifest, false)
+		return manifest, nil
+	} else {
+		context.GetLogger(ctx).Errorf("unable to get manifest from image object: %v", err)
 	}
 
-	return manifest, err
+	return nil, distribution.ErrManifestUnknownRevision{
+		Name:     m.imageStream.Reference(),
+		Revision: dgst,
+	}
 }
 
 // Put creates or updates the named manifest.

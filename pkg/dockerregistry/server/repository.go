@@ -325,11 +325,6 @@ func (is *imageStream) updateImage(image *imageapiv1.Image) (*imageapiv1.Image, 
 
 // rememberLayersOfImage caches the layer digests of given image
 func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageapiv1.Image, cacheName string) {
-	if len(image.DockerImageLayers) == 0 && len(image.DockerImageManifestMediaType) > 0 && len(image.DockerImageConfig) == 0 {
-		// image has no layers
-		return
-	}
-
 	if len(image.DockerImageLayers) > 0 {
 		for _, layer := range image.DockerImageLayers {
 			var desc *distribution.Descriptor
@@ -351,20 +346,21 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
 			_ = is.cache.AddDigest(digest.Digest(meta.ID), cacheName, nil)
 		}
-	} else {
-		manifest, err := NewManifestFromImage(image)
-		if err != nil {
-			context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
-			return
+		return
+	}
+
+	manifest, err := NewManifestFromImage(image)
+	if err != nil {
+		context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
+		return
+	}
+	refs := manifest.References()
+	for i := range refs {
+		var desc *distribution.Descriptor
+		if isImageManaged(image) {
+			desc = &refs[i]
 		}
-		refs := manifest.References()
-		for i := range refs {
-			var desc *distribution.Descriptor
-			if isImageManaged(image) {
-				desc = &refs[i]
-			}
-			_ = is.cache.AddDigest(refs[i].Digest, cacheName, desc)
-		}
+		_ = is.cache.AddDigest(refs[i].Digest, cacheName, desc)
 	}
 }
 

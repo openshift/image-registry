@@ -49,6 +49,10 @@ func NewManifestHandler(serverAddr string, blobStore distribution.BlobStore, man
 
 // NewManifestFromImage creates a manifest for a manifest stored in the given image.
 func NewManifestFromImage(image *imageapiv1.Image) (distribution.Manifest, error) {
+	if len(image.DockerImageManifest) == 0 {
+		return nil, fmt.Errorf("manifest is not present in image object %s (mediatype=%q)", image.Name, image.DockerImageManifestMediaType)
+	}
+
 	switch image.DockerImageManifestMediaType {
 	case "", schema1.MediaTypeManifest:
 		return unmarshalManifestSchema1([]byte(image.DockerImageManifest), image.DockerImageSignatures)
