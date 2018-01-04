@@ -133,7 +133,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 	if r.app.config.Pullthrough.Enabled {
 		ms = &pullthroughManifestService{
 			ManifestService: ms,
-			repo:            r,
+			imageStream:     r.imageStream,
 		}
 	}
 

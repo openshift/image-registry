@@ -125,14 +125,11 @@ func TestPullthroughManifests(t *testing.T) {
 	} {
 		localManifestService := newTestManifestService(repoName, tc.localData)
 
-		repo := newTestRepository(backgroundCtx, t, namespace, repo, testRepositoryOptions{
-			client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-			enablePullThrough: true,
-		})
+		imageStream := newTestImageStream(backgroundCtx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ptms := &pullthroughManifestService{
 			ManifestService: localManifestService,
-			repo:            repo,
+			imageStream:     imageStream,
 		}
 
 		ctx := WithTestPassthroughToUpstream(backgroundCtx, false)
@@ -354,14 +351,12 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 			localManifestService := newTestManifestService(repoName, tc.localData)
 
 			ctx := WithTestPassthroughToUpstream(backgroundCtx, false)
-			repo := newTestRepository(ctx, t, namespace, repo, testRepositoryOptions{
-				client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-				enablePullThrough: true,
-			})
+
+			imageStream := newTestImageStream(backgroundCtx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 			ptms := &pullthroughManifestService{
 				ManifestService: localManifestService,
-				repo:            repo,
+				imageStream:     imageStream,
 			}
 
 			manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
@@ -489,14 +484,11 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 			s.touched = false
 		}
 
-		r := newTestRepository(ctx, t, namespace, tc.repoName, testRepositoryOptions{
-			client:            registryclient.NewFakeRegistryAPIClient(nil, imageClient),
-			enablePullThrough: true,
-		})
+		imageStream := newTestImageStream(ctx, t, namespace, tc.repoName, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ptms := &pullthroughManifestService{
 			ManifestService: newTestManifestService(tc.repoName, nil),
-			repo:            r,
+			imageStream:     imageStream,
 		}
 
 		ptms.Get(ctx, digest.Digest(img.Name))
