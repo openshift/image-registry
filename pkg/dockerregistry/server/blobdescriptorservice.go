@@ -127,12 +127,34 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 		if _, processed := processedImages[tagEvent.Image]; processed {
 			continue
 		}
-		if imageHasBlob(r.ctx, r.imageStream, repoCacheName, tagEvent.Image, dgst.String(), !r.app.config.Pullthrough.Enabled) {
+
+		processedImages[tagEvent.Image] = struct{}{}
+
+		context.GetLogger(r.ctx).Debugf("getting image %s", tagEvent.Image)
+		image, err := r.imageStream.getImage(r.ctx, digest.Digest(tagEvent.Image))
+		if err != nil {
+			if kerrors.IsNotFound(err) {
+				context.GetLogger(r.ctx).Debugf("image %q not found", tagEvent.Image)
+			} else {
+				context.GetLogger(r.ctx).Errorf("failed to get image: %v", err)
+			}
+			continue
+		}
+
+		// in case of pullthrough disabled, client won't be able to download a blob belonging to not managed image
+		// (image stored in external registry), thus don't consider them as candidates
+		if !r.app.config.Pullthrough.Enabled && !isImageManaged(image) {
+			context.GetLogger(r.ctx).Debugf("skipping not managed image")
+			continue
+		}
+
+		if imageHasBlob(r.ctx, image, dgst) {
 			tagName := event2Name[tagEvent]
 			context.GetLogger(r.ctx).Debugf("blob found under istag %s:%s in image %s", r.imageStream.Reference(), tagName, tagEvent.Image)
+			// remember all the layers of matching image
+			r.imageStream.rememberLayersOfImage(r.ctx, image, repoCacheName)
 			return logFound(true)
 		}
-		processedImages[tagEvent.Image] = struct{}{}
 	}
 
 	context.GetLogger(r.ctx).Warnf("blob %q exists locally but is not referenced in repository %s", dgst.String(), r.imageStream.Reference())
@@ -140,38 +162,10 @@ func imageStreamHasBlob(r *repository, dgst digest.Digest) bool {
 	return logFound(false)
 }
 
-// imageHasBlob returns true if the image identified by imageName refers to the given blob. The image is
-// fetched. If requireManaged is true and the image is not managed (it refers to remote registry), the image
-// will not be processed.
-func imageHasBlob(
-	ctx context.Context,
-	imageStream *imageStream,
-	cacheName,
-	imageName,
-	blobDigest string,
-	requireManaged bool,
-) bool {
-	context.GetLogger(ctx).Debugf("getting image %s", imageName)
-	image, err := imageStream.getImage(ctx, digest.Digest(imageName))
-	if err != nil {
-		if kerrors.IsNotFound(err) {
-			context.GetLogger(ctx).Debugf("image %q not found", imageName)
-		} else {
-			context.GetLogger(ctx).Errorf("failed to get image: %v", err)
-		}
-		return false
-	}
-
-	// in case of pullthrough disabled, client won't be able to download a blob belonging to not managed image
-	// (image stored in external registry), thus don't consider them as candidates
-	if requireManaged && !isImageManaged(image) {
-		context.GetLogger(ctx).Debugf("skipping not managed image")
-		return false
-	}
-
+// imageHasBlob returns true if the image identified by imageName refers to the given blob.
+func imageHasBlob(ctx context.Context, image *imageapiv1.Image, blobDigest digest.Digest) bool {
 	// someone asks for manifest
-	if imageName == blobDigest {
-		imageStream.rememberLayersOfImage(ctx, image, cacheName)
+	if image.Name == blobDigest.String() {
 		return true
 	}
 
@@ -182,23 +176,19 @@ func imageHasBlob(
 	}
 
 	for _, layer := range image.DockerImageLayers {
-		if layer.Name == blobDigest {
-			// remember all the layers of matching image
-			imageStream.rememberLayersOfImage(ctx, image, cacheName)
+		if layer.Name == blobDigest.String() {
 			return true
 		}
 	}
 
 	meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
 	if !ok {
-		context.GetLogger(ctx).Errorf("image does not have metadata %s", imageName)
+		context.GetLogger(ctx).Errorf("image does not have metadata %s", image.Name)
 		return false
 	}
 
 	// only manifest V2 schema2 has docker image config filled where dockerImage.Metadata.id is its digest
-	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && meta.ID == blobDigest {
-		// remember manifest config reference of schema 2 as well
-		imageStream.rememberLayersOfImage(ctx, image, cacheName)
+	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && meta.ID == blobDigest.String() {
 		return true
 	}
 
