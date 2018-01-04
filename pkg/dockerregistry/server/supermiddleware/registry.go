@@ -21,33 +21,6 @@ func (reg *registry) Repository(ctx context.Context, named reference.Named) (dis
 	return reg.inst.Repository(ctx, repo, false)
 }
 
-// HackRegistry must not be used.
-type HackRegistry struct {
-	distribution.Namespace
-}
-
-// HackRepository must not be used.
-func (reg HackRegistry) HackRepository(ctx context.Context, named reference.Named) (distribution.Repository, distribution.Repository, error) {
-	repo, err := reg.Namespace.(*registry).Namespace.Repository(ctx, named)
-	if err != nil {
-		return repo, nil, err
-	}
-
-	repo = blobDescriptorServiceRepository{
-		Repository: repo,
-		inst:       reg.Namespace.(*registry).inst,
-	}
-
-	appRepo, bdsf, err := reg.Namespace.(*registry).inst.App.Repository(ctx, repo, false)
-	if err != nil {
-		return appRepo, nil, err
-	}
-
-	repo = newBlobDescriptorServiceRepository(appRepo, bdsf)
-
-	return repo, appRepo, err
-}
-
 // NewRegistry constructs a registry object that uses app middlewares.
 func NewRegistry(ctx context.Context, app App, driver storagedriver.StorageDriver, options ...storage.RegistryOption) (distribution.Namespace, error) {
 	options = append(options, storage.BlobDescriptorServiceFactory(&blobDescriptorServiceFactory{}))
