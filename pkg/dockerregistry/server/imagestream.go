@@ -10,6 +10,7 @@ import (
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kapiv1 "k8s.io/kubernetes/pkg/api/v1"
 
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
@@ -169,4 +170,12 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 	for _, ref := range manifest.References() {
 		_ = is.cache.AddDigest(ref.Digest, cacheName)
 	}
+}
+
+func (is *imageStream) getSecrets() ([]kapiv1.Secret, error) {
+	secrets, err := is.registryOSClient.ImageStreamSecrets(is.namespace).Secrets(is.name, metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("error getting secrets for repository %s: %v", is.Reference(), err)
+	}
+	return secrets.Items, nil
 }

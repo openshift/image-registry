@@ -13,7 +13,6 @@ import (
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapiv1 "k8s.io/kubernetes/pkg/api/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
@@ -67,19 +66,14 @@ func wrapKStatusErrorOnGetImage(repoName string, dgst digest.Digest, err error) 
 	return nil
 }
 
-// getImportContext loads secrets for given repository and returns a context for getting distribution clients
-// to remote repositories.
-func getImportContext(
-	ctx context.Context,
-	osClient client.ImageStreamSecretsNamespacer,
-	namespace, name string,
-) importer.RepositoryRetriever {
-	secrets, err := osClient.ImageStreamSecrets(namespace).Secrets(name, metav1.ListOptions{})
+// getImportContext loads secrets and returns a context for getting
+// distribution clients to remote repositories.
+func getImportContext(ctx context.Context, secretsGetter secretsGetter) importer.RepositoryRetriever {
+	secrets, err := secretsGetter()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error getting secrets for repository %s/%s: %v", namespace, name, err)
-		secrets = &kapiv1.SecretList{}
+		context.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
-	credentials := importer.NewCredentialsForSecrets(secrets.Items)
+	credentials := importer.NewCredentialsForSecrets(secrets)
 	return importer.NewContext(secureTransport, insecureTransport).WithCredentials(credentials)
 }
 

@@ -140,10 +140,8 @@ func TestPullthroughServeBlob(t *testing.T) {
 		imageStream := newTestImageStream(ctx, t, namespace, name, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		remoteBlobGetter := NewBlobGetterService(
-			imageStream.namespace,
-			imageStream.name,
 			imageStream.imageStreamGetter.get,
-			imageStream.registryOSClient,
+			imageStream.getSecrets,
 			imageStream.cache)
 
 		ptbs := &pullthroughBlobStore{
@@ -564,10 +562,8 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 			imageStream := newTestImageStream(ctx, t, namespace, repo1, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 			remoteBlobGetter := NewBlobGetterService(
-				imageStream.namespace,
-				imageStream.name,
 				imageStream.imageStreamGetter.get,
-				imageStream.registryOSClient,
+				imageStream.getSecrets,
 				imageStream.cache)
 
 			ptbs := &pullthroughBlobStore{

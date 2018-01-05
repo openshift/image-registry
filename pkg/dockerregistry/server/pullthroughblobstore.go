@@ -184,10 +184,8 @@ func storeLocalInBackground(ctx context.Context, imageStream *imageStream, write
 	// the blob getter service is not thread-safe, we need to setup a new one
 	// TODO: make it thread-safe instead of instantiating a new one
 	remoteGetter := NewBlobGetterService(
-		imageStream.namespace,
-		imageStream.name,
 		imageStream.imageStreamGetter.get,
-		imageStream.registryOSClient,
+		imageStream.getSecrets,
 		imageStream.cache,
 	)
 

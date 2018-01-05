@@ -10,11 +10,13 @@ import (
 	"github.com/docker/distribution/registry/api/errcode"
 	disterrors "github.com/docker/distribution/registry/api/v2"
 
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	kapiv1 "k8s.io/kubernetes/pkg/api/v1"
+
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	"github.com/openshift/origin/pkg/image/importer"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 )
 
 // BlobGetterService combines the operations to access and read blobs.
@@ -24,17 +26,16 @@ type BlobGetterService interface {
 	distribution.BlobServer
 }
 
-type ImageStreamGetter func() (*imageapiv1.ImageStream, error)
+type imageStreamGetter func() (*imageapiv1.ImageStream, error)
+type secretsGetter func() ([]kapiv1.Secret, error)
 
 // remoteBlobGetterService implements BlobGetterService and allows to serve blobs from remote
 // repositories.
 type remoteBlobGetterService struct {
-	namespace           string
-	name                string
-	getImageStream      ImageStreamGetter
-	isSecretsNamespacer client.ImageStreamSecretsNamespacer
-	cache               cache.RepositoryDigest
-	digestToStore       map[string]distribution.BlobStore
+	getImageStream imageStreamGetter
+	getSecrets     secretsGetter
+	cache          cache.RepositoryDigest
+	digestToStore  map[string]distribution.BlobStore
 }
 
 var _ BlobGetterService = &remoteBlobGetterService{}
@@ -42,18 +43,15 @@ var _ BlobGetterService = &remoteBlobGetterService{}
 // NewBlobGetterService returns a getter for remote blobs. Its cache will be shared among different middleware
 // wrappers, which is a must at least for stat calls made on manifest's dependencies during its verification.
 func NewBlobGetterService(
-	namespace, name string,
-	imageStreamGetter ImageStreamGetter,
-	isSecretsNamespacer client.ImageStreamSecretsNamespacer,
+	imageStreamGetter imageStreamGetter,
+	secretsGetter secretsGetter,
 	cache cache.RepositoryDigest,
 ) BlobGetterService {
 	return &remoteBlobGetterService{
-		namespace:           namespace,
-		name:                name,
-		getImageStream:      imageStreamGetter,
-		isSecretsNamespacer: isSecretsNamespacer,
-		cache:               cache,
-		digestToStore:       make(map[string]distribution.BlobStore),
+		getImageStream: imageStreamGetter,
+		getSecrets:     secretsGetter,
+		cache:          cache,
+		digestToStore:  make(map[string]distribution.BlobStore),
 	}
 }
 
@@ -86,7 +84,7 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 		localRegistry = local.Registry
 	}
 
-	retriever := getImportContext(ctx, rbgs.isSecretsNamespacer, rbgs.namespace, rbgs.name)
+	retriever := getImportContext(ctx, rbgs.getSecrets)
 
 	// look at the first level of tagged repositories first
 	repositoryCandidates, search := identifyCandidateRepositories(is, localRegistry, true)
@@ -359,7 +357,7 @@ func identifyCandidateRepositories(
 
 // pullInsecureByDefault returns true if the given repository or repository's tag allows for insecure
 // transport.
-func pullInsecureByDefault(isGetter ImageStreamGetter, tag string) bool {
+func pullInsecureByDefault(isGetter imageStreamGetter, tag string) bool {
 	insecureByDefault := false
 
 	is, err := isGetter()
