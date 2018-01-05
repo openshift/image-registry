@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 
-	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
@@ -148,15 +147,7 @@ func (is *imageStream) updateImage(image *imageapiv1.Image) (*imageapiv1.Image, 
 func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageapiv1.Image, cacheName string) {
 	if len(image.DockerImageLayers) > 0 {
 		for _, layer := range image.DockerImageLayers {
-			var desc *distribution.Descriptor
-			if isImageManaged(image) {
-				desc = &distribution.Descriptor{
-					Digest:    digest.Digest(layer.Name),
-					Size:      layer.LayerSize,
-					MediaType: layer.MediaType,
-				}
-			}
-			_ = is.cache.AddDigest(digest.Digest(layer.Name), cacheName, desc)
+			_ = is.cache.AddDigest(digest.Digest(layer.Name), cacheName)
 		}
 		meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
 		if !ok {
@@ -165,7 +156,7 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 		}
 		// remember reference to manifest config as well for schema 2
 		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
-			_ = is.cache.AddDigest(digest.Digest(meta.ID), cacheName, nil)
+			_ = is.cache.AddDigest(digest.Digest(meta.ID), cacheName)
 		}
 		return
 	}
@@ -175,12 +166,7 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 		context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
 		return
 	}
-	refs := manifest.References()
-	for i := range refs {
-		var desc *distribution.Descriptor
-		if isImageManaged(image) {
-			desc = &refs[i]
-		}
-		_ = is.cache.AddDigest(refs[i].Digest, cacheName, desc)
+	for _, ref := range manifest.References() {
+		_ = is.cache.AddDigest(ref.Digest, cacheName)
 	}
 }

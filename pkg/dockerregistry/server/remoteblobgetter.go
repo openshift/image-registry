@@ -243,7 +243,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 		if err != nil {
 			continue
 		}
-		_ = rbgs.cache.AddDigest(dgst, repo, nil)
+		_ = rbgs.cache.AddDigest(dgst, repo)
 		context.GetLogger(ctx).Infof("Found digest location by search %q in %q", dgst, repo)
 		return desc, nil
 	}
