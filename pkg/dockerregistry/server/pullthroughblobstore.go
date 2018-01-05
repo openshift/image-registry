@@ -19,7 +19,6 @@ import (
 type pullthroughBlobStore struct {
 	distribution.BlobStore
 
-	imageStream      *imageStream
 	remoteBlobGetter BlobGetterService
 	writeLimiter     maxconnections.Limiter
 	mirror           bool

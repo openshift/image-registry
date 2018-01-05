@@ -146,7 +146,6 @@ func TestPullthroughServeBlob(t *testing.T) {
 
 		ptbs := &pullthroughBlobStore{
 			BlobStore:        localBlobStore,
-			imageStream:      imageStream,
 			remoteBlobGetter: remoteBlobGetter,
 		}
 
@@ -568,7 +567,6 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 
 			ptbs := &pullthroughBlobStore{
 				BlobStore:        localBlobStore,
-				imageStream:      imageStream,
 				remoteBlobGetter: remoteBlobGetter,
 			}
 
