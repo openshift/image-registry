@@ -382,29 +382,3 @@ func identifyCandidateRepositories(
 
 	return repositories, results
 }
-
-// pullInsecureByDefault returns true if the given repository or repository's tag allows for insecure
-// transport.
-func pullInsecureByDefault(isGetter imageStreamGetter, tag string) bool {
-	insecureByDefault := false
-
-	is, err := isGetter()
-	if err != nil {
-		return insecureByDefault
-	}
-
-	if insecure, ok := is.Annotations[imageapi.InsecureRepositoryAnnotation]; ok {
-		insecureByDefault = insecure == "true"
-	}
-
-	if insecureByDefault || len(tag) == 0 {
-		return insecureByDefault
-	}
-
-	for _, t := range is.Spec.Tags {
-		if t.Name == tag {
-			return t.ImportPolicy.Insecure
-		}
-	}
-	return false
-}

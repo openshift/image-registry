@@ -6,7 +6,6 @@ import (
 	"github.com/docker/distribution/digest"
 
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 )
 
 // pullthroughManifestService wraps a distribution.ManifestService
@@ -45,7 +44,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 
 	ref, err := imageapi.ParseDockerImageReference(image.DockerImageReference)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s/%s@%s: %v", image.DockerImageReference, m.imageStream.namespace, m.imageStream.name, dgst.String(), err)
+		context.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s@%s: %v", image.DockerImageReference, m.imageStream.Reference(), dgst.String(), err)
 		return nil, err
 	}
 	ref = ref.DockerClientDefaults()
@@ -87,15 +86,11 @@ func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Conte
 			break
 		}
 	}
-	if len(tag) == 0 {
-		is, err := m.imageStream.imageStreamGetter.get()
-		if err != nil {
-			return nil, err // this is impossible
-		}
-		// if the client pulled by digest, find the corresponding tag in the image stream
-		tag, _ = imageapiv1.LatestImageTagEvent(is, dgst.String())
+
+	insecure, err := m.imageStream.tagIsInsecure(tag, dgst)
+	if err != nil {
+		return nil, err
 	}
-	insecure := pullInsecureByDefault(m.imageStream.imageStreamGetter.get, tag)
 
 	return retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), insecure)
 }
