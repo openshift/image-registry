@@ -50,6 +50,10 @@ import (
 )
 
 var pruneMode = flag.String("prune", "", "prune blobs from the storage and exit (check, delete)")
+var listRepositories = flag.Bool("list-repositories", false, "shows list of repositories")
+var listBlobs = flag.Bool("list-blobs", false, "shows list of blob digests stored in the storage")
+var listManifests = flag.Bool("list-manifests", false, "shows list of manifest digests stored in the storage")
+var listRepositoryManifests = flag.String("list-manifests-from", "", "shows the manifest digests in all the repository")
 
 func versionFields() map[interface{}]interface{} {
 	return map[interface{}]interface{}{
@@ -126,8 +130,32 @@ func ExecutePruner(configFile io.Reader, dryRun bool) {
 	}
 }
 
+func getListOptions() *ListOptions {
+	opts := &ListOptions{
+		Repositories: *listRepositories,
+		Blobs:        *listBlobs,
+		Manifests:    *listManifests,
+	}
+
+	if len(*listRepositoryManifests) > 0 {
+		opts.Manifests = true
+		opts.ManifestsFromRepo = *listRepositoryManifests
+	}
+	return opts
+}
+
 // Execute runs the Docker registry.
 func Execute(configFile io.Reader) {
+	listOpts := getListOptions()
+
+	if listOpts.Repositories || listOpts.Blobs || listOpts.Manifests {
+		if len(*pruneMode) != 0 {
+			log.Fatal("options -list-repositories, -list-blobs, -list-manifests, -list-repository-manifests and -prune are mutually exclusive")
+		}
+		ExecuteListFS(configFile, listOpts)
+		return
+	}
+
 	if len(*pruneMode) != 0 {
 		var dryRun bool
 		switch *pruneMode {

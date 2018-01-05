@@ -17,6 +17,7 @@ import (
 	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	regstorage "github.com/openshift/image-registry/pkg/dockerregistry/server/storage"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	util "github.com/openshift/image-registry/pkg/origin-common/util"
 )
@@ -173,10 +174,7 @@ type Summary struct {
 func Prune(ctx context.Context, registry distribution.Namespace, registryClient client.RegistryClient, pruner Pruner) (Summary, error) {
 	logger := context.GetLogger(ctx)
 
-	repositoryEnumerator, ok := registry.(distribution.RepositoryEnumerator)
-	if !ok {
-		return Summary{}, fmt.Errorf("unable to convert Namespace to RepositoryEnumerator")
-	}
+	enumStorage := regstorage.Enumerator{registry}
 
 	oc, err := registryClient.Client()
 	if err != nil {
@@ -221,7 +219,7 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 		Pruner: pruner,
 	}
 
-	err = repositoryEnumerator.Enumerate(ctx, func(repoName string) error {
+	err = enumStorage.Repositories(ctx, func(repoName string) error {
 		logger.Debugln("Processing repository", repoName)
 
 		named, err := reference.WithName(repoName)
@@ -252,12 +250,7 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 			return err
 		}
 
-		manifestEnumerator, ok := manifestService.(distribution.ManifestEnumerator)
-		if !ok {
-			return fmt.Errorf("unable to convert ManifestService into ManifestEnumerator")
-		}
-
-		err = manifestEnumerator.Enumerate(ctx, func(dgst digest.Digest) error {
+		err = enumStorage.Manifests(ctx, repoName, func(dgst digest.Digest) error {
 			if _, ok := inuse[string(dgst)]; ok && imageStreamHasManifestDigest(is, dgst) {
 				logger.Debugf("Keeping the manifest link %s@%s", repoName, dgst)
 				return nil
@@ -286,7 +279,7 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 
 	logger.Debugln("Processing blobs")
 	blobStatter := registry.BlobStatter()
-	err = registry.Blobs().Enumerate(ctx, func(dgst digest.Digest) error {
+	err = enumStorage.Blobs(ctx, func(dgst digest.Digest) error {
 		if imageReference, ok := inuse[string(dgst)]; ok {
 			logger.Debugf("Keeping the blob %s (it belongs to the image %s)", dgst, imageReference)
 			return nil
