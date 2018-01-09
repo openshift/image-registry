@@ -112,6 +112,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 	if err != nil {
 		return nil, err
 	}
+	localManifestService := ms
 
 	ms = &manifestService{
 		manifests:     ms,
@@ -123,8 +124,10 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 
 	if r.app.config.Pullthrough.Enabled {
 		ms = &pullthroughManifestService{
-			ManifestService: ms,
-			imageStream:     r.imageStream,
+			ManifestService:      ms,
+			localManifestService: localManifestService,
+			imageStream:          r.imageStream,
+			mirror:               r.app.config.Pullthrough.Mirror,
 		}
 	}
 

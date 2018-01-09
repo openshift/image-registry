@@ -14,8 +14,9 @@ import (
 // as to blobs.
 type pullthroughManifestService struct {
 	distribution.ManifestService
-
-	imageStream *imageStream
+	localManifestService distribution.ManifestService
+	imageStream          *imageStream
+	mirror               bool
 }
 
 var _ distribution.ManifestService = &pullthroughManifestService{}
@@ -64,6 +65,11 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 	manifest, err := pullthroughManifestService.Get(ctx, dgst)
 	switch err.(type) {
 	case nil:
+		if m.mirror {
+			if _, putErr := m.localManifestService.Put(ctx, manifest); putErr != nil {
+				context.GetLogger(ctx).Errorf("failed to mirror manifest %s: %v", ref.Exact(), putErr)
+			}
+		}
 		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
 	case distribution.ErrManifestUnknownRevision:
 		break
