@@ -14,14 +14,11 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	logrus_logstash "github.com/bshuster-repo/logrus-logstash-hook"
-	"github.com/docker/go-units"
 	gorillahandlers "github.com/gorilla/handlers"
 
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/health"
-	"github.com/docker/distribution/registry/storage"
-	"github.com/docker/distribution/registry/storage/driver/factory"
 	"github.com/docker/distribution/uuid"
 	distversion "github.com/docker/distribution/version"
 
@@ -43,90 +40,24 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/prune"
 	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
 	"github.com/openshift/image-registry/pkg/origin-common/crypto"
 	"github.com/openshift/image-registry/pkg/version"
 )
 
+var experimental = flag.Bool("experimental", false, "enable experimental features")
 var pruneMode = flag.String("prune", "", "prune blobs from the storage and exit (check, delete)")
+var restoreMode = flag.String("restore-mode", "", "check data corruption or recover storage data if possible (valid values: check, check-database, check-storage, recover)")
+var restoreNamespace = flag.String("restore-namespace", "", "check and recover only specified namespace")
 var listRepositories = flag.Bool("list-repositories", false, "shows list of repositories")
 var listBlobs = flag.Bool("list-blobs", false, "shows list of blob digests stored in the storage")
 var listManifests = flag.Bool("list-manifests", false, "shows list of manifest digests stored in the storage")
-var listRepositoryManifests = flag.String("list-manifests-from", "", "shows the manifest digests in all the repository")
+var listRepositoryManifests = flag.String("list-manifests-from", "", "shows the manifest digests in the specified repository")
 
 func versionFields() map[interface{}]interface{} {
 	return map[interface{}]interface{}{
 		"distribution_version": distversion.Version,
 		"openshift_version":    version.Get(),
-	}
-}
-
-// ExecutePruner runs the pruner.
-func ExecutePruner(configFile io.Reader, dryRun bool) {
-	config, extraConfig, err := registryconfig.Parse(configFile)
-	if err != nil {
-		log.Fatalf("error parsing configuration file: %s", err)
-	}
-
-	// A lot of installations have the 'debug' log level in their config files,
-	// but it's too verbose for pruning. Therefore we ignore it, but we still
-	// respect overrides using environment variables.
-	config.Loglevel = ""
-	config.Log.Level = configuration.Loglevel(os.Getenv("REGISTRY_LOG_LEVEL"))
-	if len(config.Log.Level) == 0 {
-		config.Log.Level = "warning"
-	}
-
-	ctx := context.Background()
-	ctx, err = configureLogging(ctx, config)
-	if err != nil {
-		log.Fatalf("error configuring logging: %s", err)
-	}
-
-	startPrune := "start prune"
-	var registryOptions []storage.RegistryOption
-	if dryRun {
-		startPrune += " (dry-run mode)"
-	} else {
-		registryOptions = append(registryOptions, storage.EnableDelete)
-	}
-	context.GetLoggerWithFields(ctx, versionFields()).Info(startPrune)
-
-	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig))
-
-	storageDriver, err := factory.Create(config.Storage.Type(), config.Storage.Parameters())
-	if err != nil {
-		log.Fatalf("error creating storage driver: %s", err)
-	}
-
-	registry, err := storage.NewRegistry(ctx, storageDriver, registryOptions...)
-	if err != nil {
-		log.Fatalf("error creating registry: %s", err)
-	}
-
-	var pruner prune.Pruner
-
-	if dryRun {
-		pruner = &prune.DryRunPruner{}
-	} else {
-		pruner = &prune.RegistryPruner{StorageDriver: storageDriver}
-	}
-
-	stats, err := prune.Prune(ctx, registry, registryClient, pruner)
-	if err != nil {
-		log.Error(err)
-	}
-	if dryRun {
-		fmt.Printf("Would delete %d blobs\n", stats.Blobs)
-		fmt.Printf("Would free up %s of disk space\n", units.BytesSize(float64(stats.DiskSpace)))
-		fmt.Println("Use -prune=delete to actually delete the data")
-	} else {
-		fmt.Printf("Deleted %d blobs\n", stats.Blobs)
-		fmt.Printf("Freed up %s of disk space\n", units.BytesSize(float64(stats.DiskSpace)))
-	}
-	if err != nil {
-		os.Exit(1)
 	}
 }
 
@@ -144,15 +75,54 @@ func getListOptions() *ListOptions {
 	return opts
 }
 
-// Execute runs the Docker registry.
-func Execute(configFile io.Reader) {
+func optionsConflict() error {
 	listOpts := getListOptions()
 
 	if listOpts.Repositories || listOpts.Blobs || listOpts.Manifests {
-		if len(*pruneMode) != 0 {
-			log.Fatal("options -list-repositories, -list-blobs, -list-manifests, -list-repository-manifests and -prune are mutually exclusive")
+		if !*experimental {
+			return fmt.Errorf("options -list-repositories, -list-blobs, -list-manifests and -list-manifests-froms are experimental. Please specify the -experimental to use them.")
 		}
+		if len(*pruneMode) > 0 {
+			return fmt.Errorf("options -list-repositories, -list-blobs, -list-manifests, -list-manifests-froms and -prune are mutually exclusive")
+		}
+		if len(*restoreMode) > 0 {
+			return fmt.Errorf("options -list-repositories, -list-blobs, -list-manifests, -list-manifests-froms and -restore-mode are mutually exclusive")
+		}
+	}
+
+	if len(*pruneMode) > 0 && len(*restoreMode) > 0 {
+		return fmt.Errorf("options -prune and -restore-mode are mutually exclusive")
+	}
+
+	if len(*restoreMode) > 0 && !*experimental {
+		return fmt.Errorf("option -restore-mode is experimental. Please specify the -experimental to use it.")
+	}
+
+	return nil
+}
+
+// Execute runs the Docker registry.
+func Execute(configFile io.Reader) {
+	if err := optionsConflict(); err != nil {
+		log.Error(err)
+		os.Exit(2)
+	}
+
+	listOpts := getListOptions()
+
+	if listOpts.Repositories || listOpts.Blobs || listOpts.Manifests {
 		ExecuteListFS(configFile, listOpts)
+		return
+	}
+
+	if len(*restoreMode) != 0 {
+		switch *restoreMode {
+		case "check", "check-database", "check-storage", "recover":
+			ExecuteRestore(configFile, *restoreMode, *restoreNamespace)
+		default:
+			log.Error("invalid value for the -restore-mode option")
+			os.Exit(2)
+		}
 		return
 	}
 
@@ -164,7 +134,8 @@ func Execute(configFile io.Reader) {
 		case "check":
 			dryRun = true
 		default:
-			log.Fatal("invalid value for the -prune option")
+			log.Error("invalid value for the -prune option")
+			os.Exit(2)
 		}
 		ExecutePruner(configFile, dryRun)
 		return

@@ -174,7 +174,7 @@ type Summary struct {
 func Prune(ctx context.Context, registry distribution.Namespace, registryClient client.RegistryClient, pruner Pruner) (Summary, error) {
 	logger := context.GetLogger(ctx)
 
-	enumStorage := regstorage.Enumerator{registry}
+	enumStorage := regstorage.Enumerator{Registry: registry}
 
 	oc, err := registryClient.Client()
 	if err != nil {
