@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/openshift/origin/tools/junitreport/pkg/cmd"
+	"github.com/openshift/image-registry/tools/junitreport/pkg/cmd"
 )
 
 var (
