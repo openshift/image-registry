@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/openshift/origin/tools/junitreport/pkg/api"
+	"github.com/openshift/image-registry/tools/junitreport/pkg/api"
 )
 
 func TestAddSuite(t *testing.T) {
