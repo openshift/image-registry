@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/openshift/origin/tools/junitreport/pkg/api"
-	"github.com/openshift/origin/tools/junitreport/pkg/builder"
-	"github.com/openshift/origin/tools/junitreport/pkg/parser"
+	"github.com/openshift/image-registry/tools/junitreport/pkg/api"
+	"github.com/openshift/image-registry/tools/junitreport/pkg/builder"
+	"github.com/openshift/image-registry/tools/junitreport/pkg/parser"
 )
 
 // NewParser returns a new parser that's capable of parsing Go unit test output

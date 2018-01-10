@@ -4,8 +4,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/openshift/origin/tools/junitreport/pkg/api"
-	"github.com/openshift/origin/tools/junitreport/pkg/builder"
+	"github.com/openshift/image-registry/tools/junitreport/pkg/api"
+	"github.com/openshift/image-registry/tools/junitreport/pkg/builder"
 )
 
 // NewTestSuitesBuilder returns a new nested test suites builder. All test suites consumed by
