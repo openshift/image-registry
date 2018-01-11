@@ -50,15 +50,11 @@ func TestPullthroughManifests(t *testing.T) {
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
 	tag := "latest"
 
-	backgroundCtx := context.Background()
-	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
-	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
-		&fakeAccessControllerMiddleware{t: t},
-		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
-	})
-
-	remoteRegistryServer := createTestRegistryServer(t, backgroundCtx)
+	remoteRegistryServer := createTestRegistryServer(t, ctx)
 	defer remoteRegistryServer.Close()
 
 	serverURL, err := url.Parse(remoteRegistryServer.URL)
@@ -67,7 +63,7 @@ func TestPullthroughManifests(t *testing.T) {
 	}
 
 	ms1dgst, ms1canonical, _, ms1manifest, err := testutil.CreateAndUploadTestManifest(
-		backgroundCtx, testutil.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
+		ctx, testutil.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -84,7 +80,7 @@ func TestPullthroughManifests(t *testing.T) {
 	image.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo, image.Name)
 	image.DockerImageManifest = ""
 
-	fos, imageClient := testutil.NewFakeOpenShiftWithClient(backgroundCtx)
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
@@ -126,14 +122,13 @@ func TestPullthroughManifests(t *testing.T) {
 	} {
 		localManifestService := newTestManifestService(repoName, tc.localData)
 
-		imageStream := newTestImageStream(backgroundCtx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ptms := &pullthroughManifestService{
 			ManifestService: localManifestService,
 			imageStream:     imageStream,
 		}
 
-		ctx := WithTestPassthroughToUpstream(backgroundCtx, false)
 		manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
 		switch err.(type) {
 		case distribution.ErrManifestUnknownRevision:
@@ -174,15 +169,11 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 	repo := "zapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
 
-	backgroundCtx := context.Background()
-	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
-	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
-		&fakeAccessControllerMiddleware{t: t},
-		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
-	})
-
-	remoteRegistryServer := createTestRegistryServer(t, backgroundCtx)
+	remoteRegistryServer := createTestRegistryServer(t, ctx)
 	defer remoteRegistryServer.Close()
 
 	serverURL, err := url.Parse(remoteRegistryServer.URL)
@@ -191,7 +182,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 	}
 
 	ms1dgst, ms1canonical, _, ms1manifest, err := testutil.CreateAndUploadTestManifest(
-		backgroundCtx, testutil.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
+		ctx, testutil.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -201,7 +192,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 	}
 	t.Logf("ms1dgst=%s, ms1manifest: %s", ms1dgst, ms1canonical)
 	ms2dgst, ms2canonical, ms2config, ms2manifest, err := testutil.CreateAndUploadTestManifest(
-		backgroundCtx, testutil.ManifestSchema2, 2, serverURL, nil, repoName, "schema2")
+		ctx, testutil.ManifestSchema2, 2, serverURL, nil, repoName, "schema2")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -345,15 +336,13 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			fos, imageClient := testutil.NewFakeOpenShiftWithClient(backgroundCtx)
+			fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 
 			tc.fakeOpenShiftInit(fos)
 
 			localManifestService := newTestManifestService(repoName, tc.localData)
 
-			ctx := WithTestPassthroughToUpstream(backgroundCtx, false)
-
-			imageStream := newTestImageStream(backgroundCtx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+			imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 			ptms := &pullthroughManifestService{
 				ManifestService: localManifestService,
