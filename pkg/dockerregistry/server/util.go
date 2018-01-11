@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/docker/distribution"
@@ -21,9 +22,12 @@ import (
 )
 
 func getNamespaceName(resourceName string) (string, string, error) {
-	repoParts := strings.SplitN(resourceName, "/", 2)
+	repoParts := strings.Split(resourceName, "/")
 	if len(repoParts) != 2 {
-		return "", "", ErrNamespaceRequired
+		return "", "", distribution.ErrRepositoryNameInvalid{
+			Name:   resourceName,
+			Reason: fmt.Errorf("it must be of the format <project>/<name>"),
+		}
 	}
 	ns := repoParts[0]
 	if len(ns) == 0 {

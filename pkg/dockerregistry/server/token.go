@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	context "github.com/docker/distribution/context"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/auth"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,6 +30,22 @@ const anonymousToken = "anonymous"
 
 func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := context.WithRequest(t.ctx, req)
+
+	params := req.URL.Query()
+	if len(params.Get("scope")) > 0 {
+		accessRecords := auth.ResolveScopeSpecifiers(ctx, params["scope"])
+		for _, access := range accessRecords {
+			switch access.Resource.Type {
+			case "repository", "signature":
+				_, _, err := getNamespaceName(access.Resource.Name)
+				if err != nil {
+					context.GetRequestLogger(ctx).Debugf("auth token request for unsupported resource name: %s", access.Resource.Name)
+					t.writeError(w, req)
+					return
+				}
+			}
+		}
+	}
 
 	// If no authorization is provided, return a token the auth provider will treat as an anonymous user
 	if len(req.Header.Get("Authorization")) == 0 {

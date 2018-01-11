@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
@@ -61,11 +60,10 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 
 	context.GetLogger(ctx).Infof("Using %q as Docker Registry URL", app.config.Server.Addr)
 
-	nameParts := strings.SplitN(repo.Named().Name(), "/", 2)
-	if len(nameParts) != 2 {
-		return nil, nil, fmt.Errorf("invalid repository name %q: it must be of the format <project>/<name>", repo.Named().Name())
+	namespace, name, err := getNamespaceName(repo.Named().Name())
+	if err != nil {
+		return nil, nil, err
 	}
-	namespace, name := nameParts[0], nameParts[1]
 
 	imageStreamGetter := &cachedImageStreamGetter{
 		ctx:          ctx,
@@ -82,8 +80,8 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		crossmount: crossmount,
 
 		imageStream: &imageStream{
-			namespace:         nameParts[0],
-			name:              nameParts[1],
+			namespace:         namespace,
+			name:              name,
 			registryOSClient:  registryOSClient,
 			cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
 			imageStreamGetter: imageStreamGetter,
