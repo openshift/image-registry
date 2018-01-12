@@ -19,12 +19,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgotesting "k8s.io/client-go/testing"
 
-	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
-	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
-	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	imagefakeclient "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1/fake"
+
+	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 func TestSignatureGet(t *testing.T) {
@@ -36,7 +37,7 @@ func TestSignatureGet(t *testing.T) {
 		Content: []byte("owGbwMvMwMQorp341GLVgXeMpw9kJDFE1LxLq1ZKLsosyUxOzFGyqlbKTEnNK8ksqQSxU/KTs1OLdItS01KLUvOSU5WslHLygeoy8otLrEwNDAz0S1KLS8CEVU4iiFKq1VHKzE1MT0XSnpuYl5kGlNNNyUwHKbFSKs5INDI1szIxMLIwtzBKNrBITUw1SbRItkw0skhKMzMzTDZItEgxTDZKS7ZINbRMSUpMTDVKMjC0SDIyNDA0NLQ0TzU0sTABWVZSWQByVmJJfm5mskJyfl5JYmZeapFCcWZ6XmJJaVE"),
 	}
 
-	testImage, err := registrytest.NewImageForManifest("user/app", registrytest.SampleImageManifestSchema1, "", false)
+	testImage, err := testutil.NewImageForManifest("user/app", testutil.SampleImageManifestSchema1, "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,14 +45,14 @@ func TestSignatureGet(t *testing.T) {
 	testImage.Signatures = append(testImage.Signatures, testSignature)
 
 	ctx := context.Background()
-	ctx = registrytest.WithTestLogger(ctx, t)
+	ctx = testutil.WithTestLogger(ctx, t)
 	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
-	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
-	registrytest.AddImageStream(t, fos, "user", "app", map[string]string{
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+	testutil.AddImageStream(t, fos, "user", "app", map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
-	registrytest.AddImage(t, fos, testImage, "user", "app", "latest")
+	testutil.AddImage(t, fos, testImage, "user", "app", "latest")
 
 	osclient, err := registryclient.NewFakeRegistryClient(imageClient).Client()
 	if err != nil {
@@ -167,7 +168,7 @@ func TestSignaturePut(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	ctx = registrytest.WithTestLogger(ctx, t)
+	ctx = testutil.WithTestLogger(ctx, t)
 	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 	ctx = withUserClient(ctx, osclient)
 

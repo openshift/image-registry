@@ -16,8 +16,8 @@ import (
 	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
 	projectapiv1 "github.com/openshift/origin/pkg/project/apis/project/v1"
 
-	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	"github.com/openshift/image-registry/pkg/testframework"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 type errRegistryWantsContent struct {
@@ -47,7 +47,7 @@ func crossMountImage(ctx context.Context, destRepo distribution.Repository, tag 
 			dst: destRepo.Named(),
 		}
 	}
-	if err := registrytest.UploadManifest(ctx, destRepo, tag, manifest); err != nil {
+	if err := testutil.UploadManifest(ctx, destRepo, tag, manifest); err != nil {
 		return fmt.Errorf("failed to upload the manifest after cross-mounting blobs: %v", err)
 	}
 	return nil
@@ -104,7 +104,7 @@ func TestCrossMount(t *testing.T) {
 			}
 
 			repo := registry.Repository(project.Name, repoName, user)
-			manifest, err := registrytest.UploadSchema2Image(context.Background(), repo, "latest")
+			manifest, err := testutil.UploadSchema2Image(context.Background(), repo, "latest")
 			if err != nil {
 				t.Fatal(err)
 			}

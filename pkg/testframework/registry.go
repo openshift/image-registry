@@ -11,7 +11,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/cmd/dockerregistry"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
-	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 type CloseFunc func() error
@@ -66,7 +66,7 @@ func StartTestRegistry(t *testing.T, kubeConfigPath string) (net.Listener, Close
 	}
 
 	ctx := context.Background()
-	ctx = registrytest.WithTestLogger(ctx, t)
+	ctx = testutil.WithTestLogger(ctx, t)
 	srv, err := dockerregistry.NewServer(ctx, dockerConfig, extraConfig)
 	if err != nil {
 		t.Fatalf("failed to create a new server: %v", err)
@@ -105,19 +105,19 @@ func (r *Registry) BaseURL() string {
 }
 
 func (r *Registry) Repository(namespace string, imagestream string, user *User) *Repository {
-	creds := registrytest.NewBasicCredentialStore(user.Name, user.Token)
+	creds := testutil.NewBasicCredentialStore(user.Name, user.Token)
 
 	baseURL := r.BaseURL()
 	repoName := fmt.Sprintf("%s/%s", namespace, imagestream)
 
-	transport, err := registrytest.NewTransport(baseURL, repoName, creds)
+	transport, err := testutil.NewTransport(baseURL, repoName, creds)
 	if err != nil {
 		r.t.Fatalf("failed to get transport for %s: %v", repoName, err)
 	}
 
 	ctx := context.Background()
 
-	repo, err := registrytest.NewRepository(ctx, repoName, baseURL, transport)
+	repo, err := testutil.NewRepository(ctx, repoName, baseURL, transport)
 	if err != nil {
 		r.t.Fatalf("failed to get repository %s: %v", repoName, err)
 	}

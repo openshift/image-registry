@@ -14,8 +14,8 @@ import (
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
 
-	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	"github.com/openshift/image-registry/pkg/testframework"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 // getSchema1Manifest simulates a client which supports only schema 1
@@ -67,7 +67,7 @@ func TestImageLayers(t *testing.T) {
 
 	ctx := context.Background()
 
-	if _, err := registrytest.UploadSchema2Image(ctx, repo, schema2Tag); err != nil {
+	if _, err := testutil.UploadSchema2Image(ctx, repo, schema2Tag); err != nil {
 		t.Fatalf("upload image with schema 2 manifest: %v", err)
 	}
 
@@ -77,7 +77,7 @@ func TestImageLayers(t *testing.T) {
 		t.Fatalf("get schema 1 manifest for image schema2: %v", err)
 	}
 
-	if err := registrytest.UploadManifest(ctx, repo, schema1Tag, schema1Manifest); err != nil {
+	if err := testutil.UploadManifest(ctx, repo, schema1Tag, schema1Manifest); err != nil {
 		t.Fatalf("upload schema 1 manifest: %v", err)
 	}
 

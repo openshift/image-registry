@@ -15,10 +15,11 @@ import (
 	"github.com/docker/distribution/registry/handlers"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
-	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
-	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
+
+	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Server {
@@ -50,7 +51,7 @@ func TestPullthroughManifests(t *testing.T) {
 	tag := "latest"
 
 	backgroundCtx := context.Background()
-	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
+	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
 
 	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
 		&fakeAccessControllerMiddleware{t: t},
@@ -65,8 +66,8 @@ func TestPullthroughManifests(t *testing.T) {
 		t.Fatalf("error parsing server url: %v", err)
 	}
 
-	ms1dgst, ms1canonical, _, ms1manifest, err := registrytest.CreateAndUploadTestManifest(
-		backgroundCtx, registrytest.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
+	ms1dgst, ms1canonical, _, ms1manifest, err := testutil.CreateAndUploadTestManifest(
+		backgroundCtx, testutil.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -76,18 +77,18 @@ func TestPullthroughManifests(t *testing.T) {
 	}
 	t.Logf("ms1dgst=%s, ms1manifest: %s", ms1dgst, ms1canonical)
 
-	image, err := registrytest.NewImageForManifest(repoName, string(ms1payload), "", false)
+	image, err := testutil.NewImageForManifest(repoName, string(ms1payload), "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	image.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo, image.Name)
 	image.DockerImageManifest = ""
 
-	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(backgroundCtx)
-	registrytest.AddImageStream(t, fos, namespace, repo, map[string]string{
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(backgroundCtx)
+	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
-	registrytest.AddImage(t, fos, image, namespace, repo, tag)
+	testutil.AddImage(t, fos, image, namespace, repo, tag)
 
 	for _, tc := range []struct {
 		name                  string
@@ -174,7 +175,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
 
 	backgroundCtx := context.Background()
-	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
+	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
 
 	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
 		&fakeAccessControllerMiddleware{t: t},
@@ -189,8 +190,8 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		t.Fatalf("error parsing server url: %v", err)
 	}
 
-	ms1dgst, ms1canonical, _, ms1manifest, err := registrytest.CreateAndUploadTestManifest(
-		backgroundCtx, registrytest.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
+	ms1dgst, ms1canonical, _, ms1manifest, err := testutil.CreateAndUploadTestManifest(
+		backgroundCtx, testutil.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -199,8 +200,8 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	t.Logf("ms1dgst=%s, ms1manifest: %s", ms1dgst, ms1canonical)
-	ms2dgst, ms2canonical, ms2config, ms2manifest, err := registrytest.CreateAndUploadTestManifest(
-		backgroundCtx, registrytest.ManifestSchema2, 2, serverURL, nil, repoName, "schema2")
+	ms2dgst, ms2canonical, ms2config, ms2manifest, err := testutil.CreateAndUploadTestManifest(
+		backgroundCtx, testutil.ManifestSchema2, 2, serverURL, nil, repoName, "schema2")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -210,13 +211,13 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 	}
 	t.Logf("ms2dgst=%s, ms2manifest: %s", ms2dgst, ms2canonical)
 
-	ms1img, err := registrytest.NewImageForManifest(repoName, string(ms1payload), "", false)
+	ms1img, err := testutil.NewImageForManifest(repoName, string(ms1payload), "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ms1img.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo, ms1img.Name)
 	ms1img.DockerImageManifest = ""
-	ms2img, err := registrytest.NewImageForManifest(repoName, string(ms2payload), ms2config, false)
+	ms2img, err := testutil.NewImageForManifest(repoName, string(ms2payload), ms2config, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +228,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		name                string
 		manifestDigest      digest.Digest
 		localData           map[digest.Digest]distribution.Manifest
-		fakeOpenShiftInit   func(fos *registrytest.FakeOpenShift)
+		fakeOpenShiftInit   func(fos *testutil.FakeOpenShift)
 		expectedManifest    distribution.Manifest
 		expectedLocalCalls  map[string]int
 		expectedErrorString string
@@ -236,11 +237,11 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		{
 			name:           "fetch schema 1 with allowed insecure",
 			manifestDigest: ms1dgst,
-			fakeOpenShiftInit: func(fos *registrytest.FakeOpenShift) {
-				registrytest.AddImageStream(t, fos, namespace, repo, map[string]string{
+			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
+				testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 					imageapi.InsecureRepositoryAnnotation: "true",
 				})
-				registrytest.AddImage(t, fos, ms1img, namespace, repo, "schema1")
+				testutil.AddImage(t, fos, ms1img, namespace, repo, "schema1")
 			},
 			expectedManifest: ms1manifest,
 			expectedLocalCalls: map[string]int{
@@ -251,11 +252,11 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		{
 			name:           "fetch schema 2 with allowed insecure",
 			manifestDigest: ms2dgst,
-			fakeOpenShiftInit: func(fos *registrytest.FakeOpenShift) {
-				registrytest.AddImageStream(t, fos, namespace, repo, map[string]string{
+			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
+				testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 					imageapi.InsecureRepositoryAnnotation: "true",
 				})
-				registrytest.AddImage(t, fos, ms2img, namespace, repo, "schema2")
+				testutil.AddImage(t, fos, ms2img, namespace, repo, "schema2")
 			},
 			expectedManifest: ms2manifest,
 			expectedLocalCalls: map[string]int{
@@ -266,11 +267,11 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		{
 			name:           "explicit forbid insecure",
 			manifestDigest: ms1dgst,
-			fakeOpenShiftInit: func(fos *registrytest.FakeOpenShift) {
-				registrytest.AddImageStream(t, fos, namespace, repo, map[string]string{
+			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
+				testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 					imageapi.InsecureRepositoryAnnotation: "false",
 				})
-				registrytest.AddImage(t, fos, ms1img, namespace, repo, "schema1")
+				testutil.AddImage(t, fos, ms1img, namespace, repo, "schema1")
 			},
 			expectedErrorString: "server gave HTTP response to HTTPS client",
 			expectedLocalCalls: map[string]int{
@@ -281,9 +282,9 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		{
 			name:           "implicit forbid insecure",
 			manifestDigest: ms1dgst,
-			fakeOpenShiftInit: func(fos *registrytest.FakeOpenShift) {
-				registrytest.AddImageStream(t, fos, namespace, repo, nil)
-				registrytest.AddImage(t, fos, ms1img, namespace, repo, "schema1")
+			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
+				testutil.AddImageStream(t, fos, namespace, repo, nil)
+				testutil.AddImage(t, fos, ms1img, namespace, repo, "schema1")
 			},
 			expectedErrorString: "server gave HTTP response to HTTPS client",
 			expectedLocalCalls: map[string]int{
@@ -294,17 +295,17 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		{
 			name:           "pullthrough from insecure tag",
 			manifestDigest: ms1dgst,
-			fakeOpenShiftInit: func(fos *registrytest.FakeOpenShift) {
-				image, err := registrytest.NewImageForManifest(repoName, string(ms1payload), "", false)
+			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
+				image, err := testutil.NewImageForManifest(repoName, string(ms1payload), "", false)
 				if err != nil {
 					t.Fatal(err)
 				}
 				image.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo, ms1dgst)
 				image.DockerImageManifest = ""
 
-				registrytest.AddUntaggedImage(t, fos, image)
-				registrytest.AddImageStream(t, fos, namespace, repo, nil)
-				registrytest.AddImageStreamTag(t, fos, ms1img, namespace, repo, &imageapiv1.TagReference{
+				testutil.AddUntaggedImage(t, fos, image)
+				testutil.AddImageStream(t, fos, namespace, repo, nil)
+				testutil.AddImageStreamTag(t, fos, ms1img, namespace, repo, &imageapiv1.TagReference{
 					Name:         "schema1",
 					ImportPolicy: imageapiv1.TagImportPolicy{Insecure: true},
 				})
@@ -318,19 +319,19 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		{
 			name:           "pull insecure if either image stream is insecure or the tag",
 			manifestDigest: ms2dgst,
-			fakeOpenShiftInit: func(fos *registrytest.FakeOpenShift) {
-				image, err := registrytest.NewImageForManifest(repoName, string(ms2payload), ms2config, false)
+			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
+				image, err := testutil.NewImageForManifest(repoName, string(ms2payload), ms2config, false)
 				if err != nil {
 					t.Fatal(err)
 				}
 				image.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo, image.Name)
 				image.DockerImageManifest = ""
 
-				registrytest.AddUntaggedImage(t, fos, image)
-				registrytest.AddImageStream(t, fos, namespace, repo, map[string]string{
+				testutil.AddUntaggedImage(t, fos, image)
+				testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 					imageapi.InsecureRepositoryAnnotation: "true",
 				})
-				registrytest.AddImageStreamTag(t, fos, image, namespace, repo, &imageapiv1.TagReference{
+				testutil.AddImageStreamTag(t, fos, image, namespace, repo, &imageapiv1.TagReference{
 					Name: "schema2",
 					// the value doesn't override is annotation because we cannot determine whether the
 					// value is explicit or just the default
@@ -344,7 +345,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			fos, imageClient := registrytest.NewFakeOpenShiftWithClient(backgroundCtx)
+			fos, imageClient := testutil.NewFakeOpenShiftWithClient(backgroundCtx)
 
 			tc.fakeOpenShiftInit(fos)
 
@@ -381,7 +382,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 				}
 			}
 
-			registrytest.AssertManifestsEqual(t, tc.name, manifestResult, tc.expectedManifest)
+			testutil.AssertManifestsEqual(t, tc.name, manifestResult, tc.expectedManifest)
 
 			for name, count := range localManifestService.calls {
 				expectCount, exists := tc.expectedLocalCalls[name]
@@ -436,7 +437,7 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 	server2 := startServer("server2")
 	defer server2.Close()
 
-	img, err := registrytest.CreateRandomImage(namespace, "dummy")
+	img, err := testutil.CreateRandomImage(namespace, "dummy")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -449,17 +450,17 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 	image2.DockerImageReference = dockerImageReference(server2, "foo/bar")
 
 	ctx := context.Background()
-	ctx = registrytest.WithTestLogger(ctx, t)
+	ctx = testutil.WithTestLogger(ctx, t)
 
-	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
-	registrytest.AddImageStream(t, fos, namespace, repo1, map[string]string{
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+	testutil.AddImageStream(t, fos, namespace, repo1, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
-	registrytest.AddImageStream(t, fos, namespace, repo2, map[string]string{
+	testutil.AddImageStream(t, fos, namespace, repo2, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
-	registrytest.AddImage(t, fos, &image1, namespace, repo1, tag)
-	registrytest.AddImage(t, fos, &image2, namespace, repo2, tag)
+	testutil.AddImage(t, fos, &image1, namespace, repo1, tag)
+	testutil.AddImage(t, fos, &image2, namespace, repo2, tag)
 
 	for _, tc := range []struct {
 		name             string
