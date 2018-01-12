@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/openshift/image-registry/pkg/testutil/counter"
 )
 
 func TestMaxConnections(t *testing.T) {
@@ -29,7 +31,7 @@ func TestMaxConnections(t *testing.T) {
 		close(handlerBarrier)
 	}()
 
-	c := newCounter()
+	c := counter.New()
 	done := make(chan struct{})
 	wait := func(reason string) {
 		select {
@@ -52,31 +54,31 @@ func TestMaxConnections(t *testing.T) {
 	wait("timeout while waiting one failed client")
 
 	// expected state: 1 running, 2 in queue, 1 failed
-	if expected := (countM{429: 1}); !c.Equal(expected) {
-		t.Errorf("c = %v, want %v", c.Values(), expected)
+	if diff := c.Diff(counter.M{429: 1}); diff != nil {
+		t.Error(diff)
 	}
 
 	handlerBarrier <- struct{}{}
 	wait("timeout while waiting the first succeed client")
 
 	// expected state: 1 running, 1 in queue, 1 failed, 1 succeed
-	if expected := (countM{200: 1, 429: 1}); !c.Equal(expected) {
-		t.Errorf("c = %v, want %v", c.Values(), expected)
+	if diff := c.Diff(counter.M{200: 1, 429: 1}); diff != nil {
+		t.Error(diff)
 	}
 
 	handlerBarrier <- struct{}{}
 	wait("timeout while waiting the second succeed client")
 
 	// expected state: 1 running, 0 in queue, 1 failed, 2 succeed
-	if expected := (countM{200: 2, 429: 1}); !c.Equal(expected) {
-		t.Errorf("c = %v, want %v", c.Values(), expected)
+	if diff := c.Diff(counter.M{200: 2, 429: 1}); diff != nil {
+		t.Error(diff)
 	}
 
 	handlerBarrier <- struct{}{}
 	wait("timeout while waiting the third succeed client")
 
 	// expected state: 0 running, 0 in queue, 1 failed, 3 succeed
-	if expected := (countM{200: 3, 429: 1}); !c.Equal(expected) {
-		t.Errorf("c = %v, want %v", c.Values(), expected)
+	if diff := c.Diff(counter.M{200: 3, 429: 1}); diff != nil {
+		t.Error(diff)
 	}
 }
