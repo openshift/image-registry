@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	context "github.com/docker/distribution/context"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/auth"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,6 +31,22 @@ const anonymousToken = "anonymous"
 func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := context.WithRequest(t.ctx, req)
 
+	params := req.URL.Query()
+	if len(params.Get("scope")) > 0 {
+		accessRecords := auth.ResolveScopeSpecifiers(ctx, params["scope"])
+		for _, access := range accessRecords {
+			switch access.Resource.Type {
+			case "repository", "signature":
+				_, _, err := getNamespaceName(access.Resource.Name)
+				if err != nil {
+					context.GetRequestLogger(ctx).Debugf("auth token request for unsupported resource name: %s", access.Resource.Name)
+					t.writeError(w, req, err.Error())
+					return
+				}
+			}
+		}
+	}
+
 	// If no authorization is provided, return a token the auth provider will treat as an anonymous user
 	if len(req.Header.Get("Authorization")) == 0 {
 		context.GetRequestLogger(ctx).Debugf("anonymous token request")
@@ -49,7 +66,7 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	osClient, err := t.client.ClientFromToken(token)
 	if err != nil {
 		context.GetRequestLogger(ctx).Errorf("error building client: %v", err)
-		t.writeError(w, req)
+		t.writeError(w, req, "invalid request")
 		return
 	}
 
@@ -62,11 +79,11 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	t.writeToken(token, w, req)
 }
 
-func (t *tokenHandler) writeError(w http.ResponseWriter, req *http.Request) {
+func (t *tokenHandler) writeError(w http.ResponseWriter, req *http.Request, msg string) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
+	w.WriteHeader(401)
 	// TODO(dmage): log error?
-	_ = json.NewEncoder(w).Encode(map[string]interface{}{"error": "invalid_request"})
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{"details": msg})
 }
 
 func (t *tokenHandler) writeToken(token string, w http.ResponseWriter, req *http.Request) {

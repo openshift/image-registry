@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/docker/distribution"
 	"github.com/docker/distribution/registry/auth"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -170,7 +171,10 @@ func TestAccessController(t *testing.T) {
 			openshiftResponses: []response{
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
 			},
-			expectedError:     ErrNamespaceRequired,
+			expectedError: distribution.ErrRepositoryNameInvalid{
+				Name:   "bar",
+				Reason: fmt.Errorf("it must be of the format <project>/<name>"),
+			},
 			expectedChallenge: false,
 			expectedActions: []string{
 				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",

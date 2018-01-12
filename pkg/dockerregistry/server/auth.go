@@ -167,9 +167,6 @@ func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
 	case ErrTokenInvalid, ErrOpenShiftAccessDenied:
 		// Challenge for errors that involve tokens or access denied
 		return &authChallenge{realm: ac.realm, err: err}
-	case ErrNamespaceRequired, ErrUnsupportedAction, ErrUnsupportedResource:
-		// Malformed or unsupported request, no challenge
-		return err
 	default:
 		// By default, just return the error, this gets surfaced as a bad request / internal error, but no challenge
 		return err
