@@ -270,8 +270,8 @@ func (m *Master) AdminKubeConfig() *rest.Config {
 	return config
 }
 
-func (m *Master) StartRegistry(t *testing.T) *Registry {
-	ln, closeFn := StartTestRegistry(t, m.AdminKubeConfigPath())
+func (m *Master) StartRegistry(t *testing.T, options ...RegistryOption) *Registry {
+	ln, closeFn := StartTestRegistry(t, m.AdminKubeConfigPath(), options...)
 	return &Registry{
 		t:        t,
 		listener: ln,

@@ -5,6 +5,7 @@ import (
 	"net"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
@@ -16,7 +17,17 @@ import (
 
 type CloseFunc func() error
 
-func StartTestRegistry(t *testing.T, kubeConfigPath string) (net.Listener, CloseFunc) {
+type RegistryOption interface {
+	Apply(dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration)
+}
+
+type DisableMirroring struct{}
+
+func (o DisableMirroring) Apply(dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) {
+	extraConfig.Pullthrough.Mirror = false
+}
+
+func StartTestRegistry(t *testing.T, kubeConfigPath string, options ...RegistryOption) (net.Listener, CloseFunc) {
 	localIPv4, err := DefaultLocalIP4()
 	if err != nil {
 		t.Fatalf("failed to detect an IPv4 address which would be reachable from containers: %v", err)
@@ -36,29 +47,36 @@ func StartTestRegistry(t *testing.T, kubeConfigPath string) (net.Listener, Close
 			"openshift": configuration.Parameters{},
 		},
 		Middleware: map[string][]configuration.Middleware{
-			"registry": {{
-				Name: "openshift",
-			}},
-			"repository": {{
-				Name: "openshift",
-				Options: configuration.Parameters{
-					"dockerregistryurl":      ln.Addr().String(),
-					"acceptschema2":          true,
-					"pullthrough":            true,
-					"enforcequota":           false,
-					"projectcachettl":        "1m",
-					"blobrepositorycachettl": "10m",
-				},
-			}},
-			"storage": {{
-				Name: "openshift",
-			}},
+			"registry":   {{Name: "openshift"}},
+			"repository": {{Name: "openshift"}},
+			"storage":    {{Name: "openshift"}},
 		},
 	}
 	dockerConfig.Log.Level = "debug"
 
 	extraConfig := &registryconfig.Configuration{
 		KubeConfig: kubeConfigPath,
+		Server: &registryconfig.Server{
+			Addr: ln.Addr().String(),
+		},
+		Pullthrough: &registryconfig.Pullthrough{
+			Enabled: true,
+			Mirror:  true,
+		},
+		Quota: &registryconfig.Quota{
+			Enabled:  false,
+			CacheTTL: 1 * time.Minute,
+		},
+		Cache: &registryconfig.Cache{
+			BlobRepositoryTTL: 10 * time.Minute,
+		},
+		Compatibility: &registryconfig.Compatibility{
+			AcceptSchema2: true,
+		},
+	}
+
+	for _, opt := range options {
+		opt.Apply(dockerConfig, extraConfig)
 	}
 
 	if err := registryconfig.InitExtraConfig(dockerConfig, extraConfig); err != nil {
