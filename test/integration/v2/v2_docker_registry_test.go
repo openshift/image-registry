@@ -21,8 +21,8 @@ import (
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageclient "github.com/openshift/origin/pkg/image/generated/internalclientset"
 
-	registryutil "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	"github.com/openshift/image-registry/pkg/testframework"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 // gzippedEmptyTar is a gzip-compressed version of an empty tar file
@@ -253,8 +253,8 @@ func TestV2RegistryGetTags(t *testing.T) {
 }
 
 func putManifest(baseURL, namespace, name, user, token string) (digest.Digest, error) {
-	creds := registryutil.NewBasicCredentialStore(user, token)
-	desc, _, err := registryutil.UploadRandomTestBlob(context.Background(), baseURL, creds, namespace+"/"+name)
+	creds := testutil.NewBasicCredentialStore(user, token)
+	desc, _, err := testutil.UploadRandomTestBlob(context.Background(), baseURL, creds, namespace+"/"+name)
 	if err != nil {
 		return "", err
 	}

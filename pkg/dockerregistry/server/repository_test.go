@@ -26,12 +26,13 @@ import (
 	clientgotesting "k8s.io/client-go/testing"
 	kapi "k8s.io/kubernetes/pkg/api"
 
-	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
-	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	"github.com/openshift/origin/pkg/image/util"
+
+	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 const (
@@ -41,7 +42,7 @@ const (
 
 func TestRepositoryBlobStat(t *testing.T) {
 	backgroundCtx := context.Background()
-	backgroundCtx = registrytest.WithTestLogger(backgroundCtx, t)
+	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
 
 	backgroundCtx = withAppMiddleware(backgroundCtx, &fakeAccessControllerMiddleware{t: t})
 
@@ -87,7 +88,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 		name    string
 		managed bool
 	}{{"nm/is", true}, {"registry.org:5000/user/app", false}} {
-		img, err := registrytest.NewImageForManifest(d.name, registrytest.SampleImageManifestSchema1, "", d.managed)
+		img, err := testutil.NewImageForManifest(d.name, testutil.SampleImageManifestSchema1, "", d.managed)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -296,7 +297,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 				ctx = withDeferredErrors(ctx, tc.deferredErrors)
 			}
 
-			fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
+			fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 
 			for _, is := range tc.imageStreams {
 				_, err = fos.CreateImageStream(is.Namespace, &is)
@@ -346,7 +347,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 	const blobRepoCacheTTL = time.Millisecond * 500
 
 	ctx := context.Background()
-	ctx = registrytest.WithTestLogger(ctx, t)
+	ctx = testutil.WithTestLogger(ctx, t)
 	ctx = withAuthPerformed(ctx)
 
 	// this driver holds all the testing blobs in memory during the whole test run
@@ -370,9 +371,9 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
-	registrytest.AddImageStream(t, fos, "nm", "is", nil)
-	registrytest.AddImage(t, fos, testImage, "nm", "is", "latest")
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+	testutil.AddImageStream(t, fos, "nm", "is", nil)
+	testutil.AddImage(t, fos, testImage, "nm", "is", "latest")
 
 	reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, blobRepoCacheTTL, false, false)
 	if err != nil {
@@ -545,7 +546,7 @@ func storeTestImage(
 	}
 
 	for i := 0; i < testImageLayerCount; i++ {
-		payload, err := registrytest.CreateRandomTarFile()
+		payload, err := testutil.CreateRandomTarFile()
 		if err != nil {
 			return nil, fmt.Errorf("unexpected error generating test layer file: %v", err)
 		}

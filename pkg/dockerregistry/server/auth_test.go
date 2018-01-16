@@ -25,8 +25,8 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
-	"github.com/openshift/image-registry/pkg/dockerregistry/testutil"
 	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 var scheme = runtime.NewScheme()

@@ -21,7 +21,7 @@ import (
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	srvconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/supermiddleware"
-	registrytest "github.com/openshift/image-registry/pkg/dockerregistry/testutil"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 const testPassthroughToUpstream = "openshift.test.passthrough-to-upstream"
@@ -49,7 +49,7 @@ func (m appMiddlewareChain) Apply(app supermiddleware.App) supermiddleware.App {
 // context. If the object isn't given, its method will err out.
 func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 	ctx := context.Background()
-	ctx = registrytest.WithTestLogger(ctx, t)
+	ctx = testutil.WithTestLogger(ctx, t)
 
 	m := NewTestBlobDescriptorManager()
 	ctx = withAppMiddleware(ctx, &appMiddlewareChain{
@@ -57,8 +57,8 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		&fakeBlobDescriptorServiceMiddleware{t: t, m: m},
 	})
 
-	fos, imageClient := registrytest.NewFakeOpenShiftWithClient(ctx)
-	testImage := registrytest.AddRandomImage(t, fos, "user", "app", "latest")
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+	testImage := testutil.AddRandomImage(t, fos, "user", "app", "latest")
 
 	dockercfg := &configuration.Configuration{
 		Loglevel: "debug",
@@ -104,7 +104,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		t.Fatalf("error parsing server url: %v", err)
 	}
 
-	desc, _, err := registrytest.UploadRandomTestBlob(ctx, serverURL.String(), nil, "user/app")
+	desc, _, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, "user/app")
 	if err != nil {
 		t.Fatal(err)
 	}
