@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -114,64 +112,45 @@ func TestPullThroughInsecure(t *testing.T) {
 		imageSize += size
 	}
 
-	localIPv4, err := testframework.DefaultLocalIP4()
-	if err != nil {
-		t.Fatal(err)
-	}
+	ts := testframework.NewHTTPServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Logf("External registry got %s %s", r.Method, r.URL.Path)
 
-	l, err := net.Listen("tcp", ":0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer l.Close()
+		w.Header().Set("Docker-Distribution-API-Version", "registry/2.0")
 
-	_, portStr, err := net.SplitHostPort(l.Addr().String())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	go func() {
-		http.Serve(l, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			t.Logf("External registry got %s %s", r.Method, r.URL.Path)
-
-			w.Header().Set("Docker-Distribution-API-Version", "registry/2.0")
-
-			switch r.URL.Path {
-			case "/v2/":
-				w.Write([]byte(`{}`))
-			case "/v2/" + isname + "/tags/list":
-				w.Write([]byte("{\"name\": \"" + isname + "\", \"tags\": [\"latest\", \"" + repotag + "\"]}"))
-			case "/v2/" + isname + "/manifests/latest", "/v2/" + isname + "/manifests/" + repotag, "/v2/" + isname + "/manifests/" + etcdDigest:
-				if r.Method == "HEAD" {
-					w.Header().Set("Content-Length", fmt.Sprintf("%d", len(etcdManifest)))
-					w.Header().Set("Docker-Content-Digest", etcdDigest)
-					w.WriteHeader(http.StatusOK)
-				} else {
-					w.Write([]byte(etcdManifest))
-				}
-			default:
-				if strings.HasPrefix(r.URL.Path, "/v2/"+isname+"/blobs/") {
-					for dgst, size := range descriptors {
-						if r.URL.Path != "/v2/"+isname+"/blobs/"+dgst {
-							continue
-						}
-						if r.Method == "HEAD" {
-							w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
-							w.Header().Set("Docker-Content-Digest", dgst)
-							w.WriteHeader(http.StatusOK)
-							countStat++
-							return
-						}
-						w.Write(gzippedEmptyTar)
+		switch r.URL.Path {
+		case "/v2/":
+			w.Write([]byte(`{}`))
+		case "/v2/" + isname + "/tags/list":
+			w.Write([]byte("{\"name\": \"" + isname + "\", \"tags\": [\"latest\", \"" + repotag + "\"]}"))
+		case "/v2/" + isname + "/manifests/latest", "/v2/" + isname + "/manifests/" + repotag, "/v2/" + isname + "/manifests/" + etcdDigest:
+			if r.Method == "HEAD" {
+				w.Header().Set("Content-Length", fmt.Sprintf("%d", len(etcdManifest)))
+				w.Header().Set("Docker-Content-Digest", etcdDigest)
+				w.WriteHeader(http.StatusOK)
+			} else {
+				w.Write([]byte(etcdManifest))
+			}
+		default:
+			if strings.HasPrefix(r.URL.Path, "/v2/"+isname+"/blobs/") {
+				for dgst, size := range descriptors {
+					if r.URL.Path != "/v2/"+isname+"/blobs/"+dgst {
+						continue
+					}
+					if r.Method == "HEAD" {
+						w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
+						w.Header().Set("Docker-Content-Digest", dgst)
+						w.WriteHeader(http.StatusOK)
+						countStat++
 						return
 					}
+					w.Write(gzippedEmptyTar)
+					return
 				}
-				t.Fatalf("unexpected request %s: %#v", r.URL.Path, r)
 			}
-		}))
-	}()
-	addr := net.JoinHostPort(localIPv4.String(), portStr)
-	srvurl, _ := url.Parse("http://" + addr)
+			t.Fatalf("unexpected request %s: %#v", r.URL.Path, r)
+		}
+	}))
+	defer ts.Close()
 
 	stream := imageapiv1.ImageStreamImport{
 		ObjectMeta: metav1.ObjectMeta{
@@ -187,7 +166,7 @@ func TestPullThroughInsecure(t *testing.T) {
 				{
 					From: kapi.ObjectReference{
 						Kind: "DockerImage",
-						Name: srvurl.Host + "/" + isname + ":" + repotag,
+						Name: ts.URL.Host + "/" + isname + ":" + repotag,
 					},
 					ImportPolicy: imageapiv1.TagImportPolicy{Insecure: true},
 				},
