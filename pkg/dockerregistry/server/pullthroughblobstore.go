@@ -130,7 +130,7 @@ func serveRemoteContent(rw http.ResponseWriter, req *http.Request, desc distribu
 		return false, err
 	}
 
-	http.ServeContent(rw, req, desc.Digest.String(), time.Time{}, remoteReader)
+	http.ServeContent(rw, req, "", time.Time{}, remoteReader)
 
 	return true, nil
 }
