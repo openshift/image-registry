@@ -682,7 +682,8 @@ openshift:
 	}
 }
 
-func TestDisableInmemoryCache(t *testing.T) {
+// TODO(legion) Uncomment this when we will have our cache on the storage level.
+func testDisableInmemoryCache(t *testing.T) {
 	testDisableInmemoryCacheName(t, "layerinfo")
 	testDisableInmemoryCacheName(t, "blobdescriptor")
 }
@@ -722,4 +723,51 @@ openshift:
 func TestPreserveRedisCache(t *testing.T) {
 	testPreserveRedisCacheName(t, "layerinfo")
 	testPreserveRedisCacheName(t, "blobdescriptor")
+}
+
+func TestDisabledMiddleware(t *testing.T) {
+	var inputConfigYaml = `
+version: 0.1
+storage:
+  inmemory: {}
+middleware:
+  registry:
+    - name: openshift
+  repository:
+    - name: openshift
+      disabled: true
+  storage:
+    - name: openshift
+openshift:
+  version: 1.0
+  server:
+    addr: "localhost:5000"
+`
+	var expectConfigYaml = `
+version: 0.1
+storage:
+  inmemory: {}
+middleware:
+  registry:
+    - name: openshift
+  repository:
+    - name: openshift
+  storage:
+    - name: openshift
+openshift:
+  version: 1.0
+  server:
+    addr: "localhost:5000"
+`
+	_, currentConfig, err := Parse(strings.NewReader(inputConfigYaml))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, expectConfig, err := Parse(strings.NewReader(expectConfigYaml))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(currentConfig, expectConfig) {
+		t.Fatalf("expected configuration\n\t%#v\ngot\n\t%#v", expectConfig, currentConfig)
+	}
 }
