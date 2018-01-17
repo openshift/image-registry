@@ -41,8 +41,6 @@ func StartMasterContainer(configDir string) (*MasterContainer, error) {
 		return nil, err
 	}
 
-	const originImageRef = "docker.io/openshift/origin"
-
 	ctx := context.Background()
 
 	progress, err := cli.ImagePull(ctx, originImageRef, types.ImagePullOptions{})
