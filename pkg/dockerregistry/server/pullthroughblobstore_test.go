@@ -27,22 +27,19 @@ import (
 )
 
 func TestPullthroughServeBlob(t *testing.T) {
-	backgroundCtx := context.Background()
-	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
 
 	namespace, name := "user", "app"
 	repoName := fmt.Sprintf("%s/%s", namespace, name)
-	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
-		&fakeAccessControllerMiddleware{t: t},
-		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
-	})
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
 	testImage, err := testutil.NewImageForManifest(repoName, testutil.SampleImageManifestSchema1, "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	remoteRegistryServer := createTestRegistryServer(t, backgroundCtx)
+	remoteRegistryServer := createTestRegistryServer(t, ctx)
 	defer remoteRegistryServer.Close()
 
 	serverURL, err := url.Parse(remoteRegistryServer.URL)
@@ -51,17 +48,17 @@ func TestPullthroughServeBlob(t *testing.T) {
 	}
 	testImage.DockerImageReference = fmt.Sprintf("%s/%s@%s", serverURL.Host, repoName, testImage.Name)
 
-	fos, imageClient := testutil.NewFakeOpenShiftWithClient(backgroundCtx)
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, name, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, testImage, namespace, name, "latest")
 
-	blob1Desc, blob1Content, err := testutil.UploadRandomTestBlob(backgroundCtx, serverURL.String(), nil, repoName)
+	blob1Desc, blob1Content, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
 	if err != nil {
 		t.Fatal(err)
 	}
-	blob2Desc, blob2Content, err := testutil.UploadRandomTestBlob(backgroundCtx, serverURL.String(), nil, repoName)
+	blob2Desc, blob2Content, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,8 +136,6 @@ func TestPullthroughServeBlob(t *testing.T) {
 		},
 	} {
 		localBlobStore := newTestBlobStore(nil, tc.localBlobs)
-
-		ctx := WithTestPassthroughToUpstream(backgroundCtx, false)
 
 		imageStream := newTestImageStream(ctx, t, namespace, name, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
@@ -315,15 +310,11 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 	repo1Name := fmt.Sprintf("%s/%s", namespace, repo1)
 	repo2Name := fmt.Sprintf("%s/%s", namespace, repo2)
 
-	backgroundCtx := context.Background()
-	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
-	backgroundCtx = withAppMiddleware(backgroundCtx, &appMiddlewareChain{
-		&fakeAccessControllerMiddleware{t: t},
-		&fakeBlobDescriptorServiceMiddleware{t: t, respectPassthrough: true},
-	})
-
-	remoteRegistryServer := createTestRegistryServer(t, backgroundCtx)
+	remoteRegistryServer := createTestRegistryServer(t, ctx)
 	defer remoteRegistryServer.Close()
 
 	serverURL, err := url.Parse(remoteRegistryServer.URL)
@@ -332,7 +323,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 	}
 
 	m1dgst, m1canonical, m1cfg, m1manifest, err := testutil.CreateAndUploadTestManifest(
-		backgroundCtx, testutil.ManifestSchema2, 2, serverURL, nil, repo1Name, "foo")
+		ctx, testutil.ManifestSchema2, 2, serverURL, nil, repo1Name, "foo")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -342,7 +333,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 	}
 	t.Logf("m1dgst=%s, m1manifest: %s", m1dgst, m1canonical)
 	m2dgst, m2canonical, m2cfg, m2manifest, err := testutil.CreateAndUploadTestManifest(
-		backgroundCtx, testutil.ManifestSchema2, 2, serverURL, nil, repo2Name, "bar")
+		ctx, testutil.ManifestSchema2, 2, serverURL, nil, repo2Name, "bar")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -562,15 +553,13 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 	} {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := testutil.WithTestLogger(backgroundCtx, t)
+			ctx := testutil.WithTestLogger(ctx, t)
 
 			fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 
 			tc.fakeOpenShiftInit(fos)
 
 			localBlobStore := newTestBlobStore(nil, tc.localBlobs)
-
-			ctx = WithTestPassthroughToUpstream(ctx, false)
 
 			imageStream := newTestImageStream(ctx, t, namespace, repo1, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 

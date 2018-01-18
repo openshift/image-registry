@@ -24,17 +24,6 @@ import (
 	"github.com/openshift/image-registry/pkg/testutil"
 )
 
-const testPassthroughToUpstream = "openshift.test.passthrough-to-upstream"
-
-func WithTestPassthroughToUpstream(ctx context.Context, passthrough bool) context.Context {
-	return context.WithValue(ctx, testPassthroughToUpstream, passthrough)
-}
-
-func GetTestPassThroughToUpstream(ctx context.Context) bool {
-	passthrough, found := ctx.Value(testPassthroughToUpstream).(bool)
-	return found && passthrough
-}
-
 type appMiddlewareChain []appMiddleware
 
 func (m appMiddlewareChain) Apply(app supermiddleware.App) supermiddleware.App {
@@ -346,20 +335,16 @@ func statsGreaterThanOrEqual(stats, minimumLimits map[string]int) bool {
 type fakeBlobDescriptorServiceMiddleware struct {
 	t *testing.T
 	m *testBlobDescriptorManager
-
-	respectPassthrough bool
 }
 
 func (m *fakeBlobDescriptorServiceMiddleware) Apply(app supermiddleware.App) supermiddleware.App {
-	return &fakeBlobDescriptorServiceApp{App: app, t: m.t, m: m.m, respectPassthrough: m.respectPassthrough}
+	return &fakeBlobDescriptorServiceApp{App: app, t: m.t, m: m.m}
 }
 
 type fakeBlobDescriptorServiceApp struct {
 	supermiddleware.App
 	t *testing.T
 	m *testBlobDescriptorManager
-
-	respectPassthrough bool
 }
 
 func (app *fakeBlobDescriptorServiceApp) Repository(ctx context.Context, repo distribution.Repository, crossmount bool) (distribution.Repository, distribution.BlobDescriptorServiceFactory, error) {
@@ -367,28 +352,24 @@ func (app *fakeBlobDescriptorServiceApp) Repository(ctx context.Context, repo di
 	if err != nil {
 		return repo, bdsf, err
 	}
-	return repo, &testBlobDescriptorServiceFactory{upstream: bdsf, t: app.t, m: app.m, respectPassthrough: app.respectPassthrough}, nil
+	return repo, &testBlobDescriptorServiceFactory{upstream: bdsf, t: app.t, m: app.m}, nil
 }
 
 type testBlobDescriptorServiceFactory struct {
 	upstream distribution.BlobDescriptorServiceFactory
 	t        *testing.T
 	m        *testBlobDescriptorManager
-
-	respectPassthrough bool
 }
 
 func (bf *testBlobDescriptorServiceFactory) BlobAccessController(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {
-	return &testBlobDescriptorService{BlobDescriptorService: svc, t: bf.t, m: bf.m, upstreamFactory: bf.upstream, respectPassthrough: bf.respectPassthrough}
+	svc = bf.upstream.BlobAccessController(svc)
+	return &testBlobDescriptorService{BlobDescriptorService: svc, t: bf.t, m: bf.m}
 }
 
 type testBlobDescriptorService struct {
 	distribution.BlobDescriptorService
 	t *testing.T
 	m *testBlobDescriptorManager
-
-	upstreamFactory    distribution.BlobDescriptorServiceFactory
-	respectPassthrough bool
 }
 
 func (bs *testBlobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
@@ -396,24 +377,14 @@ func (bs *testBlobDescriptorService) Stat(ctx context.Context, dgst digest.Diges
 		bs.m.methodInvoked("Stat")
 	}
 
-	svc := bs.BlobDescriptorService
-	if bs.respectPassthrough && !GetTestPassThroughToUpstream(ctx) {
-		svc = bs.upstreamFactory.BlobAccessController(svc)
-	}
-
-	return svc.Stat(ctx, dgst)
+	return bs.BlobDescriptorService.Stat(ctx, dgst)
 }
 func (bs *testBlobDescriptorService) Clear(ctx context.Context, dgst digest.Digest) error {
 	if bs.m != nil {
 		bs.m.methodInvoked("Clear")
 	}
 
-	svc := bs.BlobDescriptorService
-	if bs.respectPassthrough && !GetTestPassThroughToUpstream(ctx) {
-		svc = bs.upstreamFactory.BlobAccessController(svc)
-	}
-
-	return svc.Clear(ctx, dgst)
+	return bs.BlobDescriptorService.Clear(ctx, dgst)
 }
 
 type fakeAccessControllerMiddleware struct {
