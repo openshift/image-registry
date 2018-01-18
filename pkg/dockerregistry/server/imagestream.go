@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 
+	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
@@ -245,4 +246,90 @@ func (is *imageStream) identifyCandidateRepositories(primary bool) ([]string, ma
 
 	repositoryCandidates, search := identifyCandidateRepositories(stream, localRegistry, primary)
 	return repositoryCandidates, search, nil
+}
+
+func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, error) {
+	stream, err := is.imageStreamGetter.get()
+	if err != nil {
+		return nil, err
+	}
+
+	m := make(map[string]digest.Digest)
+
+	for _, history := range stream.Status.Tags {
+		if len(history.Items) == 0 {
+			continue
+		}
+
+		tag := history.Tag
+
+		dgst, err := digest.ParseDigest(history.Items[0].Image)
+		if err != nil {
+			context.GetLogger(ctx).Errorf("bad digest %s: %v", history.Items[0].Image, err)
+			continue
+		}
+
+		m[tag] = dgst
+	}
+
+	return m, nil
+}
+
+func (is *imageStream) Tag(ctx context.Context, tag string, dgst digest.Digest, pullthroughEnabled bool) error {
+	image, err := is.registryOSClient.Images().Get(dgst.String(), metav1.GetOptions{})
+	if err != nil {
+		context.GetLogger(ctx).Errorf("unable to get image: %s", dgst.String())
+		return err
+	}
+	image.SetResourceVersion("")
+
+	if !pullthroughEnabled && !isImageManaged(image) {
+		return distribution.ErrRepositoryUnknown{Name: is.Reference()}
+	}
+
+	ism := imageapiv1.ImageStreamMapping{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: is.namespace,
+			Name:      is.name,
+		},
+		Tag:   tag,
+		Image: *image,
+	}
+
+	_, err = is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism)
+	if quotautil.IsErrorQuotaExceeded(err) {
+		context.GetLogger(ctx).Errorf("denied creating ImageStreamMapping: %v", err)
+		return distribution.ErrAccessDenied
+	}
+	return err
+}
+
+func (is *imageStream) Untag(ctx context.Context, tag string, pullthroughEnabled bool) error {
+	stream, err := is.imageStreamGetter.get()
+	if err != nil {
+		return err
+	}
+
+	te := util.LatestTaggedImage(stream, tag)
+	if te == nil {
+		return distribution.ErrTagUnknown{Tag: tag}
+	}
+
+	if !pullthroughEnabled {
+		dgst, err := digest.ParseDigest(te.Image)
+		if err != nil {
+			return err
+		}
+
+		image, err := is.getImage(ctx, dgst)
+		if err != nil {
+			return err
+		}
+
+		if !isImageManaged(image) {
+			return distribution.ErrTagUnknown{Tag: tag}
+		}
+	}
+
+	return is.registryOSClient.ImageStreamTags(is.namespace).Delete(imageapi.JoinImageStreamTag(is.name, tag), &metav1.DeleteOptions{})
 }
