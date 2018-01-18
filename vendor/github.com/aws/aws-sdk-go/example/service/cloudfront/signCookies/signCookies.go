@@ -1,5 +1,3 @@
-// +build example
-
 package main
 
 import (
@@ -16,7 +14,7 @@ import (
 // the contents of the object to stdout.
 //
 // Usage example:
-// signCookies -file <privkey file>  -id <keyId> -r <resource pattern> -g <object to get>
+// go run signCookies.go -file <privkey file>  -id <keyId> -r <resource pattern> -g <object to get>
 func main() {
 	var keyFile string  // Private key PEM file
 	var keyID string    // Key pair ID of CloudFront key pair
@@ -59,7 +57,7 @@ func main() {
 
 	// Send and handle the response. For a successful response the object's
 	// content will be written to stdout. The same process could be applied
-	// to a http service written cookies to the response but using
+	// to a http service written cookies to the response but useing
 	// http.SetCookie(w, c,) on the ResponseWriter.
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

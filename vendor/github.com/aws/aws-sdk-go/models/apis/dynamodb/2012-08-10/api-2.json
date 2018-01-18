@@ -8,8 +8,7 @@
     "serviceAbbreviation":"DynamoDB",
     "serviceFullName":"Amazon DynamoDB",
     "signatureVersion":"v4",
-    "targetPrefix":"DynamoDB_20120810",
-    "uid":"dynamodb-2012-08-10"
+    "targetPrefix":"DynamoDB_20120810"
   },
   "operations":{
     "BatchGetItem":{

@@ -6,10 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/private/waiter"
 )
 
-// WaitUntilBatchPredictionAvailable uses the Amazon Machine Learning API operation
-// DescribeBatchPredictions to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *MachineLearning) WaitUntilBatchPredictionAvailable(input *DescribeBatchPredictionsInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeBatchPredictions",
@@ -39,10 +35,6 @@ func (c *MachineLearning) WaitUntilBatchPredictionAvailable(input *DescribeBatch
 	return w.Wait()
 }
 
-// WaitUntilDataSourceAvailable uses the Amazon Machine Learning API operation
-// DescribeDataSources to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *MachineLearning) WaitUntilDataSourceAvailable(input *DescribeDataSourcesInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeDataSources",
@@ -72,10 +64,6 @@ func (c *MachineLearning) WaitUntilDataSourceAvailable(input *DescribeDataSource
 	return w.Wait()
 }
 
-// WaitUntilEvaluationAvailable uses the Amazon Machine Learning API operation
-// DescribeEvaluations to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *MachineLearning) WaitUntilEvaluationAvailable(input *DescribeEvaluationsInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeEvaluations",
@@ -105,10 +93,6 @@ func (c *MachineLearning) WaitUntilEvaluationAvailable(input *DescribeEvaluation
 	return w.Wait()
 }
 
-// WaitUntilMLModelAvailable uses the Amazon Machine Learning API operation
-// DescribeMLModels to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *MachineLearning) WaitUntilMLModelAvailable(input *DescribeMLModelsInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeMLModels",

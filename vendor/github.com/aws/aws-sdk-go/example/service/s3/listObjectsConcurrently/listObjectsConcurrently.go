@@ -1,5 +1,3 @@
-// +build example
-
 package main
 
 import (
@@ -10,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -23,7 +22,7 @@ func exit(msg ...interface{}) {
 // contains a list of profiles to use.
 //
 // Usage:
-// listObjectsConcurrentlv
+// go run listObjectsConcurrently.go
 func main() {
 	accounts := []string{"default", "default2", "otherprofile"}
 
@@ -33,18 +32,11 @@ func main() {
 	for _, acc := range accounts {
 		wg.Add(1)
 		go func(acc string) {
-			defer wg.Done()
-
-			sess, err := session.NewSessionWithOptions(session.Options{
-				Profile: acc,
-			})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "failed to create session for account, %s, %v\n", acc, err)
-				return
-			}
-			if err = getAccountBuckets(sess, bucketCh, acc); err != nil {
+			sess := session.New(&aws.Config{Credentials: credentials.NewSharedCredentials("", acc)})
+			if err := getAccountBuckets(sess, bucketCh, acc); err != nil {
 				fmt.Fprintf(os.Stderr, "failed to get account %s's bucket info, %v\n", acc, err)
 			}
+			wg.Done()
 		}(acc)
 	}
 	// Spin off a goroutine which will wait until all account buckets have been collected and

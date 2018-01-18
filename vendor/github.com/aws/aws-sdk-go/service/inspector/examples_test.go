@@ -16,13 +16,7 @@ var _ time.Duration
 var _ bytes.Buffer
 
 func ExampleInspector_AddAttributesToFindings() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.AddAttributesToFindingsInput{
 		Attributes: []*inspector.Attribute{ // Required
@@ -51,13 +45,7 @@ func ExampleInspector_AddAttributesToFindings() {
 }
 
 func ExampleInspector_CreateAssessmentTarget() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.CreateAssessmentTargetInput{
 		AssessmentTargetName: aws.String("AssessmentTargetName"), // Required
@@ -77,13 +65,7 @@ func ExampleInspector_CreateAssessmentTarget() {
 }
 
 func ExampleInspector_CreateAssessmentTemplate() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.CreateAssessmentTemplateInput{
 		AssessmentTargetArn:    aws.String("Arn"),                    // Required
@@ -115,13 +97,7 @@ func ExampleInspector_CreateAssessmentTemplate() {
 }
 
 func ExampleInspector_CreateResourceGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.CreateResourceGroupInput{
 		ResourceGroupTags: []*inspector.ResourceGroupTag{ // Required
@@ -146,13 +122,7 @@ func ExampleInspector_CreateResourceGroup() {
 }
 
 func ExampleInspector_DeleteAssessmentRun() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DeleteAssessmentRunInput{
 		AssessmentRunArn: aws.String("Arn"), // Required
@@ -171,13 +141,7 @@ func ExampleInspector_DeleteAssessmentRun() {
 }
 
 func ExampleInspector_DeleteAssessmentTarget() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DeleteAssessmentTargetInput{
 		AssessmentTargetArn: aws.String("Arn"), // Required
@@ -196,13 +160,7 @@ func ExampleInspector_DeleteAssessmentTarget() {
 }
 
 func ExampleInspector_DeleteAssessmentTemplate() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DeleteAssessmentTemplateInput{
 		AssessmentTemplateArn: aws.String("Arn"), // Required
@@ -221,13 +179,7 @@ func ExampleInspector_DeleteAssessmentTemplate() {
 }
 
 func ExampleInspector_DescribeAssessmentRuns() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DescribeAssessmentRunsInput{
 		AssessmentRunArns: []*string{ // Required
@@ -249,13 +201,7 @@ func ExampleInspector_DescribeAssessmentRuns() {
 }
 
 func ExampleInspector_DescribeAssessmentTargets() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DescribeAssessmentTargetsInput{
 		AssessmentTargetArns: []*string{ // Required
@@ -277,13 +223,7 @@ func ExampleInspector_DescribeAssessmentTargets() {
 }
 
 func ExampleInspector_DescribeAssessmentTemplates() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DescribeAssessmentTemplatesInput{
 		AssessmentTemplateArns: []*string{ // Required
@@ -305,13 +245,7 @@ func ExampleInspector_DescribeAssessmentTemplates() {
 }
 
 func ExampleInspector_DescribeCrossAccountAccessRole() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	var params *inspector.DescribeCrossAccountAccessRoleInput
 	resp, err := svc.DescribeCrossAccountAccessRole(params)
@@ -328,13 +262,7 @@ func ExampleInspector_DescribeCrossAccountAccessRole() {
 }
 
 func ExampleInspector_DescribeFindings() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DescribeFindingsInput{
 		FindingArns: []*string{ // Required
@@ -357,13 +285,7 @@ func ExampleInspector_DescribeFindings() {
 }
 
 func ExampleInspector_DescribeResourceGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DescribeResourceGroupsInput{
 		ResourceGroupArns: []*string{ // Required
@@ -385,13 +307,7 @@ func ExampleInspector_DescribeResourceGroups() {
 }
 
 func ExampleInspector_DescribeRulesPackages() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.DescribeRulesPackagesInput{
 		RulesPackageArns: []*string{ // Required
@@ -414,13 +330,7 @@ func ExampleInspector_DescribeRulesPackages() {
 }
 
 func ExampleInspector_GetTelemetryMetadata() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.GetTelemetryMetadataInput{
 		AssessmentRunArn: aws.String("Arn"), // Required
@@ -439,13 +349,7 @@ func ExampleInspector_GetTelemetryMetadata() {
 }
 
 func ExampleInspector_ListAssessmentRunAgents() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.ListAssessmentRunAgentsInput{
 		AssessmentRunArn: aws.String("Arn"), // Required
@@ -476,13 +380,7 @@ func ExampleInspector_ListAssessmentRunAgents() {
 }
 
 func ExampleInspector_ListAssessmentRuns() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.ListAssessmentRunsInput{
 		AssessmentTemplateArns: []*string{
@@ -533,13 +431,7 @@ func ExampleInspector_ListAssessmentRuns() {
 }
 
 func ExampleInspector_ListAssessmentTargets() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.ListAssessmentTargetsInput{
 		Filter: &inspector.AssessmentTargetFilter{
@@ -562,13 +454,7 @@ func ExampleInspector_ListAssessmentTargets() {
 }
 
 func ExampleInspector_ListAssessmentTemplates() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.ListAssessmentTemplatesInput{
 		AssessmentTargetArns: []*string{
@@ -603,13 +489,7 @@ func ExampleInspector_ListAssessmentTemplates() {
 }
 
 func ExampleInspector_ListEventSubscriptions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.ListEventSubscriptionsInput{
 		MaxResults:  aws.Int64(1),
@@ -630,13 +510,7 @@ func ExampleInspector_ListEventSubscriptions() {
 }
 
 func ExampleInspector_ListFindings() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.ListFindingsInput{
 		AssessmentRunArns: []*string{
@@ -700,13 +574,7 @@ func ExampleInspector_ListFindings() {
 }
 
 func ExampleInspector_ListRulesPackages() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.ListRulesPackagesInput{
 		MaxResults: aws.Int64(1),
@@ -726,13 +594,7 @@ func ExampleInspector_ListRulesPackages() {
 }
 
 func ExampleInspector_ListTagsForResource() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.ListTagsForResourceInput{
 		ResourceArn: aws.String("Arn"), // Required
@@ -751,13 +613,7 @@ func ExampleInspector_ListTagsForResource() {
 }
 
 func ExampleInspector_PreviewAgents() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.PreviewAgentsInput{
 		PreviewAgentsArn: aws.String("Arn"), // Required
@@ -778,13 +634,7 @@ func ExampleInspector_PreviewAgents() {
 }
 
 func ExampleInspector_RegisterCrossAccountAccessRole() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.RegisterCrossAccountAccessRoleInput{
 		RoleArn: aws.String("Arn"), // Required
@@ -803,13 +653,7 @@ func ExampleInspector_RegisterCrossAccountAccessRole() {
 }
 
 func ExampleInspector_RemoveAttributesFromFindings() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.RemoveAttributesFromFindingsInput{
 		AttributeKeys: []*string{ // Required
@@ -835,13 +679,7 @@ func ExampleInspector_RemoveAttributesFromFindings() {
 }
 
 func ExampleInspector_SetTagsForResource() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.SetTagsForResourceInput{
 		ResourceArn: aws.String("Arn"), // Required
@@ -867,13 +705,7 @@ func ExampleInspector_SetTagsForResource() {
 }
 
 func ExampleInspector_StartAssessmentRun() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.StartAssessmentRunInput{
 		AssessmentTemplateArn: aws.String("Arn"), // Required
@@ -893,13 +725,7 @@ func ExampleInspector_StartAssessmentRun() {
 }
 
 func ExampleInspector_StopAssessmentRun() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.StopAssessmentRunInput{
 		AssessmentRunArn: aws.String("Arn"), // Required
@@ -918,13 +744,7 @@ func ExampleInspector_StopAssessmentRun() {
 }
 
 func ExampleInspector_SubscribeToEvent() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.SubscribeToEventInput{
 		Event:       aws.String("Event"), // Required
@@ -945,13 +765,7 @@ func ExampleInspector_SubscribeToEvent() {
 }
 
 func ExampleInspector_UnsubscribeFromEvent() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.UnsubscribeFromEventInput{
 		Event:       aws.String("Event"), // Required
@@ -972,13 +786,7 @@ func ExampleInspector_UnsubscribeFromEvent() {
 }
 
 func ExampleInspector_UpdateAssessmentTarget() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := inspector.New(sess)
+	svc := inspector.New(session.New())
 
 	params := &inspector.UpdateAssessmentTargetInput{
 		AssessmentTargetArn:  aws.String("Arn"),                  // Required

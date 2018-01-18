@@ -6,11 +6,11 @@ package workspaces
 import (
 	"github.com/aws/aws-sdk-go/awstesting/integration/smoke"
 	"github.com/aws/aws-sdk-go/service/workspaces"
-	"github.com/gucumber/gucumber"
+	. "github.com/lsegal/gucumber"
 )
 
 func init() {
-	gucumber.Before("@workspaces", func() {
-		gucumber.World["client"] = workspaces.New(smoke.Session)
+	Before("@workspaces", func() {
+		World["client"] = workspaces.New(smoke.Session)
 	})
 }

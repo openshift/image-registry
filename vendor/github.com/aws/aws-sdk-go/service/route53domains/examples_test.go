@@ -16,13 +16,7 @@ var _ time.Duration
 var _ bytes.Buffer
 
 func ExampleRoute53Domains_CheckDomainAvailability() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.CheckDomainAvailabilityInput{
 		DomainName:  aws.String("DomainName"), // Required
@@ -42,13 +36,7 @@ func ExampleRoute53Domains_CheckDomainAvailability() {
 }
 
 func ExampleRoute53Domains_DeleteTagsForDomain() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.DeleteTagsForDomainInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -71,13 +59,7 @@ func ExampleRoute53Domains_DeleteTagsForDomain() {
 }
 
 func ExampleRoute53Domains_DisableDomainAutoRenew() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.DisableDomainAutoRenewInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -96,13 +78,7 @@ func ExampleRoute53Domains_DisableDomainAutoRenew() {
 }
 
 func ExampleRoute53Domains_DisableDomainTransferLock() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.DisableDomainTransferLockInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -121,13 +97,7 @@ func ExampleRoute53Domains_DisableDomainTransferLock() {
 }
 
 func ExampleRoute53Domains_EnableDomainAutoRenew() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.EnableDomainAutoRenewInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -146,13 +116,7 @@ func ExampleRoute53Domains_EnableDomainAutoRenew() {
 }
 
 func ExampleRoute53Domains_EnableDomainTransferLock() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.EnableDomainTransferLockInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -171,13 +135,7 @@ func ExampleRoute53Domains_EnableDomainTransferLock() {
 }
 
 func ExampleRoute53Domains_GetContactReachabilityStatus() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.GetContactReachabilityStatusInput{
 		DomainName: aws.String("DomainName"),
@@ -196,13 +154,7 @@ func ExampleRoute53Domains_GetContactReachabilityStatus() {
 }
 
 func ExampleRoute53Domains_GetDomainDetail() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.GetDomainDetailInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -220,41 +172,8 @@ func ExampleRoute53Domains_GetDomainDetail() {
 	fmt.Println(resp)
 }
 
-func ExampleRoute53Domains_GetDomainSuggestions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
-
-	params := &route53domains.GetDomainSuggestionsInput{
-		DomainName:      aws.String("DomainName"), // Required
-		OnlyAvailable:   aws.Bool(true),           // Required
-		SuggestionCount: aws.Int64(1),             // Required
-	}
-	resp, err := svc.GetDomainSuggestions(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleRoute53Domains_GetOperationDetail() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.GetOperationDetailInput{
 		OperationId: aws.String("OperationId"), // Required
@@ -273,13 +192,7 @@ func ExampleRoute53Domains_GetOperationDetail() {
 }
 
 func ExampleRoute53Domains_ListDomains() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.ListDomainsInput{
 		Marker:   aws.String("PageMarker"),
@@ -299,13 +212,7 @@ func ExampleRoute53Domains_ListDomains() {
 }
 
 func ExampleRoute53Domains_ListOperations() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.ListOperationsInput{
 		Marker:   aws.String("PageMarker"),
@@ -325,13 +232,7 @@ func ExampleRoute53Domains_ListOperations() {
 }
 
 func ExampleRoute53Domains_ListTagsForDomain() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.ListTagsForDomainInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -350,13 +251,7 @@ func ExampleRoute53Domains_ListTagsForDomain() {
 }
 
 func ExampleRoute53Domains_RegisterDomain() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.RegisterDomainInput{
 		AdminContact: &route53domains.ContactDetail{ // Required
@@ -446,41 +341,8 @@ func ExampleRoute53Domains_RegisterDomain() {
 	fmt.Println(resp)
 }
 
-func ExampleRoute53Domains_RenewDomain() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
-
-	params := &route53domains.RenewDomainInput{
-		CurrentExpiryYear: aws.Int64(1),             // Required
-		DomainName:        aws.String("DomainName"), // Required
-		DurationInYears:   aws.Int64(1),
-	}
-	resp, err := svc.RenewDomain(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleRoute53Domains_ResendContactReachabilityEmail() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.ResendContactReachabilityEmailInput{
 		DomainName: aws.String("DomainName"),
@@ -499,13 +361,7 @@ func ExampleRoute53Domains_ResendContactReachabilityEmail() {
 }
 
 func ExampleRoute53Domains_RetrieveDomainAuthCode() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.RetrieveDomainAuthCodeInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -524,13 +380,7 @@ func ExampleRoute53Domains_RetrieveDomainAuthCode() {
 }
 
 func ExampleRoute53Domains_TransferDomain() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.TransferDomainInput{
 		AdminContact: &route53domains.ContactDetail{ // Required
@@ -632,13 +482,7 @@ func ExampleRoute53Domains_TransferDomain() {
 }
 
 func ExampleRoute53Domains_UpdateDomainContact() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.UpdateDomainContactInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -723,13 +567,7 @@ func ExampleRoute53Domains_UpdateDomainContact() {
 }
 
 func ExampleRoute53Domains_UpdateDomainContactPrivacy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.UpdateDomainContactPrivacyInput{
 		DomainName:        aws.String("DomainName"), // Required
@@ -751,13 +589,7 @@ func ExampleRoute53Domains_UpdateDomainContactPrivacy() {
 }
 
 func ExampleRoute53Domains_UpdateDomainNameservers() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.UpdateDomainNameserversInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -787,13 +619,7 @@ func ExampleRoute53Domains_UpdateDomainNameservers() {
 }
 
 func ExampleRoute53Domains_UpdateTagsForDomain() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
+	svc := route53domains.New(session.New())
 
 	params := &route53domains.UpdateTagsForDomainInput{
 		DomainName: aws.String("DomainName"), // Required
@@ -806,34 +632,6 @@ func ExampleRoute53Domains_UpdateTagsForDomain() {
 		},
 	}
 	resp, err := svc.UpdateTagsForDomain(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
-func ExampleRoute53Domains_ViewBilling() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := route53domains.New(sess)
-
-	params := &route53domains.ViewBillingInput{
-		End:      aws.Time(time.Now()),
-		Marker:   aws.String("PageMarker"),
-		MaxItems: aws.Int64(1),
-		Start:    aws.Time(time.Now()),
-	}
-	resp, err := svc.ViewBilling(params)
 
 	if err != nil {
 		// Print the error, cast err to awserr.Error to get the Code and
