@@ -7,6 +7,7 @@ import (
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/registry/api/errcode"
+	disterrors "github.com/docker/distribution/registry/api/v2"
 
 	corev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -208,4 +209,40 @@ func (is *imageStream) tagIsInsecure(tag string, dgst digest.Digest) (bool, erro
 	}
 
 	return false, nil
+}
+
+func (is *imageStream) Exists() (bool, error) {
+	_, err := is.imageStreamGetter.get()
+	if err != nil {
+		if t, ok := err.(errcode.Error); ok && t.ErrorCode() == disterrors.ErrorCodeNameUnknown {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+func (is *imageStream) localRegistry() (string, error) {
+	stream, err := is.imageStreamGetter.get()
+	if err != nil {
+		return "", err
+	}
+
+	local, err := imageapi.ParseDockerImageReference(stream.Status.DockerImageRepository)
+	if err != nil {
+		return "", err
+	}
+	return local.Registry, nil
+}
+
+func (is *imageStream) identifyCandidateRepositories(primary bool) ([]string, map[string]imagePullthroughSpec, error) {
+	stream, err := is.imageStreamGetter.get()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	localRegistry, _ := is.localRegistry()
+
+	repositoryCandidates, search := identifyCandidateRepositories(stream, localRegistry, primary)
+	return repositoryCandidates, search, nil
 }

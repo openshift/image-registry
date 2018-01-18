@@ -92,7 +92,7 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 
 	if app.config.Pullthrough.Enabled {
 		r.remoteBlobGetter = NewBlobGetterService(
-			imageStreamGetter.get,
+			r.imageStream,
 			r.imageStream.getSecrets,
 			r.imageStream.cache)
 	}
