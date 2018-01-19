@@ -23,8 +23,7 @@ import (
 
 	"k8s.io/client-go/rest"
 
-	"github.com/openshift/origin/pkg/cmd/util/tokencmd"
-	projectapiv1 "github.com/openshift/origin/pkg/project/apis/project/v1"
+	projectapiv1 "github.com/openshift/api/project/v1"
 )
 
 type MasterContainer struct {
@@ -278,15 +277,14 @@ func (m *Master) StartRegistry(t *testing.T, options ...RegistryOption) *Registr
 }
 
 func (m *Master) CreateUser(username string, password string) *User {
-	token, err := tokencmd.RequestToken(m.AdminKubeConfig(), nil, username, password)
+	_, user, err := GetClientForUser(m.AdminKubeConfig(), username)
 	if err != nil {
 		m.t.Fatalf("failed to get a token for the user %s: %v", username, err)
 	}
-
 	return &User{
 		Name:       username,
-		Token:      token,
-		kubeConfig: UserClientConfig(m.AdminKubeConfig(), token),
+		Token:      user.BearerToken,
+		kubeConfig: UserClientConfig(m.AdminKubeConfig(), user.BearerToken),
 	}
 }
 

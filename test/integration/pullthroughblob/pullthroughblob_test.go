@@ -9,11 +9,11 @@ import (
 
 	digest "github.com/docker/distribution/digest"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapi "k8s.io/kubernetes/pkg/api/v1"
 
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
 
 	"github.com/openshift/image-registry/pkg/testframework"
 	"github.com/openshift/image-registry/pkg/testutil/counter"
@@ -77,7 +77,7 @@ func TestPullthroughBlob(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	imageClient := imagev1.NewForConfigOrDie(master.AdminKubeConfig())
+	imageClient := imageclientv1.NewForConfigOrDie(master.AdminKubeConfig())
 
 	isi, err := imageClient.ImageStreamImports(testproject.Name).Create(&imageapiv1.ImageStreamImport{
 		ObjectMeta: metav1.ObjectMeta{
@@ -87,7 +87,7 @@ func TestPullthroughBlob(t *testing.T) {
 			Import: true,
 			Images: []imageapiv1.ImageImportSpec{
 				{
-					From: kapi.ObjectReference{
+					From: corev1.ObjectReference{
 						Kind: "DockerImage",
 						Name: fmt.Sprintf("%s/remoteimage:latest", ts.URL.Host),
 					},

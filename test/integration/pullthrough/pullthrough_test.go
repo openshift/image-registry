@@ -10,12 +10,12 @@ import (
 
 	"github.com/docker/distribution/manifest/schema1"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapi "k8s.io/kubernetes/pkg/api/v1"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	imagev1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	"github.com/openshift/image-registry/pkg/testframework"
 )
@@ -164,7 +164,7 @@ func TestPullThroughInsecure(t *testing.T) {
 			Import: true,
 			Images: []imageapiv1.ImageImportSpec{
 				{
-					From: kapi.ObjectReference{
+					From: corev1.ObjectReference{
 						Kind: "DockerImage",
 						Name: ts.URL.Host + "/" + isname + ":" + repotag,
 					},
@@ -174,7 +174,7 @@ func TestPullThroughInsecure(t *testing.T) {
 		},
 	}
 
-	adminImageClient := imagev1.NewForConfigOrDie(testuser.KubeConfig())
+	adminImageClient := imageclientv1.NewForConfigOrDie(testuser.KubeConfig())
 
 	isi, err := adminImageClient.ImageStreamImports(namespace).Create(&stream)
 	if err != nil {

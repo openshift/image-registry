@@ -18,14 +18,10 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/diff"
-	kapi "k8s.io/kubernetes/pkg/api"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	"github.com/openshift/origin/pkg/image/util"
-
-	// install image API for k8s.io/kubernetes/pkg/api.Scheme.Converter
-	_ "github.com/openshift/origin/pkg/image/apis/image/install"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	util "github.com/openshift/image-registry/pkg/origin-common/util"
 )
 
 type ManifestSchemaVersion int
@@ -278,7 +274,7 @@ func NewImageForManifest(repoName string, rawManifest string, manifestConfig str
 		annotations[imageapi.ManagedByOpenShiftAnnotation] = "true"
 	}
 
-	img := imageapi.Image{
+	image := &imageapi.Image{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        desc.Digest.String(),
 			Annotations: annotations,
@@ -287,17 +283,18 @@ func NewImageForManifest(repoName string, rawManifest string, manifestConfig str
 		DockerImageManifest:  rawManifest,
 		DockerImageConfig:    manifestConfig,
 	}
-	if err := util.ImageWithMetadata(&img); err != nil {
-		return nil, err
-	}
-	newImage := imageapiv1.Image{}
-	if err := kapi.Scheme.Converter().Convert(&img, &newImage, 0, nil); err != nil {
+	if err := util.InternalImageWithMetadata(image); err != nil {
 		return nil, err
 	}
 
-	if err := imageapiv1.ImageWithMetadata(&newImage); err != nil {
+	newImage, err := ConvertImage(image)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert image from internal to external type: %v", err)
+	}
+	if err := util.ImageWithMetadata(newImage); err != nil {
 		return nil, fmt.Errorf("failed to fill image with metadata: %v", err)
 	}
 
-	return &newImage, nil
+	return newImage, nil
+
 }

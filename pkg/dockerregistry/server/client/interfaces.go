@@ -1,18 +1,18 @@
 package client
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapi "k8s.io/kubernetes/pkg/api"
-	kapiv1 "k8s.io/kubernetes/pkg/api/v1"
-	kcoreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
+	coreclientv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	userapiv1 "github.com/openshift/origin/pkg/user/apis/user/v1"
-	authapiv1 "k8s.io/kubernetes/pkg/apis/authorization/v1"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	userapiv1 "github.com/openshift/api/user/v1"
+	authapiv1 "k8s.io/api/authorization/v1"
 
-	imageclientv1 "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1"
-	userclientv1 "github.com/openshift/origin/pkg/user/generated/clientset/typed/user/v1"
-	authclientv1 "k8s.io/kubernetes/pkg/client/clientset_generated/clientset/typed/authorization/v1"
+	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	userclientv1 "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
+
+	authclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
 
 type UsersInterfacer interface {
@@ -71,13 +71,13 @@ type ImageStreamImageInterface interface {
 	Get(name string, options metav1.GetOptions) (*imageapiv1.ImageStreamImage, error)
 }
 
-var _ UserInterface = userclientv1.UserResourceInterface(nil)
+var _ UserInterface = userclientv1.UserInterface(nil)
 
 type UserInterface interface {
 	Get(name string, options metav1.GetOptions) (*userapiv1.User, error)
 }
 
-var _ ImageInterface = imageclientv1.ImageResourceInterface(nil)
+var _ ImageInterface = imageclientv1.ImageInterface(nil)
 
 type ImageInterface interface {
 	Get(name string, options metav1.GetOptions) (*imageapiv1.Image, error)
@@ -107,13 +107,13 @@ type ImageStreamTagInterface interface {
 var _ ImageStreamSecretInterface = imageclientv1.ImageStreamInterface(nil)
 
 type ImageStreamSecretInterface interface {
-	Secrets(name string, options metav1.ListOptions) (*kapiv1.SecretList, error)
+	Secrets(name string, options metav1.ListOptions) (*corev1.SecretList, error)
 }
 
-var _ LimitRangeInterface = kcoreclient.LimitRangeInterface(nil)
+var _ LimitRangeInterface = coreclientv1.LimitRangeInterface(nil)
 
 type LimitRangeInterface interface {
-	List(opts metav1.ListOptions) (*kapi.LimitRangeList, error)
+	List(opts metav1.ListOptions) (*corev1.LimitRangeList, error)
 }
 
 var _ LocalSubjectAccessReviewInterface = authclientv1.LocalSubjectAccessReviewInterface(nil)

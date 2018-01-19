@@ -18,8 +18,9 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageclient "github.com/openshift/origin/pkg/image/generated/internalclientset"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	"github.com/openshift/image-registry/pkg/testframework"
 	"github.com/openshift/image-registry/pkg/testutil"
@@ -86,7 +87,6 @@ func signedManifest(name string, blobs []digest.Digest) ([]byte, digest.Digest, 
 func TestV2RegistryGetTags(t *testing.T) {
 	master := testframework.NewMaster(t)
 	defer master.Close()
-
 	namespace := "namespace"
 	testuser := master.CreateUser("admin", "password")
 	master.CreateProject(namespace, testuser.Name)
@@ -96,9 +96,9 @@ func TestV2RegistryGetTags(t *testing.T) {
 
 	baseURL := registry.BaseURL()
 
-	adminImageClient := imageclient.NewForConfigOrDie(master.AdminKubeConfig())
+	adminImageClient := imageclientv1.NewForConfigOrDie(master.AdminKubeConfig())
 
-	stream := imageapi.ImageStream{
+	stream := imageapiv1.ImageStream{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "test",
@@ -209,7 +209,13 @@ func TestV2RegistryGetTags(t *testing.T) {
 	if e, a := fmt.Sprintf("%s/%s/%s@%s", strings.TrimPrefix(baseURL, "http://"), namespace, stream.Name, dgst.String()), image.Image.DockerImageReference; e != a {
 		t.Errorf("image dockerImageReference: expected %q, got %q", e, a)
 	}
-	if e, a := "foo", image.Image.DockerImageMetadata.ID; e != a {
+
+	dockerImageMetadata := &imageapi.DockerImage{}
+	if err := json.Unmarshal(image.Image.DockerImageMetadata.Raw, dockerImageMetadata); err != nil {
+		t.Fatal(err)
+	}
+
+	if e, a := "foo", dockerImageMetadata.ID; e != a {
 		t.Errorf("image dockerImageMetadata.ID: expected %q, got %q", e, a)
 	}
 
@@ -240,8 +246,15 @@ func TestV2RegistryGetTags(t *testing.T) {
 	if len(otherStream.Status.Tags) != 1 {
 		t.Errorf("expected 1 tag, got %#v", otherStream.Status.Tags)
 	}
-	history, ok := otherStream.Status.Tags[imageapi.DefaultImageTag]
-	if !ok {
+
+	var history *imageapiv1.NamedTagEventList
+	for i := range otherStream.Status.Tags {
+		if otherStream.Status.Tags[i].Tag == imageapi.DefaultImageTag {
+			history = &otherStream.Status.Tags[i]
+			break
+		}
+	}
+	if history == nil {
 		t.Fatal("unable to find 'latest' tag")
 	}
 	if len(history.Items) != 1 {

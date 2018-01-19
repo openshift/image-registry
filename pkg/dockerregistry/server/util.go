@@ -9,15 +9,15 @@ import (
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/api/errcode"
 	disterrors "github.com/docker/distribution/registry/api/v2"
-	quotautil "github.com/openshift/origin/pkg/quota/util"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	imageapiv1 "github.com/openshift/api/image/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	"github.com/openshift/origin/pkg/image/importer"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
+	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
 )
 
 func getNamespaceName(resourceName string) (string, string, error) {
@@ -68,13 +68,13 @@ func wrapKStatusErrorOnGetImage(repoName string, dgst digest.Digest, err error) 
 
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
-func getImportContext(ctx context.Context, secretsGetter secretsGetter) importer.RepositoryRetriever {
+func getImportContext(ctx context.Context, secretsGetter secretsGetter) registryclient.RepositoryRetriever {
 	secrets, err := secretsGetter()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
-	credentials := importer.NewCredentialsForSecrets(secrets)
-	return importer.NewContext(secureTransport, insecureTransport).WithCredentials(credentials)
+	credentials := registryclient.NewCredentialsForSecrets(secrets)
+	return registryclient.NewContext(secureTransport, insecureTransport).WithCredentials(credentials)
 }
 
 // cachedImageStreamGetter wraps a master API client for getting image streams with a cache.
