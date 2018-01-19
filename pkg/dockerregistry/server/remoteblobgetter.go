@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 	"sort"
+	"sync"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
@@ -10,11 +11,13 @@ import (
 	"github.com/docker/distribution/registry/api/errcode"
 	disterrors "github.com/docker/distribution/registry/api/v2"
 
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	kapiv1 "k8s.io/kubernetes/pkg/api/v1"
+
 	imageapi "github.com/openshift/origin/pkg/image/apis/image"
 	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
 	"github.com/openshift/origin/pkg/image/importer"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 )
 
 // BlobGetterService combines the operations to access and read blobs.
@@ -24,17 +27,43 @@ type BlobGetterService interface {
 	distribution.BlobServer
 }
 
-type ImageStreamGetter func() (*imageapiv1.ImageStream, error)
+type imageStreamGetter func() (*imageapiv1.ImageStream, error)
+type secretsGetter func() ([]kapiv1.Secret, error)
+
+// digestBlobStoreCache caches BlobStores by digests. It is safe to use it
+// concurrently from different goroutines (from an HTTP handler and background
+// mirroring, for example).
+type digestBlobStoreCache struct {
+	mu   sync.RWMutex
+	data map[string]distribution.BlobStore
+}
+
+func newDigestBlobStoreCache() *digestBlobStoreCache {
+	return &digestBlobStoreCache{
+		data: make(map[string]distribution.BlobStore),
+	}
+}
+
+func (c *digestBlobStoreCache) Get(dgst digest.Digest) (distribution.BlobStore, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	bs, ok := c.data[dgst.String()]
+	return bs, ok
+}
+
+func (c *digestBlobStoreCache) Put(dgst digest.Digest, bs distribution.BlobStore) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.data[dgst.String()] = bs
+}
 
 // remoteBlobGetterService implements BlobGetterService and allows to serve blobs from remote
 // repositories.
 type remoteBlobGetterService struct {
-	namespace           string
-	name                string
-	getImageStream      ImageStreamGetter
-	isSecretsNamespacer client.ImageStreamSecretsNamespacer
-	cache               cache.RepositoryDigest
-	digestToStore       map[string]distribution.BlobStore
+	getImageStream imageStreamGetter
+	getSecrets     secretsGetter
+	cache          cache.RepositoryDigest
+	digestToStore  *digestBlobStoreCache
 }
 
 var _ BlobGetterService = &remoteBlobGetterService{}
@@ -42,18 +71,15 @@ var _ BlobGetterService = &remoteBlobGetterService{}
 // NewBlobGetterService returns a getter for remote blobs. Its cache will be shared among different middleware
 // wrappers, which is a must at least for stat calls made on manifest's dependencies during its verification.
 func NewBlobGetterService(
-	namespace, name string,
-	imageStreamGetter ImageStreamGetter,
-	isSecretsNamespacer client.ImageStreamSecretsNamespacer,
+	imageStreamGetter imageStreamGetter,
+	secretsGetter secretsGetter,
 	cache cache.RepositoryDigest,
 ) BlobGetterService {
 	return &remoteBlobGetterService{
-		namespace:           namespace,
-		name:                name,
-		getImageStream:      imageStreamGetter,
-		isSecretsNamespacer: isSecretsNamespacer,
-		cache:               cache,
-		digestToStore:       make(map[string]distribution.BlobStore),
+		getImageStream: imageStreamGetter,
+		getSecrets:     secretsGetter,
+		cache:          cache,
+		digestToStore:  newDigestBlobStoreCache(),
 	}
 }
 
@@ -86,7 +112,7 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 		localRegistry = local.Registry
 	}
 
-	retriever := getImportContext(ctx, rbgs.isSecretsNamespacer, rbgs.namespace, rbgs.name)
+	retriever := getImportContext(ctx, rbgs.getSecrets)
 
 	// look at the first level of tagged repositories first
 	repositoryCandidates, search := identifyCandidateRepositories(is, localRegistry, true)
@@ -108,7 +134,7 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 
 func (rbgs *remoteBlobGetterService) Open(ctx context.Context, dgst digest.Digest) (distribution.ReadSeekCloser, error) {
 	context.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Open: starting with dgst=%s", dgst.String())
-	store, ok := rbgs.digestToStore[dgst.String()]
+	store, ok := rbgs.digestToStore.Get(dgst)
 	if ok {
 		return store.Open(ctx, dgst)
 	}
@@ -119,7 +145,7 @@ func (rbgs *remoteBlobGetterService) Open(ctx context.Context, dgst digest.Diges
 		return nil, err
 	}
 
-	store, ok = rbgs.digestToStore[desc.Digest.String()]
+	store, ok = rbgs.digestToStore.Get(desc.Digest)
 	if !ok {
 		return nil, distribution.ErrBlobUnknown
 	}
@@ -129,7 +155,7 @@ func (rbgs *remoteBlobGetterService) Open(ctx context.Context, dgst digest.Diges
 
 func (rbgs *remoteBlobGetterService) ServeBlob(ctx context.Context, w http.ResponseWriter, req *http.Request, dgst digest.Digest) error {
 	context.GetLogger(ctx).Debugf("(*remoteBlobGetterService).ServeBlob: starting with dgst=%s", dgst.String())
-	store, ok := rbgs.digestToStore[dgst.String()]
+	store, ok := rbgs.digestToStore.Get(dgst)
 	if ok {
 		return store.ServeBlob(ctx, w, req, dgst)
 	}
@@ -140,7 +166,7 @@ func (rbgs *remoteBlobGetterService) ServeBlob(ctx context.Context, w http.Respo
 		return err
 	}
 
-	store, ok = rbgs.digestToStore[desc.Digest.String()]
+	store, ok = rbgs.digestToStore.Get(desc.Digest)
 	if !ok {
 		return distribution.ErrBlobUnknown
 	}
@@ -177,14 +203,14 @@ func (rbgs *remoteBlobGetterService) proxyStat(
 		return distribution.Descriptor{}, err
 	}
 
-	rbgs.digestToStore[dgst.String()] = pullthroughBlobStore
+	rbgs.digestToStore.Put(dgst, pullthroughBlobStore)
 	return desc, nil
 }
 
 // Get attempts to fetch the requested blob by digest using a remote proxy store if necessary.
 func (rbgs *remoteBlobGetterService) Get(ctx context.Context, dgst digest.Digest) ([]byte, error) {
 	context.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Get: starting with dgst=%s", dgst.String())
-	store, ok := rbgs.digestToStore[dgst.String()]
+	store, ok := rbgs.digestToStore.Get(dgst)
 	if ok {
 		return store.Get(ctx, dgst)
 	}
@@ -195,7 +221,7 @@ func (rbgs *remoteBlobGetterService) Get(ctx context.Context, dgst digest.Digest
 		return nil, err
 	}
 
-	store, ok = rbgs.digestToStore[desc.Digest.String()]
+	store, ok = rbgs.digestToStore.Get(desc.Digest)
 	if !ok {
 		return nil, distribution.ErrBlobUnknown
 	}
@@ -355,30 +381,4 @@ func identifyCandidateRepositories(
 	sort.Sort(&byInsecureFlag{repositories: repositories, specs: specs})
 
 	return repositories, results
-}
-
-// pullInsecureByDefault returns true if the given repository or repository's tag allows for insecure
-// transport.
-func pullInsecureByDefault(isGetter ImageStreamGetter, tag string) bool {
-	insecureByDefault := false
-
-	is, err := isGetter()
-	if err != nil {
-		return insecureByDefault
-	}
-
-	if insecure, ok := is.Annotations[imageapi.InsecureRepositoryAnnotation]; ok {
-		insecureByDefault = insecure == "true"
-	}
-
-	if insecureByDefault || len(tag) == 0 {
-		return insecureByDefault
-	}
-
-	for _, t := range is.Spec.Tags {
-		if t.Name == tag {
-			return t.ImportPolicy.Insecure
-		}
-	}
-	return false
 }

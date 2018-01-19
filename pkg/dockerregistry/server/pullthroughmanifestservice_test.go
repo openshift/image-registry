@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
@@ -552,3 +553,94 @@ func (t *testManifestService) Delete(ctx context.Context, dgst digest.Digest) er
 }
 
 const etcdDigest = "sha256:958608f8ecc1dc62c93b6c610f3a834dae4220c9642e6e8b4e0f2b3ad7cbd238"
+
+type putWaiterManifestService struct {
+	distribution.ManifestService
+	done chan struct{}
+}
+
+var _ distribution.ManifestService = &putWaiterManifestService{}
+
+func (ms *putWaiterManifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
+	return nil, distribution.ErrManifestUnknownRevision{
+		Name:     "unnamed",
+		Revision: dgst,
+	}
+}
+
+func (ms *putWaiterManifestService) Put(ctx context.Context, manifest distribution.Manifest, options ...distribution.ManifestServiceOption) (digest.Digest, error) {
+	close(ms.done)
+	return "", fmt.Errorf("put aborted")
+}
+
+func TestPullthroughManifestMirroring(t *testing.T) {
+	const timeout = 5 * time.Second
+
+	namespace := "myproject"
+	repo := "myapp"
+
+	mediaType := "application/vnd.docker.distribution.manifest.v2+json"
+	manifest := `{"schemaVersion":2,"mediaType":"` + mediaType + `"}`
+	config := `{}`
+
+	manifestDigest := digest.FromBytes([]byte(manifest))
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v2/":
+			fmt.Fprint(w, "{}")
+		case "/v2/remoteimage/manifests/" + manifestDigest.String():
+			w.Header().Set("Content-Type", mediaType)
+			fmt.Fprint(w, manifest)
+		default:
+			t.Logf("unhandled request: %s %v", r.Method, r.URL)
+			http.Error(w, "404 not found", http.StatusNotFound)
+		}
+	}))
+	defer ts.Close()
+
+	tsURL, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatalf("failed to parse test server URL: %v", err)
+	}
+
+	img, err := testutil.NewImageForManifest("unused", manifest, config, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img.DockerImageReference = fmt.Sprintf("%s/remoteimage", tsURL.Host)
+	img.DockerImageManifest = ""
+	img.DockerImageConfig = ""
+
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
+		imageapi.InsecureRepositoryAnnotation: "true",
+	})
+	testutil.AddImage(t, fos, img, namespace, repo, "latest")
+
+	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+
+	ms := &putWaiterManifestService{
+		done: make(chan struct{}),
+	}
+	ptms := &pullthroughManifestService{
+		ManifestService:      ms,
+		localManifestService: ms,
+		imageStream:          imageStream,
+		mirror:               true,
+	}
+
+	_, err = ptms.Get(ctx, digest.Digest(img.Name))
+	if err != nil {
+		t.Fatalf("failed to get manifest: %v", err)
+	}
+
+	select {
+	case <-ms.done:
+	case <-time.After(timeout):
+		t.Fatal("timeout while waiting for manifest to be mirrored")
+	}
+}

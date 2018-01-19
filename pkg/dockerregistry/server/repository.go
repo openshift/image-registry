@@ -93,10 +93,8 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 
 	if app.config.Pullthrough.Enabled {
 		r.remoteBlobGetter = NewBlobGetterService(
-			r.imageStream.namespace,
-			r.imageStream.name,
 			imageStreamGetter.get,
-			registryOSClient,
+			r.imageStream.getSecrets,
 			r.imageStream.cache)
 	}
 
@@ -114,6 +112,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 	if err != nil {
 		return nil, err
 	}
+	localManifestService := ms
 
 	ms = &manifestService{
 		manifests:     ms,
@@ -125,8 +124,10 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 
 	if r.app.config.Pullthrough.Enabled {
 		ms = &pullthroughManifestService{
-			ManifestService: ms,
-			imageStream:     r.imageStream,
+			ManifestService:      ms,
+			localManifestService: localManifestService,
+			imageStream:          r.imageStream,
+			mirror:               r.app.config.Pullthrough.Mirror,
 		}
 	}
 
@@ -159,7 +160,6 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 		bs = &pullthroughBlobStore{
 			BlobStore: bs,
 
-			imageStream:      r.imageStream,
 			remoteBlobGetter: r.remoteBlobGetter,
 			writeLimiter:     r.app.writeLimiter,
 			mirror:           r.app.config.Pullthrough.Mirror,
