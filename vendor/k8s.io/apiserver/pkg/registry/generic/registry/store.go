@@ -52,6 +52,14 @@ import (
 // object.
 type ObjectFunc func(obj runtime.Object) error
 
+// GenericStore interface can be used for type assertions when we need to access the underlying strategies.
+type GenericStore interface {
+	GetCreateStrategy() rest.RESTCreateStrategy
+	GetUpdateStrategy() rest.RESTUpdateStrategy
+	GetDeleteStrategy() rest.RESTDeleteStrategy
+	GetExportStrategy() rest.RESTExportStrategy
+}
+
 // Store implements pkg/api/rest.StandardStorage. It's intended to be
 // embeddable and allows the consumer to implement any non-generic functions
 // that are required. This object is intended to be copyable so that it can be
@@ -68,9 +76,6 @@ type ObjectFunc func(obj runtime.Object) error
 //
 // TODO: make the default exposed methods exactly match a generic RESTStorage
 type Store struct {
-	// Copier is used to make some storage caching decorators work
-	Copier runtime.ObjectCopier
-
 	// NewFunc returns a new instance of the type this registry returns for a
 	// GET of a single object, e.g.:
 	//
@@ -143,11 +148,13 @@ type Store struct {
 	// AfterCreate implements a further operation to run after a resource is
 	// created and before it is decorated, optional.
 	AfterCreate ObjectFunc
+
 	// UpdateStrategy implements resource-specific behavior during updates.
 	UpdateStrategy rest.RESTUpdateStrategy
 	// AfterUpdate implements a further operation to run after a resource is
 	// updated and before it is decorated, optional.
 	AfterUpdate ObjectFunc
+
 	// DeleteStrategy implements resource-specific behavior during deletion.
 	DeleteStrategy rest.RESTDeleteStrategy
 	// AfterDelete implements a further operation to run after a resource is
@@ -173,6 +180,7 @@ type Store struct {
 var _ rest.StandardStorage = &Store{}
 var _ rest.Exporter = &Store{}
 var _ rest.TableConvertor = &Store{}
+var _ GenericStore = &Store{}
 
 const OptimisticLockErrorMsg = "the object has been modified; please apply your changes to the latest version and try again"
 
@@ -229,6 +237,26 @@ func (e *Store) NewList() runtime.Object {
 	return e.NewListFunc()
 }
 
+// GetCreateStrategy implements GenericStore.
+func (e *Store) GetCreateStrategy() rest.RESTCreateStrategy {
+	return e.CreateStrategy
+}
+
+// GetUpdateStrategy implements GenericStore.
+func (e *Store) GetUpdateStrategy() rest.RESTUpdateStrategy {
+	return e.UpdateStrategy
+}
+
+// GetDeleteStrategy implements GenericStore.
+func (e *Store) GetDeleteStrategy() rest.RESTDeleteStrategy {
+	return e.DeleteStrategy
+}
+
+// GetExportStrategy implements GenericStore.
+func (e *Store) GetExportStrategy() rest.RESTExportStrategy {
+	return e.ExportStrategy
+}
+
 // List returns a list of items matching labels and field according to the
 // store's PredicateFunc.
 func (e *Store) List(ctx genericapirequest.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
@@ -260,6 +288,8 @@ func (e *Store) ListPredicate(ctx genericapirequest.Context, p storage.Selection
 		options = &metainternalversion.ListOptions{ResourceVersion: ""}
 	}
 	p.IncludeUninitialized = options.IncludeUninitialized
+	p.Limit = options.Limit
+	p.Continue = options.Continue
 	list := e.NewListFunc()
 	qualifiedResource := e.qualifiedResourceFromContext(ctx)
 	if name, ok := p.MatchesSingle(); ok {
@@ -275,10 +305,18 @@ func (e *Store) ListPredicate(ctx genericapirequest.Context, p storage.Selection
 }
 
 // Create inserts a new item according to the unique key from the object.
-func (e *Store) Create(ctx genericapirequest.Context, obj runtime.Object, includeUninitialized bool) (runtime.Object, error) {
+func (e *Store) Create(ctx genericapirequest.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, includeUninitialized bool) (runtime.Object, error) {
 	if err := rest.BeforeCreate(e.CreateStrategy, ctx, obj); err != nil {
 		return nil, err
 	}
+	// at this point we have a fully formed object.  It is time to call the validators that the apiserver
+	// handling chain wants to enforce.
+	if createValidation != nil {
+		if err := createValidation(obj.DeepCopyObject()); err != nil {
+			return nil, err
+		}
+	}
+
 	name, err := e.ObjectNameFunc(obj)
 	if err != nil {
 		return nil, err
@@ -409,7 +447,7 @@ func (e *Store) WaitForInitialized(ctx genericapirequest.Context, obj runtime.Ob
 
 // shouldDeleteDuringUpdate checks if a Update is removing all the object's
 // finalizers. If so, it further checks if the object's
-// DeletionGracePeriodSeconds is 0. If so, it returns true.
+// DeletionGracePeriodSeconds is 0.
 func (e *Store) shouldDeleteDuringUpdate(ctx genericapirequest.Context, key string, obj, existing runtime.Object) bool {
 	newMeta, err := meta.Accessor(obj)
 	if err != nil {
@@ -466,7 +504,7 @@ func (e *Store) deleteWithoutFinalizers(ctx genericapirequest.Context, name, key
 // Update performs an atomic update and set of the object. Returns the result of the update
 // or an error. If the registry allows create-on-update, the create flow will be executed.
 // A bool is returned along with the object and any errors, to indicate object creation.
-func (e *Store) Update(ctx genericapirequest.Context, name string, objInfo rest.UpdatedObjectInfo) (runtime.Object, bool, error) {
+func (e *Store) Update(ctx genericapirequest.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc) (runtime.Object, bool, error) {
 	key, err := e.KeyFunc(ctx, name)
 	if err != nil {
 		return nil, false, err
@@ -516,10 +554,18 @@ func (e *Store) Update(ctx genericapirequest.Context, name string, objInfo rest.
 			if err := rest.BeforeCreate(e.CreateStrategy, ctx, obj); err != nil {
 				return nil, nil, err
 			}
+			// at this point we have a fully formed object.  It is time to call the validators that the apiserver
+			// handling chain wants to enforce.
+			if createValidation != nil {
+				if err := createValidation(obj.DeepCopyObject()); err != nil {
+					return nil, nil, err
+				}
+			}
 			ttl, err := e.calculateTTL(obj, 0, false)
 			if err != nil {
 				return nil, nil, err
 			}
+
 			return obj, &ttl, nil
 		}
 
@@ -553,6 +599,13 @@ func (e *Store) Update(ctx genericapirequest.Context, name string, objInfo rest.
 		}
 		if err := rest.BeforeUpdate(e.UpdateStrategy, ctx, obj, existing); err != nil {
 			return nil, nil, err
+		}
+		// at this point we have a fully formed object.  It is time to call the validators that the apiserver
+		// handling chain wants to enforce.
+		if updateValidation != nil {
+			if err := updateValidation(obj.DeepCopyObject(), existing.DeepCopyObject()); err != nil {
+				return nil, nil, err
+			}
 		}
 		if e.shouldDeleteDuringUpdate(ctx, key, obj, existing) {
 			deleteObj = obj
@@ -646,12 +699,17 @@ var (
 // priority, there are three factors affect whether to add/remove the
 // FinalizerOrphanDependents: options, existing finalizers of the object,
 // and e.DeleteStrategy.DefaultGarbageCollectionPolicy.
-func shouldOrphanDependents(e *Store, accessor metav1.Object, options *metav1.DeleteOptions) bool {
-	if gcStrategy, ok := e.DeleteStrategy.(rest.GarbageCollectionDeleteStrategy); ok {
-		if gcStrategy.DefaultGarbageCollectionPolicy() == rest.Unsupported {
-			// return  false to indicate that we should NOT orphan
-			return false
-		}
+func shouldOrphanDependents(ctx genericapirequest.Context, e *Store, accessor metav1.Object, options *metav1.DeleteOptions) bool {
+	// Get default GC policy from this REST object type
+	gcStrategy, ok := e.DeleteStrategy.(rest.GarbageCollectionDeleteStrategy)
+	var defaultGCPolicy rest.GarbageCollectionPolicy
+	if ok {
+		defaultGCPolicy = gcStrategy.DefaultGarbageCollectionPolicy(ctx)
+	}
+
+	if defaultGCPolicy == rest.Unsupported {
+		// return  false to indicate that we should NOT orphan
+		return false
 	}
 
 	// An explicit policy was set at deletion time, that overrides everything
@@ -680,10 +738,8 @@ func shouldOrphanDependents(e *Store, accessor metav1.Object, options *metav1.De
 	}
 
 	// Get default orphan policy from this REST object type if it exists
-	if gcStrategy, ok := e.DeleteStrategy.(rest.GarbageCollectionDeleteStrategy); ok {
-		if gcStrategy.DefaultGarbageCollectionPolicy() == rest.OrphanDependents {
-			return true
-		}
+	if defaultGCPolicy == rest.OrphanDependents {
+		return true
 	}
 	return false
 }
@@ -693,9 +749,9 @@ func shouldOrphanDependents(e *Store, accessor metav1.Object, options *metav1.De
 // priority, there are three factors affect whether to add/remove the
 // FinalizerDeleteDependents: options, existing finalizers of the object, and
 // e.DeleteStrategy.DefaultGarbageCollectionPolicy.
-func shouldDeleteDependents(e *Store, accessor metav1.Object, options *metav1.DeleteOptions) bool {
-	// Get default orphan policy from this REST object type
-	if gcStrategy, ok := e.DeleteStrategy.(rest.GarbageCollectionDeleteStrategy); ok && gcStrategy.DefaultGarbageCollectionPolicy() == rest.Unsupported {
+func shouldDeleteDependents(ctx genericapirequest.Context, e *Store, accessor metav1.Object, options *metav1.DeleteOptions) bool {
+	// Get default GC policy from this REST object type
+	if gcStrategy, ok := e.DeleteStrategy.(rest.GarbageCollectionDeleteStrategy); ok && gcStrategy.DefaultGarbageCollectionPolicy(ctx) == rest.Unsupported {
 		// return false to indicate that we should NOT delete in foreground
 		return false
 	}
@@ -736,12 +792,12 @@ func shouldDeleteDependents(e *Store, accessor metav1.Object, options *metav1.De
 // The finalizers returned are intended to be handled by the garbage collector.
 // If garbage collection is disabled for the store, this function returns false
 // to ensure finalizers aren't set which will never be cleared.
-func deletionFinalizersForGarbageCollection(e *Store, accessor metav1.Object, options *metav1.DeleteOptions) (bool, []string) {
+func deletionFinalizersForGarbageCollection(ctx genericapirequest.Context, e *Store, accessor metav1.Object, options *metav1.DeleteOptions) (bool, []string) {
 	if !e.EnableGarbageCollection {
 		return false, []string{}
 	}
-	shouldOrphan := shouldOrphanDependents(e, accessor, options)
-	shouldDeleteDependentInForeground := shouldDeleteDependents(e, accessor, options)
+	shouldOrphan := shouldOrphanDependents(ctx, e, accessor, options)
+	shouldDeleteDependentInForeground := shouldDeleteDependents(ctx, e, accessor, options)
 	newFinalizers := []string{}
 
 	// first remove both finalizers, add them back if needed.
@@ -827,8 +883,8 @@ func (e *Store) updateForGracefulDeletionAndFinalizers(ctx genericapirequest.Con
 			if err != nil {
 				return nil, err
 			}
-			shouldUpdate, newFinalizers := deletionFinalizersForGarbageCollection(e, existingAccessor, options)
-			if shouldUpdate {
+			needsUpdate, newFinalizers := deletionFinalizersForGarbageCollection(ctx, e, existingAccessor, options)
+			if needsUpdate {
 				existingAccessor.SetFinalizers(newFinalizers)
 			}
 
@@ -919,7 +975,7 @@ func (e *Store) Delete(ctx genericapirequest.Context, name string, options *meta
 
 	// Handle combinations of graceful deletion and finalization by issuing
 	// the correct updates.
-	shouldUpdateFinalizers, _ := deletionFinalizersForGarbageCollection(e, accessor, options)
+	shouldUpdateFinalizers, _ := deletionFinalizersForGarbageCollection(ctx, e, accessor, options)
 	// TODO: remove the check, because we support no-op updates now.
 	if graceful || pendingFinalizers || shouldUpdateFinalizers {
 		err, ignoreNotFound, deleteImmediately, out, lastExisting = e.updateForGracefulDeletionAndFinalizers(ctx, name, key, options, preconditions, obj)
@@ -948,18 +1004,6 @@ func (e *Store) Delete(ctx genericapirequest.Context, name string, options *meta
 	return out, true, err
 }
 
-// copyListOptions copies list options for mutation.
-func copyListOptions(options *metainternalversion.ListOptions) *metainternalversion.ListOptions {
-	if options == nil {
-		return &metainternalversion.ListOptions{}
-	}
-	copied, err := metainternalversion.Copier.Copy(options)
-	if err != nil {
-		panic(err)
-	}
-	return copied.(*metainternalversion.ListOptions)
-}
-
 // DeleteCollection removes all items returned by List with a given ListOptions from storage.
 //
 // DeleteCollection is currently NOT atomic. It can happen that only subset of objects
@@ -971,10 +1015,15 @@ func copyListOptions(options *metainternalversion.ListOptions) *metainternalvers
 // possibly with storage API, but watch is not delivered correctly then).
 // It will be possible to fix it with v3 etcd API.
 func (e *Store) DeleteCollection(ctx genericapirequest.Context, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {
+	if listOptions == nil {
+		listOptions = &metainternalversion.ListOptions{}
+	} else {
+		listOptions = listOptions.DeepCopy()
+	}
+
 	// DeleteCollection must remain backwards compatible with old clients that expect it to
 	// remove all resources, initialized or not, within the type. It is also consistent with
 	// Delete which does not require IncludeUninitialized
-	listOptions = copyListOptions(listOptions)
 	listOptions.IncludeUninitialized = true
 
 	listObj, err := e.List(ctx, listOptions)
@@ -1307,7 +1356,6 @@ func (e *Store) CompleteWithOptions(options *generic.StoreOptions) error {
 
 	if e.Storage == nil {
 		e.Storage, e.DestroyFunc = opts.Decorator(
-			e.Copier,
 			opts.StorageConfig,
 			e.NewFunc(),
 			prefix,

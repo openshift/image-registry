@@ -6,11 +6,11 @@ package cloudhsm
 import (
 	"github.com/aws/aws-sdk-go/awstesting/integration/smoke"
 	"github.com/aws/aws-sdk-go/service/cloudhsm"
-	"github.com/gucumber/gucumber"
+	. "github.com/lsegal/gucumber"
 )
 
 func init() {
-	gucumber.Before("@cloudhsm", func() {
-		gucumber.World["client"] = cloudhsm.New(smoke.Session)
+	Before("@cloudhsm", func() {
+		World["client"] = cloudhsm.New(smoke.Session)
 	})
 }

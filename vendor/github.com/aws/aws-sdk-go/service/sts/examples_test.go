@@ -16,13 +16,7 @@ var _ time.Duration
 var _ bytes.Buffer
 
 func ExampleSTS_AssumeRole() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := sts.New(sess)
+	svc := sts.New(session.New())
 
 	params := &sts.AssumeRoleInput{
 		RoleArn:         aws.String("arnType"),             // Required
@@ -47,13 +41,7 @@ func ExampleSTS_AssumeRole() {
 }
 
 func ExampleSTS_AssumeRoleWithSAML() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := sts.New(sess)
+	svc := sts.New(session.New())
 
 	params := &sts.AssumeRoleWithSAMLInput{
 		PrincipalArn:    aws.String("arnType"),           // Required
@@ -76,13 +64,7 @@ func ExampleSTS_AssumeRoleWithSAML() {
 }
 
 func ExampleSTS_AssumeRoleWithWebIdentity() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := sts.New(sess)
+	svc := sts.New(session.New())
 
 	params := &sts.AssumeRoleWithWebIdentityInput{
 		RoleArn:          aws.String("arnType"),             // Required
@@ -106,13 +88,7 @@ func ExampleSTS_AssumeRoleWithWebIdentity() {
 }
 
 func ExampleSTS_DecodeAuthorizationMessage() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := sts.New(sess)
+	svc := sts.New(session.New())
 
 	params := &sts.DecodeAuthorizationMessageInput{
 		EncodedMessage: aws.String("encodedMessageType"), // Required
@@ -131,13 +107,7 @@ func ExampleSTS_DecodeAuthorizationMessage() {
 }
 
 func ExampleSTS_GetCallerIdentity() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := sts.New(sess)
+	svc := sts.New(session.New())
 
 	var params *sts.GetCallerIdentityInput
 	resp, err := svc.GetCallerIdentity(params)
@@ -154,13 +124,7 @@ func ExampleSTS_GetCallerIdentity() {
 }
 
 func ExampleSTS_GetFederationToken() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := sts.New(sess)
+	svc := sts.New(session.New())
 
 	params := &sts.GetFederationTokenInput{
 		Name:            aws.String("userNameType"), // Required
@@ -181,13 +145,7 @@ func ExampleSTS_GetFederationToken() {
 }
 
 func ExampleSTS_GetSessionToken() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := sts.New(sess)
+	svc := sts.New(session.New())
 
 	params := &sts.GetSessionTokenInput{
 		DurationSeconds: aws.Int64(1),

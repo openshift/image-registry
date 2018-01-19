@@ -9,8 +9,7 @@
     "serviceFullName":"AWS CodeDeploy",
     "signatureVersion":"v4",
     "targetPrefix":"CodeDeploy_20141006",
-    "timestampFormat":"unixTimestamp",
-    "uid":"codedeploy-2014-10-06"
+    "timestampFormat":"unixTimestamp"
   },
   "operations":{
     "AddTagsToOnPremisesInstances":{
@@ -154,13 +153,11 @@
         {"shape":"InvalidDeploymentGroupNameException"},
         {"shape":"DeploymentGroupDoesNotExistException"},
         {"shape":"RevisionRequiredException"},
-        {"shape":"RevisionDoesNotExistException"},
         {"shape":"InvalidRevisionException"},
         {"shape":"InvalidDeploymentConfigNameException"},
         {"shape":"DeploymentConfigDoesNotExistException"},
         {"shape":"DescriptionTooLongException"},
-        {"shape":"DeploymentLimitExceededException"},
-        {"shape":"InvalidAutoRollbackConfigException"}
+        {"shape":"DeploymentLimitExceededException"}
       ]
     },
     "CreateDeploymentConfig":{
@@ -204,10 +201,7 @@
         {"shape":"DeploymentGroupLimitExceededException"},
         {"shape":"LifecycleHookLimitExceededException"},
         {"shape":"InvalidTriggerConfigException"},
-        {"shape":"TriggerTargetsLimitExceededException"},
-        {"shape":"InvalidAlarmConfigException"},
-        {"shape":"AlarmsLimitExceededException"},
-        {"shape":"InvalidAutoRollbackConfigException"}
+        {"shape":"TriggerTargetsLimitExceededException"}
       ]
     },
     "DeleteApplication":{
@@ -507,15 +501,11 @@
       "input":{"shape":"RegisterOnPremisesInstanceInput"},
       "errors":[
         {"shape":"InstanceNameAlreadyRegisteredException"},
-        {"shape":"IamArnRequiredException"},
-        {"shape":"IamSessionArnAlreadyRegisteredException"},
         {"shape":"IamUserArnAlreadyRegisteredException"},
         {"shape":"InstanceNameRequiredException"},
         {"shape":"IamUserArnRequiredException"},
         {"shape":"InvalidInstanceNameException"},
-        {"shape":"InvalidIamSessionArnException"},
-        {"shape":"InvalidIamUserArnException"},
-        {"shape":"MultipleIamArnsProvidedException"}
+        {"shape":"InvalidIamUserArnException"}
       ]
     },
     "RemoveTagsFromOnPremisesInstances":{
@@ -587,10 +577,7 @@
         {"shape":"InvalidRoleException"},
         {"shape":"LifecycleHookLimitExceededException"},
         {"shape":"InvalidTriggerConfigException"},
-        {"shape":"TriggerTargetsLimitExceededException"},
-        {"shape":"InvalidAlarmConfigException"},
-        {"shape":"AlarmsLimitExceededException"},
-        {"shape":"InvalidAutoRollbackConfigException"}
+        {"shape":"TriggerTargetsLimitExceededException"}
       ]
     }
   },
@@ -605,31 +592,6 @@
         "tags":{"shape":"TagList"},
         "instanceNames":{"shape":"InstanceNameList"}
       }
-    },
-    "Alarm":{
-      "type":"structure",
-      "members":{
-        "name":{"shape":"AlarmName"}
-      }
-    },
-    "AlarmConfiguration":{
-      "type":"structure",
-      "members":{
-        "enabled":{"shape":"Boolean"},
-        "ignorePollAlarmFailure":{"shape":"Boolean"},
-        "alarms":{"shape":"AlarmList"}
-      }
-    },
-    "AlarmList":{
-      "type":"list",
-      "member":{"shape":"Alarm"}
-    },
-    "AlarmName":{"type":"string"},
-    "AlarmsLimitExceededException":{
-      "type":"structure",
-      "members":{
-      },
-      "exception":true
     },
     "ApplicationAlreadyExistsException":{
       "type":"structure",
@@ -685,25 +647,6 @@
     "ApplicationsList":{
       "type":"list",
       "member":{"shape":"ApplicationName"}
-    },
-    "AutoRollbackConfiguration":{
-      "type":"structure",
-      "members":{
-        "enabled":{"shape":"Boolean"},
-        "events":{"shape":"AutoRollbackEventsList"}
-      }
-    },
-    "AutoRollbackEvent":{
-      "type":"string",
-      "enum":[
-        "DEPLOYMENT_FAILURE",
-        "DEPLOYMENT_STOP_ON_ALARM",
-        "DEPLOYMENT_STOP_ON_REQUEST"
-      ]
-    },
-    "AutoRollbackEventsList":{
-      "type":"list",
-      "member":{"shape":"AutoRollbackEvent"}
     },
     "AutoScalingGroup":{
       "type":"structure",
@@ -877,9 +820,7 @@
         "onPremisesInstanceTagFilters":{"shape":"TagFilterList"},
         "autoScalingGroups":{"shape":"AutoScalingGroupNameList"},
         "serviceRoleArn":{"shape":"Role"},
-        "triggerConfigurations":{"shape":"TriggerConfigList"},
-        "alarmConfiguration":{"shape":"AlarmConfiguration"},
-        "autoRollbackConfiguration":{"shape":"AutoRollbackConfiguration"}
+        "triggerConfigurations":{"shape":"TriggerConfigList"}
       }
     },
     "CreateDeploymentGroupOutput":{
@@ -897,9 +838,7 @@
         "revision":{"shape":"RevisionLocation"},
         "deploymentConfigName":{"shape":"DeploymentConfigName"},
         "description":{"shape":"Description"},
-        "ignoreApplicationStopFailures":{"shape":"Boolean"},
-        "autoRollbackConfiguration":{"shape":"AutoRollbackConfiguration"},
-        "updateOutdatedInstancesOnly":{"shape":"Boolean"}
+        "ignoreApplicationStopFailures":{"shape":"Boolean"}
       }
     },
     "CreateDeploymentOutput":{
@@ -998,8 +937,7 @@
       "type":"string",
       "enum":[
         "user",
-        "autoscaling",
-        "codeDeployRollback"
+        "autoscaling"
       ]
     },
     "DeploymentDoesNotExistException":{
@@ -1033,9 +971,7 @@
         "autoScalingGroups":{"shape":"AutoScalingGroupList"},
         "serviceRoleArn":{"shape":"Role"},
         "targetRevision":{"shape":"RevisionLocation"},
-        "triggerConfigurations":{"shape":"TriggerConfigList"},
-        "alarmConfiguration":{"shape":"AlarmConfiguration"},
-        "autoRollbackConfiguration":{"shape":"AutoRollbackConfiguration"}
+        "triggerConfigurations":{"shape":"TriggerConfigList"}
       }
     },
     "DeploymentGroupInfoList":{
@@ -1086,10 +1022,7 @@
         "deploymentOverview":{"shape":"DeploymentOverview"},
         "description":{"shape":"Description"},
         "creator":{"shape":"DeploymentCreator"},
-        "ignoreApplicationStopFailures":{"shape":"Boolean"},
-        "autoRollbackConfiguration":{"shape":"AutoRollbackConfiguration"},
-        "updateOutdatedInstancesOnly":{"shape":"Boolean"},
-        "rollbackInfo":{"shape":"RollbackInfo"}
+        "ignoreApplicationStopFailures":{"shape":"Boolean"}
       }
     },
     "DeploymentLimitExceededException":{
@@ -1196,12 +1129,7 @@
         "HEALTH_CONSTRAINTS_INVALID",
         "HEALTH_CONSTRAINTS",
         "INTERNAL_ERROR",
-        "THROTTLED",
-        "ALARM_ACTIVE",
-        "AGENT_ISSUE",
-        "AUTO_SCALING_IAM_ROLE_PERMISSIONS",
-        "AUTO_SCALING_CONFIGURATION",
-        "MANUAL_STOP"
+        "THROTTLED"
       ]
     },
     "ErrorInformation":{
@@ -1334,19 +1262,6 @@
         "commitId":{"shape":"CommitId"}
       }
     },
-    "IamArnRequiredException":{
-      "type":"structure",
-      "members":{
-      },
-      "exception":true
-    },
-    "IamSessionArn":{"type":"string"},
-    "IamSessionArnAlreadyRegisteredException":{
-      "type":"structure",
-      "members":{
-      },
-      "exception":true
-    },
     "IamUserArn":{"type":"string"},
     "IamUserArnAlreadyRegisteredException":{
       "type":"structure",
@@ -1379,7 +1294,6 @@
       "type":"structure",
       "members":{
         "instanceName":{"shape":"InstanceName"},
-        "iamSessionArn":{"shape":"IamSessionArn"},
         "iamUserArn":{"shape":"IamUserArn"},
         "instanceArn":{"shape":"InstanceArn"},
         "registerTime":{"shape":"Timestamp"},
@@ -1453,19 +1367,7 @@
       "type":"list",
       "member":{"shape":"InstanceId"}
     },
-    "InvalidAlarmConfigException":{
-      "type":"structure",
-      "members":{
-      },
-      "exception":true
-    },
     "InvalidApplicationNameException":{
-      "type":"structure",
-      "members":{
-      },
-      "exception":true
-    },
-    "InvalidAutoRollbackConfigException":{
       "type":"structure",
       "members":{
       },
@@ -1514,12 +1416,6 @@
       "exception":true
     },
     "InvalidEC2TagException":{
-      "type":"structure",
-      "members":{
-      },
-      "exception":true
-    },
-    "InvalidIamSessionArnException":{
       "type":"structure",
       "members":{
       },
@@ -1801,14 +1697,7 @@
       ]
     },
     "MinimumHealthyHostsValue":{"type":"integer"},
-    "MultipleIamArnsProvidedException":{
-      "type":"structure",
-      "members":{
-      },
-      "exception":true
-    },
     "NextToken":{"type":"string"},
-    "NullableBoolean":{"type":"boolean"},
     "RegisterApplicationRevisionInput":{
       "type":"structure",
       "required":[
@@ -1823,10 +1712,12 @@
     },
     "RegisterOnPremisesInstanceInput":{
       "type":"structure",
-      "required":["instanceName"],
+      "required":[
+        "instanceName",
+        "iamUserArn"
+      ],
       "members":{
         "instanceName":{"shape":"InstanceName"},
-        "iamSessionArn":{"shape":"IamSessionArn"},
         "iamUserArn":{"shape":"IamUserArn"}
       }
     },
@@ -1898,14 +1789,6 @@
       },
       "exception":true
     },
-    "RollbackInfo":{
-      "type":"structure",
-      "members":{
-        "rollbackDeploymentId":{"shape":"DeploymentId"},
-        "rollbackTriggeringDeploymentId":{"shape":"DeploymentId"},
-        "rollbackMessage":{"shape":"Description"}
-      }
-    },
     "S3Bucket":{"type":"string"},
     "S3Key":{"type":"string"},
     "S3Location":{
@@ -1930,8 +1813,7 @@
       "type":"structure",
       "required":["deploymentId"],
       "members":{
-        "deploymentId":{"shape":"DeploymentId"},
-        "autoRollbackEnabled":{"shape":"NullableBoolean"}
+        "deploymentId":{"shape":"DeploymentId"}
       }
     },
     "StopDeploymentOutput":{
@@ -2018,7 +1900,6 @@
         "DeploymentSuccess",
         "DeploymentFailure",
         "DeploymentStop",
-        "DeploymentRollback",
         "InstanceStart",
         "InstanceSuccess",
         "InstanceFailure"
@@ -2058,9 +1939,7 @@
         "onPremisesInstanceTagFilters":{"shape":"TagFilterList"},
         "autoScalingGroups":{"shape":"AutoScalingGroupNameList"},
         "serviceRoleArn":{"shape":"Role"},
-        "triggerConfigurations":{"shape":"TriggerConfigList"},
-        "alarmConfiguration":{"shape":"AlarmConfiguration"},
-        "autoRollbackConfiguration":{"shape":"AutoRollbackConfiguration"}
+        "triggerConfigurations":{"shape":"TriggerConfigList"}
       }
     },
     "UpdateDeploymentGroupOutput":{

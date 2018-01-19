@@ -15,40 +15,8 @@ import (
 var _ time.Duration
 var _ bytes.Buffer
 
-func ExampleRDS_AddRoleToDBCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
-
-	params := &rds.AddRoleToDBClusterInput{
-		DBClusterIdentifier: aws.String("String"), // Required
-		RoleArn:             aws.String("String"), // Required
-	}
-	resp, err := svc.AddRoleToDBCluster(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleRDS_AddSourceIdentifierToSubscription() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.AddSourceIdentifierToSubscriptionInput{
 		SourceIdentifier: aws.String("String"), // Required
@@ -68,13 +36,7 @@ func ExampleRDS_AddSourceIdentifierToSubscription() {
 }
 
 func ExampleRDS_AddTagsToResource() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.AddTagsToResourceInput{
 		ResourceName: aws.String("String"), // Required
@@ -100,13 +62,7 @@ func ExampleRDS_AddTagsToResource() {
 }
 
 func ExampleRDS_ApplyPendingMaintenanceAction() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ApplyPendingMaintenanceActionInput{
 		ApplyAction:        aws.String("String"), // Required
@@ -127,13 +83,7 @@ func ExampleRDS_ApplyPendingMaintenanceAction() {
 }
 
 func ExampleRDS_AuthorizeDBSecurityGroupIngress() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.AuthorizeDBSecurityGroupIngressInput{
 		DBSecurityGroupName:     aws.String("String"), // Required
@@ -155,48 +105,8 @@ func ExampleRDS_AuthorizeDBSecurityGroupIngress() {
 	fmt.Println(resp)
 }
 
-func ExampleRDS_CopyDBClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
-
-	params := &rds.CopyDBClusterParameterGroupInput{
-		SourceDBClusterParameterGroupIdentifier:  aws.String("String"), // Required
-		TargetDBClusterParameterGroupDescription: aws.String("String"), // Required
-		TargetDBClusterParameterGroupIdentifier:  aws.String("String"), // Required
-		Tags: []*rds.Tag{
-			{ // Required
-				Key:   aws.String("String"),
-				Value: aws.String("String"),
-			},
-			// More values...
-		},
-	}
-	resp, err := svc.CopyDBClusterParameterGroup(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleRDS_CopyDBClusterSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CopyDBClusterSnapshotInput{
 		SourceDBClusterSnapshotIdentifier: aws.String("String"), // Required
@@ -223,13 +133,7 @@ func ExampleRDS_CopyDBClusterSnapshot() {
 }
 
 func ExampleRDS_CopyDBParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CopyDBParameterGroupInput{
 		SourceDBParameterGroupIdentifier:  aws.String("String"), // Required
@@ -257,22 +161,13 @@ func ExampleRDS_CopyDBParameterGroup() {
 }
 
 func ExampleRDS_CopyDBSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CopyDBSnapshotInput{
 		SourceDBSnapshotIdentifier: aws.String("String"), // Required
 		TargetDBSnapshotIdentifier: aws.String("String"), // Required
 		CopyTags:                   aws.Bool(true),
-		DestinationRegion:          aws.String("String"),
 		KmsKeyId:                   aws.String("String"),
-		PreSignedUrl:               aws.String("String"),
-		SourceRegion:               aws.String("String"),
 		Tags: []*rds.Tag{
 			{ // Required
 				Key:   aws.String("String"),
@@ -295,13 +190,7 @@ func ExampleRDS_CopyDBSnapshot() {
 }
 
 func ExampleRDS_CopyOptionGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CopyOptionGroupInput{
 		SourceOptionGroupIdentifier:  aws.String("String"), // Required
@@ -329,17 +218,13 @@ func ExampleRDS_CopyOptionGroup() {
 }
 
 func ExampleRDS_CreateDBCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBClusterInput{
 		DBClusterIdentifier: aws.String("String"), // Required
 		Engine:              aws.String("String"), // Required
+		MasterUserPassword:  aws.String("String"), // Required
+		MasterUsername:      aws.String("String"), // Required
 		AvailabilityZones: []*string{
 			aws.String("String"), // Required
 			// More values...
@@ -351,8 +236,6 @@ func ExampleRDS_CreateDBCluster() {
 		DatabaseName:                aws.String("String"),
 		EngineVersion:               aws.String("String"),
 		KmsKeyId:                    aws.String("String"),
-		MasterUserPassword:          aws.String("String"),
-		MasterUsername:              aws.String("String"),
 		OptionGroupName:             aws.String("String"),
 		Port:                        aws.Int64(1),
 		PreferredBackupWindow:       aws.String("String"),
@@ -385,13 +268,7 @@ func ExampleRDS_CreateDBCluster() {
 }
 
 func ExampleRDS_CreateDBClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBClusterParameterGroupInput{
 		DBClusterParameterGroupName: aws.String("String"), // Required
@@ -419,13 +296,7 @@ func ExampleRDS_CreateDBClusterParameterGroup() {
 }
 
 func ExampleRDS_CreateDBClusterSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBClusterSnapshotInput{
 		DBClusterIdentifier:         aws.String("String"), // Required
@@ -452,13 +323,7 @@ func ExampleRDS_CreateDBClusterSnapshot() {
 }
 
 func ExampleRDS_CreateDBInstance() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBInstanceInput{
 		DBInstanceClass:         aws.String("String"), // Required
@@ -506,7 +371,6 @@ func ExampleRDS_CreateDBInstance() {
 		},
 		TdeCredentialArn:      aws.String("String"),
 		TdeCredentialPassword: aws.String("String"),
-		Timezone:              aws.String("String"),
 		VpcSecurityGroupIds: []*string{
 			aws.String("String"), // Required
 			// More values...
@@ -526,13 +390,7 @@ func ExampleRDS_CreateDBInstance() {
 }
 
 func ExampleRDS_CreateDBInstanceReadReplica() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBInstanceReadReplicaInput{
 		DBInstanceIdentifier:       aws.String("String"), // Required
@@ -571,13 +429,7 @@ func ExampleRDS_CreateDBInstanceReadReplica() {
 }
 
 func ExampleRDS_CreateDBParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBParameterGroupInput{
 		DBParameterGroupFamily: aws.String("String"), // Required
@@ -605,13 +457,7 @@ func ExampleRDS_CreateDBParameterGroup() {
 }
 
 func ExampleRDS_CreateDBSecurityGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBSecurityGroupInput{
 		DBSecurityGroupDescription: aws.String("String"), // Required
@@ -638,13 +484,7 @@ func ExampleRDS_CreateDBSecurityGroup() {
 }
 
 func ExampleRDS_CreateDBSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBSnapshotInput{
 		DBInstanceIdentifier: aws.String("String"), // Required
@@ -671,13 +511,7 @@ func ExampleRDS_CreateDBSnapshot() {
 }
 
 func ExampleRDS_CreateDBSubnetGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateDBSubnetGroupInput{
 		DBSubnetGroupDescription: aws.String("String"), // Required
@@ -708,13 +542,7 @@ func ExampleRDS_CreateDBSubnetGroup() {
 }
 
 func ExampleRDS_CreateEventSubscription() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateEventSubscriptionInput{
 		SnsTopicArn:      aws.String("String"), // Required
@@ -751,13 +579,7 @@ func ExampleRDS_CreateEventSubscription() {
 }
 
 func ExampleRDS_CreateOptionGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.CreateOptionGroupInput{
 		EngineName:             aws.String("String"), // Required
@@ -786,13 +608,7 @@ func ExampleRDS_CreateOptionGroup() {
 }
 
 func ExampleRDS_DeleteDBCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteDBClusterInput{
 		DBClusterIdentifier:       aws.String("String"), // Required
@@ -813,13 +629,7 @@ func ExampleRDS_DeleteDBCluster() {
 }
 
 func ExampleRDS_DeleteDBClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteDBClusterParameterGroupInput{
 		DBClusterParameterGroupName: aws.String("String"), // Required
@@ -838,13 +648,7 @@ func ExampleRDS_DeleteDBClusterParameterGroup() {
 }
 
 func ExampleRDS_DeleteDBClusterSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteDBClusterSnapshotInput{
 		DBClusterSnapshotIdentifier: aws.String("String"), // Required
@@ -863,13 +667,7 @@ func ExampleRDS_DeleteDBClusterSnapshot() {
 }
 
 func ExampleRDS_DeleteDBInstance() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteDBInstanceInput{
 		DBInstanceIdentifier:      aws.String("String"), // Required
@@ -890,13 +688,7 @@ func ExampleRDS_DeleteDBInstance() {
 }
 
 func ExampleRDS_DeleteDBParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteDBParameterGroupInput{
 		DBParameterGroupName: aws.String("String"), // Required
@@ -915,13 +707,7 @@ func ExampleRDS_DeleteDBParameterGroup() {
 }
 
 func ExampleRDS_DeleteDBSecurityGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteDBSecurityGroupInput{
 		DBSecurityGroupName: aws.String("String"), // Required
@@ -940,13 +726,7 @@ func ExampleRDS_DeleteDBSecurityGroup() {
 }
 
 func ExampleRDS_DeleteDBSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteDBSnapshotInput{
 		DBSnapshotIdentifier: aws.String("String"), // Required
@@ -965,13 +745,7 @@ func ExampleRDS_DeleteDBSnapshot() {
 }
 
 func ExampleRDS_DeleteDBSubnetGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteDBSubnetGroupInput{
 		DBSubnetGroupName: aws.String("String"), // Required
@@ -990,13 +764,7 @@ func ExampleRDS_DeleteDBSubnetGroup() {
 }
 
 func ExampleRDS_DeleteEventSubscription() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteEventSubscriptionInput{
 		SubscriptionName: aws.String("String"), // Required
@@ -1015,13 +783,7 @@ func ExampleRDS_DeleteEventSubscription() {
 }
 
 func ExampleRDS_DeleteOptionGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DeleteOptionGroupInput{
 		OptionGroupName: aws.String("String"), // Required
@@ -1040,13 +802,7 @@ func ExampleRDS_DeleteOptionGroup() {
 }
 
 func ExampleRDS_DescribeAccountAttributes() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	var params *rds.DescribeAccountAttributesInput
 	resp, err := svc.DescribeAccountAttributes(params)
@@ -1063,13 +819,7 @@ func ExampleRDS_DescribeAccountAttributes() {
 }
 
 func ExampleRDS_DescribeCertificates() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeCertificatesInput{
 		CertificateIdentifier: aws.String("String"),
@@ -1100,13 +850,7 @@ func ExampleRDS_DescribeCertificates() {
 }
 
 func ExampleRDS_DescribeDBClusterParameterGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBClusterParameterGroupsInput{
 		DBClusterParameterGroupName: aws.String("String"),
@@ -1137,13 +881,7 @@ func ExampleRDS_DescribeDBClusterParameterGroups() {
 }
 
 func ExampleRDS_DescribeDBClusterParameters() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBClusterParametersInput{
 		DBClusterParameterGroupName: aws.String("String"), // Required
@@ -1175,13 +913,7 @@ func ExampleRDS_DescribeDBClusterParameters() {
 }
 
 func ExampleRDS_DescribeDBClusterSnapshotAttributes() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBClusterSnapshotAttributesInput{
 		DBClusterSnapshotIdentifier: aws.String("String"), // Required
@@ -1200,13 +932,7 @@ func ExampleRDS_DescribeDBClusterSnapshotAttributes() {
 }
 
 func ExampleRDS_DescribeDBClusterSnapshots() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBClusterSnapshotsInput{
 		DBClusterIdentifier:         aws.String("String"),
@@ -1241,13 +967,7 @@ func ExampleRDS_DescribeDBClusterSnapshots() {
 }
 
 func ExampleRDS_DescribeDBClusters() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBClustersInput{
 		DBClusterIdentifier: aws.String("String"),
@@ -1278,13 +998,7 @@ func ExampleRDS_DescribeDBClusters() {
 }
 
 func ExampleRDS_DescribeDBEngineVersions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBEngineVersionsInput{
 		DBParameterGroupFamily: aws.String("String"),
@@ -1302,9 +1016,8 @@ func ExampleRDS_DescribeDBEngineVersions() {
 			// More values...
 		},
 		ListSupportedCharacterSets: aws.Bool(true),
-		ListSupportedTimezones:     aws.Bool(true),
-		Marker:                     aws.String("String"),
-		MaxRecords:                 aws.Int64(1),
+		Marker:     aws.String("String"),
+		MaxRecords: aws.Int64(1),
 	}
 	resp, err := svc.DescribeDBEngineVersions(params)
 
@@ -1320,13 +1033,7 @@ func ExampleRDS_DescribeDBEngineVersions() {
 }
 
 func ExampleRDS_DescribeDBInstances() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBInstancesInput{
 		DBInstanceIdentifier: aws.String("String"),
@@ -1357,13 +1064,7 @@ func ExampleRDS_DescribeDBInstances() {
 }
 
 func ExampleRDS_DescribeDBLogFiles() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBLogFilesInput{
 		DBInstanceIdentifier: aws.String("String"), // Required
@@ -1397,13 +1098,7 @@ func ExampleRDS_DescribeDBLogFiles() {
 }
 
 func ExampleRDS_DescribeDBParameterGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBParameterGroupsInput{
 		DBParameterGroupName: aws.String("String"),
@@ -1434,13 +1129,7 @@ func ExampleRDS_DescribeDBParameterGroups() {
 }
 
 func ExampleRDS_DescribeDBParameters() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBParametersInput{
 		DBParameterGroupName: aws.String("String"), // Required
@@ -1472,13 +1161,7 @@ func ExampleRDS_DescribeDBParameters() {
 }
 
 func ExampleRDS_DescribeDBSecurityGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBSecurityGroupsInput{
 		DBSecurityGroupName: aws.String("String"),
@@ -1509,13 +1192,7 @@ func ExampleRDS_DescribeDBSecurityGroups() {
 }
 
 func ExampleRDS_DescribeDBSnapshotAttributes() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBSnapshotAttributesInput{
 		DBSnapshotIdentifier: aws.String("String"), // Required
@@ -1534,13 +1211,7 @@ func ExampleRDS_DescribeDBSnapshotAttributes() {
 }
 
 func ExampleRDS_DescribeDBSnapshots() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBSnapshotsInput{
 		DBInstanceIdentifier: aws.String("String"),
@@ -1575,13 +1246,7 @@ func ExampleRDS_DescribeDBSnapshots() {
 }
 
 func ExampleRDS_DescribeDBSubnetGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeDBSubnetGroupsInput{
 		DBSubnetGroupName: aws.String("String"),
@@ -1612,13 +1277,7 @@ func ExampleRDS_DescribeDBSubnetGroups() {
 }
 
 func ExampleRDS_DescribeEngineDefaultClusterParameters() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeEngineDefaultClusterParametersInput{
 		DBParameterGroupFamily: aws.String("String"), // Required
@@ -1649,13 +1308,7 @@ func ExampleRDS_DescribeEngineDefaultClusterParameters() {
 }
 
 func ExampleRDS_DescribeEngineDefaultParameters() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeEngineDefaultParametersInput{
 		DBParameterGroupFamily: aws.String("String"), // Required
@@ -1686,13 +1339,7 @@ func ExampleRDS_DescribeEngineDefaultParameters() {
 }
 
 func ExampleRDS_DescribeEventCategories() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeEventCategoriesInput{
 		Filters: []*rds.Filter{
@@ -1721,13 +1368,7 @@ func ExampleRDS_DescribeEventCategories() {
 }
 
 func ExampleRDS_DescribeEventSubscriptions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeEventSubscriptionsInput{
 		Filters: []*rds.Filter{
@@ -1758,13 +1399,7 @@ func ExampleRDS_DescribeEventSubscriptions() {
 }
 
 func ExampleRDS_DescribeEvents() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeEventsInput{
 		Duration: aws.Int64(1),
@@ -1803,13 +1438,7 @@ func ExampleRDS_DescribeEvents() {
 }
 
 func ExampleRDS_DescribeOptionGroupOptions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeOptionGroupOptionsInput{
 		EngineName: aws.String("String"), // Required
@@ -1841,13 +1470,7 @@ func ExampleRDS_DescribeOptionGroupOptions() {
 }
 
 func ExampleRDS_DescribeOptionGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeOptionGroupsInput{
 		EngineName: aws.String("String"),
@@ -1880,13 +1503,7 @@ func ExampleRDS_DescribeOptionGroups() {
 }
 
 func ExampleRDS_DescribeOrderableDBInstanceOptions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeOrderableDBInstanceOptionsInput{
 		Engine:          aws.String("String"), // Required
@@ -1921,13 +1538,7 @@ func ExampleRDS_DescribeOrderableDBInstanceOptions() {
 }
 
 func ExampleRDS_DescribePendingMaintenanceActions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribePendingMaintenanceActionsInput{
 		Filters: []*rds.Filter{
@@ -1958,13 +1569,7 @@ func ExampleRDS_DescribePendingMaintenanceActions() {
 }
 
 func ExampleRDS_DescribeReservedDBInstances() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeReservedDBInstancesInput{
 		DBInstanceClass: aws.String("String"),
@@ -2001,13 +1606,7 @@ func ExampleRDS_DescribeReservedDBInstances() {
 }
 
 func ExampleRDS_DescribeReservedDBInstancesOfferings() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DescribeReservedDBInstancesOfferingsInput{
 		DBInstanceClass: aws.String("String"),
@@ -2042,51 +1641,8 @@ func ExampleRDS_DescribeReservedDBInstancesOfferings() {
 	fmt.Println(resp)
 }
 
-func ExampleRDS_DescribeSourceRegions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
-
-	params := &rds.DescribeSourceRegionsInput{
-		Filters: []*rds.Filter{
-			{ // Required
-				Name: aws.String("String"), // Required
-				Values: []*string{ // Required
-					aws.String("String"), // Required
-					// More values...
-				},
-			},
-			// More values...
-		},
-		Marker:     aws.String("String"),
-		MaxRecords: aws.Int64(1),
-		RegionName: aws.String("String"),
-	}
-	resp, err := svc.DescribeSourceRegions(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleRDS_DownloadDBLogFilePortion() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.DownloadDBLogFilePortionInput{
 		DBInstanceIdentifier: aws.String("String"), // Required
@@ -2108,17 +1664,10 @@ func ExampleRDS_DownloadDBLogFilePortion() {
 }
 
 func ExampleRDS_FailoverDBCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.FailoverDBClusterInput{
-		DBClusterIdentifier:        aws.String("String"),
-		TargetDBInstanceIdentifier: aws.String("String"),
+		DBClusterIdentifier: aws.String("String"),
 	}
 	resp, err := svc.FailoverDBCluster(params)
 
@@ -2134,13 +1683,7 @@ func ExampleRDS_FailoverDBCluster() {
 }
 
 func ExampleRDS_ListTagsForResource() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ListTagsForResourceInput{
 		ResourceName: aws.String("String"), // Required
@@ -2169,13 +1712,7 @@ func ExampleRDS_ListTagsForResource() {
 }
 
 func ExampleRDS_ModifyDBCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyDBClusterInput{
 		DBClusterIdentifier:         aws.String("String"), // Required
@@ -2207,13 +1744,7 @@ func ExampleRDS_ModifyDBCluster() {
 }
 
 func ExampleRDS_ModifyDBClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyDBClusterParameterGroupInput{
 		DBClusterParameterGroupName: aws.String("String"), // Required
@@ -2247,13 +1778,7 @@ func ExampleRDS_ModifyDBClusterParameterGroup() {
 }
 
 func ExampleRDS_ModifyDBClusterSnapshotAttribute() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyDBClusterSnapshotAttributeInput{
 		AttributeName:               aws.String("String"), // Required
@@ -2281,13 +1806,7 @@ func ExampleRDS_ModifyDBClusterSnapshotAttribute() {
 }
 
 func ExampleRDS_ModifyDBInstance() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyDBInstanceInput{
 		DBInstanceIdentifier:     aws.String("String"), // Required
@@ -2305,12 +1824,10 @@ func ExampleRDS_ModifyDBInstance() {
 			aws.String("String"), // Required
 			// More values...
 		},
-		DBSubnetGroupName:          aws.String("String"),
 		Domain:                     aws.String("String"),
 		DomainIAMRoleName:          aws.String("String"),
 		EngineVersion:              aws.String("String"),
 		Iops:                       aws.Int64(1),
-		LicenseModel:               aws.String("String"),
 		MasterUserPassword:         aws.String("String"),
 		MonitoringInterval:         aws.Int64(1),
 		MonitoringRoleArn:          aws.String("String"),
@@ -2343,13 +1860,7 @@ func ExampleRDS_ModifyDBInstance() {
 }
 
 func ExampleRDS_ModifyDBParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyDBParameterGroupInput{
 		DBParameterGroupName: aws.String("String"), // Required
@@ -2383,13 +1894,7 @@ func ExampleRDS_ModifyDBParameterGroup() {
 }
 
 func ExampleRDS_ModifyDBSnapshotAttribute() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyDBSnapshotAttributeInput{
 		AttributeName:        aws.String("String"), // Required
@@ -2417,13 +1922,7 @@ func ExampleRDS_ModifyDBSnapshotAttribute() {
 }
 
 func ExampleRDS_ModifyDBSubnetGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyDBSubnetGroupInput{
 		DBSubnetGroupName: aws.String("String"), // Required
@@ -2447,13 +1946,7 @@ func ExampleRDS_ModifyDBSubnetGroup() {
 }
 
 func ExampleRDS_ModifyEventSubscription() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyEventSubscriptionInput{
 		SubscriptionName: aws.String("String"), // Required
@@ -2479,13 +1972,7 @@ func ExampleRDS_ModifyEventSubscription() {
 }
 
 func ExampleRDS_ModifyOptionGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ModifyOptionGroupInput{
 		OptionGroupName:  aws.String("String"), // Required
@@ -2511,8 +1998,7 @@ func ExampleRDS_ModifyOptionGroup() {
 					},
 					// More values...
 				},
-				OptionVersion: aws.String("String"),
-				Port:          aws.Int64(1),
+				Port: aws.Int64(1),
 				VpcSecurityGroupMemberships: []*string{
 					aws.String("String"), // Required
 					// More values...
@@ -2539,13 +2025,7 @@ func ExampleRDS_ModifyOptionGroup() {
 }
 
 func ExampleRDS_PromoteReadReplica() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.PromoteReadReplicaInput{
 		DBInstanceIdentifier:  aws.String("String"), // Required
@@ -2566,13 +2046,7 @@ func ExampleRDS_PromoteReadReplica() {
 }
 
 func ExampleRDS_PromoteReadReplicaDBCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.PromoteReadReplicaDBClusterInput{
 		DBClusterIdentifier: aws.String("String"), // Required
@@ -2591,13 +2065,7 @@ func ExampleRDS_PromoteReadReplicaDBCluster() {
 }
 
 func ExampleRDS_PurchaseReservedDBInstancesOffering() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.PurchaseReservedDBInstancesOfferingInput{
 		ReservedDBInstancesOfferingId: aws.String("String"), // Required
@@ -2625,13 +2093,7 @@ func ExampleRDS_PurchaseReservedDBInstancesOffering() {
 }
 
 func ExampleRDS_RebootDBInstance() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.RebootDBInstanceInput{
 		DBInstanceIdentifier: aws.String("String"), // Required
@@ -2650,40 +2112,8 @@ func ExampleRDS_RebootDBInstance() {
 	fmt.Println(resp)
 }
 
-func ExampleRDS_RemoveRoleFromDBCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
-
-	params := &rds.RemoveRoleFromDBClusterInput{
-		DBClusterIdentifier: aws.String("String"), // Required
-		RoleArn:             aws.String("String"), // Required
-	}
-	resp, err := svc.RemoveRoleFromDBCluster(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleRDS_RemoveSourceIdentifierFromSubscription() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.RemoveSourceIdentifierFromSubscriptionInput{
 		SourceIdentifier: aws.String("String"), // Required
@@ -2703,13 +2133,7 @@ func ExampleRDS_RemoveSourceIdentifierFromSubscription() {
 }
 
 func ExampleRDS_RemoveTagsFromResource() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.RemoveTagsFromResourceInput{
 		ResourceName: aws.String("String"), // Required
@@ -2732,13 +2156,7 @@ func ExampleRDS_RemoveTagsFromResource() {
 }
 
 func ExampleRDS_ResetDBClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ResetDBClusterParameterGroupInput{
 		DBClusterParameterGroupName: aws.String("String"), // Required
@@ -2773,13 +2191,7 @@ func ExampleRDS_ResetDBClusterParameterGroup() {
 }
 
 func ExampleRDS_ResetDBParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.ResetDBParameterGroupInput{
 		DBParameterGroupName: aws.String("String"), // Required
@@ -2813,74 +2225,8 @@ func ExampleRDS_ResetDBParameterGroup() {
 	fmt.Println(resp)
 }
 
-func ExampleRDS_RestoreDBClusterFromS3() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
-
-	params := &rds.RestoreDBClusterFromS3Input{
-		DBClusterIdentifier: aws.String("String"), // Required
-		Engine:              aws.String("String"), // Required
-		MasterUserPassword:  aws.String("String"), // Required
-		MasterUsername:      aws.String("String"), // Required
-		S3BucketName:        aws.String("String"), // Required
-		S3IngestionRoleArn:  aws.String("String"), // Required
-		SourceEngine:        aws.String("String"), // Required
-		SourceEngineVersion: aws.String("String"), // Required
-		AvailabilityZones: []*string{
-			aws.String("String"), // Required
-			// More values...
-		},
-		BackupRetentionPeriod:       aws.Int64(1),
-		CharacterSetName:            aws.String("String"),
-		DBClusterParameterGroupName: aws.String("String"),
-		DBSubnetGroupName:           aws.String("String"),
-		DatabaseName:                aws.String("String"),
-		EngineVersion:               aws.String("String"),
-		KmsKeyId:                    aws.String("String"),
-		OptionGroupName:             aws.String("String"),
-		Port:                        aws.Int64(1),
-		PreferredBackupWindow:      aws.String("String"),
-		PreferredMaintenanceWindow: aws.String("String"),
-		S3Prefix:                   aws.String("String"),
-		StorageEncrypted:           aws.Bool(true),
-		Tags: []*rds.Tag{
-			{ // Required
-				Key:   aws.String("String"),
-				Value: aws.String("String"),
-			},
-			// More values...
-		},
-		VpcSecurityGroupIds: []*string{
-			aws.String("String"), // Required
-			// More values...
-		},
-	}
-	resp, err := svc.RestoreDBClusterFromS3(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleRDS_RestoreDBClusterFromSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.RestoreDBClusterFromSnapshotInput{
 		DBClusterIdentifier: aws.String("String"), // Required
@@ -2922,13 +2268,7 @@ func ExampleRDS_RestoreDBClusterFromSnapshot() {
 }
 
 func ExampleRDS_RestoreDBClusterToPointInTime() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.RestoreDBClusterToPointInTimeInput{
 		DBClusterIdentifier:       aws.String("String"), // Required
@@ -2965,13 +2305,7 @@ func ExampleRDS_RestoreDBClusterToPointInTime() {
 }
 
 func ExampleRDS_RestoreDBInstanceFromDBSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.RestoreDBInstanceFromDBSnapshotInput{
 		DBInstanceIdentifier:    aws.String("String"), // Required
@@ -3016,13 +2350,7 @@ func ExampleRDS_RestoreDBInstanceFromDBSnapshot() {
 }
 
 func ExampleRDS_RestoreDBInstanceToPointInTime() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.RestoreDBInstanceToPointInTimeInput{
 		SourceDBInstanceIdentifier: aws.String("String"), // Required
@@ -3069,13 +2397,7 @@ func ExampleRDS_RestoreDBInstanceToPointInTime() {
 }
 
 func ExampleRDS_RevokeDBSecurityGroupIngress() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := rds.New(sess)
+	svc := rds.New(session.New())
 
 	params := &rds.RevokeDBSecurityGroupIngressInput{
 		DBSecurityGroupName:     aws.String("String"), // Required

@@ -25,15 +25,15 @@ import (
 	"testing"
 	"time"
 
+	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/clock"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/pkg/api/v1"
-	"k8s.io/client-go/pkg/api/v1/ref"
 	restclient "k8s.io/client-go/rest"
+	ref "k8s.io/client-go/tools/reference"
 )
 
 type testEventSink struct {
@@ -120,6 +120,9 @@ func TestEventf(t *testing.T) {
 		},
 	}
 	testRef, err := ref.GetPartialReference(scheme.Scheme, testPod, "spec.containers[2]")
+	if err != nil {
+		t.Fatal(err)
+	}
 	testRef2, err := ref.GetPartialReference(scheme.Scheme, testPod2, "spec.containers[3]")
 	if err != nil {
 		t.Fatal(err)
@@ -641,6 +644,9 @@ func TestMultiSinkCache(t *testing.T) {
 		},
 	}
 	testRef, err := ref.GetPartialReference(scheme.Scheme, testPod, "spec.containers[2]")
+	if err != nil {
+		t.Fatal(err)
+	}
 	testRef2, err := ref.GetPartialReference(scheme.Scheme, testPod2, "spec.containers[3]")
 	if err != nil {
 		t.Fatal(err)

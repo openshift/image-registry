@@ -29,10 +29,10 @@ import (
 
 	"github.com/golang/glog"
 
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/pkg/version"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	certutil "k8s.io/client-go/util/cert"
@@ -70,6 +70,10 @@ type Config struct {
 	// refresh tokens for an OAuth2 flow.
 	// TODO: demonstrate an OAuth2 compatible client.
 	BearerToken string
+
+	// CacheDir is the directory where we'll store HTTP cached responses.
+	// If set to empty string, no caching mechanism will be used.
+	CacheDir string
 
 	// Impersonate is the configuration that RESTClient will use for impersonation.
 	Impersonate ImpersonationConfig
@@ -129,6 +133,7 @@ type ImpersonationConfig struct {
 	Extra map[string][]string
 }
 
+// +k8s:deepcopy-gen=true
 // TLSClientConfig contains settings to enable transport layer security
 type TLSClientConfig struct {
 	// Server should be accessed without verifying the TLS certificate. For testing only.
@@ -415,5 +420,45 @@ func AnonymousClientConfig(config *Config) *Config {
 		QPS:           config.QPS,
 		Burst:         config.Burst,
 		Timeout:       config.Timeout,
+		Dial:          config.Dial,
+	}
+}
+
+// CopyConfig returns a copy of the given config
+func CopyConfig(config *Config) *Config {
+	return &Config{
+		Host:          config.Host,
+		APIPath:       config.APIPath,
+		Prefix:        config.Prefix,
+		ContentConfig: config.ContentConfig,
+		Username:      config.Username,
+		Password:      config.Password,
+		BearerToken:   config.BearerToken,
+		CacheDir:      config.CacheDir,
+		Impersonate: ImpersonationConfig{
+			Groups:   config.Impersonate.Groups,
+			Extra:    config.Impersonate.Extra,
+			UserName: config.Impersonate.UserName,
+		},
+		AuthProvider:        config.AuthProvider,
+		AuthConfigPersister: config.AuthConfigPersister,
+		TLSClientConfig: TLSClientConfig{
+			Insecure:   config.TLSClientConfig.Insecure,
+			ServerName: config.TLSClientConfig.ServerName,
+			CertFile:   config.TLSClientConfig.CertFile,
+			KeyFile:    config.TLSClientConfig.KeyFile,
+			CAFile:     config.TLSClientConfig.CAFile,
+			CertData:   config.TLSClientConfig.CertData,
+			KeyData:    config.TLSClientConfig.KeyData,
+			CAData:     config.TLSClientConfig.CAData,
+		},
+		UserAgent:     config.UserAgent,
+		Transport:     config.Transport,
+		WrapTransport: config.WrapTransport,
+		QPS:           config.QPS,
+		Burst:         config.Burst,
+		RateLimiter:   config.RateLimiter,
+		Timeout:       config.Timeout,
+		Dial:          config.Dial,
 	}
 }

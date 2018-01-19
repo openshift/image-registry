@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -118,52 +117,11 @@ func TestSendHandlerError(t *testing.T) {
 	assert.NotNil(t, r.HTTPResponse)
 }
 
-func TestValidateReqSigHandler(t *testing.T) {
-	cases := []struct {
-		Req    *request.Request
-		Resign bool
-	}{
-		{
-			Req: &request.Request{
-				Config: aws.Config{Credentials: credentials.AnonymousCredentials},
-				Time:   time.Now().Add(-15 * time.Minute),
-			},
-			Resign: false,
-		},
-		{
-			Req: &request.Request{
-				Time: time.Now().Add(-15 * time.Minute),
-			},
-			Resign: true,
-		},
-		{
-			Req: &request.Request{
-				Time: time.Now().Add(-1 * time.Minute),
-			},
-			Resign: false,
-		},
-	}
-
-	for i, c := range cases {
-		resigned := false
-		c.Req.Handlers.Sign.PushBack(func(r *request.Request) {
-			resigned = true
-		})
-
-		corehandlers.ValidateReqSigHandler.Fn(c.Req)
-
-		assert.NoError(t, c.Req.Error, "%d, expect no error", i)
-		assert.Equal(t, c.Resign, resigned, "%d, expected resigning to match", i)
-	}
-}
-
 func setupContentLengthTestServer(t *testing.T, hasContentLength bool, contentLength int64) *httptest.Server {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, ok := r.Header["Content-Length"]
 		assert.Equal(t, hasContentLength, ok, "expect content length to be set, %t", hasContentLength)
-		if hasContentLength {
-			assert.Equal(t, contentLength, r.ContentLength)
-		}
+		assert.Equal(t, contentLength, r.ContentLength)
 
 		b, err := ioutil.ReadAll(r.Body)
 		assert.NoError(t, err)

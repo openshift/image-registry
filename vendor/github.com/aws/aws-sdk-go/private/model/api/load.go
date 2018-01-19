@@ -1,5 +1,3 @@
-// +build codegen
-
 package api
 
 import (
@@ -50,7 +48,6 @@ func (a *API) AttachString(str string) {
 
 // Setup initializes the API.
 func (a *API) Setup() {
-	a.setMetadataEndpointsKey()
 	a.writeShapeNames()
 	a.resolveReferences()
 	a.fixStutterNames()

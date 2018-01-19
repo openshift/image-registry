@@ -33,7 +33,7 @@ func (t *tag) parseJSONTag(structTag reflect.StructTag) {
 }
 
 func (t *tag) parseTagStr(tagStr string) {
-	parts := strings.Split(tagStr, ",")
+	parts := strings.SplitN(tagStr, ",", 2)
 	if len(parts) == 0 {
 		return
 	}

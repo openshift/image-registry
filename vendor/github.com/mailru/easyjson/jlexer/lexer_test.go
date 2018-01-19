@@ -18,12 +18,15 @@ func TestString(t *testing.T) {
 		{toParse: `"\u0020"`, want: " "},
 		{toParse: `"\u0020-\t"`, want: " -\t"},
 		{toParse: `"\ufffd\uFFFD"`, want: "\ufffd\ufffd"},
+		{toParse: `"\ud83d\ude00"`, want: "😀"},
+		{toParse: `"\ud83d\ude08"`, want: "😈"},
+		{toParse: `"\ud8"`, wantError: true},
 
 		{toParse: `"test"junk`, want: "test"},
 
 		{toParse: `5`, wantError: true},        // not a string
 		{toParse: `"\x"`, wantError: true},     // invalid escape
-		{toParse: `"\ud800"`, wantError: true}, // invalid utf-8 char
+		{toParse: `"\ud800"`, want: "�"},      // invalid utf-8 char; return replacement char
 	} {
 		l := Lexer{Data: []byte(test.toParse)}
 
@@ -219,6 +222,30 @@ func TestInterface(t *testing.T) {
 			t.Errorf("[%d, %q] Interface() error: %v", i, test.toParse, err)
 		} else if err == nil && test.wantError {
 			t.Errorf("[%d, %q] Interface() ok; want error", i, test.toParse)
+		}
+	}
+}
+
+func TestConsumed(t *testing.T) {
+	for i, test := range []struct {
+		toParse   string
+		wantError bool
+	}{
+		{toParse: "", wantError: false},
+		{toParse: "   ", wantError: false},
+		{toParse: "\r\n", wantError: false},
+		{toParse: "\t\t", wantError: false},
+
+		{toParse: "{", wantError: true},
+	} {
+		l := Lexer{Data: []byte(test.toParse)}
+		l.Consumed()
+
+		err := l.Error()
+		if err != nil && !test.wantError {
+			t.Errorf("[%d, %q] Consumed() error: %v", i, test.toParse, err)
+		} else if err == nil && test.wantError {
+			t.Errorf("[%d, %q] Consumed() ok; want error", i, test.toParse)
 		}
 	}
 }

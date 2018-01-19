@@ -108,7 +108,7 @@ func ExampleCookieSigner_SignWithPolicy() {
 	// CloudFront-Key-Pair-Id: privateKeyID, , , false
 }
 
-func ExampleCookieOptions() {
+func ExampleCookieSigner_SignOptions() {
 	origRandReader := randReader
 	randReader = newRandomReader(rand.New(rand.NewSource(1)))
 	defer func() {
@@ -124,7 +124,7 @@ func ExampleCookieOptions() {
 	}
 
 	// Create the CookieSigner with options set. These options can be set
-	// directly with cookieSigner.Opts. These values can be overridden on
+	// directly with cookieSigner.Opts. These values can be overriden on
 	// individual Sign and SignWithProfile calls.
 	cookieSigner := NewCookieSigner("keyID", privKey, func(o *CookieOptions) {
 		//provide an optional struct fields to specify other options

@@ -8,8 +8,7 @@
     "serviceAbbreviation":"ACM",
     "serviceFullName":"AWS Certificate Manager",
     "signatureVersion":"v4",
-    "targetPrefix":"CertificateManager",
-    "uid":"acm-2015-12-08"
+    "targetPrefix":"CertificateManager"
   },
   "operations":{
     "AddTagsToCertificate":{
@@ -64,19 +63,6 @@
         {"shape":"ResourceNotFoundException"},
         {"shape":"RequestInProgressException"},
         {"shape":"InvalidArnException"}
-      ]
-    },
-    "ImportCertificate":{
-      "name":"ImportCertificate",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"ImportCertificateRequest"},
-      "output":{"shape":"ImportCertificateResponse"},
-      "errors":[
-        {"shape":"ResourceNotFoundException"},
-        {"shape":"LimitExceededException"}
       ]
     },
     "ListCertificates":{
@@ -162,25 +148,15 @@
     },
     "CertificateBody":{
       "type":"string",
-      "max":32768,
+      "max":524288,
       "min":1,
       "pattern":"-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}(\\u000D?\\u000A)?"
-    },
-    "CertificateBodyBlob":{
-      "type":"blob",
-      "max":32768,
-      "min":1
     },
     "CertificateChain":{
       "type":"string",
       "max":2097152,
       "min":1,
       "pattern":"(-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}\\u000D?\\u000A)*-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}(\\u000D?\\u000A)?"
-    },
-    "CertificateChainBlob":{
-      "type":"blob",
-      "max":2097152,
-      "min":1
     },
     "CertificateDetail":{
       "type":"structure",
@@ -194,7 +170,6 @@
         "Issuer":{"shape":"String"},
         "CreatedAt":{"shape":"TStamp"},
         "IssuedAt":{"shape":"TStamp"},
-        "ImportedAt":{"shape":"TStamp"},
         "Status":{"shape":"CertificateStatus"},
         "RevokedAt":{"shape":"TStamp"},
         "RevocationReason":{"shape":"RevocationReason"},
@@ -202,9 +177,7 @@
         "NotAfter":{"shape":"TStamp"},
         "KeyAlgorithm":{"shape":"KeyAlgorithm"},
         "SignatureAlgorithm":{"shape":"String"},
-        "InUseBy":{"shape":"InUseList"},
-        "FailureReason":{"shape":"FailureReason"},
-        "Type":{"shape":"CertificateType"}
+        "InUseBy":{"shape":"InUseList"}
       }
     },
     "CertificateStatus":{
@@ -234,13 +207,6 @@
       "type":"list",
       "member":{"shape":"CertificateSummary"}
     },
-    "CertificateType":{
-      "type":"string",
-      "enum":[
-        "IMPORTED",
-        "AMAZON_ISSUED"
-      ]
-    },
     "DeleteCertificateRequest":{
       "type":"structure",
       "required":["CertificateArn"],
@@ -264,7 +230,7 @@
     "DomainList":{
       "type":"list",
       "member":{"shape":"DomainNameString"},
-      "max":100,
+      "max":1000,
       "min":1
     },
     "DomainNameString":{
@@ -302,18 +268,8 @@
     "DomainValidationOptionList":{
       "type":"list",
       "member":{"shape":"DomainValidationOption"},
-      "max":100,
+      "max":1000,
       "min":1
-    },
-    "FailureReason":{
-      "type":"string",
-      "enum":[
-        "NO_AVAILABLE_CONTACTS",
-        "ADDITIONAL_VERIFICATION_REQUIRED",
-        "DOMAIN_NOT_ALLOWED",
-        "INVALID_PUBLIC_DOMAIN",
-        "OTHER"
-      ]
     },
     "GetCertificateRequest":{
       "type":"structure",
@@ -334,25 +290,6 @@
       "max":32,
       "min":1,
       "pattern":"\\w+"
-    },
-    "ImportCertificateRequest":{
-      "type":"structure",
-      "required":[
-        "Certificate",
-        "PrivateKey"
-      ],
-      "members":{
-        "CertificateArn":{"shape":"Arn"},
-        "Certificate":{"shape":"CertificateBodyBlob"},
-        "PrivateKey":{"shape":"PrivateKeyBlob"},
-        "CertificateChain":{"shape":"CertificateChainBlob"}
-      }
-    },
-    "ImportCertificateResponse":{
-      "type":"structure",
-      "members":{
-        "CertificateArn":{"shape":"Arn"}
-      }
     },
     "InUseList":{
       "type":"list",
@@ -390,7 +327,6 @@
       "type":"string",
       "enum":[
         "RSA_2048",
-        "RSA_1024",
         "EC_prime256v1"
       ]
     },
@@ -439,12 +375,6 @@
       "max":320,
       "min":1,
       "pattern":"[\\u0009\\u000A\\u000D\\u0020-\\u00FF]*"
-    },
-    "PrivateKeyBlob":{
-      "type":"blob",
-      "max":524288,
-      "min":1,
-      "sensitive":true
     },
     "RemoveTagsFromCertificateRequest":{
       "type":"structure",
@@ -541,7 +471,7 @@
     "TagList":{
       "type":"list",
       "member":{"shape":"Tag"},
-      "max":50,
+      "max":10,
       "min":1
     },
     "TagValue":{

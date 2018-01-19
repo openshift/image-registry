@@ -1,7 +1,6 @@
 {
   "version":"2.0",
   "metadata":{
-    "uid":"redshift-2012-12-01",
     "apiVersion":"2012-12-01",
     "endpointPrefix":"redshift",
     "protocol":"query",
@@ -1223,7 +1222,6 @@
         "ClusterRevisionNumber":{"shape":"String"},
         "Tags":{"shape":"TagList"},
         "KmsKeyId":{"shape":"String"},
-        "EnhancedVpcRouting":{"shape":"Boolean"},
         "IamRoles":{"shape":"ClusterIamRoleList"}
       },
       "wrapper":true
@@ -1666,7 +1664,6 @@
         "ElasticIp":{"shape":"String"},
         "Tags":{"shape":"TagList"},
         "KmsKeyId":{"shape":"String"},
-        "EnhancedVpcRouting":{"shape":"BooleanOptional"},
         "AdditionalInfo":{"shape":"String"},
         "IamRoles":{"shape":"IamRoleArnList"}
       }
@@ -2810,8 +2807,7 @@
         "HsmConfigurationIdentifier":{"shape":"String"},
         "NewClusterIdentifier":{"shape":"String"},
         "PubliclyAccessible":{"shape":"BooleanOptional"},
-        "ElasticIp":{"shape":"String"},
-        "EnhancedVpcRouting":{"shape":"BooleanOptional"}
+        "ElasticIp":{"shape":"String"}
       }
     },
     "ModifyClusterParameterGroupMessage":{
@@ -2976,8 +2972,7 @@
         "ClusterVersion":{"shape":"String"},
         "AutomatedSnapshotRetentionPeriod":{"shape":"IntegerOptional"},
         "ClusterIdentifier":{"shape":"String"},
-        "PubliclyAccessible":{"shape":"BooleanOptional"},
-        "EnhancedVpcRouting":{"shape":"BooleanOptional"}
+        "PubliclyAccessible":{"shape":"BooleanOptional"}
       }
     },
     "PurchaseReservedNodeOfferingMessage":{
@@ -3207,7 +3202,6 @@
         "AutomatedSnapshotRetentionPeriod":{"shape":"IntegerOptional"},
         "KmsKeyId":{"shape":"String"},
         "NodeType":{"shape":"String"},
-        "EnhancedVpcRouting":{"shape":"BooleanOptional"},
         "AdditionalInfo":{"shape":"String"},
         "IamRoles":{"shape":"IamRoleArnList"}
       }
@@ -3365,8 +3359,7 @@
         "ElapsedTimeInSeconds":{"shape":"Long"},
         "SourceRegion":{"shape":"String"},
         "Tags":{"shape":"TagList"},
-        "RestorableNodeTypes":{"shape":"RestorableNodeTypeList"},
-        "EnhancedVpcRouting":{"shape":"Boolean"}
+        "RestorableNodeTypes":{"shape":"RestorableNodeTypeList"}
       },
       "wrapper":true
     },

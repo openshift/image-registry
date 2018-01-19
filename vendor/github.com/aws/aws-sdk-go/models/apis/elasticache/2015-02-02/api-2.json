@@ -1,7 +1,6 @@
 {
   "version":"2.0",
   "metadata":{
-    "uid":"elasticache-2015-02-02",
     "apiVersion":"2015-02-02",
     "endpointPrefix":"elasticache",
     "protocol":"query",
@@ -174,7 +173,6 @@
         {"shape":"CacheParameterGroupNotFoundFault"},
         {"shape":"InvalidVPCNetworkStateFault"},
         {"shape":"TagQuotaPerResourceExceeded"},
-        {"shape":"NodeGroupsPerReplicationGroupQuotaExceededFault"},
         {"shape":"InvalidParameterValueException"},
         {"shape":"InvalidParameterCombinationException"}
       ]
@@ -193,9 +191,7 @@
       "errors":[
         {"shape":"SnapshotAlreadyExistsFault"},
         {"shape":"CacheClusterNotFoundFault"},
-        {"shape":"ReplicationGroupNotFoundFault"},
         {"shape":"InvalidCacheClusterStateFault"},
-        {"shape":"InvalidReplicationGroupStateFault"},
         {"shape":"SnapshotQuotaExceededFault"},
         {"shape":"SnapshotFeatureNotSupportedFault"},
         {"shape":"InvalidParameterCombinationException"},
@@ -1256,8 +1252,7 @@
         "NotificationTopicArn":{"shape":"String"},
         "AutoMinorVersionUpgrade":{"shape":"BooleanOptional"},
         "SnapshotRetentionLimit":{"shape":"IntegerOptional"},
-        "SnapshotWindow":{"shape":"String"},
-        "AuthToken":{"shape":"String"}
+        "SnapshotWindow":{"shape":"String"}
       }
     },
     "CreateCacheClusterResult":{
@@ -1334,9 +1329,6 @@
         "AutomaticFailoverEnabled":{"shape":"BooleanOptional"},
         "NumCacheClusters":{"shape":"IntegerOptional"},
         "PreferredCacheClusterAZs":{"shape":"AvailabilityZonesList"},
-        "NumNodeGroups":{"shape":"IntegerOptional"},
-        "ReplicasPerNodeGroup":{"shape":"IntegerOptional"},
-        "NodeGroupConfiguration":{"shape":"NodeGroupConfigurationList"},
         "CacheNodeType":{"shape":"String"},
         "Engine":{"shape":"String"},
         "EngineVersion":{"shape":"String"},
@@ -1352,8 +1344,7 @@
         "NotificationTopicArn":{"shape":"String"},
         "AutoMinorVersionUpgrade":{"shape":"BooleanOptional"},
         "SnapshotRetentionLimit":{"shape":"IntegerOptional"},
-        "SnapshotWindow":{"shape":"String"},
-        "AuthToken":{"shape":"String"}
+        "SnapshotWindow":{"shape":"String"}
       }
     },
     "CreateReplicationGroupResult":{
@@ -1364,9 +1355,11 @@
     },
     "CreateSnapshotMessage":{
       "type":"structure",
-      "required":["SnapshotName"],
+      "required":[
+        "CacheClusterId",
+        "SnapshotName"
+      ],
       "members":{
-        "ReplicationGroupId":{"shape":"String"},
         "CacheClusterId":{"shape":"String"},
         "SnapshotName":{"shape":"String"}
       }
@@ -1564,13 +1557,11 @@
     "DescribeSnapshotsMessage":{
       "type":"structure",
       "members":{
-        "ReplicationGroupId":{"shape":"String"},
         "CacheClusterId":{"shape":"String"},
         "SnapshotName":{"shape":"String"},
         "SnapshotSource":{"shape":"String"},
         "Marker":{"shape":"String"},
-        "MaxRecords":{"shape":"IntegerOptional"},
-        "ShowNodeGroupConfig":{"shape":"BooleanOptional"}
+        "MaxRecords":{"shape":"IntegerOptional"}
       }
     },
     "Double":{"type":"double"},
@@ -1862,24 +1853,7 @@
         "NodeGroupId":{"shape":"String"},
         "Status":{"shape":"String"},
         "PrimaryEndpoint":{"shape":"Endpoint"},
-        "Slots":{"shape":"String"},
         "NodeGroupMembers":{"shape":"NodeGroupMemberList"}
-      }
-    },
-    "NodeGroupConfiguration":{
-      "type":"structure",
-      "members":{
-        "Slots":{"shape":"String"},
-        "ReplicaCount":{"shape":"IntegerOptional"},
-        "PrimaryAvailabilityZone":{"shape":"String"},
-        "ReplicaAvailabilityZones":{"shape":"AvailabilityZonesList"}
-      }
-    },
-    "NodeGroupConfigurationList":{
-      "type":"list",
-      "member":{
-        "shape":"NodeGroupConfiguration",
-        "locationName":"NodeGroupConfiguration"
       }
     },
     "NodeGroupList":{
@@ -1906,17 +1880,6 @@
         "locationName":"NodeGroupMember"
       }
     },
-    "NodeGroupsPerReplicationGroupQuotaExceededFault":{
-      "type":"structure",
-      "members":{
-      },
-      "error":{
-        "code":"NodeGroupsPerReplicationGroupQuotaExceeded",
-        "httpStatusCode":400,
-        "senderFault":true
-      },
-      "exception":true
-    },
     "NodeQuotaForClusterExceededFault":{
       "type":"structure",
       "members":{
@@ -1942,10 +1905,7 @@
     "NodeSnapshot":{
       "type":"structure",
       "members":{
-        "CacheClusterId":{"shape":"String"},
-        "NodeGroupId":{"shape":"String"},
         "CacheNodeId":{"shape":"String"},
-        "NodeGroupConfiguration":{"shape":"NodeGroupConfiguration"},
         "CacheSize":{"shape":"String"},
         "CacheNodeCreateTime":{"shape":"TStamp"},
         "SnapshotCreateTime":{"shape":"TStamp"}
@@ -2096,10 +2056,7 @@
         "MemberClusters":{"shape":"ClusterIdList"},
         "NodeGroups":{"shape":"NodeGroupList"},
         "SnapshottingClusterId":{"shape":"String"},
-        "AutomaticFailover":{"shape":"AutomaticFailoverStatus"},
-        "ConfigurationEndpoint":{"shape":"Endpoint"},
-        "SnapshotRetentionLimit":{"shape":"IntegerOptional"},
-        "SnapshotWindow":{"shape":"String"}
+        "AutomaticFailover":{"shape":"AutomaticFailoverStatus"}
       },
       "wrapper":true
     },
@@ -2300,8 +2257,6 @@
       "type":"structure",
       "members":{
         "SnapshotName":{"shape":"String"},
-        "ReplicationGroupId":{"shape":"String"},
-        "ReplicationGroupDescription":{"shape":"String"},
         "CacheClusterId":{"shape":"String"},
         "SnapshotStatus":{"shape":"String"},
         "SnapshotSource":{"shape":"String"},
@@ -2320,8 +2275,6 @@
         "AutoMinorVersionUpgrade":{"shape":"Boolean"},
         "SnapshotRetentionLimit":{"shape":"IntegerOptional"},
         "SnapshotWindow":{"shape":"String"},
-        "NumNodeGroups":{"shape":"IntegerOptional"},
-        "AutomaticFailover":{"shape":"AutomaticFailoverStatus"},
         "NodeSnapshots":{"shape":"NodeSnapshotList"}
       },
       "wrapper":true
@@ -2390,8 +2343,7 @@
         "cache-cluster",
         "cache-parameter-group",
         "cache-security-group",
-        "cache-subnet-group",
-        "replication-group"
+        "cache-subnet-group"
       ]
     },
     "String":{"type":"string"},

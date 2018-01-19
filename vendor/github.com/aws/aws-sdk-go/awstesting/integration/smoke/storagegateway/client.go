@@ -6,11 +6,11 @@ package storagegateway
 import (
 	"github.com/aws/aws-sdk-go/awstesting/integration/smoke"
 	"github.com/aws/aws-sdk-go/service/storagegateway"
-	"github.com/gucumber/gucumber"
+	. "github.com/lsegal/gucumber"
 )
 
 func init() {
-	gucumber.Before("@storagegateway", func() {
-		gucumber.World["client"] = storagegateway.New(smoke.Session)
+	Before("@storagegateway", func() {
+		World["client"] = storagegateway.New(smoke.Session)
 	})
 }

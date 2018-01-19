@@ -20,8 +20,6 @@ const opAddTags = "AddTags"
 // value can be used to capture response data after the request's "Send" method
 // is called.
 //
-// See AddTags for usage and error information.
-//
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
 // access properties on the request object before or after sending the request. If
@@ -39,7 +37,6 @@ const opAddTags = "AddTags"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/AddTags
 func (c *ElasticsearchService) AddTagsRequest(input *AddTagsInput) (req *request.Request, output *AddTagsOutput) {
 	op := &request.Operation{
 		Name:       opAddTags,
@@ -51,44 +48,18 @@ func (c *ElasticsearchService) AddTagsRequest(input *AddTagsInput) (req *request
 		input = &AddTagsInput{}
 	}
 
-	output = &AddTagsOutput{}
 	req = c.newRequest(op, input, output)
 	req.Handlers.Unmarshal.Remove(restjson.UnmarshalHandler)
 	req.Handlers.Unmarshal.PushBackNamed(protocol.UnmarshalDiscardBodyHandler)
+	output = &AddTagsOutput{}
+	req.Data = output
 	return
 }
 
-// AddTags API operation for Amazon Elasticsearch Service.
-//
 // Attaches tags to an existing Elasticsearch domain. Tags are a set of case-sensitive
 // key value pairs. An Elasticsearch domain may have up to 10 tags. See  Tagging
-// Amazon Elasticsearch Service Domains for more information. (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains.html#es-managedomains-awsresorcetagging)
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation AddTags for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * LimitExceededException
-//   An exception for trying to create more than allowed resources or sub-resources.
-//   Gives http status code of 409.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/AddTags
+// Amazon Elasticsearch Service Domains for more information. (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains.html#es-managedomains-awsresorcetagging"
+// target="_blank)
 func (c *ElasticsearchService) AddTags(input *AddTagsInput) (*AddTagsOutput, error) {
 	req, out := c.AddTagsRequest(input)
 	err := req.Send()
@@ -101,8 +72,6 @@ const opCreateElasticsearchDomain = "CreateElasticsearchDomain"
 // client's request for the CreateElasticsearchDomain operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See CreateElasticsearchDomain for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -121,7 +90,6 @@ const opCreateElasticsearchDomain = "CreateElasticsearchDomain"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/CreateElasticsearchDomain
 func (c *ElasticsearchService) CreateElasticsearchDomainRequest(input *CreateElasticsearchDomainInput) (req *request.Request, output *CreateElasticsearchDomainOutput) {
 	op := &request.Operation{
 		Name:       opCreateElasticsearchDomain,
@@ -133,54 +101,15 @@ func (c *ElasticsearchService) CreateElasticsearchDomainRequest(input *CreateEla
 		input = &CreateElasticsearchDomainInput{}
 	}
 
-	output = &CreateElasticsearchDomainOutput{}
 	req = c.newRequest(op, input, output)
+	output = &CreateElasticsearchDomainOutput{}
+	req.Data = output
 	return
 }
 
-// CreateElasticsearchDomain API operation for Amazon Elasticsearch Service.
-//
 // Creates a new Elasticsearch domain. For more information, see Creating Elasticsearch
-// Domains (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomains)
-// in the Amazon Elasticsearch Service Developer Guide.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation CreateElasticsearchDomain for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * DisabledOperationException
-//   An error occured because the client wanted to access a not supported operation.
-//   Gives http status code of 409.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-//   * InvalidTypeException
-//   An exception for trying to create or access sub-resource that is either invalid
-//   or not supported. Gives http status code of 409.
-//
-//   * LimitExceededException
-//   An exception for trying to create more than allowed resources or sub-resources.
-//   Gives http status code of 409.
-//
-//   * ResourceAlreadyExistsException
-//   An exception for creating a resource that already exists. Gives http status
-//   code of 400.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/CreateElasticsearchDomain
+// Domains (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomains"
+// target="_blank) in the Amazon Elasticsearch Service Developer Guide.
 func (c *ElasticsearchService) CreateElasticsearchDomain(input *CreateElasticsearchDomainInput) (*CreateElasticsearchDomainOutput, error) {
 	req, out := c.CreateElasticsearchDomainRequest(input)
 	err := req.Send()
@@ -193,8 +122,6 @@ const opDeleteElasticsearchDomain = "DeleteElasticsearchDomain"
 // client's request for the DeleteElasticsearchDomain operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See DeleteElasticsearchDomain for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -213,7 +140,6 @@ const opDeleteElasticsearchDomain = "DeleteElasticsearchDomain"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DeleteElasticsearchDomain
 func (c *ElasticsearchService) DeleteElasticsearchDomainRequest(input *DeleteElasticsearchDomainInput) (req *request.Request, output *DeleteElasticsearchDomainOutput) {
 	op := &request.Operation{
 		Name:       opDeleteElasticsearchDomain,
@@ -225,41 +151,14 @@ func (c *ElasticsearchService) DeleteElasticsearchDomainRequest(input *DeleteEla
 		input = &DeleteElasticsearchDomainInput{}
 	}
 
-	output = &DeleteElasticsearchDomainOutput{}
 	req = c.newRequest(op, input, output)
+	output = &DeleteElasticsearchDomainOutput{}
+	req.Data = output
 	return
 }
 
-// DeleteElasticsearchDomain API operation for Amazon Elasticsearch Service.
-//
 // Permanently deletes the specified Elasticsearch domain and all of its data.
 // Once a domain is deleted, it cannot be recovered.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation DeleteElasticsearchDomain for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-//   * ResourceNotFoundException
-//   An exception for accessing or deleting a resource that does not exist. Gives
-//   http status code of 400.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DeleteElasticsearchDomain
 func (c *ElasticsearchService) DeleteElasticsearchDomain(input *DeleteElasticsearchDomainInput) (*DeleteElasticsearchDomainOutput, error) {
 	req, out := c.DeleteElasticsearchDomainRequest(input)
 	err := req.Send()
@@ -272,8 +171,6 @@ const opDescribeElasticsearchDomain = "DescribeElasticsearchDomain"
 // client's request for the DescribeElasticsearchDomain operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See DescribeElasticsearchDomain for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -292,7 +189,6 @@ const opDescribeElasticsearchDomain = "DescribeElasticsearchDomain"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomain
 func (c *ElasticsearchService) DescribeElasticsearchDomainRequest(input *DescribeElasticsearchDomainInput) (req *request.Request, output *DescribeElasticsearchDomainOutput) {
 	op := &request.Operation{
 		Name:       opDescribeElasticsearchDomain,
@@ -304,41 +200,14 @@ func (c *ElasticsearchService) DescribeElasticsearchDomainRequest(input *Describ
 		input = &DescribeElasticsearchDomainInput{}
 	}
 
-	output = &DescribeElasticsearchDomainOutput{}
 	req = c.newRequest(op, input, output)
+	output = &DescribeElasticsearchDomainOutput{}
+	req.Data = output
 	return
 }
 
-// DescribeElasticsearchDomain API operation for Amazon Elasticsearch Service.
-//
 // Returns domain configuration information about the specified Elasticsearch
 // domain, including the domain ID, domain endpoint, and domain ARN.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation DescribeElasticsearchDomain for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-//   * ResourceNotFoundException
-//   An exception for accessing or deleting a resource that does not exist. Gives
-//   http status code of 400.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomain
 func (c *ElasticsearchService) DescribeElasticsearchDomain(input *DescribeElasticsearchDomainInput) (*DescribeElasticsearchDomainOutput, error) {
 	req, out := c.DescribeElasticsearchDomainRequest(input)
 	err := req.Send()
@@ -351,8 +220,6 @@ const opDescribeElasticsearchDomainConfig = "DescribeElasticsearchDomainConfig"
 // client's request for the DescribeElasticsearchDomainConfig operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See DescribeElasticsearchDomainConfig for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -371,7 +238,6 @@ const opDescribeElasticsearchDomainConfig = "DescribeElasticsearchDomainConfig"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomainConfig
 func (c *ElasticsearchService) DescribeElasticsearchDomainConfigRequest(input *DescribeElasticsearchDomainConfigInput) (req *request.Request, output *DescribeElasticsearchDomainConfigOutput) {
 	op := &request.Operation{
 		Name:       opDescribeElasticsearchDomainConfig,
@@ -383,42 +249,15 @@ func (c *ElasticsearchService) DescribeElasticsearchDomainConfigRequest(input *D
 		input = &DescribeElasticsearchDomainConfigInput{}
 	}
 
-	output = &DescribeElasticsearchDomainConfigOutput{}
 	req = c.newRequest(op, input, output)
+	output = &DescribeElasticsearchDomainConfigOutput{}
+	req.Data = output
 	return
 }
 
-// DescribeElasticsearchDomainConfig API operation for Amazon Elasticsearch Service.
-//
 // Provides cluster configuration information about the specified Elasticsearch
 // domain, such as the state, creation date, update version, and update date
 // for cluster options.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation DescribeElasticsearchDomainConfig for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-//   * ResourceNotFoundException
-//   An exception for accessing or deleting a resource that does not exist. Gives
-//   http status code of 400.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomainConfig
 func (c *ElasticsearchService) DescribeElasticsearchDomainConfig(input *DescribeElasticsearchDomainConfigInput) (*DescribeElasticsearchDomainConfigOutput, error) {
 	req, out := c.DescribeElasticsearchDomainConfigRequest(input)
 	err := req.Send()
@@ -431,8 +270,6 @@ const opDescribeElasticsearchDomains = "DescribeElasticsearchDomains"
 // client's request for the DescribeElasticsearchDomains operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See DescribeElasticsearchDomains for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -451,7 +288,6 @@ const opDescribeElasticsearchDomains = "DescribeElasticsearchDomains"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomains
 func (c *ElasticsearchService) DescribeElasticsearchDomainsRequest(input *DescribeElasticsearchDomainsInput) (req *request.Request, output *DescribeElasticsearchDomainsOutput) {
 	op := &request.Operation{
 		Name:       opDescribeElasticsearchDomains,
@@ -463,37 +299,14 @@ func (c *ElasticsearchService) DescribeElasticsearchDomainsRequest(input *Descri
 		input = &DescribeElasticsearchDomainsInput{}
 	}
 
-	output = &DescribeElasticsearchDomainsOutput{}
 	req = c.newRequest(op, input, output)
+	output = &DescribeElasticsearchDomainsOutput{}
+	req.Data = output
 	return
 }
 
-// DescribeElasticsearchDomains API operation for Amazon Elasticsearch Service.
-//
 // Returns domain configuration information about the specified Elasticsearch
 // domains, including the domain ID, domain endpoint, and domain ARN.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation DescribeElasticsearchDomains for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomains
 func (c *ElasticsearchService) DescribeElasticsearchDomains(input *DescribeElasticsearchDomainsInput) (*DescribeElasticsearchDomainsOutput, error) {
 	req, out := c.DescribeElasticsearchDomainsRequest(input)
 	err := req.Send()
@@ -506,8 +319,6 @@ const opListDomainNames = "ListDomainNames"
 // client's request for the ListDomainNames operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See ListDomainNames for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -526,7 +337,6 @@ const opListDomainNames = "ListDomainNames"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ListDomainNames
 func (c *ElasticsearchService) ListDomainNamesRequest(input *ListDomainNamesInput) (req *request.Request, output *ListDomainNamesOutput) {
 	op := &request.Operation{
 		Name:       opListDomainNames,
@@ -538,32 +348,14 @@ func (c *ElasticsearchService) ListDomainNamesRequest(input *ListDomainNamesInpu
 		input = &ListDomainNamesInput{}
 	}
 
-	output = &ListDomainNamesOutput{}
 	req = c.newRequest(op, input, output)
+	output = &ListDomainNamesOutput{}
+	req.Data = output
 	return
 }
 
-// ListDomainNames API operation for Amazon Elasticsearch Service.
-//
 // Returns the name of all Elasticsearch domains owned by the current user's
 // account.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation ListDomainNames for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ListDomainNames
 func (c *ElasticsearchService) ListDomainNames(input *ListDomainNamesInput) (*ListDomainNamesOutput, error) {
 	req, out := c.ListDomainNamesRequest(input)
 	err := req.Send()
@@ -576,8 +368,6 @@ const opListTags = "ListTags"
 // client's request for the ListTags operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See ListTags for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -596,7 +386,6 @@ const opListTags = "ListTags"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ListTags
 func (c *ElasticsearchService) ListTagsRequest(input *ListTagsInput) (req *request.Request, output *ListTagsOutput) {
 	op := &request.Operation{
 		Name:       opListTags,
@@ -608,40 +397,13 @@ func (c *ElasticsearchService) ListTagsRequest(input *ListTagsInput) (req *reque
 		input = &ListTagsInput{}
 	}
 
-	output = &ListTagsOutput{}
 	req = c.newRequest(op, input, output)
+	output = &ListTagsOutput{}
+	req.Data = output
 	return
 }
 
-// ListTags API operation for Amazon Elasticsearch Service.
-//
 // Returns all tags for the given Elasticsearch domain.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation ListTags for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * ResourceNotFoundException
-//   An exception for accessing or deleting a resource that does not exist. Gives
-//   http status code of 400.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ListTags
 func (c *ElasticsearchService) ListTags(input *ListTagsInput) (*ListTagsOutput, error) {
 	req, out := c.ListTagsRequest(input)
 	err := req.Send()
@@ -654,8 +416,6 @@ const opRemoveTags = "RemoveTags"
 // client's request for the RemoveTags operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See RemoveTags for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -674,7 +434,6 @@ const opRemoveTags = "RemoveTags"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/RemoveTags
 func (c *ElasticsearchService) RemoveTagsRequest(input *RemoveTagsInput) (req *request.Request, output *RemoveTagsOutput) {
 	op := &request.Operation{
 		Name:       opRemoveTags,
@@ -686,38 +445,15 @@ func (c *ElasticsearchService) RemoveTagsRequest(input *RemoveTagsInput) (req *r
 		input = &RemoveTagsInput{}
 	}
 
-	output = &RemoveTagsOutput{}
 	req = c.newRequest(op, input, output)
 	req.Handlers.Unmarshal.Remove(restjson.UnmarshalHandler)
 	req.Handlers.Unmarshal.PushBackNamed(protocol.UnmarshalDiscardBodyHandler)
+	output = &RemoveTagsOutput{}
+	req.Data = output
 	return
 }
 
-// RemoveTags API operation for Amazon Elasticsearch Service.
-//
 // Removes the specified set of tags from the specified Elasticsearch domain.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation RemoveTags for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/RemoveTags
 func (c *ElasticsearchService) RemoveTags(input *RemoveTagsInput) (*RemoveTagsOutput, error) {
 	req, out := c.RemoveTagsRequest(input)
 	err := req.Send()
@@ -730,8 +466,6 @@ const opUpdateElasticsearchDomainConfig = "UpdateElasticsearchDomainConfig"
 // client's request for the UpdateElasticsearchDomainConfig operation. The "output" return
 // value can be used to capture response data after the request's "Send" method
 // is called.
-//
-// See UpdateElasticsearchDomainConfig for usage and error information.
 //
 // Creating a request object using this method should be used when you want to inject
 // custom logic into the request's lifecycle using a custom handler, or if you want to
@@ -750,7 +484,6 @@ const opUpdateElasticsearchDomainConfig = "UpdateElasticsearchDomainConfig"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/UpdateElasticsearchDomainConfig
 func (c *ElasticsearchService) UpdateElasticsearchDomainConfigRequest(input *UpdateElasticsearchDomainConfigInput) (req *request.Request, output *UpdateElasticsearchDomainConfigOutput) {
 	op := &request.Operation{
 		Name:       opUpdateElasticsearchDomainConfig,
@@ -762,49 +495,14 @@ func (c *ElasticsearchService) UpdateElasticsearchDomainConfigRequest(input *Upd
 		input = &UpdateElasticsearchDomainConfigInput{}
 	}
 
-	output = &UpdateElasticsearchDomainConfigOutput{}
 	req = c.newRequest(op, input, output)
+	output = &UpdateElasticsearchDomainConfigOutput{}
+	req.Data = output
 	return
 }
 
-// UpdateElasticsearchDomainConfig API operation for Amazon Elasticsearch Service.
-//
 // Modifies the cluster configuration of the specified Elasticsearch domain,
 // setting as setting the instance type and the number of instances.
-//
-// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
-// with awserr.Error's Code and Message methods to get detailed information about
-// the error.
-//
-// See the AWS API reference guide for Amazon Elasticsearch Service's
-// API operation UpdateElasticsearchDomainConfig for usage and error information.
-//
-// Returned Error Codes:
-//   * BaseException
-//   An error occurred while processing the request.
-//
-//   * InternalException
-//   The request processing has failed because of an unknown error, exception
-//   or failure (the failure is internal to the service) . Gives http status code
-//   of 500.
-//
-//   * InvalidTypeException
-//   An exception for trying to create or access sub-resource that is either invalid
-//   or not supported. Gives http status code of 409.
-//
-//   * LimitExceededException
-//   An exception for trying to create more than allowed resources or sub-resources.
-//   Gives http status code of 409.
-//
-//   * ResourceNotFoundException
-//   An exception for accessing or deleting a resource that does not exist. Gives
-//   http status code of 400.
-//
-//   * ValidationException
-//   An exception for missing / invalid input fields. Gives http status code of
-//   400.
-//
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/UpdateElasticsearchDomainConfig
 func (c *ElasticsearchService) UpdateElasticsearchDomainConfig(input *UpdateElasticsearchDomainConfigInput) (*UpdateElasticsearchDomainConfigOutput, error) {
 	req, out := c.UpdateElasticsearchDomainConfigRequest(input)
 	err := req.Send()
@@ -813,22 +511,17 @@ func (c *ElasticsearchService) UpdateElasticsearchDomainConfig(input *UpdateElas
 
 // The configured access rules for the domain's document and search endpoints,
 // and the current status of those rules.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/AccessPoliciesStatus
 type AccessPoliciesStatus struct {
 	_ struct{} `type:"structure"`
 
 	// The access policy configured for the Elasticsearch domain. Access policies
 	// may be resource-based, IP-based, or IAM-based. See  Configuring Access Policies
-	// (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-access-policies)for
-	// more information.
-	//
-	// Options is a required field
+	// (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-access-policies"
+	// target="_blank)for more information.
 	Options *string `type:"string" required:"true"`
 
 	// The status of the access policy for the Elasticsearch domain. See OptionStatus
 	// for the status information that's included.
-	//
-	// Status is a required field
 	Status *OptionStatus `type:"structure" required:"true"`
 }
 
@@ -842,32 +535,15 @@ func (s AccessPoliciesStatus) GoString() string {
 	return s.String()
 }
 
-// SetOptions sets the Options field's value.
-func (s *AccessPoliciesStatus) SetOptions(v string) *AccessPoliciesStatus {
-	s.Options = &v
-	return s
-}
-
-// SetStatus sets the Status field's value.
-func (s *AccessPoliciesStatus) SetStatus(v *OptionStatus) *AccessPoliciesStatus {
-	s.Status = v
-	return s
-}
-
 // Container for the parameters to the AddTags operation. Specify the tags that
 // you want to attach to the Elasticsearch domain.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/AddTagsRequest
 type AddTagsInput struct {
 	_ struct{} `type:"structure"`
 
 	// Specify the ARN for which you want to add the tags.
-	//
-	// ARN is a required field
 	ARN *string `type:"string" required:"true"`
 
 	// List of Tag that need to be added for the Elasticsearch domain.
-	//
-	// TagList is a required field
 	TagList []*Tag `type:"list" required:"true"`
 }
 
@@ -907,19 +583,6 @@ func (s *AddTagsInput) Validate() error {
 	return nil
 }
 
-// SetARN sets the ARN field's value.
-func (s *AddTagsInput) SetARN(v string) *AddTagsInput {
-	s.ARN = &v
-	return s
-}
-
-// SetTagList sets the TagList field's value.
-func (s *AddTagsInput) SetTagList(v []*Tag) *AddTagsInput {
-	s.TagList = v
-	return s
-}
-
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/AddTagsOutput
 type AddTagsOutput struct {
 	_ struct{} `type:"structure"`
 }
@@ -937,27 +600,21 @@ func (s AddTagsOutput) GoString() string {
 // Status of the advanced options for the specified Elasticsearch domain. Currently,
 // the following advanced options are available:
 //
-//    * Option to allow references to indices in an HTTP request body. Must
-//    be false when configuring access to individual sub-resources. By default,
-//    the value is true. See Configuration Advanced Options (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options)
-//    for more information.
-//    * Option to specify the percentage of heap space that is allocated to
-//    field data. By default, this setting is unbounded.
-// For more information, see Configuring Advanced Options (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options).
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/AdvancedOptionsStatus
+//  Option to allow references to indices in an HTTP request body. Must be
+// false when configuring access to individual sub-resources. By default, the
+// value is true. See Configuration Advanced Options (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options"
+// target="_blank) for more information. Option to specify the percentage of
+// heap space that is allocated to field data. By default, this setting is unbounded.
+//  For more information, see Configuring Advanced Options (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options).
 type AdvancedOptionsStatus struct {
 	_ struct{} `type:"structure"`
 
 	// Specifies the status of advanced options for the specified Elasticsearch
 	// domain.
-	//
-	// Options is a required field
 	Options map[string]*string `type:"map" required:"true"`
 
 	// Specifies the status of OptionStatus for advanced options for the specified
 	// Elasticsearch domain.
-	//
-	// Status is a required field
 	Status *OptionStatus `type:"structure" required:"true"`
 }
 
@@ -971,19 +628,6 @@ func (s AdvancedOptionsStatus) GoString() string {
 	return s.String()
 }
 
-// SetOptions sets the Options field's value.
-func (s *AdvancedOptionsStatus) SetOptions(v map[string]*string) *AdvancedOptionsStatus {
-	s.Options = v
-	return s
-}
-
-// SetStatus sets the Status field's value.
-func (s *AdvancedOptionsStatus) SetStatus(v *OptionStatus) *AdvancedOptionsStatus {
-	s.Status = v
-	return s
-}
-
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/CreateElasticsearchDomainRequest
 type CreateElasticsearchDomainInput struct {
 	_ struct{} `type:"structure"`
 
@@ -992,16 +636,14 @@ type CreateElasticsearchDomainInput struct {
 
 	// Option to allow references to indices in an HTTP request body. Must be false
 	// when configuring access to individual sub-resources. By default, the value
-	// is true. See Configuration Advanced Options (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options)
-	// for more information.
+	// is true. See Configuration Advanced Options (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options"
+	// target="_blank) for more information.
 	AdvancedOptions map[string]*string `type:"map"`
 
 	// The name of the Elasticsearch domain that you are creating. Domain names
 	// are unique across the domains owned by an account within an AWS region. Domain
 	// names must start with a letter or number and can contain the following characters:
 	// a-z (lowercase), 0-9, and - (hyphen).
-	//
-	// DomainName is a required field
 	DomainName *string `min:"3" type:"string" required:"true"`
 
 	// Options to enable, disable and specify the type and size of EBS storage volumes.
@@ -1010,12 +652,6 @@ type CreateElasticsearchDomainInput struct {
 	// Configuration options for an Elasticsearch domain. Specifies the instance
 	// type and number of instances in the domain cluster.
 	ElasticsearchClusterConfig *ElasticsearchClusterConfig `type:"structure"`
-
-	// String of format X.Y to specify version for the Elasticsearch domain eg.
-	// "1.5" or "2.3". For more information, see Creating Elasticsearch Domains
-	// (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomains)
-	// in the Amazon Elasticsearch Service Developer Guide.
-	ElasticsearchVersion *string `type:"string"`
 
 	// Option to set time, in UTC format, of the daily automated snapshot. Default
 	// value is 0 hours.
@@ -1048,51 +684,8 @@ func (s *CreateElasticsearchDomainInput) Validate() error {
 	return nil
 }
 
-// SetAccessPolicies sets the AccessPolicies field's value.
-func (s *CreateElasticsearchDomainInput) SetAccessPolicies(v string) *CreateElasticsearchDomainInput {
-	s.AccessPolicies = &v
-	return s
-}
-
-// SetAdvancedOptions sets the AdvancedOptions field's value.
-func (s *CreateElasticsearchDomainInput) SetAdvancedOptions(v map[string]*string) *CreateElasticsearchDomainInput {
-	s.AdvancedOptions = v
-	return s
-}
-
-// SetDomainName sets the DomainName field's value.
-func (s *CreateElasticsearchDomainInput) SetDomainName(v string) *CreateElasticsearchDomainInput {
-	s.DomainName = &v
-	return s
-}
-
-// SetEBSOptions sets the EBSOptions field's value.
-func (s *CreateElasticsearchDomainInput) SetEBSOptions(v *EBSOptions) *CreateElasticsearchDomainInput {
-	s.EBSOptions = v
-	return s
-}
-
-// SetElasticsearchClusterConfig sets the ElasticsearchClusterConfig field's value.
-func (s *CreateElasticsearchDomainInput) SetElasticsearchClusterConfig(v *ElasticsearchClusterConfig) *CreateElasticsearchDomainInput {
-	s.ElasticsearchClusterConfig = v
-	return s
-}
-
-// SetElasticsearchVersion sets the ElasticsearchVersion field's value.
-func (s *CreateElasticsearchDomainInput) SetElasticsearchVersion(v string) *CreateElasticsearchDomainInput {
-	s.ElasticsearchVersion = &v
-	return s
-}
-
-// SetSnapshotOptions sets the SnapshotOptions field's value.
-func (s *CreateElasticsearchDomainInput) SetSnapshotOptions(v *SnapshotOptions) *CreateElasticsearchDomainInput {
-	s.SnapshotOptions = v
-	return s
-}
-
 // The result of a CreateElasticsearchDomain operation. Contains the status
 // of the newly created Elasticsearch domain.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/CreateElasticsearchDomainResponse
 type CreateElasticsearchDomainOutput struct {
 	_ struct{} `type:"structure"`
 
@@ -1110,21 +703,12 @@ func (s CreateElasticsearchDomainOutput) GoString() string {
 	return s.String()
 }
 
-// SetDomainStatus sets the DomainStatus field's value.
-func (s *CreateElasticsearchDomainOutput) SetDomainStatus(v *ElasticsearchDomainStatus) *CreateElasticsearchDomainOutput {
-	s.DomainStatus = v
-	return s
-}
-
 // Container for the parameters to the DeleteElasticsearchDomain operation.
 // Specifies the name of the Elasticsearch domain that you want to delete.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DeleteElasticsearchDomainRequest
 type DeleteElasticsearchDomainInput struct {
 	_ struct{} `type:"structure"`
 
 	// The name of the Elasticsearch domain that you want to permanently delete.
-	//
-	// DomainName is a required field
 	DomainName *string `location:"uri" locationName:"DomainName" min:"3" type:"string" required:"true"`
 }
 
@@ -1154,16 +738,9 @@ func (s *DeleteElasticsearchDomainInput) Validate() error {
 	return nil
 }
 
-// SetDomainName sets the DomainName field's value.
-func (s *DeleteElasticsearchDomainInput) SetDomainName(v string) *DeleteElasticsearchDomainInput {
-	s.DomainName = &v
-	return s
-}
-
 // The result of a DeleteElasticsearchDomain request. Contains the status of
 // the pending deletion, or no status if the domain and all of its resources
 // have been deleted.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DeleteElasticsearchDomainResponse
 type DeleteElasticsearchDomainOutput struct {
 	_ struct{} `type:"structure"`
 
@@ -1181,21 +758,12 @@ func (s DeleteElasticsearchDomainOutput) GoString() string {
 	return s.String()
 }
 
-// SetDomainStatus sets the DomainStatus field's value.
-func (s *DeleteElasticsearchDomainOutput) SetDomainStatus(v *ElasticsearchDomainStatus) *DeleteElasticsearchDomainOutput {
-	s.DomainStatus = v
-	return s
-}
-
 // Container for the parameters to the DescribeElasticsearchDomainConfig operation.
 // Specifies the domain name for which you want configuration information.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomainConfigRequest
 type DescribeElasticsearchDomainConfigInput struct {
 	_ struct{} `type:"structure"`
 
 	// The Elasticsearch domain that you want to get information about.
-	//
-	// DomainName is a required field
 	DomainName *string `location:"uri" locationName:"DomainName" min:"3" type:"string" required:"true"`
 }
 
@@ -1225,22 +793,13 @@ func (s *DescribeElasticsearchDomainConfigInput) Validate() error {
 	return nil
 }
 
-// SetDomainName sets the DomainName field's value.
-func (s *DescribeElasticsearchDomainConfigInput) SetDomainName(v string) *DescribeElasticsearchDomainConfigInput {
-	s.DomainName = &v
-	return s
-}
-
 // The result of a DescribeElasticsearchDomainConfig request. Contains the configuration
 // information of the requested domain.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomainConfigResponse
 type DescribeElasticsearchDomainConfigOutput struct {
 	_ struct{} `type:"structure"`
 
 	// The configuration information of the domain requested in the DescribeElasticsearchDomainConfig
 	// request.
-	//
-	// DomainConfig is a required field
 	DomainConfig *ElasticsearchDomainConfig `type:"structure" required:"true"`
 }
 
@@ -1254,20 +813,11 @@ func (s DescribeElasticsearchDomainConfigOutput) GoString() string {
 	return s.String()
 }
 
-// SetDomainConfig sets the DomainConfig field's value.
-func (s *DescribeElasticsearchDomainConfigOutput) SetDomainConfig(v *ElasticsearchDomainConfig) *DescribeElasticsearchDomainConfigOutput {
-	s.DomainConfig = v
-	return s
-}
-
 // Container for the parameters to the DescribeElasticsearchDomain operation.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomainRequest
 type DescribeElasticsearchDomainInput struct {
 	_ struct{} `type:"structure"`
 
 	// The name of the Elasticsearch domain for which you want information.
-	//
-	// DomainName is a required field
 	DomainName *string `location:"uri" locationName:"DomainName" min:"3" type:"string" required:"true"`
 }
 
@@ -1297,21 +847,12 @@ func (s *DescribeElasticsearchDomainInput) Validate() error {
 	return nil
 }
 
-// SetDomainName sets the DomainName field's value.
-func (s *DescribeElasticsearchDomainInput) SetDomainName(v string) *DescribeElasticsearchDomainInput {
-	s.DomainName = &v
-	return s
-}
-
 // The result of a DescribeElasticsearchDomain request. Contains the status
 // of the domain specified in the request.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomainResponse
 type DescribeElasticsearchDomainOutput struct {
 	_ struct{} `type:"structure"`
 
 	// The current status of the Elasticsearch domain.
-	//
-	// DomainStatus is a required field
 	DomainStatus *ElasticsearchDomainStatus `type:"structure" required:"true"`
 }
 
@@ -1325,21 +866,12 @@ func (s DescribeElasticsearchDomainOutput) GoString() string {
 	return s.String()
 }
 
-// SetDomainStatus sets the DomainStatus field's value.
-func (s *DescribeElasticsearchDomainOutput) SetDomainStatus(v *ElasticsearchDomainStatus) *DescribeElasticsearchDomainOutput {
-	s.DomainStatus = v
-	return s
-}
-
 // Container for the parameters to the DescribeElasticsearchDomains operation.
 // By default, the API returns the status of all Elasticsearch domains.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomainsRequest
 type DescribeElasticsearchDomainsInput struct {
 	_ struct{} `type:"structure"`
 
 	// The Elasticsearch domains for which you want information.
-	//
-	// DomainNames is a required field
 	DomainNames []*string `type:"list" required:"true"`
 }
 
@@ -1366,21 +898,12 @@ func (s *DescribeElasticsearchDomainsInput) Validate() error {
 	return nil
 }
 
-// SetDomainNames sets the DomainNames field's value.
-func (s *DescribeElasticsearchDomainsInput) SetDomainNames(v []*string) *DescribeElasticsearchDomainsInput {
-	s.DomainNames = v
-	return s
-}
-
 // The result of a DescribeElasticsearchDomains request. Contains the status
 // of the specified domains or all domains owned by the account.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DescribeElasticsearchDomainsResponse
 type DescribeElasticsearchDomainsOutput struct {
 	_ struct{} `type:"structure"`
 
 	// The status of the domains requested in the DescribeElasticsearchDomains request.
-	//
-	// DomainStatusList is a required field
 	DomainStatusList []*ElasticsearchDomainStatus `type:"list" required:"true"`
 }
 
@@ -1394,13 +917,6 @@ func (s DescribeElasticsearchDomainsOutput) GoString() string {
 	return s.String()
 }
 
-// SetDomainStatusList sets the DomainStatusList field's value.
-func (s *DescribeElasticsearchDomainsOutput) SetDomainStatusList(v []*ElasticsearchDomainStatus) *DescribeElasticsearchDomainsOutput {
-	s.DomainStatusList = v
-	return s
-}
-
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/DomainInfo
 type DomainInfo struct {
 	_ struct{} `type:"structure"`
 
@@ -1418,15 +934,9 @@ func (s DomainInfo) GoString() string {
 	return s.String()
 }
 
-// SetDomainName sets the DomainName field's value.
-func (s *DomainInfo) SetDomainName(v string) *DomainInfo {
-	s.DomainName = &v
-	return s
-}
-
 // Options to enable, disable, and specify the properties of EBS storage volumes.
-// For more information, see  Configuring EBS-based Storage (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-ebs).
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/EBSOptions
+// For more information, see  Configuring EBS-based Storage (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-ebs"
+// target="_blank).
 type EBSOptions struct {
 	_ struct{} `type:"structure"`
 
@@ -1453,43 +963,14 @@ func (s EBSOptions) GoString() string {
 	return s.String()
 }
 
-// SetEBSEnabled sets the EBSEnabled field's value.
-func (s *EBSOptions) SetEBSEnabled(v bool) *EBSOptions {
-	s.EBSEnabled = &v
-	return s
-}
-
-// SetIops sets the Iops field's value.
-func (s *EBSOptions) SetIops(v int64) *EBSOptions {
-	s.Iops = &v
-	return s
-}
-
-// SetVolumeSize sets the VolumeSize field's value.
-func (s *EBSOptions) SetVolumeSize(v int64) *EBSOptions {
-	s.VolumeSize = &v
-	return s
-}
-
-// SetVolumeType sets the VolumeType field's value.
-func (s *EBSOptions) SetVolumeType(v string) *EBSOptions {
-	s.VolumeType = &v
-	return s
-}
-
 // Status of the EBS options for the specified Elasticsearch domain.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/EBSOptionsStatus
 type EBSOptionsStatus struct {
 	_ struct{} `type:"structure"`
 
 	// Specifies the EBS options for the specified Elasticsearch domain.
-	//
-	// Options is a required field
 	Options *EBSOptions `type:"structure" required:"true"`
 
 	// Specifies the status of the EBS options for the specified Elasticsearch domain.
-	//
-	// Status is a required field
 	Status *OptionStatus `type:"structure" required:"true"`
 }
 
@@ -1503,21 +984,8 @@ func (s EBSOptionsStatus) GoString() string {
 	return s.String()
 }
 
-// SetOptions sets the Options field's value.
-func (s *EBSOptionsStatus) SetOptions(v *EBSOptions) *EBSOptionsStatus {
-	s.Options = v
-	return s
-}
-
-// SetStatus sets the Status field's value.
-func (s *EBSOptionsStatus) SetStatus(v *OptionStatus) *EBSOptionsStatus {
-	s.Status = v
-	return s
-}
-
 // Specifies the configuration for the domain cluster, such as the type and
 // number of instances.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ElasticsearchClusterConfig
 type ElasticsearchClusterConfig struct {
 	_ struct{} `type:"structure"`
 
@@ -1525,8 +993,8 @@ type ElasticsearchClusterConfig struct {
 	DedicatedMasterCount *int64 `type:"integer"`
 
 	// A boolean value to indicate whether a dedicated master node is enabled. See
-	// About Dedicated Master Nodes (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains.html#es-managedomains-dedicatedmasternodes)
-	// for more information.
+	// About Dedicated Master Nodes (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains.html#es-managedomains-dedicatedmasternodes"
+	// target="_blank) for more information.
 	DedicatedMasterEnabled *bool `type:"boolean"`
 
 	// The instance type for a dedicated master node.
@@ -1539,8 +1007,8 @@ type ElasticsearchClusterConfig struct {
 	InstanceType *string `type:"string" enum:"ESPartitionInstanceType"`
 
 	// A boolean value to indicate whether zone awareness is enabled. See About
-	// Zone Awareness (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains.html#es-managedomains-zoneawareness)
-	// for more information.
+	// Zone Awareness (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains.html#es-managedomains-zoneawareness"
+	// target="_blank) for more information.
 	ZoneAwarenessEnabled *bool `type:"boolean"`
 }
 
@@ -1554,56 +1022,15 @@ func (s ElasticsearchClusterConfig) GoString() string {
 	return s.String()
 }
 
-// SetDedicatedMasterCount sets the DedicatedMasterCount field's value.
-func (s *ElasticsearchClusterConfig) SetDedicatedMasterCount(v int64) *ElasticsearchClusterConfig {
-	s.DedicatedMasterCount = &v
-	return s
-}
-
-// SetDedicatedMasterEnabled sets the DedicatedMasterEnabled field's value.
-func (s *ElasticsearchClusterConfig) SetDedicatedMasterEnabled(v bool) *ElasticsearchClusterConfig {
-	s.DedicatedMasterEnabled = &v
-	return s
-}
-
-// SetDedicatedMasterType sets the DedicatedMasterType field's value.
-func (s *ElasticsearchClusterConfig) SetDedicatedMasterType(v string) *ElasticsearchClusterConfig {
-	s.DedicatedMasterType = &v
-	return s
-}
-
-// SetInstanceCount sets the InstanceCount field's value.
-func (s *ElasticsearchClusterConfig) SetInstanceCount(v int64) *ElasticsearchClusterConfig {
-	s.InstanceCount = &v
-	return s
-}
-
-// SetInstanceType sets the InstanceType field's value.
-func (s *ElasticsearchClusterConfig) SetInstanceType(v string) *ElasticsearchClusterConfig {
-	s.InstanceType = &v
-	return s
-}
-
-// SetZoneAwarenessEnabled sets the ZoneAwarenessEnabled field's value.
-func (s *ElasticsearchClusterConfig) SetZoneAwarenessEnabled(v bool) *ElasticsearchClusterConfig {
-	s.ZoneAwarenessEnabled = &v
-	return s
-}
-
 // Specifies the configuration status for the specified Elasticsearch domain.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ElasticsearchClusterConfigStatus
 type ElasticsearchClusterConfigStatus struct {
 	_ struct{} `type:"structure"`
 
 	// Specifies the cluster configuration for the specified Elasticsearch domain.
-	//
-	// Options is a required field
 	Options *ElasticsearchClusterConfig `type:"structure" required:"true"`
 
 	// Specifies the status of the configuration for the specified Elasticsearch
 	// domain.
-	//
-	// Status is a required field
 	Status *OptionStatus `type:"structure" required:"true"`
 }
 
@@ -1617,20 +1044,7 @@ func (s ElasticsearchClusterConfigStatus) GoString() string {
 	return s.String()
 }
 
-// SetOptions sets the Options field's value.
-func (s *ElasticsearchClusterConfigStatus) SetOptions(v *ElasticsearchClusterConfig) *ElasticsearchClusterConfigStatus {
-	s.Options = v
-	return s
-}
-
-// SetStatus sets the Status field's value.
-func (s *ElasticsearchClusterConfigStatus) SetStatus(v *OptionStatus) *ElasticsearchClusterConfigStatus {
-	s.Status = v
-	return s
-}
-
 // The configuration of an Elasticsearch domain.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ElasticsearchDomainConfig
 type ElasticsearchDomainConfig struct {
 	_ struct{} `type:"structure"`
 
@@ -1638,8 +1052,8 @@ type ElasticsearchDomainConfig struct {
 	AccessPolicies *AccessPoliciesStatus `type:"structure"`
 
 	// Specifies the AdvancedOptions for the domain. See Configuring Advanced Options
-	// (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options)
-	// for more information.
+	// (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options"
+	// target="_blank) for more information.
 	AdvancedOptions *AdvancedOptionsStatus `type:"structure"`
 
 	// Specifies the EBSOptions for the Elasticsearch domain.
@@ -1647,9 +1061,6 @@ type ElasticsearchDomainConfig struct {
 
 	// Specifies the ElasticsearchClusterConfig for the Elasticsearch domain.
 	ElasticsearchClusterConfig *ElasticsearchClusterConfigStatus `type:"structure"`
-
-	// String of format X.Y to specify version for the Elasticsearch domain.
-	ElasticsearchVersion *ElasticsearchVersionStatus `type:"structure"`
 
 	// Specifies the SnapshotOptions for the Elasticsearch domain.
 	SnapshotOptions *SnapshotOptionsStatus `type:"structure"`
@@ -1665,52 +1076,13 @@ func (s ElasticsearchDomainConfig) GoString() string {
 	return s.String()
 }
 
-// SetAccessPolicies sets the AccessPolicies field's value.
-func (s *ElasticsearchDomainConfig) SetAccessPolicies(v *AccessPoliciesStatus) *ElasticsearchDomainConfig {
-	s.AccessPolicies = v
-	return s
-}
-
-// SetAdvancedOptions sets the AdvancedOptions field's value.
-func (s *ElasticsearchDomainConfig) SetAdvancedOptions(v *AdvancedOptionsStatus) *ElasticsearchDomainConfig {
-	s.AdvancedOptions = v
-	return s
-}
-
-// SetEBSOptions sets the EBSOptions field's value.
-func (s *ElasticsearchDomainConfig) SetEBSOptions(v *EBSOptionsStatus) *ElasticsearchDomainConfig {
-	s.EBSOptions = v
-	return s
-}
-
-// SetElasticsearchClusterConfig sets the ElasticsearchClusterConfig field's value.
-func (s *ElasticsearchDomainConfig) SetElasticsearchClusterConfig(v *ElasticsearchClusterConfigStatus) *ElasticsearchDomainConfig {
-	s.ElasticsearchClusterConfig = v
-	return s
-}
-
-// SetElasticsearchVersion sets the ElasticsearchVersion field's value.
-func (s *ElasticsearchDomainConfig) SetElasticsearchVersion(v *ElasticsearchVersionStatus) *ElasticsearchDomainConfig {
-	s.ElasticsearchVersion = v
-	return s
-}
-
-// SetSnapshotOptions sets the SnapshotOptions field's value.
-func (s *ElasticsearchDomainConfig) SetSnapshotOptions(v *SnapshotOptionsStatus) *ElasticsearchDomainConfig {
-	s.SnapshotOptions = v
-	return s
-}
-
 // The current status of an Elasticsearch domain.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ElasticsearchDomainStatus
 type ElasticsearchDomainStatus struct {
 	_ struct{} `type:"structure"`
 
 	// The Amazon resource name (ARN) of an Elasticsearch domain. See Identifiers
-	// for IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/index.html?Using_Identifiers.html)
-	// in Using AWS Identity and Access Management for more information.
-	//
-	// ARN is a required field
+	// for IAM Entities (http://docs.aws.amazon.com/IAM/latest/UserGuide/index.html?Using_Identifiers.html"
+	// target="_blank) in Using AWS Identity and Access Management for more information.
 	ARN *string `type:"string" required:"true"`
 
 	// IAM access policy as a JSON-formatted string.
@@ -1730,29 +1102,21 @@ type ElasticsearchDomainStatus struct {
 	Deleted *bool `type:"boolean"`
 
 	// The unique identifier for the specified Elasticsearch domain.
-	//
-	// DomainId is a required field
 	DomainId *string `min:"1" type:"string" required:"true"`
 
 	// The name of an Elasticsearch domain. Domain names are unique across the domains
 	// owned by an account within an AWS region. Domain names start with a letter
 	// or number and can contain the following characters: a-z (lowercase), 0-9,
 	// and - (hyphen).
-	//
-	// DomainName is a required field
 	DomainName *string `min:"3" type:"string" required:"true"`
 
 	// The EBSOptions for the specified domain. See Configuring EBS-based Storage
-	// (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-ebs)
-	// for more information.
+	// (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-ebs"
+	// target="_blank) for more information.
 	EBSOptions *EBSOptions `type:"structure"`
 
 	// The type and number of instances in the domain cluster.
-	//
-	// ElasticsearchClusterConfig is a required field
 	ElasticsearchClusterConfig *ElasticsearchClusterConfig `type:"structure" required:"true"`
-
-	ElasticsearchVersion *string `type:"string"`
 
 	// The Elasticsearch domain endpoint that you use to submit index and search
 	// requests.
@@ -1777,125 +1141,6 @@ func (s ElasticsearchDomainStatus) GoString() string {
 	return s.String()
 }
 
-// SetARN sets the ARN field's value.
-func (s *ElasticsearchDomainStatus) SetARN(v string) *ElasticsearchDomainStatus {
-	s.ARN = &v
-	return s
-}
-
-// SetAccessPolicies sets the AccessPolicies field's value.
-func (s *ElasticsearchDomainStatus) SetAccessPolicies(v string) *ElasticsearchDomainStatus {
-	s.AccessPolicies = &v
-	return s
-}
-
-// SetAdvancedOptions sets the AdvancedOptions field's value.
-func (s *ElasticsearchDomainStatus) SetAdvancedOptions(v map[string]*string) *ElasticsearchDomainStatus {
-	s.AdvancedOptions = v
-	return s
-}
-
-// SetCreated sets the Created field's value.
-func (s *ElasticsearchDomainStatus) SetCreated(v bool) *ElasticsearchDomainStatus {
-	s.Created = &v
-	return s
-}
-
-// SetDeleted sets the Deleted field's value.
-func (s *ElasticsearchDomainStatus) SetDeleted(v bool) *ElasticsearchDomainStatus {
-	s.Deleted = &v
-	return s
-}
-
-// SetDomainId sets the DomainId field's value.
-func (s *ElasticsearchDomainStatus) SetDomainId(v string) *ElasticsearchDomainStatus {
-	s.DomainId = &v
-	return s
-}
-
-// SetDomainName sets the DomainName field's value.
-func (s *ElasticsearchDomainStatus) SetDomainName(v string) *ElasticsearchDomainStatus {
-	s.DomainName = &v
-	return s
-}
-
-// SetEBSOptions sets the EBSOptions field's value.
-func (s *ElasticsearchDomainStatus) SetEBSOptions(v *EBSOptions) *ElasticsearchDomainStatus {
-	s.EBSOptions = v
-	return s
-}
-
-// SetElasticsearchClusterConfig sets the ElasticsearchClusterConfig field's value.
-func (s *ElasticsearchDomainStatus) SetElasticsearchClusterConfig(v *ElasticsearchClusterConfig) *ElasticsearchDomainStatus {
-	s.ElasticsearchClusterConfig = v
-	return s
-}
-
-// SetElasticsearchVersion sets the ElasticsearchVersion field's value.
-func (s *ElasticsearchDomainStatus) SetElasticsearchVersion(v string) *ElasticsearchDomainStatus {
-	s.ElasticsearchVersion = &v
-	return s
-}
-
-// SetEndpoint sets the Endpoint field's value.
-func (s *ElasticsearchDomainStatus) SetEndpoint(v string) *ElasticsearchDomainStatus {
-	s.Endpoint = &v
-	return s
-}
-
-// SetProcessing sets the Processing field's value.
-func (s *ElasticsearchDomainStatus) SetProcessing(v bool) *ElasticsearchDomainStatus {
-	s.Processing = &v
-	return s
-}
-
-// SetSnapshotOptions sets the SnapshotOptions field's value.
-func (s *ElasticsearchDomainStatus) SetSnapshotOptions(v *SnapshotOptions) *ElasticsearchDomainStatus {
-	s.SnapshotOptions = v
-	return s
-}
-
-// Status of the Elasticsearch version options for the specified Elasticsearch
-// domain.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ElasticsearchVersionStatus
-type ElasticsearchVersionStatus struct {
-	_ struct{} `type:"structure"`
-
-	// Specifies the Elasticsearch version for the specified Elasticsearch domain.
-	//
-	// Options is a required field
-	Options *string `type:"string" required:"true"`
-
-	// Specifies the status of the Elasticsearch version options for the specified
-	// Elasticsearch domain.
-	//
-	// Status is a required field
-	Status *OptionStatus `type:"structure" required:"true"`
-}
-
-// String returns the string representation
-func (s ElasticsearchVersionStatus) String() string {
-	return awsutil.Prettify(s)
-}
-
-// GoString returns the string representation
-func (s ElasticsearchVersionStatus) GoString() string {
-	return s.String()
-}
-
-// SetOptions sets the Options field's value.
-func (s *ElasticsearchVersionStatus) SetOptions(v string) *ElasticsearchVersionStatus {
-	s.Options = &v
-	return s
-}
-
-// SetStatus sets the Status field's value.
-func (s *ElasticsearchVersionStatus) SetStatus(v *OptionStatus) *ElasticsearchVersionStatus {
-	s.Status = v
-	return s
-}
-
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ListDomainNamesInput
 type ListDomainNamesInput struct {
 	_ struct{} `type:"structure"`
 }
@@ -1912,7 +1157,6 @@ func (s ListDomainNamesInput) GoString() string {
 
 // The result of a ListDomainNames operation. Contains the names of all Elasticsearch
 // domains owned by this account.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ListDomainNamesResponse
 type ListDomainNamesOutput struct {
 	_ struct{} `type:"structure"`
 
@@ -1930,23 +1174,14 @@ func (s ListDomainNamesOutput) GoString() string {
 	return s.String()
 }
 
-// SetDomainNames sets the DomainNames field's value.
-func (s *ListDomainNamesOutput) SetDomainNames(v []*DomainInfo) *ListDomainNamesOutput {
-	s.DomainNames = v
-	return s
-}
-
 // Container for the parameters to the ListTags operation. Specify the ARN for
 // the Elasticsearch domain to which the tags are attached that you want to
 // view are attached.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ListTagsRequest
 type ListTagsInput struct {
 	_ struct{} `type:"structure"`
 
 	// Specify the ARN for the Elasticsearch domain to which the tags are attached
 	// that you want to view.
-	//
-	// ARN is a required field
 	ARN *string `location:"querystring" locationName:"arn" type:"string" required:"true"`
 }
 
@@ -1973,15 +1208,8 @@ func (s *ListTagsInput) Validate() error {
 	return nil
 }
 
-// SetARN sets the ARN field's value.
-func (s *ListTagsInput) SetARN(v string) *ListTagsInput {
-	s.ARN = &v
-	return s
-}
-
 // The result of a ListTags operation. Contains tags for all requested Elasticsearch
 // domains.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/ListTagsResponse
 type ListTagsOutput struct {
 	_ struct{} `type:"structure"`
 
@@ -1999,33 +1227,20 @@ func (s ListTagsOutput) GoString() string {
 	return s.String()
 }
 
-// SetTagList sets the TagList field's value.
-func (s *ListTagsOutput) SetTagList(v []*Tag) *ListTagsOutput {
-	s.TagList = v
-	return s
-}
-
 // Provides the current status of the entity.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/OptionStatus
 type OptionStatus struct {
 	_ struct{} `type:"structure"`
 
 	// Timestamp which tells the creation date for the entity.
-	//
-	// CreationDate is a required field
 	CreationDate *time.Time `type:"timestamp" timestampFormat:"unix" required:"true"`
 
 	// Indicates whether the Elasticsearch domain is being deleted.
 	PendingDeletion *bool `type:"boolean"`
 
 	// Provides the OptionState for the Elasticsearch domain.
-	//
-	// State is a required field
 	State *string `type:"string" required:"true" enum:"OptionState"`
 
 	// Timestamp which tells the last updated time for the entity.
-	//
-	// UpdateDate is a required field
 	UpdateDate *time.Time `type:"timestamp" timestampFormat:"unix" required:"true"`
 
 	// Specifies the latest version for the entity.
@@ -2042,53 +1257,18 @@ func (s OptionStatus) GoString() string {
 	return s.String()
 }
 
-// SetCreationDate sets the CreationDate field's value.
-func (s *OptionStatus) SetCreationDate(v time.Time) *OptionStatus {
-	s.CreationDate = &v
-	return s
-}
-
-// SetPendingDeletion sets the PendingDeletion field's value.
-func (s *OptionStatus) SetPendingDeletion(v bool) *OptionStatus {
-	s.PendingDeletion = &v
-	return s
-}
-
-// SetState sets the State field's value.
-func (s *OptionStatus) SetState(v string) *OptionStatus {
-	s.State = &v
-	return s
-}
-
-// SetUpdateDate sets the UpdateDate field's value.
-func (s *OptionStatus) SetUpdateDate(v time.Time) *OptionStatus {
-	s.UpdateDate = &v
-	return s
-}
-
-// SetUpdateVersion sets the UpdateVersion field's value.
-func (s *OptionStatus) SetUpdateVersion(v int64) *OptionStatus {
-	s.UpdateVersion = &v
-	return s
-}
-
 // Container for the parameters to the RemoveTags operation. Specify the ARN
 // for the Elasticsearch domain from which you want to remove the specified
 // TagKey.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/RemoveTagsRequest
 type RemoveTagsInput struct {
 	_ struct{} `type:"structure"`
 
 	// Specifies the ARN for the Elasticsearch domain from which you want to delete
 	// the specified tags.
-	//
-	// ARN is a required field
 	ARN *string `type:"string" required:"true"`
 
 	// Specifies the TagKey list which you want to remove from the Elasticsearch
 	// domain.
-	//
-	// TagKeys is a required field
 	TagKeys []*string `type:"list" required:"true"`
 }
 
@@ -2118,19 +1298,6 @@ func (s *RemoveTagsInput) Validate() error {
 	return nil
 }
 
-// SetARN sets the ARN field's value.
-func (s *RemoveTagsInput) SetARN(v string) *RemoveTagsInput {
-	s.ARN = &v
-	return s
-}
-
-// SetTagKeys sets the TagKeys field's value.
-func (s *RemoveTagsInput) SetTagKeys(v []*string) *RemoveTagsInput {
-	s.TagKeys = v
-	return s
-}
-
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/RemoveTagsOutput
 type RemoveTagsOutput struct {
 	_ struct{} `type:"structure"`
 }
@@ -2147,7 +1314,6 @@ func (s RemoveTagsOutput) GoString() string {
 
 // Specifies the time, in UTC format, when the service takes a daily automated
 // snapshot of the specified Elasticsearch domain. Default value is 0 hours.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/SnapshotOptions
 type SnapshotOptions struct {
 	_ struct{} `type:"structure"`
 
@@ -2166,25 +1332,14 @@ func (s SnapshotOptions) GoString() string {
 	return s.String()
 }
 
-// SetAutomatedSnapshotStartHour sets the AutomatedSnapshotStartHour field's value.
-func (s *SnapshotOptions) SetAutomatedSnapshotStartHour(v int64) *SnapshotOptions {
-	s.AutomatedSnapshotStartHour = &v
-	return s
-}
-
 // Status of a daily automated snapshot.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/SnapshotOptionsStatus
 type SnapshotOptionsStatus struct {
 	_ struct{} `type:"structure"`
 
 	// Specifies the daily snapshot options specified for the Elasticsearch domain.
-	//
-	// Options is a required field
 	Options *SnapshotOptions `type:"structure" required:"true"`
 
 	// Specifies the status of a daily automated snapshot.
-	//
-	// Status is a required field
 	Status *OptionStatus `type:"structure" required:"true"`
 }
 
@@ -2198,35 +1353,18 @@ func (s SnapshotOptionsStatus) GoString() string {
 	return s.String()
 }
 
-// SetOptions sets the Options field's value.
-func (s *SnapshotOptionsStatus) SetOptions(v *SnapshotOptions) *SnapshotOptionsStatus {
-	s.Options = v
-	return s
-}
-
-// SetStatus sets the Status field's value.
-func (s *SnapshotOptionsStatus) SetStatus(v *OptionStatus) *SnapshotOptionsStatus {
-	s.Status = v
-	return s
-}
-
 // Specifies a key value pair for a resource tag.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/Tag
 type Tag struct {
 	_ struct{} `type:"structure"`
 
 	// Specifies the TagKey, the name of the tag. Tag keys must be unique for the
 	// Elasticsearch domain to which they are attached.
-	//
-	// Key is a required field
 	Key *string `min:"1" type:"string" required:"true"`
 
 	// Specifies the TagValue, the value assigned to the corresponding tag key.
 	// Tag values can be null and do not have to be unique in a tag set. For example,
 	// you can have a key value pair in a tag set of project : Trinity and cost-center
 	// : Trinity
-	//
-	// Value is a required field
 	Value *string `type:"string" required:"true"`
 }
 
@@ -2259,21 +1397,8 @@ func (s *Tag) Validate() error {
 	return nil
 }
 
-// SetKey sets the Key field's value.
-func (s *Tag) SetKey(v string) *Tag {
-	s.Key = &v
-	return s
-}
-
-// SetValue sets the Value field's value.
-func (s *Tag) SetValue(v string) *Tag {
-	s.Value = &v
-	return s
-}
-
 // Container for the parameters to the UpdateElasticsearchDomain operation.
 // Specifies the type and number of instances in the domain cluster.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/UpdateElasticsearchDomainConfigRequest
 type UpdateElasticsearchDomainConfigInput struct {
 	_ struct{} `type:"structure"`
 
@@ -2282,13 +1407,11 @@ type UpdateElasticsearchDomainConfigInput struct {
 
 	// Modifies the advanced option to allow references to indices in an HTTP request
 	// body. Must be false when configuring access to individual sub-resources.
-	// By default, the value is true. See Configuration Advanced Options (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options)
-	// for more information.
+	// By default, the value is true. See Configuration Advanced Options (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-advanced-options"
+	// target="_blank) for more information.
 	AdvancedOptions map[string]*string `type:"map"`
 
 	// The name of the Elasticsearch domain that you are updating.
-	//
-	// DomainName is a required field
 	DomainName *string `location:"uri" locationName:"DomainName" min:"3" type:"string" required:"true"`
 
 	// Specify the type and size of the EBS volume that you want to use.
@@ -2328,51 +1451,12 @@ func (s *UpdateElasticsearchDomainConfigInput) Validate() error {
 	return nil
 }
 
-// SetAccessPolicies sets the AccessPolicies field's value.
-func (s *UpdateElasticsearchDomainConfigInput) SetAccessPolicies(v string) *UpdateElasticsearchDomainConfigInput {
-	s.AccessPolicies = &v
-	return s
-}
-
-// SetAdvancedOptions sets the AdvancedOptions field's value.
-func (s *UpdateElasticsearchDomainConfigInput) SetAdvancedOptions(v map[string]*string) *UpdateElasticsearchDomainConfigInput {
-	s.AdvancedOptions = v
-	return s
-}
-
-// SetDomainName sets the DomainName field's value.
-func (s *UpdateElasticsearchDomainConfigInput) SetDomainName(v string) *UpdateElasticsearchDomainConfigInput {
-	s.DomainName = &v
-	return s
-}
-
-// SetEBSOptions sets the EBSOptions field's value.
-func (s *UpdateElasticsearchDomainConfigInput) SetEBSOptions(v *EBSOptions) *UpdateElasticsearchDomainConfigInput {
-	s.EBSOptions = v
-	return s
-}
-
-// SetElasticsearchClusterConfig sets the ElasticsearchClusterConfig field's value.
-func (s *UpdateElasticsearchDomainConfigInput) SetElasticsearchClusterConfig(v *ElasticsearchClusterConfig) *UpdateElasticsearchDomainConfigInput {
-	s.ElasticsearchClusterConfig = v
-	return s
-}
-
-// SetSnapshotOptions sets the SnapshotOptions field's value.
-func (s *UpdateElasticsearchDomainConfigInput) SetSnapshotOptions(v *SnapshotOptions) *UpdateElasticsearchDomainConfigInput {
-	s.SnapshotOptions = v
-	return s
-}
-
 // The result of an UpdateElasticsearchDomain request. Contains the status of
 // the Elasticsearch domain being updated.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/es-2015-01-01/UpdateElasticsearchDomainConfigResponse
 type UpdateElasticsearchDomainConfigOutput struct {
 	_ struct{} `type:"structure"`
 
 	// The status of the updated Elasticsearch domain.
-	//
-	// DomainConfig is a required field
 	DomainConfig *ElasticsearchDomainConfig `type:"structure" required:"true"`
 }
 
@@ -2386,97 +1470,58 @@ func (s UpdateElasticsearchDomainConfigOutput) GoString() string {
 	return s.String()
 }
 
-// SetDomainConfig sets the DomainConfig field's value.
-func (s *UpdateElasticsearchDomainConfigOutput) SetDomainConfig(v *ElasticsearchDomainConfig) *UpdateElasticsearchDomainConfigOutput {
-	s.DomainConfig = v
-	return s
-}
-
 const (
-	// ESPartitionInstanceTypeM3MediumElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeM3MediumElasticsearch = "m3.medium.elasticsearch"
-
-	// ESPartitionInstanceTypeM3LargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeM3LargeElasticsearch = "m3.large.elasticsearch"
-
-	// ESPartitionInstanceTypeM3XlargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeM3XlargeElasticsearch = "m3.xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeM32xlargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeM32xlargeElasticsearch = "m3.2xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeM4LargeElasticsearch is a ESPartitionInstanceType enum value
-	ESPartitionInstanceTypeM4LargeElasticsearch = "m4.large.elasticsearch"
-
-	// ESPartitionInstanceTypeM4XlargeElasticsearch is a ESPartitionInstanceType enum value
-	ESPartitionInstanceTypeM4XlargeElasticsearch = "m4.xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeM42xlargeElasticsearch is a ESPartitionInstanceType enum value
-	ESPartitionInstanceTypeM42xlargeElasticsearch = "m4.2xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeM44xlargeElasticsearch is a ESPartitionInstanceType enum value
-	ESPartitionInstanceTypeM44xlargeElasticsearch = "m4.4xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeM410xlargeElasticsearch is a ESPartitionInstanceType enum value
-	ESPartitionInstanceTypeM410xlargeElasticsearch = "m4.10xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeT2MicroElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeT2MicroElasticsearch = "t2.micro.elasticsearch"
-
-	// ESPartitionInstanceTypeT2SmallElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeT2SmallElasticsearch = "t2.small.elasticsearch"
-
-	// ESPartitionInstanceTypeT2MediumElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeT2MediumElasticsearch = "t2.medium.elasticsearch"
-
-	// ESPartitionInstanceTypeR3LargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeR3LargeElasticsearch = "r3.large.elasticsearch"
-
-	// ESPartitionInstanceTypeR3XlargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeR3XlargeElasticsearch = "r3.xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeR32xlargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeR32xlargeElasticsearch = "r3.2xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeR34xlargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeR34xlargeElasticsearch = "r3.4xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeR38xlargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeR38xlargeElasticsearch = "r3.8xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeI2XlargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeI2XlargeElasticsearch = "i2.xlarge.elasticsearch"
-
-	// ESPartitionInstanceTypeI22xlargeElasticsearch is a ESPartitionInstanceType enum value
+	// @enum ESPartitionInstanceType
 	ESPartitionInstanceTypeI22xlargeElasticsearch = "i2.2xlarge.elasticsearch"
 )
 
 // The state of a requested change. One of the following:
 //
-//    * Processing: The request change is still in-process.
-//    * Active: The request change is processed and deployed to the Elasticsearch
-//    domain.
+//  Processing: The request change is still in-process. Active: The request
+// change is processed and deployed to the Elasticsearch domain.
 const (
-	// OptionStateRequiresIndexDocuments is a OptionState enum value
+	// @enum OptionState
 	OptionStateRequiresIndexDocuments = "RequiresIndexDocuments"
-
-	// OptionStateProcessing is a OptionState enum value
+	// @enum OptionState
 	OptionStateProcessing = "Processing"
-
-	// OptionStateActive is a OptionState enum value
+	// @enum OptionState
 	OptionStateActive = "Active"
 )
 
 // The type of EBS volume, standard, gp2, or io1. See Configuring EBS-based
-// Storage (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-ebs)for
-// more information.
+// Storage (http://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-createupdatedomains.html#es-createdomain-configure-ebs"
+// target="_blank)for more information.
 const (
-	// VolumeTypeStandard is a VolumeType enum value
+	// @enum VolumeType
 	VolumeTypeStandard = "standard"
-
-	// VolumeTypeGp2 is a VolumeType enum value
+	// @enum VolumeType
 	VolumeTypeGp2 = "gp2"
-
-	// VolumeTypeIo1 is a VolumeType enum value
+	// @enum VolumeType
 	VolumeTypeIo1 = "io1"
 )

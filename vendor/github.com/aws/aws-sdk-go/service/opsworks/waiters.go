@@ -6,10 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/private/waiter"
 )
 
-// WaitUntilAppExists uses the AWS OpsWorks API operation
-// DescribeApps to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *OpsWorks) WaitUntilAppExists(input *DescribeAppsInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeApps",
@@ -39,10 +35,6 @@ func (c *OpsWorks) WaitUntilAppExists(input *DescribeAppsInput) error {
 	return w.Wait()
 }
 
-// WaitUntilDeploymentSuccessful uses the AWS OpsWorks API operation
-// DescribeDeployments to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *OpsWorks) WaitUntilDeploymentSuccessful(input *DescribeDeploymentsInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeDeployments",
@@ -72,10 +64,6 @@ func (c *OpsWorks) WaitUntilDeploymentSuccessful(input *DescribeDeploymentsInput
 	return w.Wait()
 }
 
-// WaitUntilInstanceOnline uses the AWS OpsWorks API operation
-// DescribeInstances to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *OpsWorks) WaitUntilInstanceOnline(input *DescribeInstancesInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeInstances",
@@ -147,10 +135,6 @@ func (c *OpsWorks) WaitUntilInstanceOnline(input *DescribeInstancesInput) error 
 	return w.Wait()
 }
 
-// WaitUntilInstanceRegistered uses the AWS OpsWorks API operation
-// DescribeInstances to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *OpsWorks) WaitUntilInstanceRegistered(input *DescribeInstancesInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeInstances",
@@ -216,10 +200,6 @@ func (c *OpsWorks) WaitUntilInstanceRegistered(input *DescribeInstancesInput) er
 	return w.Wait()
 }
 
-// WaitUntilInstanceStopped uses the AWS OpsWorks API operation
-// DescribeInstances to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *OpsWorks) WaitUntilInstanceStopped(input *DescribeInstancesInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeInstances",
@@ -297,10 +277,6 @@ func (c *OpsWorks) WaitUntilInstanceStopped(input *DescribeInstancesInput) error
 	return w.Wait()
 }
 
-// WaitUntilInstanceTerminated uses the AWS OpsWorks API operation
-// DescribeInstances to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *OpsWorks) WaitUntilInstanceTerminated(input *DescribeInstancesInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeInstances",

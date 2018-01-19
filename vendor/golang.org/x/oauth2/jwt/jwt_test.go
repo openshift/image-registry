@@ -5,15 +5,11 @@
 package jwt
 
 import (
-	"context"
-	"encoding/base64"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
-	"golang.org/x/oauth2/jws"
+	"golang.org/x/oauth2"
 )
 
 var dummyPrivateKey = []byte(`-----BEGIN RSA PRIVATE KEY-----
@@ -61,25 +57,25 @@ func TestJWTFetch_JSONResponse(t *testing.T) {
 		PrivateKey: dummyPrivateKey,
 		TokenURL:   ts.URL,
 	}
-	tok, err := conf.TokenSource(context.Background()).Token()
+	tok, err := conf.TokenSource(oauth2.NoContext).Token()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !tok.Valid() {
-		t.Errorf("got invalid token: %v", tok)
+		t.Errorf("Token invalid")
 	}
-	if got, want := tok.AccessToken, "90d64460d14870c08c81352a05dedd3465940a7c"; got != want {
-		t.Errorf("access token = %q; want %q", got, want)
+	if tok.AccessToken != "90d64460d14870c08c81352a05dedd3465940a7c" {
+		t.Errorf("Unexpected access token, %#v", tok.AccessToken)
 	}
-	if got, want := tok.TokenType, "bearer"; got != want {
-		t.Errorf("token type = %q; want %q", got, want)
+	if tok.TokenType != "bearer" {
+		t.Errorf("Unexpected token type, %#v", tok.TokenType)
 	}
-	if got := tok.Expiry.IsZero(); got {
-		t.Errorf("token expiry = %v, want none", got)
+	if tok.Expiry.IsZero() {
+		t.Errorf("Unexpected token expiry, %#v", tok.Expiry)
 	}
 	scope := tok.Extra("scope")
-	if got, want := scope, "user"; got != want {
-		t.Errorf("scope = %q; want %q", got, want)
+	if scope != "user" {
+		t.Errorf("Unexpected value for scope: %v", scope)
 	}
 }
 
@@ -95,25 +91,25 @@ func TestJWTFetch_BadResponse(t *testing.T) {
 		PrivateKey: dummyPrivateKey,
 		TokenURL:   ts.URL,
 	}
-	tok, err := conf.TokenSource(context.Background()).Token()
+	tok, err := conf.TokenSource(oauth2.NoContext).Token()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if tok == nil {
-		t.Fatalf("got nil token; want token")
+		t.Fatalf("token is nil")
 	}
 	if tok.Valid() {
-		t.Errorf("got invalid token: %v", tok)
+		t.Errorf("token is valid. want invalid.")
 	}
-	if got, want := tok.AccessToken, ""; got != want {
-		t.Errorf("access token = %q; want %q", got, want)
+	if tok.AccessToken != "" {
+		t.Errorf("Unexpected non-empty access token %q.", tok.AccessToken)
 	}
-	if got, want := tok.TokenType, "bearer"; got != want {
-		t.Errorf("token type = %q; want %q", got, want)
+	if want := "bearer"; tok.TokenType != want {
+		t.Errorf("TokenType = %q; want %q", tok.TokenType, want)
 	}
 	scope := tok.Extra("scope")
-	if got, want := scope, "user"; got != want {
-		t.Errorf("token scope = %q; want %q", got, want)
+	if want := "user"; scope != want {
+		t.Errorf("token scope = %q; want %q", scope, want)
 	}
 }
 
@@ -128,63 +124,11 @@ func TestJWTFetch_BadResponseType(t *testing.T) {
 		PrivateKey: dummyPrivateKey,
 		TokenURL:   ts.URL,
 	}
-	tok, err := conf.TokenSource(context.Background()).Token()
+	tok, err := conf.TokenSource(oauth2.NoContext).Token()
 	if err == nil {
 		t.Error("got a token; expected error")
-		if got, want := tok.AccessToken, ""; got != want {
-			t.Errorf("access token = %q; want %q", got, want)
+		if tok.AccessToken != "" {
+			t.Errorf("Unexpected access token, %#v.", tok.AccessToken)
 		}
-	}
-}
-
-func TestJWTFetch_Assertion(t *testing.T) {
-	var assertion string
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
-		assertion = r.Form.Get("assertion")
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{
-			"access_token": "90d64460d14870c08c81352a05dedd3465940a7c",
-			"scope": "user",
-			"token_type": "bearer",
-			"expires_in": 3600
-		}`))
-	}))
-	defer ts.Close()
-
-	conf := &Config{
-		Email:        "aaa@xxx.com",
-		PrivateKey:   dummyPrivateKey,
-		PrivateKeyID: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-		TokenURL:     ts.URL,
-	}
-
-	_, err := conf.TokenSource(context.Background()).Token()
-	if err != nil {
-		t.Fatalf("Failed to fetch token: %v", err)
-	}
-
-	parts := strings.Split(assertion, ".")
-	if len(parts) != 3 {
-		t.Fatalf("assertion = %q; want 3 parts", assertion)
-	}
-	gotjson, err := base64.RawURLEncoding.DecodeString(parts[0])
-	if err != nil {
-		t.Fatalf("invalid token header; err = %v", err)
-	}
-
-	got := jws.Header{}
-	if err := json.Unmarshal(gotjson, &got); err != nil {
-		t.Errorf("failed to unmarshal json token header = %q; err = %v", gotjson, err)
-	}
-
-	want := jws.Header{
-		Algorithm: "RS256",
-		Typ:       "JWT",
-		KeyID:     "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-	}
-	if got != want {
-		t.Errorf("access token header = %q; want %q", got, want)
 	}
 }
