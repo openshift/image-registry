@@ -1,10 +1,7 @@
 package server
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"reflect"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
@@ -19,21 +16,6 @@ var (
 	errMissingURL    = errors.New("missing URL on layer")
 	errUnexpectedURL = errors.New("unexpected URL on layer")
 )
-
-func unmarshalManifestSchema2(content []byte) (distribution.Manifest, error) {
-	var deserializedManifest schema2.DeserializedManifest
-	if err := json.Unmarshal(content, &deserializedManifest); err != nil {
-		return nil, err
-	}
-
-	if !reflect.DeepEqual(deserializedManifest.Versioned, schema2.SchemaVersion) {
-		return nil, fmt.Errorf("unexpected manifest schema version=%d, mediaType=%q",
-			deserializedManifest.SchemaVersion,
-			deserializedManifest.MediaType)
-	}
-
-	return &deserializedManifest, nil
-}
 
 type manifestSchema2Handler struct {
 	blobStore    distribution.BlobStore

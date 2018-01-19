@@ -19,6 +19,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
 	util "github.com/openshift/image-registry/pkg/origin-common/util"
@@ -166,7 +167,7 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 		return
 	}
 
-	manifest, err := NewManifestFromImage(image)
+	manifest, err := registrymanifest.NewFromImage(image)
 	if err != nil {
 		context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
 		return
