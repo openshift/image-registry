@@ -50,6 +50,7 @@ type repository struct {
 
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
+	cache            cache.RepositoryDigest
 }
 
 // Repository returns a new repository middleware.
@@ -64,10 +65,6 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 	namespace, name, err := getNamespaceName(repo.Named().Name())
 	if err != nil {
 		return nil, nil, err
-	}
-
-	imageStreamCache := &cache.RepoDigest{
-		Cache: app.cache,
 	}
 
 	r := &repository{
@@ -88,7 +85,9 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 				name:         name,
 				isNamespacer: registryOSClient,
 			},
-			cache: imageStreamCache,
+		},
+		cache: &cache.RepoDigest{
+			Cache: app.cache,
 		},
 	}
 
@@ -96,7 +95,8 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		r.remoteBlobGetter = NewBlobGetterService(
 			r.imageStream,
 			r.imageStream.GetSecrets,
-			imageStreamCache)
+			r.cache,
+		)
 	}
 
 	bdsf := blobDescriptorServiceFactoryFunc(r.BlobDescriptorService)
@@ -120,6 +120,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 		blobStore:     r.Blobs(ctx),
 		serverAddr:    r.app.config.Server.Addr,
 		imageStream:   r.imageStream,
+		cache:         r.cache,
 		acceptSchema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
@@ -128,6 +129,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 			ManifestService:      ms,
 			localManifestService: localManifestService,
 			imageStream:          r.imageStream,
+			cache:                r.cache,
 			mirror:               r.app.config.Pullthrough.Mirror,
 		}
 	}

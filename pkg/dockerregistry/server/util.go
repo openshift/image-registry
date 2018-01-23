@@ -7,14 +7,19 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
+	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/registry/api/errcode"
 	disterrors "github.com/docker/distribution/registry/api/v2"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
@@ -112,4 +117,32 @@ func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, error) {
 func (g *cachedImageStreamGetter) cacheImageStream(is *imageapiv1.ImageStream) {
 	context.GetLogger(g.ctx).Debugf("(*cachedImageStreamGetter).cacheImageStream: got image stream %s/%s", is.Namespace, is.Name)
 	g.cachedImageStream = is
+}
+
+// RememberLayersOfImage caches the layer digests of given image.
+func RememberLayersOfImage(ctx context.Context, cache cache.RepositoryDigest, image *imageapiv1.Image, cacheName string) {
+	if len(image.DockerImageLayers) > 0 {
+		for _, layer := range image.DockerImageLayers {
+			_ = cache.AddDigest(digest.Digest(layer.Name), cacheName)
+		}
+		meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
+		if !ok {
+			context.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
+			return
+		}
+		// remember reference to manifest config as well for schema 2
+		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
+			_ = cache.AddDigest(digest.Digest(meta.ID), cacheName)
+		}
+		return
+	}
+
+	manifest, err := registrymanifest.NewFromImage(image)
+	if err != nil {
+		context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
+		return
+	}
+	for _, ref := range manifest.References() {
+		_ = cache.AddDigest(ref.Digest, cacheName)
+	}
 }

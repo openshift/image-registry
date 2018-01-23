@@ -5,6 +5,7 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
@@ -17,6 +18,7 @@ type pullthroughManifestService struct {
 	distribution.ManifestService
 	localManifestService distribution.ManifestService
 	imageStream          imagestream.ImageStream
+	cache                cache.RepositoryDigest
 	mirror               bool
 }
 
@@ -71,7 +73,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 				context.GetLogger(ctx).Errorf("failed to mirror manifest %s: %v", ref.Exact(), putErr)
 			}
 		}
-		m.imageStream.RememberLayersOfImage(ctx, image, ref.Exact())
+		RememberLayersOfImage(ctx, m.cache, image, ref.Exact())
 	case distribution.ErrManifestUnknownRevision:
 		break
 	default:

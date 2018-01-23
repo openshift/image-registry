@@ -39,7 +39,12 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 		// schema v2 has no empty layers.
 		if !isEmptyDigest(dgst) {
 			// ensure it's referenced inside of corresponding image stream
-			if !bs.repo.imageStream.HasBlob(ctx, dgst, !bs.repo.app.config.Pullthrough.Enabled) {
+			if bs.repo.cache.ContainsRepository(dgst, bs.repo.imageStream.Reference()) {
+				context.GetLogger(ctx).Debugf("found cached blob %q in repository %s", dgst.String(), bs.repo.imageStream.Reference())
+			} else if image := bs.repo.imageStream.HasBlob(ctx, dgst, !bs.repo.app.config.Pullthrough.Enabled); image != nil {
+				// remember all the layers of matching image
+				RememberLayersOfImage(ctx, bs.repo.cache, image, bs.repo.imageStream.Reference())
+			} else {
 				context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s is neither empty nor referenced in image stream %s", dgst.String(), bs.repo.Named().Name())
 				return distribution.Descriptor{}, distribution.ErrBlobUnknown
 			}

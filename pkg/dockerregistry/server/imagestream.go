@@ -8,7 +8,6 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
-	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/registry/api/errcode"
 	disterrors "github.com/docker/distribution/registry/api/v2"
 
@@ -16,12 +15,9 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
 
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
-	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
@@ -38,8 +34,6 @@ type imageStream struct {
 	cachedImages map[digest.Digest]*imageapiv1.Image
 	// imageStreamGetter fetches and caches an image stream. The image stream stays cached for the entire time of handling single repository-scoped request.
 	imageStreamGetter *cachedImageStreamGetter
-	// cache is used to associate a digest with a repository name.
-	cache cache.RepositoryDigest
 }
 
 func (is *imageStream) Reference() string {
@@ -150,34 +144,6 @@ func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Di
 // UpdateImage modifies the Image.
 func (is *imageStream) UpdateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
 	return is.registryOSClient.Images().Update(image)
-}
-
-// RememberLayersOfImage caches the layer digests of given image
-func (is *imageStream) RememberLayersOfImage(ctx context.Context, image *imageapiv1.Image, cacheName string) {
-	if len(image.DockerImageLayers) > 0 {
-		for _, layer := range image.DockerImageLayers {
-			_ = is.cache.AddDigest(digest.Digest(layer.Name), cacheName)
-		}
-		meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
-		if !ok {
-			context.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
-			return
-		}
-		// remember reference to manifest config as well for schema 2
-		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
-			_ = is.cache.AddDigest(digest.Digest(meta.ID), cacheName)
-		}
-		return
-	}
-
-	manifest, err := registrymanifest.NewFromImage(image)
-	if err != nil {
-		context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
-		return
-	}
-	for _, ref := range manifest.References() {
-		_ = is.cache.AddDigest(ref.Digest, cacheName)
-	}
 }
 
 func (is *imageStream) GetSecrets() ([]corev1.Secret, error) {

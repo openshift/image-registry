@@ -12,6 +12,7 @@ import (
 
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/testutil"
 )
@@ -83,11 +84,25 @@ func TestManifestServiceGetDoesntChangeDockerImageReference(t *testing.T) {
 
 	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
+	digestCache, err := cache.NewBlobDigest(
+		defaultDescriptorCacheSize,
+		defaultDigestToRepositoryCacheSize,
+		24*time.Hour, // for tests it's virtually forever
+	)
+	if err != nil {
+		t.Fatalf("unable to create cache: %v", err)
+	}
+
+	cache := &cache.RepoDigest{
+		Cache: digestCache,
+	}
+
 	ms := &manifestService{
 		manifests: newTestManifestService(repo, map[digest.Digest]distribution.Manifest{
 			digest.Digest(testImage.Name): &schema2.DeserializedManifest{},
 		}),
 		imageStream:   imageStream,
+		cache:         cache,
 		acceptSchema2: true,
 	}
 

@@ -32,18 +32,12 @@ func (b ByGeneration) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 // HasBlob returns true if the given blob digest is referenced in image stream corresponding to
 // given repository. If not found locally, image stream's images will be iterated and fetched from newest to
 // oldest until found. Each processed image will update local cache of blobs.
-func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireManaged bool) bool {
-	repoCacheName := is.Reference()
-	if is.cache.ContainsRepository(dgst, repoCacheName) {
-		context.GetLogger(ctx).Debugf("found cached blob %q in repository %s", dgst.String(), is.Reference())
-		return true
-	}
-
+func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireManaged bool) *imageapiv1.Image {
 	context.GetLogger(ctx).Debugf("verifying presence of blob %q in image stream %s", dgst.String(), is.Reference())
 	started := time.Now()
-	logFound := func(found bool) bool {
+	logFound := func(found *imageapiv1.Image) *imageapiv1.Image {
 		elapsed := time.Since(started)
-		if found {
+		if found != nil {
 			context.GetLogger(ctx).Debugf("verified presence of blob %q in image stream %s after %s", dgst.String(), is.Reference(), elapsed.String())
 		} else {
 			context.GetLogger(ctx).Debugf("detected absence of blob %q in image stream %s after %s", dgst.String(), is.Reference(), elapsed.String())
@@ -55,7 +49,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireM
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("failed to get image stream: %v", err)
-		return logFound(false)
+		return logFound(nil)
 	}
 
 	tagEvents := []*imageapiv1.TagEvent{}
@@ -101,15 +95,13 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireM
 		if imageHasBlob(ctx, image, dgst) {
 			tagName := event2Name[tagEvent]
 			context.GetLogger(ctx).Debugf("blob found under istag %s:%s in image %s", is.Reference(), tagName, tagEvent.Image)
-			// remember all the layers of matching image
-			is.RememberLayersOfImage(ctx, image, repoCacheName)
-			return logFound(true)
+			return logFound(image)
 		}
 	}
 
 	context.GetLogger(ctx).Warnf("blob %q exists locally but is not referenced in repository %s", dgst.String(), is.Reference())
 
-	return logFound(false)
+	return logFound(nil)
 }
 
 // imageHasBlob returns true if the image identified by imageName refers to the given blob.

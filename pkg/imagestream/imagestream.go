@@ -35,9 +35,8 @@ type ImageStream interface {
 	CreateImageStreamMapping(ctx context.Context, tag string, image *imageapiv1.Image) error
 	UpdateImage(image *imageapiv1.Image) (*imageapiv1.Image, error)
 	GetImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error)
-	RememberLayersOfImage(ctx context.Context, image *imageapiv1.Image, cacheName string)
 
-	HasBlob(ctx context.Context, dgst digest.Digest, requireManaged bool) bool
+	HasBlob(ctx context.Context, dgst digest.Digest, requireManaged bool) *imageapiv1.Image
 	IdentifyCandidateRepositories(primary bool) ([]string, map[string]ImagePullthroughSpec, error)
 	GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, error)
 	GetSecrets() ([]corev1.Secret, error)

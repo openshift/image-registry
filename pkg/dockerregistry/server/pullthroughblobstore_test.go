@@ -20,6 +20,7 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	dockerregistryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	originregistryclient "github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
@@ -139,10 +140,23 @@ func TestPullthroughServeBlob(t *testing.T) {
 
 		imageStream := newTestImageStream(ctx, t, namespace, name, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
+		digestCache, err := cache.NewBlobDigest(
+			defaultDescriptorCacheSize,
+			defaultDigestToRepositoryCacheSize,
+			24*time.Hour, // for tests it's virtually forever
+		)
+		if err != nil {
+			t.Fatalf("unable to create cache: %v", err)
+		}
+
+		cache := &cache.RepoDigest{
+			Cache: digestCache,
+		}
+
 		remoteBlobGetter := NewBlobGetterService(
 			imageStream,
 			imageStream.GetSecrets,
-			imageStream.cache)
+			cache)
 
 		ptbs := &pullthroughBlobStore{
 			BlobStore:        localBlobStore,
@@ -560,10 +574,23 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 
 			imageStream := newTestImageStream(ctx, t, namespace, repo1, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
+			digestCache, err := cache.NewBlobDigest(
+				defaultDescriptorCacheSize,
+				defaultDigestToRepositoryCacheSize,
+				24*time.Hour, // for tests it's virtually forever
+			)
+			if err != nil {
+				t.Fatalf("unable to create cache: %v", err)
+			}
+
+			cache := &cache.RepoDigest{
+				Cache: digestCache,
+			}
+
 			remoteBlobGetter := NewBlobGetterService(
 				imageStream,
 				imageStream.GetSecrets,
-				imageStream.cache)
+				cache)
 
 			ptbs := &pullthroughBlobStore{
 				BlobStore:        localBlobStore,

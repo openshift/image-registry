@@ -14,6 +14,7 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
@@ -41,6 +42,7 @@ type manifestService struct {
 
 	serverAddr  string
 	imageStream imagestream.ImageStream
+	cache       cache.RepositoryDigest
 
 	// acceptSchema2 allows to refuse the manifest schema version 2
 	acceptSchema2 bool
@@ -77,7 +79,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 
 	manifest, err := m.manifests.Get(ctx, dgst, options...)
 	if err == nil {
-		m.imageStream.RememberLayersOfImage(ctx, image, ref)
+		RememberLayersOfImage(ctx, m.cache, image, ref)
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
 	} else if _, ok := err.(distribution.ErrManifestUnknownRevision); !ok {
@@ -87,7 +89,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 
 	manifest, err = registrymanifest.NewFromImage(image)
 	if err == nil {
-		m.imageStream.RememberLayersOfImage(ctx, image, ref)
+		RememberLayersOfImage(ctx, m.cache, image, ref)
 		m.migrateManifest(ctx, image, dgst, manifest, false)
 		return manifest, nil
 	} else {

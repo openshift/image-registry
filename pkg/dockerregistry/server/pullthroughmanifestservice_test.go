@@ -18,6 +18,7 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/testutil"
@@ -125,9 +126,23 @@ func TestPullthroughManifests(t *testing.T) {
 
 		imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
+		digestCache, err := cache.NewBlobDigest(
+			defaultDescriptorCacheSize,
+			defaultDigestToRepositoryCacheSize,
+			24*time.Hour, // for tests it's virtually forever
+		)
+		if err != nil {
+			t.Fatalf("unable to create cache: %v", err)
+		}
+
+		cache := &cache.RepoDigest{
+			Cache: digestCache,
+		}
+
 		ptms := &pullthroughManifestService{
 			ManifestService: localManifestService,
 			imageStream:     imageStream,
+			cache:           cache,
 		}
 
 		manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
@@ -345,9 +360,23 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 
 			imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
+			digestCache, err := cache.NewBlobDigest(
+				defaultDescriptorCacheSize,
+				defaultDigestToRepositoryCacheSize,
+				24*time.Hour, // for tests it's virtually forever
+			)
+			if err != nil {
+				t.Fatalf("unable to create cache: %v", err)
+			}
+
+			cache := &cache.RepoDigest{
+				Cache: digestCache,
+			}
+
 			ptms := &pullthroughManifestService{
 				ManifestService: localManifestService,
 				imageStream:     imageStream,
+				cache:           cache,
 			}
 
 			manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
