@@ -213,10 +213,10 @@ func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorServic
 }
 
 func (r *repository) checkPendingErrors(ctx context.Context) error {
-	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.imageStream.namespace, r.imageStream.name)
+	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.imageStream.Reference())
 }
 
-func checkPendingErrors(ctx context.Context, logger context.Logger, namespace, name string) error {
+func checkPendingErrors(ctx context.Context, logger context.Logger, ref string) error {
 	if !authPerformed(ctx) {
 		return fmt.Errorf("openshift.auth.completed missing from context")
 	}
@@ -226,11 +226,11 @@ func checkPendingErrors(ctx context.Context, logger context.Logger, namespace, n
 		return nil
 	}
 
-	repoErr, haveRepoErr := deferredErrors.Get(namespace, name)
+	repoErr, haveRepoErr := deferredErrors.Get(ref)
 	if !haveRepoErr {
 		return nil
 	}
 
-	logger.Debugf("Origin auth: found deferred error for %s/%s: %v", namespace, name, repoErr)
+	logger.Debugf("Origin auth: found deferred error for %s: %v", ref, repoErr)
 	return repoErr
 }
