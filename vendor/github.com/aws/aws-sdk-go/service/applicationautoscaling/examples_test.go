@@ -16,13 +16,7 @@ var _ time.Duration
 var _ bytes.Buffer
 
 func ExampleApplicationAutoScaling_DeleteScalingPolicy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := applicationautoscaling.New(sess)
+	svc := applicationautoscaling.New(session.New())
 
 	params := &applicationautoscaling.DeleteScalingPolicyInput{
 		PolicyName:        aws.String("ResourceIdMaxLen1600"), // Required
@@ -44,13 +38,7 @@ func ExampleApplicationAutoScaling_DeleteScalingPolicy() {
 }
 
 func ExampleApplicationAutoScaling_DeregisterScalableTarget() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := applicationautoscaling.New(sess)
+	svc := applicationautoscaling.New(session.New())
 
 	params := &applicationautoscaling.DeregisterScalableTargetInput{
 		ResourceId:        aws.String("ResourceIdMaxLen1600"), // Required
@@ -71,13 +59,7 @@ func ExampleApplicationAutoScaling_DeregisterScalableTarget() {
 }
 
 func ExampleApplicationAutoScaling_DescribeScalableTargets() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := applicationautoscaling.New(sess)
+	svc := applicationautoscaling.New(session.New())
 
 	params := &applicationautoscaling.DescribeScalableTargetsInput{
 		ServiceNamespace: aws.String("ServiceNamespace"), // Required
@@ -103,13 +85,7 @@ func ExampleApplicationAutoScaling_DescribeScalableTargets() {
 }
 
 func ExampleApplicationAutoScaling_DescribeScalingActivities() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := applicationautoscaling.New(sess)
+	svc := applicationautoscaling.New(session.New())
 
 	params := &applicationautoscaling.DescribeScalingActivitiesInput{
 		ServiceNamespace:  aws.String("ServiceNamespace"), // Required
@@ -132,13 +108,7 @@ func ExampleApplicationAutoScaling_DescribeScalingActivities() {
 }
 
 func ExampleApplicationAutoScaling_DescribeScalingPolicies() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := applicationautoscaling.New(sess)
+	svc := applicationautoscaling.New(session.New())
 
 	params := &applicationautoscaling.DescribeScalingPoliciesInput{
 		ServiceNamespace: aws.String("ServiceNamespace"), // Required
@@ -165,13 +135,7 @@ func ExampleApplicationAutoScaling_DescribeScalingPolicies() {
 }
 
 func ExampleApplicationAutoScaling_PutScalingPolicy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := applicationautoscaling.New(sess)
+	svc := applicationautoscaling.New(session.New())
 
 	params := &applicationautoscaling.PutScalingPolicyInput{
 		PolicyName:        aws.String("PolicyName"),           // Required
@@ -208,13 +172,7 @@ func ExampleApplicationAutoScaling_PutScalingPolicy() {
 }
 
 func ExampleApplicationAutoScaling_RegisterScalableTarget() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := applicationautoscaling.New(sess)
+	svc := applicationautoscaling.New(session.New())
 
 	params := &applicationautoscaling.RegisterScalableTargetInput{
 		ResourceId:        aws.String("ResourceIdMaxLen1600"), // Required

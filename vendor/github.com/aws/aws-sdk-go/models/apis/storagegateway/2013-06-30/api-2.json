@@ -7,8 +7,7 @@
     "protocol":"json",
     "serviceFullName":"AWS Storage Gateway",
     "signatureVersion":"v4",
-    "targetPrefix":"StorageGateway_20130630",
-    "uid":"storagegateway-2013-06-30"
+    "targetPrefix":"StorageGateway_20130630"
   },
   "operations":{
     "ActivateGateway":{
@@ -115,19 +114,6 @@
         {"shape":"InternalServerError"}
       ]
     },
-    "CreateNFSFileShare":{
-      "name":"CreateNFSFileShare",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"CreateNFSFileShareInput"},
-      "output":{"shape":"CreateNFSFileShareOutput"},
-      "errors":[
-        {"shape":"InvalidGatewayRequestException"},
-        {"shape":"InternalServerError"}
-      ]
-    },
     "CreateSnapshot":{
       "name":"CreateSnapshot",
       "http":{
@@ -138,8 +124,7 @@
       "output":{"shape":"CreateSnapshotOutput"},
       "errors":[
         {"shape":"InvalidGatewayRequestException"},
-        {"shape":"InternalServerError"},
-        {"shape":"ServiceUnavailableError"}
+        {"shape":"InternalServerError"}
       ]
     },
     "CreateSnapshotFromVolumeRecoveryPoint":{
@@ -152,8 +137,7 @@
       "output":{"shape":"CreateSnapshotFromVolumeRecoveryPointOutput"},
       "errors":[
         {"shape":"InvalidGatewayRequestException"},
-        {"shape":"InternalServerError"},
-        {"shape":"ServiceUnavailableError"}
+        {"shape":"InternalServerError"}
       ]
     },
     "CreateStorediSCSIVolume":{
@@ -216,19 +200,6 @@
       },
       "input":{"shape":"DeleteChapCredentialsInput"},
       "output":{"shape":"DeleteChapCredentialsOutput"},
-      "errors":[
-        {"shape":"InvalidGatewayRequestException"},
-        {"shape":"InternalServerError"}
-      ]
-    },
-    "DeleteFileShare":{
-      "name":"DeleteFileShare",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"DeleteFileShareInput"},
-      "output":{"shape":"DeleteFileShareOutput"},
       "errors":[
         {"shape":"InvalidGatewayRequestException"},
         {"shape":"InternalServerError"}
@@ -377,19 +348,6 @@
         {"shape":"InternalServerError"}
       ]
     },
-    "DescribeNFSFileShares":{
-      "name":"DescribeNFSFileShares",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"DescribeNFSFileSharesInput"},
-      "output":{"shape":"DescribeNFSFileSharesOutput"},
-      "errors":[
-        {"shape":"InvalidGatewayRequestException"},
-        {"shape":"InternalServerError"}
-      ]
-    },
     "DescribeSnapshotSchedule":{
       "name":"DescribeSnapshotSchedule",
       "http":{
@@ -502,19 +460,6 @@
       },
       "input":{"shape":"DisableGatewayInput"},
       "output":{"shape":"DisableGatewayOutput"},
-      "errors":[
-        {"shape":"InvalidGatewayRequestException"},
-        {"shape":"InternalServerError"}
-      ]
-    },
-    "ListFileShares":{
-      "name":"ListFileShares",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"ListFileSharesInput"},
-      "output":{"shape":"ListFileSharesOutput"},
       "errors":[
         {"shape":"InvalidGatewayRequestException"},
         {"shape":"InternalServerError"}
@@ -767,19 +712,6 @@
         {"shape":"InternalServerError"}
       ]
     },
-    "UpdateNFSFileShare":{
-      "name":"UpdateNFSFileShare",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"UpdateNFSFileShareInput"},
-      "output":{"shape":"UpdateNFSFileShareOutput"},
-      "errors":[
-        {"shape":"InvalidGatewayRequestException"},
-        {"shape":"InternalServerError"}
-      ]
-    },
     "UpdateSnapshotSchedule":{
       "name":"UpdateSnapshotSchedule",
       "http":{
@@ -918,7 +850,6 @@
       "type":"long",
       "min":51200
     },
-    "Boolean":{"type":"boolean"},
     "CachediSCSIVolume":{
       "type":"structure",
       "members":{
@@ -929,8 +860,7 @@
         "VolumeSizeInBytes":{"shape":"long"},
         "VolumeProgress":{"shape":"DoubleObject"},
         "SourceSnapshotId":{"shape":"SnapshotId"},
-        "VolumeiSCSIAttributes":{"shape":"VolumeiSCSIAttributes"},
-        "CreatedDate":{"shape":"CreatedDate"}
+        "VolumeiSCSIAttributes":{"shape":"VolumeiSCSIAttributes"}
       }
     },
     "CachediSCSIVolumes":{
@@ -1008,7 +938,6 @@
         "VolumeSizeInBytes":{"shape":"long"},
         "SnapshotId":{"shape":"SnapshotId"},
         "TargetName":{"shape":"TargetName"},
-        "SourceVolumeARN":{"shape":"VolumeARN"},
         "NetworkInterfaceId":{"shape":"NetworkInterfaceId"},
         "ClientToken":{"shape":"ClientToken"}
       }
@@ -1018,31 +947,6 @@
       "members":{
         "VolumeARN":{"shape":"VolumeARN"},
         "TargetARN":{"shape":"TargetARN"}
-      }
-    },
-    "CreateNFSFileShareInput":{
-      "type":"structure",
-      "required":[
-        "ClientToken",
-        "GatewayARN",
-        "Role",
-        "LocationARN"
-      ],
-      "members":{
-        "ClientToken":{"shape":"ClientToken"},
-        "NFSFileShareDefaults":{"shape":"NFSFileShareDefaults"},
-        "GatewayARN":{"shape":"GatewayARN"},
-        "KMSEncrypted":{"shape":"Boolean"},
-        "KMSKey":{"shape":"KMSKey"},
-        "Role":{"shape":"Role"},
-        "LocationARN":{"shape":"LocationARN"},
-        "DefaultStorageClass":{"shape":"StorageClass"}
-      }
-    },
-    "CreateNFSFileShareOutput":{
-      "type":"structure",
-      "members":{
-        "FileShareARN":{"shape":"FileShareARN"}
       }
     },
     "CreateSnapshotFromVolumeRecoveryPointInput":{
@@ -1150,7 +1054,6 @@
         "TapeARNs":{"shape":"TapeARNs"}
       }
     },
-    "CreatedDate":{"type":"timestamp"},
     "DayOfWeek":{
       "type":"integer",
       "max":6,
@@ -1189,19 +1092,6 @@
       "members":{
         "TargetARN":{"shape":"TargetARN"},
         "InitiatorName":{"shape":"IqnName"}
-      }
-    },
-    "DeleteFileShareInput":{
-      "type":"structure",
-      "required":["FileShareARN"],
-      "members":{
-        "FileShareARN":{"shape":"FileShareARN"}
-      }
-    },
-    "DeleteFileShareOutput":{
-      "type":"structure",
-      "members":{
-        "FileShareARN":{"shape":"FileShareARN"}
       }
     },
     "DeleteGatewayInput":{
@@ -1369,19 +1259,6 @@
         "MinuteOfHour":{"shape":"MinuteOfHour"},
         "DayOfWeek":{"shape":"DayOfWeek"},
         "Timezone":{"shape":"GatewayTimezone"}
-      }
-    },
-    "DescribeNFSFileSharesInput":{
-      "type":"structure",
-      "required":["FileShareARNList"],
-      "members":{
-        "FileShareARNList":{"shape":"FileShareARNList"}
-      }
-    },
-    "DescribeNFSFileSharesOutput":{
-      "type":"structure",
-      "members":{
-        "NFSFileShareInfoList":{"shape":"NFSFileShareInfoList"}
       }
     },
     "DescribeSnapshotScheduleInput":{
@@ -1642,40 +1519,6 @@
         "VolumeNotReady"
       ]
     },
-    "FileShareARN":{
-      "type":"string",
-      "max":500,
-      "min":50
-    },
-    "FileShareARNList":{
-      "type":"list",
-      "member":{"shape":"FileShareARN"},
-      "max":10,
-      "min":1
-    },
-    "FileShareId":{
-      "type":"string",
-      "max":30,
-      "min":12
-    },
-    "FileShareInfo":{
-      "type":"structure",
-      "members":{
-        "FileShareARN":{"shape":"FileShareARN"},
-        "FileShareId":{"shape":"FileShareId"},
-        "FileShareStatus":{"shape":"FileShareStatus"},
-        "GatewayARN":{"shape":"GatewayARN"}
-      }
-    },
-    "FileShareInfoList":{
-      "type":"list",
-      "member":{"shape":"FileShareInfo"}
-    },
-    "FileShareStatus":{
-      "type":"string",
-      "max":50,
-      "min":3
-    },
     "GatewayARN":{
       "type":"string",
       "max":500,
@@ -1766,31 +1609,10 @@
       "min":1,
       "pattern":"[0-9a-z:.-]+"
     },
-    "KMSKey":{
-      "type":"string",
-      "max":2048,
-      "min":20
-    },
     "LastSoftwareUpdate":{
       "type":"string",
       "max":25,
       "min":1
-    },
-    "ListFileSharesInput":{
-      "type":"structure",
-      "members":{
-        "GatewayARN":{"shape":"GatewayARN"},
-        "Limit":{"shape":"PositiveIntObject"},
-        "Marker":{"shape":"Marker"}
-      }
-    },
-    "ListFileSharesOutput":{
-      "type":"structure",
-      "members":{
-        "Marker":{"shape":"Marker"},
-        "NextMarker":{"shape":"Marker"},
-        "FileShareInfoList":{"shape":"FileShareInfoList"}
-      }
     },
     "ListGatewaysInput":{
       "type":"structure",
@@ -1902,11 +1724,6 @@
       "pattern":"^[ -~]+$",
       "sensitive":true
     },
-    "LocationARN":{
-      "type":"string",
-      "max":310,
-      "min":16
-    },
     "Marker":{
       "type":"string",
       "max":1000,
@@ -1921,35 +1738,6 @@
       "type":"integer",
       "max":59,
       "min":0
-    },
-    "NFSFileShareDefaults":{
-      "type":"structure",
-      "members":{
-        "FileMode":{"shape":"PermissionMode"},
-        "DirectoryMode":{"shape":"PermissionMode"},
-        "GroupId":{"shape":"PermissionId"},
-        "OwnerId":{"shape":"PermissionId"}
-      }
-    },
-    "NFSFileShareInfo":{
-      "type":"structure",
-      "members":{
-        "NFSFileShareDefaults":{"shape":"NFSFileShareDefaults"},
-        "FileShareARN":{"shape":"FileShareARN"},
-        "FileShareId":{"shape":"FileShareId"},
-        "FileShareStatus":{"shape":"FileShareStatus"},
-        "GatewayARN":{"shape":"GatewayARN"},
-        "KMSEncrypted":{"shape":"boolean"},
-        "KMSKey":{"shape":"KMSKey"},
-        "Path":{"shape":"Path"},
-        "Role":{"shape":"Role"},
-        "LocationARN":{"shape":"LocationARN"},
-        "DefaultStorageClass":{"shape":"StorageClass"}
-      }
-    },
-    "NFSFileShareInfoList":{
-      "type":"list",
-      "member":{"shape":"NFSFileShareInfo"}
     },
     "NetworkInterface":{
       "type":"structure",
@@ -1972,18 +1760,6 @@
       "type":"integer",
       "max":10,
       "min":1
-    },
-    "Path":{"type":"string"},
-    "PermissionId":{
-      "type":"long",
-      "max":4294967294,
-      "min":0
-    },
-    "PermissionMode":{
-      "type":"string",
-      "max":4,
-      "min":1,
-      "pattern":"^[0-7]{4}$"
     },
     "PositiveIntObject":{
       "type":"integer",
@@ -2068,19 +1844,6 @@
         "TapeARN":{"shape":"TapeARN"}
       }
     },
-    "Role":{
-      "type":"string",
-      "max":2048,
-      "min":20
-    },
-    "ServiceUnavailableError":{
-      "type":"structure",
-      "members":{
-        "message":{"shape":"string"},
-        "error":{"shape":"StorageGatewayError"}
-      },
-      "exception":true
-    },
     "SetLocalConsolePasswordInput":{
       "type":"structure",
       "required":[
@@ -2133,11 +1896,6 @@
         "GatewayARN":{"shape":"GatewayARN"}
       }
     },
-    "StorageClass":{
-      "type":"string",
-      "max":20,
-      "min":5
-    },
     "StorageGatewayError":{
       "type":"structure",
       "members":{
@@ -2157,8 +1915,7 @@
         "VolumeDiskId":{"shape":"DiskId"},
         "SourceSnapshotId":{"shape":"SnapshotId"},
         "PreservedExistingData":{"shape":"boolean"},
-        "VolumeiSCSIAttributes":{"shape":"VolumeiSCSIAttributes"},
-        "CreatedDate":{"shape":"CreatedDate"}
+        "VolumeiSCSIAttributes":{"shape":"VolumeiSCSIAttributes"}
       }
     },
     "StorediSCSIVolumes":{
@@ -2199,7 +1956,6 @@
       "members":{
         "TapeARN":{"shape":"TapeARN"},
         "TapeBarcode":{"shape":"TapeBarcode"},
-        "TapeCreatedDate":{"shape":"Time"},
         "TapeSizeInBytes":{"shape":"TapeSize"},
         "TapeStatus":{"shape":"TapeStatus"},
         "VTLDevice":{"shape":"VTLDeviceARN"},
@@ -2209,8 +1965,7 @@
     "TapeARN":{
       "type":"string",
       "max":500,
-      "min":50,
-      "pattern":"^arn:(aws|aws-cn):storagegateway:[a-z\\-0-9]+:[0-9]+:tape\\/[0-9A-Z]{7,16}$"
+      "min":50
     },
     "TapeARNs":{
       "type":"list",
@@ -2221,7 +1976,6 @@
       "members":{
         "TapeARN":{"shape":"TapeARN"},
         "TapeBarcode":{"shape":"TapeBarcode"},
-        "TapeCreatedDate":{"shape":"Time"},
         "TapeSizeInBytes":{"shape":"TapeSize"},
         "CompletionTime":{"shape":"Time"},
         "RetrievedTo":{"shape":"GatewayARN"},
@@ -2380,23 +2134,6 @@
       "type":"structure",
       "members":{
         "GatewayARN":{"shape":"GatewayARN"}
-      }
-    },
-    "UpdateNFSFileShareInput":{
-      "type":"structure",
-      "required":["FileShareARN"],
-      "members":{
-        "FileShareARN":{"shape":"FileShareARN"},
-        "KMSEncrypted":{"shape":"Boolean"},
-        "KMSKey":{"shape":"KMSKey"},
-        "NFSFileShareDefaults":{"shape":"NFSFileShareDefaults"},
-        "DefaultStorageClass":{"shape":"StorageClass"}
-      }
-    },
-    "UpdateNFSFileShareOutput":{
-      "type":"structure",
-      "members":{
-        "FileShareARN":{"shape":"FileShareARN"}
       }
     },
     "UpdateSnapshotScheduleInput":{

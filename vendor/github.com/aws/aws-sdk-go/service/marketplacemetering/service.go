@@ -19,22 +19,9 @@ import (
 //
 // Submitting Metering Records
 //
-//    * MeterUsage- Submits the metering record for a Marketplace product. MeterUsage
-//    is called from an EC2 instance.
-//
-//    * BatchMeterUsage- Submits the metering record for a set of customers.
-//    BatchMeterUsage is called from a software-as-a-service (SaaS) application.
-//
-// Accepting New Customers
-//
-//    * ResolveCustomer- Called by a SaaS application during the registration
-//    process. When a buyer visits your website during the registration process,
-//    the buyer submits a Registration Token through the browser. The Registration
-//    Token is resolved through this API to obtain a CustomerIdentifier and
-//    Product Code.
-// The service client's operations are safe to be used concurrently.
+//   MeterUsage- Submits the metering record for a Marketplace product.
+//The service client's operations are safe to be used concurrently.
 // It is not safe to mutate any of the client's properties though.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/meteringmarketplace-2016-01-14
 type MarketplaceMetering struct {
 	*client.Client
 }
@@ -45,11 +32,8 @@ var initClient func(*client.Client)
 // Used for custom request initialization logic
 var initRequest func(*request.Request)
 
-// Service information constants
-const (
-	ServiceName = "metering.marketplace" // Service endpoint prefix API calls made to.
-	EndpointsID = ServiceName            // Service ID for Regions and Endpoints metadata.
-)
+// A ServiceName is the name of the service the client will make API calls to.
+const ServiceName = "metering.marketplace"
 
 // New creates a new instance of the MarketplaceMetering client with a session.
 // If additional configuration is needed for the client instance use the optional
@@ -62,21 +46,18 @@ const (
 //     // Create a MarketplaceMetering client with additional configuration
 //     svc := marketplacemetering.New(mySession, aws.NewConfig().WithRegion("us-west-2"))
 func New(p client.ConfigProvider, cfgs ...*aws.Config) *MarketplaceMetering {
-	c := p.ClientConfig(EndpointsID, cfgs...)
-	return newClient(*c.Config, c.Handlers, c.Endpoint, c.SigningRegion, c.SigningName)
+	c := p.ClientConfig(ServiceName, cfgs...)
+	return newClient(*c.Config, c.Handlers, c.Endpoint, c.SigningRegion)
 }
 
 // newClient creates, initializes and returns a new service client instance.
-func newClient(cfg aws.Config, handlers request.Handlers, endpoint, signingRegion, signingName string) *MarketplaceMetering {
-	if len(signingName) == 0 {
-		signingName = "aws-marketplace"
-	}
+func newClient(cfg aws.Config, handlers request.Handlers, endpoint, signingRegion string) *MarketplaceMetering {
 	svc := &MarketplaceMetering{
 		Client: client.New(
 			cfg,
 			metadata.ClientInfo{
 				ServiceName:   ServiceName,
-				SigningName:   signingName,
+				SigningName:   "aws-marketplace",
 				SigningRegion: signingRegion,
 				Endpoint:      endpoint,
 				APIVersion:    "2016-01-14",

@@ -8,16 +8,18 @@ import (
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/registry/api/errcode"
 
+	corev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapiv1 "k8s.io/kubernetes/pkg/api/v1"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	quotautil "github.com/openshift/origin/pkg/quota/util"
+	dockerapiv10 "github.com/openshift/api/image/docker10"
+	imageapiv1 "github.com/openshift/api/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
+	util "github.com/openshift/image-registry/pkg/origin-common/util"
 )
 
 type imageStream struct {
@@ -81,7 +83,7 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 	}
 
 	context.GetLogger(ctx).Infof("(*imageStream).getImage: got image %s", image.Name)
-	if err := imageapiv1.ImageWithMetadata(image); err != nil {
+	if err := util.ImageWithMetadata(image); err != nil {
 		return nil, err
 	}
 	is.cachedImages[dgst] = image
@@ -106,7 +108,7 @@ func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst dig
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
-	tagEvent, err := imageapiv1.ResolveImageID(stream, dgst.String())
+	tagEvent, err := util.ResolveImageID(stream, dgst.String())
 	if err != nil {
 		context.GetLogger(ctx).Errorf("failed to resolve image %s in ImageStream %s: %v", dgst.String(), is.Reference(), err)
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
@@ -150,7 +152,7 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 		for _, layer := range image.DockerImageLayers {
 			_ = is.cache.AddDigest(digest.Digest(layer.Name), cacheName)
 		}
-		meta, ok := image.DockerImageMetadata.Object.(*imageapi.DockerImage)
+		meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
 		if !ok {
 			context.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
 			return
@@ -172,7 +174,7 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 	}
 }
 
-func (is *imageStream) getSecrets() ([]kapiv1.Secret, error) {
+func (is *imageStream) getSecrets() ([]corev1.Secret, error) {
 	secrets, err := is.registryOSClient.ImageStreamSecrets(is.namespace).Secrets(is.name, metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error getting secrets for repository %s: %v", is.Reference(), err)
@@ -194,7 +196,7 @@ func (is *imageStream) tagIsInsecure(tag string, dgst digest.Digest) (bool, erro
 
 	if len(tag) == 0 {
 		// if the client pulled by digest, find the corresponding tag in the image stream
-		tag, _ = imageapiv1.LatestImageTagEvent(stream, dgst.String())
+		tag, _ = util.LatestImageTagEvent(stream, dgst.String())
 	}
 
 	if len(tag) != 0 {

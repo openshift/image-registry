@@ -43,9 +43,8 @@ import (
 // If you want to use Amazon Cognito in an Android, iOS, or Unity application,
 // you will probably want to make API calls via the AWS Mobile SDK. To learn
 // more, see the AWS Mobile SDK Developer Guide (http://docs.aws.amazon.com/mobile/index.html).
-// The service client's operations are safe to be used concurrently.
+//The service client's operations are safe to be used concurrently.
 // It is not safe to mutate any of the client's properties though.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/cognito-identity-2014-06-30
 type CognitoIdentity struct {
 	*client.Client
 }
@@ -56,11 +55,8 @@ var initClient func(*client.Client)
 // Used for custom request initialization logic
 var initRequest func(*request.Request)
 
-// Service information constants
-const (
-	ServiceName = "cognito-identity" // Service endpoint prefix API calls made to.
-	EndpointsID = ServiceName        // Service ID for Regions and Endpoints metadata.
-)
+// A ServiceName is the name of the service the client will make API calls to.
+const ServiceName = "cognito-identity"
 
 // New creates a new instance of the CognitoIdentity client with a session.
 // If additional configuration is needed for the client instance use the optional
@@ -73,18 +69,17 @@ const (
 //     // Create a CognitoIdentity client with additional configuration
 //     svc := cognitoidentity.New(mySession, aws.NewConfig().WithRegion("us-west-2"))
 func New(p client.ConfigProvider, cfgs ...*aws.Config) *CognitoIdentity {
-	c := p.ClientConfig(EndpointsID, cfgs...)
-	return newClient(*c.Config, c.Handlers, c.Endpoint, c.SigningRegion, c.SigningName)
+	c := p.ClientConfig(ServiceName, cfgs...)
+	return newClient(*c.Config, c.Handlers, c.Endpoint, c.SigningRegion)
 }
 
 // newClient creates, initializes and returns a new service client instance.
-func newClient(cfg aws.Config, handlers request.Handlers, endpoint, signingRegion, signingName string) *CognitoIdentity {
+func newClient(cfg aws.Config, handlers request.Handlers, endpoint, signingRegion string) *CognitoIdentity {
 	svc := &CognitoIdentity{
 		Client: client.New(
 			cfg,
 			metadata.ClientInfo{
 				ServiceName:   ServiceName,
-				SigningName:   signingName,
 				SigningRegion: signingRegion,
 				Endpoint:      endpoint,
 				APIVersion:    "2014-06-30",

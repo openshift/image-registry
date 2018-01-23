@@ -24,11 +24,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/diff"
 	clientgotesting "k8s.io/client-go/testing"
-	kapi "k8s.io/kubernetes/pkg/api"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	"github.com/openshift/origin/pkg/image/util"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/image-registry/pkg/origin-common/util"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
@@ -618,19 +617,20 @@ func storeTestImage(
 		image.DockerImageSignatures = append(image.DockerImageSignatures, signatures...)
 	}
 
-	if err := util.ImageWithMetadata(image); err != nil {
-		return nil, err
-	}
-	newImage := imageapiv1.Image{}
-	if err := kapi.Scheme.Converter().Convert(image, &newImage, 0, nil); err != nil {
+	if err := util.InternalImageWithMetadata(image); err != nil {
 		return nil, err
 	}
 
-	if err := imageapiv1.ImageWithMetadata(&newImage); err != nil {
+	newImage, err := testutil.ConvertImage(image)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert image from internal to external type: %v", err)
+	}
+	if err := util.ImageWithMetadata(newImage); err != nil {
 		return nil, fmt.Errorf("failed to fill image with metadata: %v", err)
 	}
 
-	return &newImage, nil
+	return newImage, nil
+
 }
 
 func populateTestStorage(

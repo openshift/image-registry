@@ -20,7 +20,9 @@ import (
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/distribution/registry/client/auth/challenge"
 	"github.com/docker/distribution/registry/client/transport"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
+
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 func NewTransport(baseURL string, repoName string, creds auth.CredentialStore) (http.RoundTripper, error) {
@@ -349,4 +351,27 @@ func UploadSchema2Image(ctx context.Context, repo distribution.Repository, tag s
 	}
 
 	return manifest, nil
+}
+
+func ConvertImage(image *imageapi.Image) (*imageapiv1.Image, error) {
+	newImage := &imageapiv1.Image{}
+	newImage.Name = image.Name
+	newImage.Annotations = image.Annotations
+	newImage.DockerImageReference = image.DockerImageReference
+	newImage.DockerImageManifest = image.DockerImageManifest
+	newImage.DockerImageConfig = image.DockerImageConfig
+
+	for _, layer := range image.DockerImageLayers {
+		newImage.DockerImageLayers = append(newImage.DockerImageLayers, imageapiv1.ImageLayer{
+			Name:      layer.Name,
+			LayerSize: layer.LayerSize,
+			MediaType: layer.MediaType,
+		})
+	}
+	b, err := json.Marshal(image.DockerImageMetadata)
+	if err != nil {
+		return nil, err
+	}
+	newImage.DockerImageMetadata.Raw = b
+	return newImage, nil
 }

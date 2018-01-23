@@ -11,10 +11,10 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"k8s.io/kubernetes/pkg/util/logs"
+	"k8s.io/apiserver/pkg/util/logs"
 
 	"github.com/openshift/image-registry/pkg/cmd/dockerregistry"
-	"github.com/openshift/origin/pkg/cmd/util/serviceability"
+	"github.com/openshift/image-registry/pkg/origin-common/cmd/util/serviceability"
 )
 
 func main() {

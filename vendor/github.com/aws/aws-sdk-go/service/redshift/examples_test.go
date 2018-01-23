@@ -16,13 +16,7 @@ var _ time.Duration
 var _ bytes.Buffer
 
 func ExampleRedshift_AuthorizeClusterSecurityGroupIngress() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.AuthorizeClusterSecurityGroupIngressInput{
 		ClusterSecurityGroupName: aws.String("String"), // Required
@@ -44,13 +38,7 @@ func ExampleRedshift_AuthorizeClusterSecurityGroupIngress() {
 }
 
 func ExampleRedshift_AuthorizeSnapshotAccess() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.AuthorizeSnapshotAccessInput{
 		AccountWithRestoreAccess:  aws.String("String"), // Required
@@ -71,13 +59,7 @@ func ExampleRedshift_AuthorizeSnapshotAccess() {
 }
 
 func ExampleRedshift_CopyClusterSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CopyClusterSnapshotInput{
 		SourceSnapshotIdentifier:        aws.String("String"), // Required
@@ -98,13 +80,7 @@ func ExampleRedshift_CopyClusterSnapshot() {
 }
 
 func ExampleRedshift_CreateCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateClusterInput{
 		ClusterIdentifier:                aws.String("String"), // Required
@@ -126,7 +102,6 @@ func ExampleRedshift_CreateCluster() {
 		DBName:                         aws.String("String"),
 		ElasticIp:                      aws.String("String"),
 		Encrypted:                      aws.Bool(true),
-		EnhancedVpcRouting:             aws.Bool(true),
 		HsmClientCertificateIdentifier: aws.String("String"),
 		HsmConfigurationIdentifier:     aws.String("String"),
 		IamRoles: []*string{
@@ -164,13 +139,7 @@ func ExampleRedshift_CreateCluster() {
 }
 
 func ExampleRedshift_CreateClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateClusterParameterGroupInput{
 		Description:          aws.String("String"), // Required
@@ -198,13 +167,7 @@ func ExampleRedshift_CreateClusterParameterGroup() {
 }
 
 func ExampleRedshift_CreateClusterSecurityGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateClusterSecurityGroupInput{
 		ClusterSecurityGroupName: aws.String("String"), // Required
@@ -231,13 +194,7 @@ func ExampleRedshift_CreateClusterSecurityGroup() {
 }
 
 func ExampleRedshift_CreateClusterSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateClusterSnapshotInput{
 		ClusterIdentifier:  aws.String("String"), // Required
@@ -264,13 +221,7 @@ func ExampleRedshift_CreateClusterSnapshot() {
 }
 
 func ExampleRedshift_CreateClusterSubnetGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateClusterSubnetGroupInput{
 		ClusterSubnetGroupName: aws.String("String"), // Required
@@ -301,13 +252,7 @@ func ExampleRedshift_CreateClusterSubnetGroup() {
 }
 
 func ExampleRedshift_CreateEventSubscription() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateEventSubscriptionInput{
 		SnsTopicArn:      aws.String("String"), // Required
@@ -345,13 +290,7 @@ func ExampleRedshift_CreateEventSubscription() {
 }
 
 func ExampleRedshift_CreateHsmClientCertificate() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateHsmClientCertificateInput{
 		HsmClientCertificateIdentifier: aws.String("String"), // Required
@@ -377,13 +316,7 @@ func ExampleRedshift_CreateHsmClientCertificate() {
 }
 
 func ExampleRedshift_CreateHsmConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateHsmConfigurationInput{
 		Description:                aws.String("String"), // Required
@@ -414,13 +347,7 @@ func ExampleRedshift_CreateHsmConfiguration() {
 }
 
 func ExampleRedshift_CreateSnapshotCopyGrant() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateSnapshotCopyGrantInput{
 		SnapshotCopyGrantName: aws.String("String"), // Required
@@ -447,13 +374,7 @@ func ExampleRedshift_CreateSnapshotCopyGrant() {
 }
 
 func ExampleRedshift_CreateTags() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.CreateTagsInput{
 		ResourceName: aws.String("String"), // Required
@@ -479,13 +400,7 @@ func ExampleRedshift_CreateTags() {
 }
 
 func ExampleRedshift_DeleteCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteClusterInput{
 		ClusterIdentifier:              aws.String("String"), // Required
@@ -506,13 +421,7 @@ func ExampleRedshift_DeleteCluster() {
 }
 
 func ExampleRedshift_DeleteClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteClusterParameterGroupInput{
 		ParameterGroupName: aws.String("String"), // Required
@@ -531,13 +440,7 @@ func ExampleRedshift_DeleteClusterParameterGroup() {
 }
 
 func ExampleRedshift_DeleteClusterSecurityGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteClusterSecurityGroupInput{
 		ClusterSecurityGroupName: aws.String("String"), // Required
@@ -556,13 +459,7 @@ func ExampleRedshift_DeleteClusterSecurityGroup() {
 }
 
 func ExampleRedshift_DeleteClusterSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteClusterSnapshotInput{
 		SnapshotIdentifier:        aws.String("String"), // Required
@@ -582,13 +479,7 @@ func ExampleRedshift_DeleteClusterSnapshot() {
 }
 
 func ExampleRedshift_DeleteClusterSubnetGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteClusterSubnetGroupInput{
 		ClusterSubnetGroupName: aws.String("String"), // Required
@@ -607,13 +498,7 @@ func ExampleRedshift_DeleteClusterSubnetGroup() {
 }
 
 func ExampleRedshift_DeleteEventSubscription() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteEventSubscriptionInput{
 		SubscriptionName: aws.String("String"), // Required
@@ -632,13 +517,7 @@ func ExampleRedshift_DeleteEventSubscription() {
 }
 
 func ExampleRedshift_DeleteHsmClientCertificate() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteHsmClientCertificateInput{
 		HsmClientCertificateIdentifier: aws.String("String"), // Required
@@ -657,13 +536,7 @@ func ExampleRedshift_DeleteHsmClientCertificate() {
 }
 
 func ExampleRedshift_DeleteHsmConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteHsmConfigurationInput{
 		HsmConfigurationIdentifier: aws.String("String"), // Required
@@ -682,13 +555,7 @@ func ExampleRedshift_DeleteHsmConfiguration() {
 }
 
 func ExampleRedshift_DeleteSnapshotCopyGrant() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteSnapshotCopyGrantInput{
 		SnapshotCopyGrantName: aws.String("String"), // Required
@@ -707,13 +574,7 @@ func ExampleRedshift_DeleteSnapshotCopyGrant() {
 }
 
 func ExampleRedshift_DeleteTags() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DeleteTagsInput{
 		ResourceName: aws.String("String"), // Required
@@ -736,13 +597,7 @@ func ExampleRedshift_DeleteTags() {
 }
 
 func ExampleRedshift_DescribeClusterParameterGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeClusterParameterGroupsInput{
 		Marker:             aws.String("String"),
@@ -771,13 +626,7 @@ func ExampleRedshift_DescribeClusterParameterGroups() {
 }
 
 func ExampleRedshift_DescribeClusterParameters() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeClusterParametersInput{
 		ParameterGroupName: aws.String("String"), // Required
@@ -799,13 +648,7 @@ func ExampleRedshift_DescribeClusterParameters() {
 }
 
 func ExampleRedshift_DescribeClusterSecurityGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeClusterSecurityGroupsInput{
 		ClusterSecurityGroupName: aws.String("String"),
@@ -834,13 +677,7 @@ func ExampleRedshift_DescribeClusterSecurityGroups() {
 }
 
 func ExampleRedshift_DescribeClusterSnapshots() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeClusterSnapshotsInput{
 		ClusterIdentifier:  aws.String("String"),
@@ -874,13 +711,7 @@ func ExampleRedshift_DescribeClusterSnapshots() {
 }
 
 func ExampleRedshift_DescribeClusterSubnetGroups() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeClusterSubnetGroupsInput{
 		ClusterSubnetGroupName: aws.String("String"),
@@ -909,13 +740,7 @@ func ExampleRedshift_DescribeClusterSubnetGroups() {
 }
 
 func ExampleRedshift_DescribeClusterVersions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeClusterVersionsInput{
 		ClusterParameterGroupFamily: aws.String("String"),
@@ -937,13 +762,7 @@ func ExampleRedshift_DescribeClusterVersions() {
 }
 
 func ExampleRedshift_DescribeClusters() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeClustersInput{
 		ClusterIdentifier: aws.String("String"),
@@ -972,13 +791,7 @@ func ExampleRedshift_DescribeClusters() {
 }
 
 func ExampleRedshift_DescribeDefaultClusterParameters() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeDefaultClusterParametersInput{
 		ParameterGroupFamily: aws.String("String"), // Required
@@ -999,13 +812,7 @@ func ExampleRedshift_DescribeDefaultClusterParameters() {
 }
 
 func ExampleRedshift_DescribeEventCategories() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeEventCategoriesInput{
 		SourceType: aws.String("String"),
@@ -1024,13 +831,7 @@ func ExampleRedshift_DescribeEventCategories() {
 }
 
 func ExampleRedshift_DescribeEventSubscriptions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeEventSubscriptionsInput{
 		Marker:           aws.String("String"),
@@ -1051,13 +852,7 @@ func ExampleRedshift_DescribeEventSubscriptions() {
 }
 
 func ExampleRedshift_DescribeEvents() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeEventsInput{
 		Duration:         aws.Int64(1),
@@ -1082,13 +877,7 @@ func ExampleRedshift_DescribeEvents() {
 }
 
 func ExampleRedshift_DescribeHsmClientCertificates() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeHsmClientCertificatesInput{
 		HsmClientCertificateIdentifier: aws.String("String"),
@@ -1117,13 +906,7 @@ func ExampleRedshift_DescribeHsmClientCertificates() {
 }
 
 func ExampleRedshift_DescribeHsmConfigurations() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeHsmConfigurationsInput{
 		HsmConfigurationIdentifier: aws.String("String"),
@@ -1152,13 +935,7 @@ func ExampleRedshift_DescribeHsmConfigurations() {
 }
 
 func ExampleRedshift_DescribeLoggingStatus() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeLoggingStatusInput{
 		ClusterIdentifier: aws.String("String"), // Required
@@ -1177,13 +954,7 @@ func ExampleRedshift_DescribeLoggingStatus() {
 }
 
 func ExampleRedshift_DescribeOrderableClusterOptions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeOrderableClusterOptionsInput{
 		ClusterVersion: aws.String("String"),
@@ -1205,13 +976,7 @@ func ExampleRedshift_DescribeOrderableClusterOptions() {
 }
 
 func ExampleRedshift_DescribeReservedNodeOfferings() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeReservedNodeOfferingsInput{
 		Marker:                 aws.String("String"),
@@ -1232,13 +997,7 @@ func ExampleRedshift_DescribeReservedNodeOfferings() {
 }
 
 func ExampleRedshift_DescribeReservedNodes() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeReservedNodesInput{
 		Marker:         aws.String("String"),
@@ -1259,13 +1018,7 @@ func ExampleRedshift_DescribeReservedNodes() {
 }
 
 func ExampleRedshift_DescribeResize() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeResizeInput{
 		ClusterIdentifier: aws.String("String"), // Required
@@ -1284,13 +1037,7 @@ func ExampleRedshift_DescribeResize() {
 }
 
 func ExampleRedshift_DescribeSnapshotCopyGrants() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeSnapshotCopyGrantsInput{
 		Marker:                aws.String("String"),
@@ -1319,13 +1066,7 @@ func ExampleRedshift_DescribeSnapshotCopyGrants() {
 }
 
 func ExampleRedshift_DescribeTableRestoreStatus() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeTableRestoreStatusInput{
 		ClusterIdentifier:     aws.String("String"),
@@ -1347,13 +1088,7 @@ func ExampleRedshift_DescribeTableRestoreStatus() {
 }
 
 func ExampleRedshift_DescribeTags() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DescribeTagsInput{
 		Marker:       aws.String("String"),
@@ -1383,13 +1118,7 @@ func ExampleRedshift_DescribeTags() {
 }
 
 func ExampleRedshift_DisableLogging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DisableLoggingInput{
 		ClusterIdentifier: aws.String("String"), // Required
@@ -1408,13 +1137,7 @@ func ExampleRedshift_DisableLogging() {
 }
 
 func ExampleRedshift_DisableSnapshotCopy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.DisableSnapshotCopyInput{
 		ClusterIdentifier: aws.String("String"), // Required
@@ -1433,13 +1156,7 @@ func ExampleRedshift_DisableSnapshotCopy() {
 }
 
 func ExampleRedshift_EnableLogging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.EnableLoggingInput{
 		BucketName:        aws.String("String"), // Required
@@ -1460,13 +1177,7 @@ func ExampleRedshift_EnableLogging() {
 }
 
 func ExampleRedshift_EnableSnapshotCopy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.EnableSnapshotCopyInput{
 		ClusterIdentifier:     aws.String("String"), // Required
@@ -1488,13 +1199,7 @@ func ExampleRedshift_EnableSnapshotCopy() {
 }
 
 func ExampleRedshift_ModifyCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.ModifyClusterInput{
 		ClusterIdentifier:                aws.String("String"), // Required
@@ -1508,7 +1213,6 @@ func ExampleRedshift_ModifyCluster() {
 		ClusterType:                    aws.String("String"),
 		ClusterVersion:                 aws.String("String"),
 		ElasticIp:                      aws.String("String"),
-		EnhancedVpcRouting:             aws.Bool(true),
 		HsmClientCertificateIdentifier: aws.String("String"),
 		HsmConfigurationIdentifier:     aws.String("String"),
 		MasterUserPassword:             aws.String("String"),
@@ -1536,13 +1240,7 @@ func ExampleRedshift_ModifyCluster() {
 }
 
 func ExampleRedshift_ModifyClusterIamRoles() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.ModifyClusterIamRolesInput{
 		ClusterIdentifier: aws.String("String"), // Required
@@ -1569,13 +1267,7 @@ func ExampleRedshift_ModifyClusterIamRoles() {
 }
 
 func ExampleRedshift_ModifyClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.ModifyClusterParameterGroupInput{
 		ParameterGroupName: aws.String("String"), // Required
@@ -1608,13 +1300,7 @@ func ExampleRedshift_ModifyClusterParameterGroup() {
 }
 
 func ExampleRedshift_ModifyClusterSubnetGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.ModifyClusterSubnetGroupInput{
 		ClusterSubnetGroupName: aws.String("String"), // Required
@@ -1638,13 +1324,7 @@ func ExampleRedshift_ModifyClusterSubnetGroup() {
 }
 
 func ExampleRedshift_ModifyEventSubscription() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.ModifyEventSubscriptionInput{
 		SubscriptionName: aws.String("String"), // Required
@@ -1675,13 +1355,7 @@ func ExampleRedshift_ModifyEventSubscription() {
 }
 
 func ExampleRedshift_ModifySnapshotCopyRetentionPeriod() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.ModifySnapshotCopyRetentionPeriodInput{
 		ClusterIdentifier: aws.String("String"), // Required
@@ -1701,13 +1375,7 @@ func ExampleRedshift_ModifySnapshotCopyRetentionPeriod() {
 }
 
 func ExampleRedshift_PurchaseReservedNodeOffering() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.PurchaseReservedNodeOfferingInput{
 		ReservedNodeOfferingId: aws.String("String"), // Required
@@ -1727,13 +1395,7 @@ func ExampleRedshift_PurchaseReservedNodeOffering() {
 }
 
 func ExampleRedshift_RebootCluster() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.RebootClusterInput{
 		ClusterIdentifier: aws.String("String"), // Required
@@ -1752,13 +1414,7 @@ func ExampleRedshift_RebootCluster() {
 }
 
 func ExampleRedshift_ResetClusterParameterGroup() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.ResetClusterParameterGroupInput{
 		ParameterGroupName: aws.String("String"), // Required
@@ -1792,13 +1448,7 @@ func ExampleRedshift_ResetClusterParameterGroup() {
 }
 
 func ExampleRedshift_RestoreFromClusterSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.RestoreFromClusterSnapshotInput{
 		ClusterIdentifier:                aws.String("String"), // Required
@@ -1814,7 +1464,6 @@ func ExampleRedshift_RestoreFromClusterSnapshot() {
 		},
 		ClusterSubnetGroupName:         aws.String("String"),
 		ElasticIp:                      aws.String("String"),
-		EnhancedVpcRouting:             aws.Bool(true),
 		HsmClientCertificateIdentifier: aws.String("String"),
 		HsmConfigurationIdentifier:     aws.String("String"),
 		IamRoles: []*string{
@@ -1847,13 +1496,7 @@ func ExampleRedshift_RestoreFromClusterSnapshot() {
 }
 
 func ExampleRedshift_RestoreTableFromClusterSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.RestoreTableFromClusterSnapshotInput{
 		ClusterIdentifier:  aws.String("String"), // Required
@@ -1879,13 +1522,7 @@ func ExampleRedshift_RestoreTableFromClusterSnapshot() {
 }
 
 func ExampleRedshift_RevokeClusterSecurityGroupIngress() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.RevokeClusterSecurityGroupIngressInput{
 		ClusterSecurityGroupName: aws.String("String"), // Required
@@ -1907,13 +1544,7 @@ func ExampleRedshift_RevokeClusterSecurityGroupIngress() {
 }
 
 func ExampleRedshift_RevokeSnapshotAccess() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.RevokeSnapshotAccessInput{
 		AccountWithRestoreAccess:  aws.String("String"), // Required
@@ -1934,13 +1565,7 @@ func ExampleRedshift_RevokeSnapshotAccess() {
 }
 
 func ExampleRedshift_RotateEncryptionKey() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := redshift.New(sess)
+	svc := redshift.New(session.New())
 
 	params := &redshift.RotateEncryptionKeyInput{
 		ClusterIdentifier: aws.String("String"), // Required

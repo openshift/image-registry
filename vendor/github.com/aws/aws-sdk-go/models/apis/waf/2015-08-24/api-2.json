@@ -1,7 +1,6 @@
 {
   "version":"2.0",
   "metadata":{
-    "uid":"waf-2015-08-24",
     "apiVersion":"2015-08-24",
     "endpointPrefix":"waf",
     "jsonVersion":"1.1",
@@ -9,8 +8,7 @@
     "serviceAbbreviation":"WAF",
     "serviceFullName":"AWS WAF",
     "signatureVersion":"v4",
-    "targetPrefix":"AWSWAF_20150824",
-    "uid":"waf-2015-08-24"
+    "targetPrefix":"AWSWAF_20150824"
   },
   "operations":{
     "CreateByteMatchSet":{
@@ -703,10 +701,7 @@
         "DELETE"
       ]
     },
-    "ChangeToken":{
-      "type":"string",
-      "min":1
-    },
+    "ChangeToken":{"type":"string"},
     "ChangeTokenStatus":{
       "type":"string",
       "enum":[
@@ -1175,10 +1170,7 @@
     },
     "IPSetDescriptorType":{
       "type":"string",
-      "enum":[
-        "IPV4",
-        "IPV6"
-      ]
+      "enum":["IPV4"]
     },
     "IPSetDescriptorValue":{"type":"string"},
     "IPSetDescriptors":{
@@ -1218,6 +1210,7 @@
     "IPString":{"type":"string"},
     "ListByteMatchSetsRequest":{
       "type":"structure",
+      "required":["Limit"],
       "members":{
         "NextMarker":{"shape":"NextMarker"},
         "Limit":{"shape":"PaginationLimit"}
@@ -1232,6 +1225,7 @@
     },
     "ListIPSetsRequest":{
       "type":"structure",
+      "required":["Limit"],
       "members":{
         "NextMarker":{"shape":"NextMarker"},
         "Limit":{"shape":"PaginationLimit"}
@@ -1251,6 +1245,7 @@
     },
     "ListRulesRequest":{
       "type":"structure",
+      "required":["Limit"],
       "members":{
         "NextMarker":{"shape":"NextMarker"},
         "Limit":{"shape":"PaginationLimit"}
@@ -1265,6 +1260,7 @@
     },
     "ListSizeConstraintSetsRequest":{
       "type":"structure",
+      "required":["Limit"],
       "members":{
         "NextMarker":{"shape":"NextMarker"},
         "Limit":{"shape":"PaginationLimit"}
@@ -1279,6 +1275,7 @@
     },
     "ListSqlInjectionMatchSetsRequest":{
       "type":"structure",
+      "required":["Limit"],
       "members":{
         "NextMarker":{"shape":"NextMarker"},
         "Limit":{"shape":"PaginationLimit"}
@@ -1293,6 +1290,7 @@
     },
     "ListWebACLsRequest":{
       "type":"structure",
+      "required":["Limit"],
       "members":{
         "NextMarker":{"shape":"NextMarker"},
         "Limit":{"shape":"PaginationLimit"}
@@ -1307,6 +1305,7 @@
     },
     "ListXssMatchSetsRequest":{
       "type":"structure",
+      "required":["Limit"],
       "members":{
         "NextMarker":{"shape":"NextMarker"},
         "Limit":{"shape":"PaginationLimit"}
@@ -1339,7 +1338,7 @@
     "PaginationLimit":{
       "type":"integer",
       "max":100,
-      "min":0
+      "min":1
     },
     "ParameterExceptionField":{
       "type":"string",

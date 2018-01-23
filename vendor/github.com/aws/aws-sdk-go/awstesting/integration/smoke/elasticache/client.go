@@ -6,11 +6,11 @@ package elasticache
 import (
 	"github.com/aws/aws-sdk-go/awstesting/integration/smoke"
 	"github.com/aws/aws-sdk-go/service/elasticache"
-	"github.com/gucumber/gucumber"
+	. "github.com/lsegal/gucumber"
 )
 
 func init() {
-	gucumber.Before("@elasticache", func() {
-		gucumber.World["client"] = elasticache.New(smoke.Session)
+	Before("@elasticache", func() {
+		World["client"] = elasticache.New(smoke.Session)
 	})
 }

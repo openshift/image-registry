@@ -19,9 +19,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgotesting "k8s.io/client-go/testing"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	imagefakeclient "github.com/openshift/origin/pkg/image/generated/clientset/typed/image/v1/fake"
+	imageapiv1 "github.com/openshift/api/image/v1"
+	imagefakeclient "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1/fake"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"

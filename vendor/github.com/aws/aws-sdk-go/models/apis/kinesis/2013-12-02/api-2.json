@@ -1,7 +1,6 @@
 {
   "version":"2.0",
   "metadata":{
-    "uid":"kinesis-2013-12-02",
     "apiVersion":"2013-12-02",
     "endpointPrefix":"kinesis",
     "jsonVersion":"1.1",
@@ -49,6 +48,7 @@
       "errors":[
         {"shape":"ResourceInUseException"},
         {"shape":"ResourceNotFoundException"},
+        {"shape":"LimitExceededException"},
         {"shape":"InvalidArgumentException"}
       ]
     },
@@ -61,18 +61,6 @@
       "input":{"shape":"DeleteStreamInput"},
       "errors":[
         {"shape":"ResourceNotFoundException"},
-        {"shape":"LimitExceededException"}
-      ]
-    },
-    "DescribeLimits":{
-      "name":"DescribeLimits",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"DescribeLimitsInput"},
-      "output":{"shape":"DescribeLimitsOutput"},
-      "errors":[
         {"shape":"LimitExceededException"}
       ]
     },
@@ -158,6 +146,7 @@
       "errors":[
         {"shape":"ResourceInUseException"},
         {"shape":"ResourceNotFoundException"},
+        {"shape":"LimitExceededException"},
         {"shape":"InvalidArgumentException"}
       ]
     },
@@ -256,21 +245,6 @@
         {"shape":"InvalidArgumentException"},
         {"shape":"LimitExceededException"}
       ]
-    },
-    "UpdateShardCount":{
-      "name":"UpdateShardCount",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"UpdateShardCountInput"},
-      "output":{"shape":"UpdateShardCountOutput"},
-      "errors":[
-        {"shape":"InvalidArgumentException"},
-        {"shape":"LimitExceededException"},
-        {"shape":"ResourceInUseException"},
-        {"shape":"ResourceNotFoundException"}
-      ]
     }
   },
   "shapes":{
@@ -285,6 +259,7 @@
         "Tags":{"shape":"TagMap"}
       }
     },
+    "ApproximateArrivalTimestamp":{"type":"timestamp"},
     "BooleanObject":{"type":"boolean"},
     "CreateStreamInput":{
       "type":"structure",
@@ -310,7 +285,7 @@
       ],
       "members":{
         "StreamName":{"shape":"StreamName"},
-        "RetentionPeriodHours":{"shape":"PositiveIntegerObject"}
+        "RetentionPeriodHours":{"shape":"RetentionPeriodHours"}
       }
     },
     "DeleteStreamInput":{
@@ -318,22 +293,6 @@
       "required":["StreamName"],
       "members":{
         "StreamName":{"shape":"StreamName"}
-      }
-    },
-    "DescribeLimitsInput":{
-      "type":"structure",
-      "members":{
-      }
-    },
-    "DescribeLimitsOutput":{
-      "type":"structure",
-      "required":[
-        "ShardLimit",
-        "OpenShardCount"
-      ],
-      "members":{
-        "ShardLimit":{"shape":"ShardCountObject"},
-        "OpenShardCount":{"shape":"ShardCountObject"}
       }
     },
     "DescribeStreamInput":{
@@ -472,7 +431,7 @@
       ],
       "members":{
         "StreamName":{"shape":"StreamName"},
-        "RetentionPeriodHours":{"shape":"PositiveIntegerObject"}
+        "RetentionPeriodHours":{"shape":"RetentionPeriodHours"}
       }
     },
     "InvalidArgumentException":{
@@ -677,7 +636,7 @@
       ],
       "members":{
         "SequenceNumber":{"shape":"SequenceNumber"},
-        "ApproximateArrivalTimestamp":{"shape":"Timestamp"},
+        "ApproximateArrivalTimestamp":{"shape":"ApproximateArrivalTimestamp"},
         "Data":{"shape":"Data"},
         "PartitionKey":{"shape":"PartitionKey"}
       }
@@ -711,9 +670,10 @@
       },
       "exception":true
     },
-    "ScalingType":{
-      "type":"string",
-      "enum":["UNIFORM_SCALING"]
+    "RetentionPeriodHours":{
+      "type":"integer",
+      "max":168,
+      "min":24
     },
     "SequenceNumber":{
       "type":"string",
@@ -741,11 +701,6 @@
         "HashKeyRange":{"shape":"HashKeyRange"},
         "SequenceNumberRange":{"shape":"SequenceNumberRange"}
       }
-    },
-    "ShardCountObject":{
-      "type":"integer",
-      "max":1000000,
-      "min":0
     },
     "ShardId":{
       "type":"string",
@@ -795,7 +750,6 @@
         "Shards",
         "HasMoreShards",
         "RetentionPeriodHours",
-        "StreamCreationTimestamp",
         "EnhancedMonitoring"
       ],
       "members":{
@@ -804,8 +758,7 @@
         "StreamStatus":{"shape":"StreamStatus"},
         "Shards":{"shape":"ShardList"},
         "HasMoreShards":{"shape":"BooleanObject"},
-        "RetentionPeriodHours":{"shape":"PositiveIntegerObject"},
-        "StreamCreationTimestamp":{"shape":"Timestamp"},
+        "RetentionPeriodHours":{"shape":"RetentionPeriodHours"},
         "EnhancedMonitoring":{"shape":"EnhancedMonitoringList"}
       }
     },
@@ -864,27 +817,6 @@
       "max":256,
       "min":0
     },
-    "Timestamp":{"type":"timestamp"},
-    "UpdateShardCountInput":{
-      "type":"structure",
-      "required":[
-        "StreamName",
-        "TargetShardCount",
-        "ScalingType"
-      ],
-      "members":{
-        "StreamName":{"shape":"StreamName"},
-        "TargetShardCount":{"shape":"PositiveIntegerObject"},
-        "ScalingType":{"shape":"ScalingType"}
-      }
-    },
-    "UpdateShardCountOutput":{
-      "type":"structure",
-      "members":{
-        "StreamName":{"shape":"StreamName"},
-        "CurrentShardCount":{"shape":"PositiveIntegerObject"},
-        "TargetShardCount":{"shape":"PositiveIntegerObject"}
-      }
-    }
+    "Timestamp":{"type":"timestamp"}
   }
 }

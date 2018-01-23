@@ -1,34 +1,46 @@
 package: github.com/openshift/image-registry
 import:
-- package: github.com/openshift/origin
-  version: 1daa267d0a1fdbd0569ce490c904391b4e77c70d
+
+# docker first
 - package: github.com/docker/distribution
   version: image-registry-release-2.6.2
   repo: git@github.com:openshift/docker-distribution
+
+# kube second
 - package: k8s.io/code-generator
   version: master
   repo: git@github.com:openshift/kubernetes-code-generator
-- package: k8s.io/kubernetes
-  version: release-1.7.6
-  repo: git@github.com:openshift/kubernetes
 - package: k8s.io/apimachinery
-  version: release-1.7.6
+  version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-apimachinery
 - package: k8s.io/client-go
-  version: release-1.7.6
+  version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-client-go
 - package: k8s.io/metrics
-  version: release-1.7.6
+  version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-metrics
 - package: k8s.io/apiserver
-  version: release-1.7.6
+  version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-apiserver
+- package: k8s.io/api
+  repo:    git@github.com:openshift/kubernetes-api
+  version: release-1.9.1
 - package: k8s.io/kube-aggregator
-  version: release-1.7.6
+  version: release-1.9.1
   repo: git@github.com:openshift/kube-aggregator
 - package: k8s.io/apiextensions-apiserver
-  version: release-1.7.6
+  version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-apiextensions-apiserver
+
+# openshift third
+- package: github.com/openshift/api
+  version: master
+- package: github.com/openshift/client-go
+  version: master
+
+
+# everything else last
+#
 - package: github.com/google/certificate-transparency
   repo: git@github.com:openshift/google-certificate-transparency
 - package: github.com/google/cadvisor
@@ -50,3 +62,6 @@ import:
   version: 9bf6e6e569ff057f75d9604a46c52928f17d2b54
 - package: github.com/docker/docker
   version: ^1.13.0
+- package: github.com/bshuster-repo/logrus-logstash-hook
+  version: 0e6d502573042a6563419fbcce4f284600bfe929
+

@@ -6,11 +6,11 @@ package redshift
 import (
 	"github.com/aws/aws-sdk-go/awstesting/integration/smoke"
 	"github.com/aws/aws-sdk-go/service/redshift"
-	"github.com/gucumber/gucumber"
+	. "github.com/lsegal/gucumber"
 )
 
 func init() {
-	gucumber.Before("@redshift", func() {
-		gucumber.World["client"] = redshift.New(smoke.Session)
+	Before("@redshift", func() {
+		World["client"] = redshift.New(smoke.Session)
 	})
 }

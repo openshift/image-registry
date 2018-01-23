@@ -109,7 +109,7 @@ func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, 
 	r := &Reflector{
 		name: name,
 		// we need this to be unique per process (some names are still the same)but obvious who it belongs to
-		metrics:       newReflectorMetrics(makeValidPromethusMetricName(fmt.Sprintf("reflector_"+name+"_%d", reflectorSuffix))),
+		metrics:       newReflectorMetrics(makeValidPromethusMetricLabel(fmt.Sprintf("reflector_"+name+"_%d", reflectorSuffix))),
 		listerWatcher: lw,
 		store:         store,
 		expectedType:  reflect.TypeOf(expectedType),
@@ -120,9 +120,9 @@ func NewNamedReflector(name string, lw ListerWatcher, expectedType interface{}, 
 	return r
 }
 
-func makeValidPromethusMetricName(in string) string {
+func makeValidPromethusMetricLabel(in string) string {
 	// this isn't perfect, but it removes our common characters
-	return strings.NewReplacer("/", "_", ".", "_", "-", "_").Replace(in)
+	return strings.NewReplacer("/", "_", ".", "_", "-", "_", ":", "_").Replace(in)
 }
 
 // internalPackages are packages that ignored when creating a default reflector name. These packages are in the common
@@ -197,21 +197,10 @@ func extractStackCreator() (string, int, bool) {
 }
 
 // Run starts a watch and handles watch events. Will restart the watch if it is closed.
-// Run starts a goroutine and returns immediately.
-func (r *Reflector) Run() {
+// Run will exit when stopCh is closed.
+func (r *Reflector) Run(stopCh <-chan struct{}) {
 	glog.V(3).Infof("Starting reflector %v (%s) from %s", r.expectedType, r.resyncPeriod, r.name)
-	go wait.Until(func() {
-		if err := r.ListAndWatch(wait.NeverStop); err != nil {
-			utilruntime.HandleError(err)
-		}
-	}, r.period, wait.NeverStop)
-}
-
-// RunUntil starts a watch and handles watch events. Will restart the watch if it is closed.
-// RunUntil starts a goroutine and returns immediately. It will exit when stopCh is closed.
-func (r *Reflector) RunUntil(stopCh <-chan struct{}) {
-	glog.V(3).Infof("Starting reflector %v (%s) from %s", r.expectedType, r.resyncPeriod, r.name)
-	go wait.Until(func() {
+	wait.Until(func() {
 		if err := r.ListAndWatch(stopCh); err != nil {
 			utilruntime.HandleError(err)
 		}
@@ -250,8 +239,6 @@ func (r *Reflector) resyncChan() (<-chan time.Time, func() bool) {
 func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 	glog.V(3).Infof("Listing and watching %v from %s", r.expectedType, r.name)
 	var resourceVersion string
-	resyncCh, cleanup := r.resyncChan()
-	defer cleanup()
 
 	// Explicitly set "0" as resource version - it's fine for the List()
 	// to be served from cache and potentially be delayed relative to
@@ -283,6 +270,10 @@ func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 	cancelCh := make(chan struct{})
 	defer close(cancelCh)
 	go func() {
+		resyncCh, cleanup := r.resyncChan()
+		defer func() {
+			cleanup() // Call the last one written into cleanup
+		}()
 		for {
 			select {
 			case <-resyncCh:
@@ -304,6 +295,13 @@ func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
 	}()
 
 	for {
+		// give the stopCh a chance to stop the loop, even in case of continue statements further down on errors
+		select {
+		case <-stopCh:
+			return nil
+		default:
+		}
+
 		timemoutseconds := int64(minWatchTimeout.Seconds() * (rand.Float64() + 1.0))
 		options = metav1.ListOptions{
 			ResourceVersion: resourceVersion,

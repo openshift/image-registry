@@ -66,6 +66,36 @@ type Serializer struct {
 var _ runtime.Serializer = &Serializer{}
 var _ recognizer.RecognizingDecoder = &Serializer{}
 
+func init() {
+	// Force jsoniter to decode number to interface{} via ints, if possible.
+	// decodeNumberAsInt64IfPossible := func(ptr unsafe.Pointer, iter *jsoniter.Iterator) {
+	// 	switch iter.WhatIsNext() {
+	// 	case jsoniter.NumberValue:
+	// 		var number json.Number
+	// 		iter.ReadVal(&number)
+	// 		u64, err := strconv.ParseUint(string(number), 10, 64)
+	// 		if err == nil {
+	// 			*(*interface{})(ptr) = u64
+	// 			return
+	// 		}
+	// 		i64, err := strconv.ParseInt(string(number), 10, 64)
+	// 		if err == nil {
+	// 			*(*interface{})(ptr) = i64
+	// 			return
+	// 		}
+	// 		f64, err := strconv.ParseFloat(string(number), 64)
+	// 		if err == nil {
+	// 			*(*interface{})(ptr) = f64
+	// 			return
+	// 		}
+	// 		// Not much we can do here.
+	// 	default:
+	// 		*(*interface{})(ptr) = iter.Read()
+	// 	}
+	// }
+	// jsoniter.RegisterTypeDecoderFunc("interface {}", decodeNumberAsInt64IfPossible)
+}
+
 // Decode attempts to convert the provided data into YAML or JSON, extract the stored schema kind, apply the provided default gvk, and then
 // load that data into an object matching the desired schema kind or the provided into. If into is *runtime.Unknown, the raw data will be
 // extracted and no decoding will be performed. If into is not registered with the typer, then the object will be straight decoded using
@@ -118,9 +148,11 @@ func (s *Serializer) Decode(originalData []byte, gvk *schema.GroupVersionKind, i
 	}
 
 	if into != nil {
+		_, isUnstructured := into.(runtime.Unstructured)
 		types, _, err := s.typer.ObjectKinds(into)
 		switch {
-		case runtime.IsNotRegisteredError(err):
+		case runtime.IsNotRegisteredError(err), isUnstructured:
+			//if err := jsoniter.ConfigFastest.Unmarshal(data, into); err != nil {
 			if err := codec.NewDecoderBytes(data, new(codec.JsonHandle)).Decode(into); err != nil {
 				return nil, actual, err
 			}
@@ -155,6 +187,7 @@ func (s *Serializer) Decode(originalData []byte, gvk *schema.GroupVersionKind, i
 		return nil, actual, err
 	}
 
+	// if err := jsoniter.ConfigFastest.Unmarshal(data, obj); err != nil {
 	if err := codec.NewDecoderBytes(data, new(codec.JsonHandle)).Decode(obj); err != nil {
 		return nil, actual, err
 	}

@@ -6,11 +6,11 @@ package simpledb
 import (
 	"github.com/aws/aws-sdk-go/awstesting/integration/smoke"
 	"github.com/aws/aws-sdk-go/service/simpledb"
-	"github.com/gucumber/gucumber"
+	. "github.com/lsegal/gucumber"
 )
 
 func init() {
-	gucumber.Before("@simpledb", func() {
-		gucumber.World["client"] = simpledb.New(smoke.Session)
+	Before("@simpledb", func() {
+		World["client"] = simpledb.New(smoke.Session)
 	})
 }

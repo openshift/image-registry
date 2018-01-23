@@ -11,8 +11,7 @@ import (
 
 	restclient "k8s.io/client-go/rest"
 
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-
+	imageapiv1 "github.com/openshift/api/image/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"

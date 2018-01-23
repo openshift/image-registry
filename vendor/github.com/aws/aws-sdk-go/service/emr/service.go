@@ -11,13 +11,13 @@ import (
 	"github.com/aws/aws-sdk-go/private/protocol/jsonrpc"
 )
 
-// Amazon EMR is a web service that makes it easy to process large amounts of
-// data efficiently. Amazon EMR uses Hadoop processing combined with several
-// AWS products to do tasks such as web indexing, data mining, log file analysis,
-// machine learning, scientific simulation, and data warehousing.
-// The service client's operations are safe to be used concurrently.
+// Amazon Elastic MapReduce (Amazon EMR) is a web service that makes it easy
+// to process large amounts of data efficiently. Amazon EMR uses Hadoop processing
+// combined with several AWS products to do tasks such as web indexing, data
+// mining, log file analysis, machine learning, scientific simulation, and data
+// warehousing.
+//The service client's operations are safe to be used concurrently.
 // It is not safe to mutate any of the client's properties though.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/elasticmapreduce-2009-03-31
 type EMR struct {
 	*client.Client
 }
@@ -28,11 +28,8 @@ var initClient func(*client.Client)
 // Used for custom request initialization logic
 var initRequest func(*request.Request)
 
-// Service information constants
-const (
-	ServiceName = "elasticmapreduce" // Service endpoint prefix API calls made to.
-	EndpointsID = ServiceName        // Service ID for Regions and Endpoints metadata.
-)
+// A ServiceName is the name of the service the client will make API calls to.
+const ServiceName = "elasticmapreduce"
 
 // New creates a new instance of the EMR client with a session.
 // If additional configuration is needed for the client instance use the optional
@@ -45,18 +42,17 @@ const (
 //     // Create a EMR client with additional configuration
 //     svc := emr.New(mySession, aws.NewConfig().WithRegion("us-west-2"))
 func New(p client.ConfigProvider, cfgs ...*aws.Config) *EMR {
-	c := p.ClientConfig(EndpointsID, cfgs...)
-	return newClient(*c.Config, c.Handlers, c.Endpoint, c.SigningRegion, c.SigningName)
+	c := p.ClientConfig(ServiceName, cfgs...)
+	return newClient(*c.Config, c.Handlers, c.Endpoint, c.SigningRegion)
 }
 
 // newClient creates, initializes and returns a new service client instance.
-func newClient(cfg aws.Config, handlers request.Handlers, endpoint, signingRegion, signingName string) *EMR {
+func newClient(cfg aws.Config, handlers request.Handlers, endpoint, signingRegion string) *EMR {
 	svc := &EMR{
 		Client: client.New(
 			cfg,
 			metadata.ClientInfo{
 				ServiceName:   ServiceName,
-				SigningName:   signingName,
 				SigningRegion: signingRegion,
 				Endpoint:      endpoint,
 				APIVersion:    "2009-03-31",

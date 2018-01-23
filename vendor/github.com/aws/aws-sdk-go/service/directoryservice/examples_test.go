@@ -15,47 +15,8 @@ import (
 var _ time.Duration
 var _ bytes.Buffer
 
-func ExampleDirectoryService_AddIpRoutes() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
-
-	params := &directoryservice.AddIpRoutesInput{
-		DirectoryId: aws.String("DirectoryId"), // Required
-		IpRoutes: []*directoryservice.IpRoute{ // Required
-			{ // Required
-				CidrIp:      aws.String("CidrIp"),
-				Description: aws.String("Description"),
-			},
-			// More values...
-		},
-		UpdateSecurityGroupForDirectoryControllers: aws.Bool(true),
-	}
-	resp, err := svc.AddIpRoutes(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleDirectoryService_AddTagsToResource() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.AddTagsToResourceInput{
 		ResourceId: aws.String("ResourceId"), // Required
@@ -80,40 +41,8 @@ func ExampleDirectoryService_AddTagsToResource() {
 	fmt.Println(resp)
 }
 
-func ExampleDirectoryService_CancelSchemaExtension() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
-
-	params := &directoryservice.CancelSchemaExtensionInput{
-		DirectoryId:       aws.String("DirectoryId"),       // Required
-		SchemaExtensionId: aws.String("SchemaExtensionId"), // Required
-	}
-	resp, err := svc.CancelSchemaExtension(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleDirectoryService_ConnectDirectory() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.ConnectDirectoryInput{
 		ConnectSettings: &directoryservice.DirectoryConnectSettings{ // Required
@@ -148,13 +77,7 @@ func ExampleDirectoryService_ConnectDirectory() {
 }
 
 func ExampleDirectoryService_CreateAlias() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.CreateAliasInput{
 		Alias:       aws.String("AliasName"),   // Required
@@ -174,13 +97,7 @@ func ExampleDirectoryService_CreateAlias() {
 }
 
 func ExampleDirectoryService_CreateComputer() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.CreateComputerInput{
 		ComputerName: aws.String("ComputerName"),     // Required
@@ -209,13 +126,7 @@ func ExampleDirectoryService_CreateComputer() {
 }
 
 func ExampleDirectoryService_CreateConditionalForwarder() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.CreateConditionalForwarderInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -239,13 +150,7 @@ func ExampleDirectoryService_CreateConditionalForwarder() {
 }
 
 func ExampleDirectoryService_CreateDirectory() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.CreateDirectoryInput{
 		Name:        aws.String("DirectoryName"), // Required
@@ -275,13 +180,7 @@ func ExampleDirectoryService_CreateDirectory() {
 }
 
 func ExampleDirectoryService_CreateMicrosoftAD() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.CreateMicrosoftADInput{
 		Name:     aws.String("DirectoryName"), // Required
@@ -310,13 +209,7 @@ func ExampleDirectoryService_CreateMicrosoftAD() {
 }
 
 func ExampleDirectoryService_CreateSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.CreateSnapshotInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -336,13 +229,7 @@ func ExampleDirectoryService_CreateSnapshot() {
 }
 
 func ExampleDirectoryService_CreateTrust() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.CreateTrustInput{
 		DirectoryId:      aws.String("DirectoryId"),      // Required
@@ -369,13 +256,7 @@ func ExampleDirectoryService_CreateTrust() {
 }
 
 func ExampleDirectoryService_DeleteConditionalForwarder() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DeleteConditionalForwarderInput{
 		DirectoryId:      aws.String("DirectoryId"),      // Required
@@ -395,13 +276,7 @@ func ExampleDirectoryService_DeleteConditionalForwarder() {
 }
 
 func ExampleDirectoryService_DeleteDirectory() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DeleteDirectoryInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -420,13 +295,7 @@ func ExampleDirectoryService_DeleteDirectory() {
 }
 
 func ExampleDirectoryService_DeleteSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DeleteSnapshotInput{
 		SnapshotId: aws.String("SnapshotId"), // Required
@@ -445,13 +314,7 @@ func ExampleDirectoryService_DeleteSnapshot() {
 }
 
 func ExampleDirectoryService_DeleteTrust() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DeleteTrustInput{
 		TrustId: aws.String("TrustId"), // Required
@@ -471,13 +334,7 @@ func ExampleDirectoryService_DeleteTrust() {
 }
 
 func ExampleDirectoryService_DeregisterEventTopic() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DeregisterEventTopicInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -497,13 +354,7 @@ func ExampleDirectoryService_DeregisterEventTopic() {
 }
 
 func ExampleDirectoryService_DescribeConditionalForwarders() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DescribeConditionalForwardersInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -526,13 +377,7 @@ func ExampleDirectoryService_DescribeConditionalForwarders() {
 }
 
 func ExampleDirectoryService_DescribeDirectories() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DescribeDirectoriesInput{
 		DirectoryIds: []*string{
@@ -556,13 +401,7 @@ func ExampleDirectoryService_DescribeDirectories() {
 }
 
 func ExampleDirectoryService_DescribeEventTopics() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DescribeEventTopicsInput{
 		DirectoryId: aws.String("DirectoryId"),
@@ -585,13 +424,7 @@ func ExampleDirectoryService_DescribeEventTopics() {
 }
 
 func ExampleDirectoryService_DescribeSnapshots() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DescribeSnapshotsInput{
 		DirectoryId: aws.String("DirectoryId"),
@@ -616,13 +449,7 @@ func ExampleDirectoryService_DescribeSnapshots() {
 }
 
 func ExampleDirectoryService_DescribeTrusts() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DescribeTrustsInput{
 		DirectoryId: aws.String("DirectoryId"),
@@ -647,13 +474,7 @@ func ExampleDirectoryService_DescribeTrusts() {
 }
 
 func ExampleDirectoryService_DisableRadius() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DisableRadiusInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -672,13 +493,7 @@ func ExampleDirectoryService_DisableRadius() {
 }
 
 func ExampleDirectoryService_DisableSso() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.DisableSsoInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -699,13 +514,7 @@ func ExampleDirectoryService_DisableSso() {
 }
 
 func ExampleDirectoryService_EnableRadius() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.EnableRadiusInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -737,13 +546,7 @@ func ExampleDirectoryService_EnableRadius() {
 }
 
 func ExampleDirectoryService_EnableSso() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.EnableSsoInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -764,13 +567,7 @@ func ExampleDirectoryService_EnableSso() {
 }
 
 func ExampleDirectoryService_GetDirectoryLimits() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	var params *directoryservice.GetDirectoryLimitsInput
 	resp, err := svc.GetDirectoryLimits(params)
@@ -787,13 +584,7 @@ func ExampleDirectoryService_GetDirectoryLimits() {
 }
 
 func ExampleDirectoryService_GetSnapshotLimits() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.GetSnapshotLimitsInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -811,68 +602,8 @@ func ExampleDirectoryService_GetSnapshotLimits() {
 	fmt.Println(resp)
 }
 
-func ExampleDirectoryService_ListIpRoutes() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
-
-	params := &directoryservice.ListIpRoutesInput{
-		DirectoryId: aws.String("DirectoryId"), // Required
-		Limit:       aws.Int64(1),
-		NextToken:   aws.String("NextToken"),
-	}
-	resp, err := svc.ListIpRoutes(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
-func ExampleDirectoryService_ListSchemaExtensions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
-
-	params := &directoryservice.ListSchemaExtensionsInput{
-		DirectoryId: aws.String("DirectoryId"), // Required
-		Limit:       aws.Int64(1),
-		NextToken:   aws.String("NextToken"),
-	}
-	resp, err := svc.ListSchemaExtensions(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleDirectoryService_ListTagsForResource() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.ListTagsForResourceInput{
 		ResourceId: aws.String("ResourceId"), // Required
@@ -893,13 +624,7 @@ func ExampleDirectoryService_ListTagsForResource() {
 }
 
 func ExampleDirectoryService_RegisterEventTopic() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.RegisterEventTopicInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -918,43 +643,8 @@ func ExampleDirectoryService_RegisterEventTopic() {
 	fmt.Println(resp)
 }
 
-func ExampleDirectoryService_RemoveIpRoutes() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
-
-	params := &directoryservice.RemoveIpRoutesInput{
-		CidrIps: []*string{ // Required
-			aws.String("CidrIp"), // Required
-			// More values...
-		},
-		DirectoryId: aws.String("DirectoryId"), // Required
-	}
-	resp, err := svc.RemoveIpRoutes(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleDirectoryService_RemoveTagsFromResource() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.RemoveTagsFromResourceInput{
 		ResourceId: aws.String("ResourceId"), // Required
@@ -977,13 +667,7 @@ func ExampleDirectoryService_RemoveTagsFromResource() {
 }
 
 func ExampleDirectoryService_RestoreFromSnapshot() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.RestoreFromSnapshotInput{
 		SnapshotId: aws.String("SnapshotId"), // Required
@@ -1001,42 +685,8 @@ func ExampleDirectoryService_RestoreFromSnapshot() {
 	fmt.Println(resp)
 }
 
-func ExampleDirectoryService_StartSchemaExtension() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
-
-	params := &directoryservice.StartSchemaExtensionInput{
-		CreateSnapshotBeforeSchemaExtension: aws.Bool(true),            // Required
-		Description:                         aws.String("Description"), // Required
-		DirectoryId:                         aws.String("DirectoryId"), // Required
-		LdifContent:                         aws.String("LdifContent"), // Required
-	}
-	resp, err := svc.StartSchemaExtension(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleDirectoryService_UpdateConditionalForwarder() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.UpdateConditionalForwarderInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -1060,13 +710,7 @@ func ExampleDirectoryService_UpdateConditionalForwarder() {
 }
 
 func ExampleDirectoryService_UpdateRadius() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.UpdateRadiusInput{
 		DirectoryId: aws.String("DirectoryId"), // Required
@@ -1098,13 +742,7 @@ func ExampleDirectoryService_UpdateRadius() {
 }
 
 func ExampleDirectoryService_VerifyTrust() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := directoryservice.New(sess)
+	svc := directoryservice.New(session.New())
 
 	params := &directoryservice.VerifyTrustInput{
 		TrustId: aws.String("TrustId"), // Required

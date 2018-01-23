@@ -16,13 +16,7 @@ var _ time.Duration
 var _ bytes.Buffer
 
 func ExampleS3_AbortMultipartUpload() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.AbortMultipartUploadInput{
 		Bucket:       aws.String("BucketName"),        // Required
@@ -44,13 +38,7 @@ func ExampleS3_AbortMultipartUpload() {
 }
 
 func ExampleS3_CompleteMultipartUpload() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.CompleteMultipartUploadInput{
 		Bucket:   aws.String("BucketName"),        // Required
@@ -81,13 +69,7 @@ func ExampleS3_CompleteMultipartUpload() {
 }
 
 func ExampleS3_CopyObject() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.CopyObjectInput{
 		Bucket:                         aws.String("BucketName"), // Required
@@ -123,8 +105,6 @@ func ExampleS3_CopyObject() {
 		SSEKMSKeyId:             aws.String("SSEKMSKeyId"),
 		ServerSideEncryption:    aws.String("ServerSideEncryption"),
 		StorageClass:            aws.String("StorageClass"),
-		Tagging:                 aws.String("TaggingHeader"),
-		TaggingDirective:        aws.String("TaggingDirective"),
 		WebsiteRedirectLocation: aws.String("WebsiteRedirectLocation"),
 	}
 	resp, err := svc.CopyObject(params)
@@ -141,13 +121,7 @@ func ExampleS3_CopyObject() {
 }
 
 func ExampleS3_CreateBucket() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.CreateBucketInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -175,13 +149,7 @@ func ExampleS3_CreateBucket() {
 }
 
 func ExampleS3_CreateMultipartUpload() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.CreateMultipartUploadInput{
 		Bucket:             aws.String("BucketName"), // Required
@@ -224,13 +192,7 @@ func ExampleS3_CreateMultipartUpload() {
 }
 
 func ExampleS3_DeleteBucket() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteBucketInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -248,40 +210,8 @@ func ExampleS3_DeleteBucket() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_DeleteBucketAnalyticsConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.DeleteBucketAnalyticsConfigurationInput{
-		Bucket: aws.String("BucketName"),  // Required
-		Id:     aws.String("AnalyticsId"), // Required
-	}
-	resp, err := svc.DeleteBucketAnalyticsConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_DeleteBucketCors() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteBucketCorsInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -299,40 +229,8 @@ func ExampleS3_DeleteBucketCors() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_DeleteBucketInventoryConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.DeleteBucketInventoryConfigurationInput{
-		Bucket: aws.String("BucketName"),  // Required
-		Id:     aws.String("InventoryId"), // Required
-	}
-	resp, err := svc.DeleteBucketInventoryConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_DeleteBucketLifecycle() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteBucketLifecycleInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -350,40 +248,8 @@ func ExampleS3_DeleteBucketLifecycle() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_DeleteBucketMetricsConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.DeleteBucketMetricsConfigurationInput{
-		Bucket: aws.String("BucketName"), // Required
-		Id:     aws.String("MetricsId"),  // Required
-	}
-	resp, err := svc.DeleteBucketMetricsConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_DeleteBucketPolicy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteBucketPolicyInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -402,13 +268,7 @@ func ExampleS3_DeleteBucketPolicy() {
 }
 
 func ExampleS3_DeleteBucketReplication() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteBucketReplicationInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -427,13 +287,7 @@ func ExampleS3_DeleteBucketReplication() {
 }
 
 func ExampleS3_DeleteBucketTagging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteBucketTaggingInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -452,13 +306,7 @@ func ExampleS3_DeleteBucketTagging() {
 }
 
 func ExampleS3_DeleteBucketWebsite() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteBucketWebsiteInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -477,13 +325,7 @@ func ExampleS3_DeleteBucketWebsite() {
 }
 
 func ExampleS3_DeleteObject() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteObjectInput{
 		Bucket:       aws.String("BucketName"), // Required
@@ -505,41 +347,8 @@ func ExampleS3_DeleteObject() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_DeleteObjectTagging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.DeleteObjectTaggingInput{
-		Bucket:    aws.String("BucketName"), // Required
-		Key:       aws.String("ObjectKey"),  // Required
-		VersionId: aws.String("ObjectVersionId"),
-	}
-	resp, err := svc.DeleteObjectTagging(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_DeleteObjects() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.DeleteObjectsInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -570,13 +379,7 @@ func ExampleS3_DeleteObjects() {
 }
 
 func ExampleS3_GetBucketAccelerateConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketAccelerateConfigurationInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -595,13 +398,7 @@ func ExampleS3_GetBucketAccelerateConfiguration() {
 }
 
 func ExampleS3_GetBucketAcl() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketAclInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -619,40 +416,8 @@ func ExampleS3_GetBucketAcl() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_GetBucketAnalyticsConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.GetBucketAnalyticsConfigurationInput{
-		Bucket: aws.String("BucketName"),  // Required
-		Id:     aws.String("AnalyticsId"), // Required
-	}
-	resp, err := svc.GetBucketAnalyticsConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_GetBucketCors() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketCorsInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -670,40 +435,8 @@ func ExampleS3_GetBucketCors() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_GetBucketInventoryConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.GetBucketInventoryConfigurationInput{
-		Bucket: aws.String("BucketName"),  // Required
-		Id:     aws.String("InventoryId"), // Required
-	}
-	resp, err := svc.GetBucketInventoryConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_GetBucketLifecycle() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketLifecycleInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -722,13 +455,7 @@ func ExampleS3_GetBucketLifecycle() {
 }
 
 func ExampleS3_GetBucketLifecycleConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketLifecycleConfigurationInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -747,13 +474,7 @@ func ExampleS3_GetBucketLifecycleConfiguration() {
 }
 
 func ExampleS3_GetBucketLocation() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketLocationInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -772,13 +493,7 @@ func ExampleS3_GetBucketLocation() {
 }
 
 func ExampleS3_GetBucketLogging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketLoggingInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -796,40 +511,8 @@ func ExampleS3_GetBucketLogging() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_GetBucketMetricsConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.GetBucketMetricsConfigurationInput{
-		Bucket: aws.String("BucketName"), // Required
-		Id:     aws.String("MetricsId"),  // Required
-	}
-	resp, err := svc.GetBucketMetricsConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_GetBucketNotification() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketNotificationConfigurationRequest{
 		Bucket: aws.String("BucketName"), // Required
@@ -848,13 +531,7 @@ func ExampleS3_GetBucketNotification() {
 }
 
 func ExampleS3_GetBucketNotificationConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketNotificationConfigurationRequest{
 		Bucket: aws.String("BucketName"), // Required
@@ -873,13 +550,7 @@ func ExampleS3_GetBucketNotificationConfiguration() {
 }
 
 func ExampleS3_GetBucketPolicy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketPolicyInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -898,13 +569,7 @@ func ExampleS3_GetBucketPolicy() {
 }
 
 func ExampleS3_GetBucketReplication() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketReplicationInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -923,13 +588,7 @@ func ExampleS3_GetBucketReplication() {
 }
 
 func ExampleS3_GetBucketRequestPayment() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketRequestPaymentInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -948,13 +607,7 @@ func ExampleS3_GetBucketRequestPayment() {
 }
 
 func ExampleS3_GetBucketTagging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketTaggingInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -973,13 +626,7 @@ func ExampleS3_GetBucketTagging() {
 }
 
 func ExampleS3_GetBucketVersioning() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketVersioningInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -998,13 +645,7 @@ func ExampleS3_GetBucketVersioning() {
 }
 
 func ExampleS3_GetBucketWebsite() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetBucketWebsiteInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -1023,13 +664,7 @@ func ExampleS3_GetBucketWebsite() {
 }
 
 func ExampleS3_GetObject() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetObjectInput{
 		Bucket:                     aws.String("BucketName"), // Required
@@ -1038,7 +673,6 @@ func ExampleS3_GetObject() {
 		IfModifiedSince:            aws.Time(time.Now()),
 		IfNoneMatch:                aws.String("IfNoneMatch"),
 		IfUnmodifiedSince:          aws.Time(time.Now()),
-		PartNumber:                 aws.Int64(1),
 		Range:                      aws.String("Range"),
 		RequestPayer:               aws.String("RequestPayer"),
 		ResponseCacheControl:       aws.String("ResponseCacheControl"),
@@ -1066,13 +700,7 @@ func ExampleS3_GetObject() {
 }
 
 func ExampleS3_GetObjectAcl() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetObjectAclInput{
 		Bucket:       aws.String("BucketName"), // Required
@@ -1093,41 +721,8 @@ func ExampleS3_GetObjectAcl() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_GetObjectTagging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.GetObjectTaggingInput{
-		Bucket:    aws.String("BucketName"), // Required
-		Key:       aws.String("ObjectKey"),  // Required
-		VersionId: aws.String("ObjectVersionId"),
-	}
-	resp, err := svc.GetObjectTagging(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_GetObjectTorrent() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.GetObjectTorrentInput{
 		Bucket:       aws.String("BucketName"), // Required
@@ -1148,13 +743,7 @@ func ExampleS3_GetObjectTorrent() {
 }
 
 func ExampleS3_HeadBucket() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.HeadBucketInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -1173,13 +762,7 @@ func ExampleS3_HeadBucket() {
 }
 
 func ExampleS3_HeadObject() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.HeadObjectInput{
 		Bucket:               aws.String("BucketName"), // Required
@@ -1188,7 +771,6 @@ func ExampleS3_HeadObject() {
 		IfModifiedSince:      aws.Time(time.Now()),
 		IfNoneMatch:          aws.String("IfNoneMatch"),
 		IfUnmodifiedSince:    aws.Time(time.Now()),
-		PartNumber:           aws.Int64(1),
 		Range:                aws.String("Range"),
 		RequestPayer:         aws.String("RequestPayer"),
 		SSECustomerAlgorithm: aws.String("SSECustomerAlgorithm"),
@@ -1209,92 +791,8 @@ func ExampleS3_HeadObject() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_ListBucketAnalyticsConfigurations() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.ListBucketAnalyticsConfigurationsInput{
-		Bucket:            aws.String("BucketName"), // Required
-		ContinuationToken: aws.String("Token"),
-	}
-	resp, err := svc.ListBucketAnalyticsConfigurations(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
-func ExampleS3_ListBucketInventoryConfigurations() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.ListBucketInventoryConfigurationsInput{
-		Bucket:            aws.String("BucketName"), // Required
-		ContinuationToken: aws.String("Token"),
-	}
-	resp, err := svc.ListBucketInventoryConfigurations(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
-func ExampleS3_ListBucketMetricsConfigurations() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.ListBucketMetricsConfigurationsInput{
-		Bucket:            aws.String("BucketName"), // Required
-		ContinuationToken: aws.String("Token"),
-	}
-	resp, err := svc.ListBucketMetricsConfigurations(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_ListBuckets() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	var params *s3.ListBucketsInput
 	resp, err := svc.ListBuckets(params)
@@ -1311,13 +809,7 @@ func ExampleS3_ListBuckets() {
 }
 
 func ExampleS3_ListMultipartUploads() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.ListMultipartUploadsInput{
 		Bucket:         aws.String("BucketName"), // Required
@@ -1342,13 +834,7 @@ func ExampleS3_ListMultipartUploads() {
 }
 
 func ExampleS3_ListObjectVersions() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.ListObjectVersionsInput{
 		Bucket:          aws.String("BucketName"), // Required
@@ -1373,13 +859,7 @@ func ExampleS3_ListObjectVersions() {
 }
 
 func ExampleS3_ListObjects() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.ListObjectsInput{
 		Bucket:       aws.String("BucketName"), // Required
@@ -1388,7 +868,6 @@ func ExampleS3_ListObjects() {
 		Marker:       aws.String("Marker"),
 		MaxKeys:      aws.Int64(1),
 		Prefix:       aws.String("Prefix"),
-		RequestPayer: aws.String("RequestPayer"),
 	}
 	resp, err := svc.ListObjects(params)
 
@@ -1404,13 +883,7 @@ func ExampleS3_ListObjects() {
 }
 
 func ExampleS3_ListObjectsV2() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.ListObjectsV2Input{
 		Bucket:            aws.String("BucketName"), // Required
@@ -1420,7 +893,6 @@ func ExampleS3_ListObjectsV2() {
 		FetchOwner:        aws.Bool(true),
 		MaxKeys:           aws.Int64(1),
 		Prefix:            aws.String("Prefix"),
-		RequestPayer:      aws.String("RequestPayer"),
 		StartAfter:        aws.String("StartAfter"),
 	}
 	resp, err := svc.ListObjectsV2(params)
@@ -1437,13 +909,7 @@ func ExampleS3_ListObjectsV2() {
 }
 
 func ExampleS3_ListParts() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.ListPartsInput{
 		Bucket:           aws.String("BucketName"),        // Required
@@ -1467,13 +933,7 @@ func ExampleS3_ListParts() {
 }
 
 func ExampleS3_PutBucketAccelerateConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketAccelerateConfigurationInput{
 		AccelerateConfiguration: &s3.AccelerateConfiguration{ // Required
@@ -1495,13 +955,7 @@ func ExampleS3_PutBucketAccelerateConfiguration() {
 }
 
 func ExampleS3_PutBucketAcl() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketAclInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -1544,73 +998,8 @@ func ExampleS3_PutBucketAcl() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_PutBucketAnalyticsConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.PutBucketAnalyticsConfigurationInput{
-		AnalyticsConfiguration: &s3.AnalyticsConfiguration{ // Required
-			Id: aws.String("AnalyticsId"), // Required
-			StorageClassAnalysis: &s3.StorageClassAnalysis{ // Required
-				DataExport: &s3.StorageClassAnalysisDataExport{
-					Destination: &s3.AnalyticsExportDestination{ // Required
-						S3BucketDestination: &s3.AnalyticsS3BucketDestination{ // Required
-							Bucket:          aws.String("BucketName"),                  // Required
-							Format:          aws.String("AnalyticsS3ExportFileFormat"), // Required
-							BucketAccountId: aws.String("AccountId"),
-							Prefix:          aws.String("Prefix"),
-						},
-					},
-					OutputSchemaVersion: aws.String("StorageClassAnalysisSchemaVersion"), // Required
-				},
-			},
-			Filter: &s3.AnalyticsFilter{
-				And: &s3.AnalyticsAndOperator{
-					Prefix: aws.String("Prefix"),
-					Tags: []*s3.Tag{
-						{ // Required
-							Key:   aws.String("ObjectKey"), // Required
-							Value: aws.String("Value"),     // Required
-						},
-						// More values...
-					},
-				},
-				Prefix: aws.String("Prefix"),
-				Tag: &s3.Tag{
-					Key:   aws.String("ObjectKey"), // Required
-					Value: aws.String("Value"),     // Required
-				},
-			},
-		},
-		Bucket: aws.String("BucketName"),  // Required
-		Id:     aws.String("AnalyticsId"), // Required
-	}
-	resp, err := svc.PutBucketAnalyticsConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_PutBucketCors() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketCorsInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -1652,63 +1041,8 @@ func ExampleS3_PutBucketCors() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_PutBucketInventoryConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.PutBucketInventoryConfigurationInput{
-		Bucket: aws.String("BucketName"),  // Required
-		Id:     aws.String("InventoryId"), // Required
-		InventoryConfiguration: &s3.InventoryConfiguration{ // Required
-			Destination: &s3.InventoryDestination{ // Required
-				S3BucketDestination: &s3.InventoryS3BucketDestination{ // Required
-					Bucket:    aws.String("BucketName"),      // Required
-					Format:    aws.String("InventoryFormat"), // Required
-					AccountId: aws.String("AccountId"),
-					Prefix:    aws.String("Prefix"),
-				},
-			},
-			Id: aws.String("InventoryId"), // Required
-			IncludedObjectVersions: aws.String("InventoryIncludedObjectVersions"), // Required
-			IsEnabled:              aws.Bool(true),                                // Required
-			Schedule: &s3.InventorySchedule{ // Required
-				Frequency: aws.String("InventoryFrequency"), // Required
-			},
-			Filter: &s3.InventoryFilter{
-				Prefix: aws.String("Prefix"), // Required
-			},
-			OptionalFields: []*string{
-				aws.String("InventoryOptionalField"), // Required
-				// More values...
-			},
-		},
-	}
-	resp, err := svc.PutBucketInventoryConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_PutBucketLifecycle() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketLifecycleInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -1757,19 +1091,14 @@ func ExampleS3_PutBucketLifecycle() {
 }
 
 func ExampleS3_PutBucketLifecycleConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketLifecycleConfigurationInput{
 		Bucket: aws.String("BucketName"), // Required
 		LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 			Rules: []*s3.LifecycleRule{ // Required
 				{ // Required
+					Prefix: aws.String("Prefix"),           // Required
 					Status: aws.String("ExpirationStatus"), // Required
 					AbortIncompleteMultipartUpload: &s3.AbortIncompleteMultipartUpload{
 						DaysAfterInitiation: aws.Int64(1),
@@ -1778,23 +1107,6 @@ func ExampleS3_PutBucketLifecycleConfiguration() {
 						Date: aws.Time(time.Now()),
 						Days: aws.Int64(1),
 						ExpiredObjectDeleteMarker: aws.Bool(true),
-					},
-					Filter: &s3.LifecycleRuleFilter{
-						And: &s3.LifecycleRuleAndOperator{
-							Prefix: aws.String("Prefix"),
-							Tags: []*s3.Tag{
-								{ // Required
-									Key:   aws.String("ObjectKey"), // Required
-									Value: aws.String("Value"),     // Required
-								},
-								// More values...
-							},
-						},
-						Prefix: aws.String("Prefix"),
-						Tag: &s3.Tag{
-							Key:   aws.String("ObjectKey"), // Required
-							Value: aws.String("Value"),     // Required
-						},
 					},
 					ID: aws.String("ID"),
 					NoncurrentVersionExpiration: &s3.NoncurrentVersionExpiration{
@@ -1807,7 +1119,6 @@ func ExampleS3_PutBucketLifecycleConfiguration() {
 						},
 						// More values...
 					},
-					Prefix: aws.String("Prefix"),
 					Transitions: []*s3.Transition{
 						{ // Required
 							Date:         aws.Time(time.Now()),
@@ -1835,13 +1146,7 @@ func ExampleS3_PutBucketLifecycleConfiguration() {
 }
 
 func ExampleS3_PutBucketLogging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketLoggingInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -1878,60 +1183,8 @@ func ExampleS3_PutBucketLogging() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_PutBucketMetricsConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.PutBucketMetricsConfigurationInput{
-		Bucket: aws.String("BucketName"), // Required
-		Id:     aws.String("MetricsId"),  // Required
-		MetricsConfiguration: &s3.MetricsConfiguration{ // Required
-			Id: aws.String("MetricsId"), // Required
-			Filter: &s3.MetricsFilter{
-				And: &s3.MetricsAndOperator{
-					Prefix: aws.String("Prefix"),
-					Tags: []*s3.Tag{
-						{ // Required
-							Key:   aws.String("ObjectKey"), // Required
-							Value: aws.String("Value"),     // Required
-						},
-						// More values...
-					},
-				},
-				Prefix: aws.String("Prefix"),
-				Tag: &s3.Tag{
-					Key:   aws.String("ObjectKey"), // Required
-					Value: aws.String("Value"),     // Required
-				},
-			},
-		},
-	}
-	resp, err := svc.PutBucketMetricsConfiguration(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_PutBucketNotification() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketNotificationInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -1980,13 +1233,7 @@ func ExampleS3_PutBucketNotification() {
 }
 
 func ExampleS3_PutBucketNotificationConfiguration() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketNotificationConfigurationInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -2073,13 +1320,7 @@ func ExampleS3_PutBucketNotificationConfiguration() {
 }
 
 func ExampleS3_PutBucketPolicy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketPolicyInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -2099,13 +1340,7 @@ func ExampleS3_PutBucketPolicy() {
 }
 
 func ExampleS3_PutBucketReplication() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketReplicationInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -2139,13 +1374,7 @@ func ExampleS3_PutBucketReplication() {
 }
 
 func ExampleS3_PutBucketRequestPayment() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketRequestPaymentInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -2167,13 +1396,7 @@ func ExampleS3_PutBucketRequestPayment() {
 }
 
 func ExampleS3_PutBucketTagging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketTaggingInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -2201,13 +1424,7 @@ func ExampleS3_PutBucketTagging() {
 }
 
 func ExampleS3_PutBucketVersioning() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketVersioningInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -2231,13 +1448,7 @@ func ExampleS3_PutBucketVersioning() {
 }
 
 func ExampleS3_PutBucketWebsite() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutBucketWebsiteInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -2284,13 +1495,7 @@ func ExampleS3_PutBucketWebsite() {
 }
 
 func ExampleS3_PutObject() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutObjectInput{
 		Bucket:             aws.String("BucketName"), // Required
@@ -2319,7 +1524,6 @@ func ExampleS3_PutObject() {
 		SSEKMSKeyId:             aws.String("SSEKMSKeyId"),
 		ServerSideEncryption:    aws.String("ServerSideEncryption"),
 		StorageClass:            aws.String("StorageClass"),
-		Tagging:                 aws.String("TaggingHeader"),
 		WebsiteRedirectLocation: aws.String("WebsiteRedirectLocation"),
 	}
 	resp, err := svc.PutObject(params)
@@ -2336,13 +1540,7 @@ func ExampleS3_PutObject() {
 }
 
 func ExampleS3_PutObjectAcl() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.PutObjectAclInput{
 		Bucket: aws.String("BucketName"), // Required
@@ -2388,50 +1586,8 @@ func ExampleS3_PutObjectAcl() {
 	fmt.Println(resp)
 }
 
-func ExampleS3_PutObjectTagging() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
-
-	params := &s3.PutObjectTaggingInput{
-		Bucket: aws.String("BucketName"), // Required
-		Key:    aws.String("ObjectKey"),  // Required
-		Tagging: &s3.Tagging{ // Required
-			TagSet: []*s3.Tag{ // Required
-				{ // Required
-					Key:   aws.String("ObjectKey"), // Required
-					Value: aws.String("Value"),     // Required
-				},
-				// More values...
-			},
-		},
-		VersionId: aws.String("ObjectVersionId"),
-	}
-	resp, err := svc.PutObjectTagging(params)
-
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Pretty-print the response data.
-	fmt.Println(resp)
-}
-
 func ExampleS3_RestoreObject() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.RestoreObjectInput{
 		Bucket:       aws.String("BucketName"), // Required
@@ -2439,9 +1595,6 @@ func ExampleS3_RestoreObject() {
 		RequestPayer: aws.String("RequestPayer"),
 		RestoreRequest: &s3.RestoreRequest{
 			Days: aws.Int64(1), // Required
-			GlacierJobParameters: &s3.GlacierJobParameters{
-				Tier: aws.String("Tier"), // Required
-			},
 		},
 		VersionId: aws.String("ObjectVersionId"),
 	}
@@ -2459,13 +1612,7 @@ func ExampleS3_RestoreObject() {
 }
 
 func ExampleS3_UploadPart() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.UploadPartInput{
 		Bucket:               aws.String("BucketName"),        // Required
@@ -2493,13 +1640,7 @@ func ExampleS3_UploadPart() {
 }
 
 func ExampleS3_UploadPartCopy() {
-	sess, err := session.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
-
-	svc := s3.New(sess)
+	svc := s3.New(session.New())
 
 	params := &s3.UploadPartCopyInput{
 		Bucket:                         aws.String("BucketName"),        // Required

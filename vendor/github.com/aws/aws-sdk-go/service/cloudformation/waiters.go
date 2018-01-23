@@ -6,10 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/private/waiter"
 )
 
-// WaitUntilStackCreateComplete uses the AWS CloudFormation API operation
-// DescribeStacks to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *CloudFormation) WaitUntilStackCreateComplete(input *DescribeStacksInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeStacks",
@@ -38,7 +34,19 @@ func (c *CloudFormation) WaitUntilStackCreateComplete(input *DescribeStacksInput
 				State:    "failure",
 				Matcher:  "pathAny",
 				Argument: "Stacks[].StackStatus",
+				Expected: "DELETE_IN_PROGRESS",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
 				Expected: "DELETE_FAILED",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "ROLLBACK_COMPLETE",
 			},
 			{
 				State:    "failure",
@@ -50,7 +58,7 @@ func (c *CloudFormation) WaitUntilStackCreateComplete(input *DescribeStacksInput
 				State:    "failure",
 				Matcher:  "pathAny",
 				Argument: "Stacks[].StackStatus",
-				Expected: "ROLLBACK_COMPLETE",
+				Expected: "ROLLBACK_IN_PROGRESS",
 			},
 			{
 				State:    "failure",
@@ -69,10 +77,6 @@ func (c *CloudFormation) WaitUntilStackCreateComplete(input *DescribeStacksInput
 	return w.Wait()
 }
 
-// WaitUntilStackDeleteComplete uses the AWS CloudFormation API operation
-// DescribeStacks to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *CloudFormation) WaitUntilStackDeleteComplete(input *DescribeStacksInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeStacks",
@@ -101,13 +105,67 @@ func (c *CloudFormation) WaitUntilStackDeleteComplete(input *DescribeStacksInput
 				State:    "failure",
 				Matcher:  "pathAny",
 				Argument: "Stacks[].StackStatus",
+				Expected: "CREATE_COMPLETE",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
 				Expected: "CREATE_FAILED",
 			},
 			{
 				State:    "failure",
 				Matcher:  "pathAny",
 				Argument: "Stacks[].StackStatus",
+				Expected: "CREATE_IN_PROGRESS",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "ROLLBACK_COMPLETE",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
 				Expected: "ROLLBACK_FAILED",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "ROLLBACK_IN_PROGRESS",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "UPDATE_COMPLETE",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "UPDATE_IN_PROGRESS",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "UPDATE_ROLLBACK_COMPLETE",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS",
 			},
 			{
 				State:    "failure",
@@ -132,10 +190,6 @@ func (c *CloudFormation) WaitUntilStackDeleteComplete(input *DescribeStacksInput
 	return w.Wait()
 }
 
-// WaitUntilStackExists uses the AWS CloudFormation API operation
-// DescribeStacks to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *CloudFormation) WaitUntilStackExists(input *DescribeStacksInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeStacks",
@@ -165,10 +219,6 @@ func (c *CloudFormation) WaitUntilStackExists(input *DescribeStacksInput) error 
 	return w.Wait()
 }
 
-// WaitUntilStackUpdateComplete uses the AWS CloudFormation API operation
-// DescribeStacks to wait for a condition to be met before returning.
-// If the condition is not meet within the max attempt window an error will
-// be returned.
 func (c *CloudFormation) WaitUntilStackUpdateComplete(input *DescribeStacksInput) error {
 	waiterCfg := waiter.Config{
 		Operation:   "DescribeStacks",
@@ -191,13 +241,25 @@ func (c *CloudFormation) WaitUntilStackUpdateComplete(input *DescribeStacksInput
 				State:    "failure",
 				Matcher:  "pathAny",
 				Argument: "Stacks[].StackStatus",
+				Expected: "UPDATE_ROLLBACK_COMPLETE",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
 				Expected: "UPDATE_ROLLBACK_FAILED",
 			},
 			{
 				State:    "failure",
 				Matcher:  "pathAny",
 				Argument: "Stacks[].StackStatus",
-				Expected: "UPDATE_ROLLBACK_COMPLETE",
+				Expected: "UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS",
+			},
+			{
+				State:    "failure",
+				Matcher:  "pathAny",
+				Argument: "Stacks[].StackStatus",
+				Expected: "UPDATE_ROLLBACK_IN_PROGRESS",
 			},
 			{
 				State:    "failure",

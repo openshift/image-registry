@@ -31,7 +31,7 @@ func WaitHTTP(rt http.RoundTripper, url string) error {
 	httpClient := &http.Client{
 		Transport: rt,
 	}
-	err := wait.Poll(500*time.Millisecond, wait.ForeverTestTimeout, func() (done bool, err error) {
+	err := wait.Poll(500*time.Millisecond, time.Second*120, func() (done bool, err error) {
 		resp, err := httpClient.Get(url)
 		if err != nil {
 			lastErr = err

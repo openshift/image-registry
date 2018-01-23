@@ -10,7 +10,7 @@ import (
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/testutil"

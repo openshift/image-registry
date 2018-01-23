@@ -8,8 +8,7 @@
     "serviceAbbreviation":"CodePipeline",
     "serviceFullName":"AWS CodePipeline",
     "signatureVersion":"v4",
-    "targetPrefix":"CodePipeline_20150709",
-    "uid":"codepipeline-2015-07-09"
+    "targetPrefix":"CodePipeline_20150709"
   },
   "operations":{
     "AcknowledgeJob":{
@@ -145,20 +144,6 @@
         {"shape":"ValidationException"},
         {"shape":"PipelineNotFoundException"},
         {"shape":"PipelineVersionNotFoundException"}
-      ]
-    },
-    "GetPipelineExecution":{
-      "name":"GetPipelineExecution",
-      "http":{
-        "method":"POST",
-        "requestUri":"/"
-      },
-      "input":{"shape":"GetPipelineExecutionInput"},
-      "output":{"shape":"GetPipelineExecutionOutput"},
-      "errors":[
-        {"shape":"ValidationException"},
-        {"shape":"PipelineNotFoundException"},
-        {"shape":"PipelineExecutionNotFoundException"}
       ]
     },
     "GetPipelineState":{
@@ -494,7 +479,7 @@
     },
     "ActionConfigurationValue":{
       "type":"string",
-      "max":1000,
+      "max":500,
       "min":1
     },
     "ActionContext":{
@@ -722,21 +707,6 @@
       "min":1,
       "pattern":"[a-zA-Z0-9_\\-]+"
     },
-    "ArtifactRevision":{
-      "type":"structure",
-      "members":{
-        "name":{"shape":"ArtifactName"},
-        "revisionId":{"shape":"Revision"},
-        "revisionChangeIdentifier":{"shape":"RevisionChangeIdentifier"},
-        "revisionSummary":{"shape":"RevisionSummary"},
-        "created":{"shape":"Timestamp"},
-        "revisionUrl":{"shape":"Url"}
-      }
-    },
-    "ArtifactRevisionList":{
-      "type":"list",
-      "member":{"shape":"ArtifactRevision"}
-    },
     "ArtifactStore":{
       "type":"structure",
       "required":[
@@ -834,9 +804,7 @@
       ],
       "members":{
         "revision":{"shape":"Revision"},
-        "changeIdentifier":{"shape":"RevisionChangeIdentifier"},
-        "created":{"shape":"Time"},
-        "revisionSummary":{"shape":"RevisionSummary"}
+        "changeIdentifier":{"shape":"RevisionChangeIdentifier"}
       }
     },
     "DeleteCustomActionTypeInput":{
@@ -974,23 +942,6 @@
       "type":"structure",
       "members":{
         "jobDetails":{"shape":"JobDetails"}
-      }
-    },
-    "GetPipelineExecutionInput":{
-      "type":"structure",
-      "required":[
-        "pipelineName",
-        "pipelineExecutionId"
-      ],
-      "members":{
-        "pipelineName":{"shape":"PipelineName"},
-        "pipelineExecutionId":{"shape":"PipelineExecutionId"}
-      }
-    },
-    "GetPipelineExecutionOutput":{
-      "type":"structure",
-      "members":{
-        "pipelineExecution":{"shape":"PipelineExecution"}
       }
     },
     "GetPipelineInput":{
@@ -1268,34 +1219,9 @@
         "version":{"shape":"PipelineVersion"}
       }
     },
-    "PipelineExecution":{
-      "type":"structure",
-      "members":{
-        "pipelineName":{"shape":"PipelineName"},
-        "pipelineVersion":{"shape":"PipelineVersion"},
-        "pipelineExecutionId":{"shape":"PipelineExecutionId"},
-        "status":{"shape":"PipelineExecutionStatus"},
-        "artifactRevisions":{"shape":"ArtifactRevisionList"}
-      }
-    },
     "PipelineExecutionId":{
       "type":"string",
       "pattern":"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-    },
-    "PipelineExecutionNotFoundException":{
-      "type":"structure",
-      "members":{
-      },
-      "exception":true
-    },
-    "PipelineExecutionStatus":{
-      "type":"string",
-      "enum":[
-        "InProgress",
-        "Succeeded",
-        "Superseded",
-        "Failed"
-      ]
     },
     "PipelineList":{
       "type":"list",
@@ -1399,8 +1325,7 @@
         "pipelineName",
         "stageName",
         "actionName",
-        "result",
-        "token"
+        "result"
       ],
       "members":{
         "pipelineName":{"shape":"PipelineName"},
@@ -1500,11 +1425,6 @@
     "RevisionChangeIdentifier":{
       "type":"string",
       "max":100,
-      "min":1
-    },
-    "RevisionSummary":{
-      "type":"string",
-      "max":2048,
       "min":1
     },
     "RoleArn":{
@@ -1664,7 +1584,6 @@
       "type":"list",
       "member":{"shape":"ThirdPartyJob"}
     },
-    "Time":{"type":"timestamp"},
     "Timestamp":{"type":"timestamp"},
     "TransitionState":{
       "type":"structure",

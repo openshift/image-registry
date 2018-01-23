@@ -6,11 +6,11 @@ package ses
 import (
 	"github.com/aws/aws-sdk-go/awstesting/integration/smoke"
 	"github.com/aws/aws-sdk-go/service/ses"
-	"github.com/gucumber/gucumber"
+	. "github.com/lsegal/gucumber"
 )
 
 func init() {
-	gucumber.Before("@ses", func() {
-		gucumber.World["client"] = ses.New(smoke.Session)
+	Before("@ses", func() {
+		World["client"] = ses.New(smoke.Session)
 	})
 }

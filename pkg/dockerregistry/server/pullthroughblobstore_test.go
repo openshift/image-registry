@@ -18,11 +18,11 @@ import (
 	"github.com/docker/distribution/manifest/schema1"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
-	imageapi "github.com/openshift/origin/pkg/image/apis/image"
-	imageapiv1 "github.com/openshift/origin/pkg/image/apis/image/v1"
-	"github.com/openshift/origin/pkg/image/importer"
+	imageapiv1 "github.com/openshift/api/image/v1"
 
-	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	dockerregistryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	originregistryclient "github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 	"github.com/openshift/image-registry/pkg/testutil"
 )
 
@@ -137,7 +137,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 	} {
 		localBlobStore := newTestBlobStore(nil, tc.localBlobs)
 
-		imageStream := newTestImageStream(ctx, t, namespace, name, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := newTestImageStream(ctx, t, namespace, name, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		remoteBlobGetter := NewBlobGetterService(
 			imageStream.imageStreamGetter.get,
@@ -253,7 +253,7 @@ func TestPullthroughServeNotSeekableBlob(t *testing.T) {
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
-	retriever := importer.NewContext(http.DefaultTransport, http.DefaultTransport).WithCredentials(importer.NoCredentials)
+	retriever := originregistryclient.NewContext(http.DefaultTransport, http.DefaultTransport).WithCredentials(originregistryclient.NoCredentials)
 	repo, err := retriever.Repository(ctx, externalRegistryURL, repoName, true)
 	if err != nil {
 		t.Fatal(err)
@@ -558,7 +558,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 
 			localBlobStore := newTestBlobStore(nil, tc.localBlobs)
 
-			imageStream := newTestImageStream(ctx, t, namespace, repo1, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+			imageStream := newTestImageStream(ctx, t, namespace, repo1, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 			remoteBlobGetter := NewBlobGetterService(
 				imageStream.imageStreamGetter.get,
