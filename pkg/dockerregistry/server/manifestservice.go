@@ -2,25 +2,20 @@ package server
 
 import (
 	"fmt"
-	"net/http"
-	"strings"
 	"sync"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
-	"github.com/docker/distribution/registry/api/errcode"
 	regapi "github.com/docker/distribution/registry/api/v2"
 
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
 	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
 )
 
 // ErrManifestBlobBadSize is returned when the blob size in a manifest does
@@ -149,73 +144,32 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 	}
 
 	// Upload to openshift
-	ism := imageapiv1.ImageStreamMapping{
+	image := &imageapiv1.Image{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: m.imageStream.namespace,
-			Name:      m.imageStream.name,
-		},
-		Image: imageapiv1.Image{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: dgst.String(),
-				Annotations: map[string]string{
-					imageapi.ManagedByOpenShiftAnnotation:      "true",
-					imageapi.ImageManifestBlobStoredAnnotation: "true",
-					imageapi.DockerImageLayersOrderAnnotation:  layerOrder,
-				},
+			Name: dgst.String(),
+			Annotations: map[string]string{
+				imageapi.ManagedByOpenShiftAnnotation:      "true",
+				imageapi.ImageManifestBlobStoredAnnotation: "true",
+				imageapi.DockerImageLayersOrderAnnotation:  layerOrder,
 			},
-			DockerImageReference:         fmt.Sprintf("%s/%s@%s", m.serverAddr, m.imageStream.Reference(), dgst.String()),
-			DockerImageManifest:          string(payload),
-			DockerImageManifestMediaType: mediaType,
-			DockerImageConfig:            string(config),
-			DockerImageLayers:            layers,
 		},
+		DockerImageReference:         fmt.Sprintf("%s/%s@%s", m.serverAddr, m.imageStream.Reference(), dgst.String()),
+		DockerImageManifest:          string(payload),
+		DockerImageManifestMediaType: mediaType,
+		DockerImageConfig:            string(config),
+		DockerImageLayers:            layers,
 	}
 
+	tag := ""
 	for _, option := range options {
 		if opt, ok := option.(distribution.WithTagOption); ok {
-			ism.Tag = opt.Tag
+			tag = opt.Tag
 			break
 		}
 	}
 
-	if _, err = m.imageStream.registryOSClient.ImageStreamMappings(m.imageStream.namespace).Create(&ism); err != nil {
-		// if the error was that the image stream wasn't found, try to auto provision it
-		statusErr, ok := err.(*kerrors.StatusError)
-		if !ok {
-			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
-			return "", err
-		}
-
-		if quotautil.IsErrorQuotaExceeded(statusErr) {
-			context.GetLogger(ctx).Errorf("denied creating ImageStreamMapping: %v", statusErr)
-			return "", distribution.ErrAccessDenied
-		}
-
-		status := statusErr.ErrStatus
-		kind := strings.ToLower(status.Details.Kind)
-		isValidKind := kind == "imagestream" /*pre-1.2*/ || kind == "imagestreams" /*1.2 to 1.6*/ || kind == "imagestreammappings" /*1.7+*/
-		if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != m.imageStream.name {
-			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
-			return "", err
-		}
-
-		if _, err := m.imageStream.createImageStream(ctx); err != nil {
-			if e, ok := err.(errcode.Error); ok && e.ErrorCode() == errcode.ErrorCodeUnknown {
-				// TODO: convert statusErr to distribution error
-				return "", statusErr
-			}
-			return "", err
-		}
-
-		// try to create the ISM again
-		if _, err := m.imageStream.registryOSClient.ImageStreamMappings(m.imageStream.namespace).Create(&ism); err != nil {
-			if quotautil.IsErrorQuotaExceeded(err) {
-				context.GetLogger(ctx).Errorf("denied a creation of ImageStreamMapping: %v", err)
-				return "", distribution.ErrAccessDenied
-			}
-			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
-			return "", err
-		}
+	if err = m.imageStream.CreateImageStreamMapping(ctx, tag, image); err != nil {
+		return "", err
 	}
 
 	return dgst, nil

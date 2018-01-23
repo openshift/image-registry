@@ -2,6 +2,8 @@ package server
 
 import (
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
@@ -333,4 +335,56 @@ func (is *imageStream) Untag(ctx context.Context, tag string, pullthroughEnabled
 	}
 
 	return is.registryOSClient.ImageStreamTags(is.namespace).Delete(imageapi.JoinImageStreamTag(is.name, tag), &metav1.DeleteOptions{})
+}
+
+func (is *imageStream) CreateImageStreamMapping(ctx context.Context, tag string, image *imageapiv1.Image) error {
+	ism := imageapiv1.ImageStreamMapping{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: is.namespace,
+			Name:      is.name,
+		},
+		Image: *image,
+		Tag:   tag,
+	}
+
+	if _, err := is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism); err != nil {
+		// if the error was that the image stream wasn't found, try to auto provision it
+		statusErr, ok := err.(*kerrors.StatusError)
+		if !ok {
+			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
+			return err
+		}
+
+		if quotautil.IsErrorQuotaExceeded(statusErr) {
+			context.GetLogger(ctx).Errorf("denied creating ImageStreamMapping: %v", statusErr)
+			return distribution.ErrAccessDenied
+		}
+
+		status := statusErr.ErrStatus
+		kind := strings.ToLower(status.Details.Kind)
+		isValidKind := kind == "imagestream" /*pre-1.2*/ || kind == "imagestreams" /*1.2 to 1.6*/ || kind == "imagestreammappings" /*1.7+*/
+		if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != is.name {
+			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
+			return err
+		}
+
+		if _, err := is.createImageStream(ctx); err != nil {
+			if e, ok := err.(errcode.Error); ok && e.ErrorCode() == errcode.ErrorCodeUnknown {
+				// TODO: convert statusErr to distribution error
+				return statusErr
+			}
+			return err
+		}
+
+		// try to create the ISM again
+		if _, err := is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism); err != nil {
+			if quotautil.IsErrorQuotaExceeded(err) {
+				context.GetLogger(ctx).Errorf("denied a creation of ImageStreamMapping: %v", err)
+				return distribution.ErrAccessDenied
+			}
+			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
+			return err
+		}
+	}
+	return nil
 }
