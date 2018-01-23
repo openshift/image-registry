@@ -237,7 +237,7 @@ func (is *imageStream) localRegistry() (string, error) {
 	return local.Registry, nil
 }
 
-func (is *imageStream) identifyCandidateRepositories(primary bool) ([]string, map[string]imagePullthroughSpec, error) {
+func (is *imageStream) IdentifyCandidateRepositories(primary bool) ([]string, map[string]ImagePullthroughSpec, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
 		return nil, nil, err

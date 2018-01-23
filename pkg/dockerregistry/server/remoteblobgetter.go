@@ -80,9 +80,9 @@ func NewBlobGetterService(
 	}
 }
 
-// imagePullthroughSpec contains a reference of remote image to pull associated with an insecure flag for the
+// ImagePullthroughSpec contains a reference of remote image to pull associated with an insecure flag for the
 // corresponding registry.
-type imagePullthroughSpec struct {
+type ImagePullthroughSpec struct {
 	dockerImageReference *imageapi.DockerImageReference
 	insecure             bool
 }
@@ -106,7 +106,7 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 	retriever := getImportContext(ctx, rbgs.getSecrets)
 
 	// look at the first level of tagged repositories first
-	repositoryCandidates, search, err := rbgs.imageStream.identifyCandidateRepositories(true)
+	repositoryCandidates, search, err := rbgs.imageStream.IdentifyCandidateRepositories(true)
 	if err != nil {
 		return distribution.Descriptor{}, err
 	}
@@ -115,7 +115,7 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 	}
 
 	// look at all other repositories tagged by the server
-	repositoryCandidates, secondary, err := rbgs.imageStream.identifyCandidateRepositories(false)
+	repositoryCandidates, secondary, err := rbgs.imageStream.IdentifyCandidateRepositories(false)
 	if err != nil {
 		return distribution.Descriptor{}, err
 	}
@@ -176,7 +176,7 @@ func (rbgs *remoteBlobGetterService) ServeBlob(ctx context.Context, w http.Respo
 func (rbgs *remoteBlobGetterService) proxyStat(
 	ctx context.Context,
 	retriever registryclient.RepositoryRetriever,
-	spec *imagePullthroughSpec,
+	spec *ImagePullthroughSpec,
 	dgst digest.Digest,
 ) (distribution.Descriptor, error) {
 	ref := spec.dockerImageReference
@@ -230,7 +230,7 @@ func (rbgs *remoteBlobGetterService) Get(ctx context.Context, dgst digest.Digest
 func (rbgs *remoteBlobGetterService) findCandidateRepository(
 	ctx context.Context,
 	repositoryCandidates []string,
-	search map[string]imagePullthroughSpec,
+	search map[string]ImagePullthroughSpec,
 	cachedRepos []string,
 	dgst digest.Digest,
 	retriever registryclient.RepositoryRetriever,
@@ -276,7 +276,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 type byInsecureFlag struct {
 	repositories []string
-	specs        []*imagePullthroughSpec
+	specs        []*ImagePullthroughSpec
 }
 
 func (by *byInsecureFlag) Len() int {
@@ -310,7 +310,7 @@ func identifyCandidateRepositories(
 	is *imageapiv1.ImageStream,
 	localRegistry string,
 	primary bool,
-) ([]string, map[string]imagePullthroughSpec) {
+) ([]string, map[string]ImagePullthroughSpec) {
 	insecureByDefault := false
 	if insecure, ok := is.Annotations[imageapi.InsecureRepositoryAnnotation]; ok {
 		insecureByDefault = insecure == "true"
@@ -362,12 +362,12 @@ func identifyCandidateRepositories(
 	}
 
 	repositories := make([]string, 0, len(search))
-	results := make(map[string]imagePullthroughSpec)
-	specs := []*imagePullthroughSpec{}
+	results := make(map[string]ImagePullthroughSpec)
+	specs := []*ImagePullthroughSpec{}
 	for repo, ref := range search {
 		repositories = append(repositories, repo)
 		// accompany the reference with corresponding registry's insecure flag
-		spec := imagePullthroughSpec{
+		spec := ImagePullthroughSpec{
 			dockerImageReference: ref,
 			insecure:             insecureRegistries[ref.Registry],
 		}
