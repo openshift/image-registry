@@ -122,9 +122,9 @@ func (bw *quotaRestrictedBlobWriter) Commit(ctx context.Context, provisional dis
 }
 
 // getLimitRangeList returns list of limit ranges for repo.
-func getLimitRangeList(ctx context.Context, limitClient client.LimitRangesGetter, namespace string, quotaEnforcing *quotaEnforcingConfig) (*corev1.LimitRangeList, error) {
-	if quotaEnforcing.limitRanges != nil {
-		obj, exists, _ := quotaEnforcing.limitRanges.get(namespace)
+func getLimitRangeList(ctx context.Context, limitClient client.LimitRangesGetter, namespace string, cache projectObjectListStore) (*corev1.LimitRangeList, error) {
+	if cache != nil {
+		obj, exists, _ := cache.get(namespace)
 		if exists {
 			return obj.(*corev1.LimitRangeList), nil
 		}
@@ -138,8 +138,8 @@ func getLimitRangeList(ctx context.Context, limitClient client.LimitRangesGetter
 		return nil, err
 	}
 
-	if quotaEnforcing.limitRanges != nil {
-		err = quotaEnforcing.limitRanges.add(namespace, lrs)
+	if cache != nil {
+		err = cache.add(namespace, lrs)
 		if err != nil {
 			context.GetLogger(ctx).Errorf("failed to cache limit range list: %v", err)
 		}
@@ -155,7 +155,7 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 		return nil
 	}
 
-	lrs, err := getLimitRangeList(ctx, repo.imageStream.registryOSClient, repo.imageStream.namespace, repo.app.quotaEnforcing)
+	lrs, err := getLimitRangeList(ctx, repo.imageStream.registryOSClient, repo.imageStream.namespace, repo.app.quotaEnforcing.limitRanges)
 	if err != nil {
 		return err
 	}
