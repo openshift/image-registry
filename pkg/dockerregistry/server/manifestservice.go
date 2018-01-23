@@ -70,23 +70,18 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 		return nil, err
 	}
 
-	ref := imageapi.DockerImageReference{
-		Registry:  m.serverAddr,
-		Namespace: m.imageStream.namespace,
-		Name:      m.imageStream.name,
-	}
-	if isImageManaged(image) {
-		// Reference without a registry part refers to repository containing locally managed images.
-		// Such an entry is retrieved, checked and set by blobDescriptorService operating only on local blobs.
-		ref.Registry = ""
-	} else {
+	// Reference without a registry part refers to repository containing locally managed images.
+	// Such an entry is retrieved, checked and set by blobDescriptorService operating only on local blobs.
+	ref := m.imageStream.Reference()
+	if !isImageManaged(image) {
 		// Repository with a registry points to remote repository. This is used by pullthrough middleware.
-		ref = ref.DockerClientDefaults().AsRepository()
+		// TODO(dmage): should ref contain image.DockerImageReferece if the image is not managed?
+		ref = fmt.Sprintf("%s/%s", m.serverAddr, ref)
 	}
 
 	manifest, err := m.manifests.Get(ctx, dgst, options...)
 	if err == nil {
-		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
+		m.imageStream.rememberLayersOfImage(ctx, image, ref)
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
 	} else if _, ok := err.(distribution.ErrManifestUnknownRevision); !ok {
@@ -96,7 +91,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 
 	manifest, err = registrymanifest.NewFromImage(image)
 	if err == nil {
-		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
+		m.imageStream.rememberLayersOfImage(ctx, image, ref)
 		m.migrateManifest(ctx, image, dgst, manifest, false)
 		return manifest, nil
 	} else {
@@ -168,7 +163,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 					imageapi.DockerImageLayersOrderAnnotation:  layerOrder,
 				},
 			},
-			DockerImageReference:         fmt.Sprintf("%s/%s/%s@%s", m.serverAddr, m.imageStream.namespace, m.imageStream.name, dgst.String()),
+			DockerImageReference:         fmt.Sprintf("%s/%s@%s", m.serverAddr, m.imageStream.Reference(), dgst.String()),
 			DockerImageManifest:          string(payload),
 			DockerImageManifestMediaType: mediaType,
 			DockerImageConfig:            string(config),
