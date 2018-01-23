@@ -22,7 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
@@ -122,24 +121,24 @@ func (bw *quotaRestrictedBlobWriter) Commit(ctx context.Context, provisional dis
 }
 
 // getLimitRangeList returns list of limit ranges for repo.
-func getLimitRangeList(ctx context.Context, limitClient client.LimitRangesGetter, namespace string, cache projectObjectListStore) (*corev1.LimitRangeList, error) {
+func (is *imageStream) getLimitRangeList(ctx context.Context, cache projectObjectListStore) (*corev1.LimitRangeList, error) {
 	if cache != nil {
-		obj, exists, _ := cache.get(namespace)
+		obj, exists, _ := cache.get(is.namespace)
 		if exists {
 			return obj.(*corev1.LimitRangeList), nil
 		}
 	}
 
-	context.GetLogger(ctx).Debugf("listing limit ranges in namespace %s", namespace)
+	context.GetLogger(ctx).Debugf("listing limit ranges in namespace %s", is.namespace)
 
-	lrs, err := limitClient.LimitRanges(namespace).List(metav1.ListOptions{})
+	lrs, err := is.registryOSClient.LimitRanges(is.namespace).List(metav1.ListOptions{})
 	if err != nil {
 		context.GetLogger(ctx).Errorf("failed to list limitranges: %v", err)
 		return nil, err
 	}
 
 	if cache != nil {
-		err = cache.add(namespace, lrs)
+		err = cache.add(is.namespace, lrs)
 		if err != nil {
 			context.GetLogger(ctx).Errorf("failed to cache limit range list: %v", err)
 		}
@@ -155,7 +154,7 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 		return nil
 	}
 
-	lrs, err := getLimitRangeList(ctx, repo.imageStream.registryOSClient, repo.imageStream.namespace, repo.app.quotaEnforcing.limitRanges)
+	lrs, err := repo.imageStream.getLimitRangeList(ctx, repo.app.quotaEnforcing.limitRanges)
 	if err != nil {
 		return err
 	}
