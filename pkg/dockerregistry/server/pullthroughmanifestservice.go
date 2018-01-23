@@ -5,6 +5,7 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 
+	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
@@ -15,7 +16,7 @@ import (
 type pullthroughManifestService struct {
 	distribution.ManifestService
 	localManifestService distribution.ManifestService
-	imageStream          *imageStream
+	imageStream          imagestream.ImageStream
 	mirror               bool
 }
 
@@ -38,7 +39,7 @@ func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest
 
 func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
-	image, _, err := m.imageStream.getImageOfImageStream(ctx, dgst)
+	image, _, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 				context.GetLogger(ctx).Errorf("failed to mirror manifest %s: %v", ref.Exact(), putErr)
 			}
 		}
-		m.imageStream.rememberLayersOfImage(ctx, image, ref.Exact())
+		m.imageStream.RememberLayersOfImage(ctx, image, ref.Exact())
 	case distribution.ErrManifestUnknownRevision:
 		break
 	default:
@@ -81,7 +82,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 }
 
 func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
-	retriever := getImportContext(ctx, m.imageStream.getSecrets)
+	retriever := getImportContext(ctx, m.imageStream.GetSecrets)
 
 	// determine, whether to fall-back to insecure transport based on a specification of image's tag
 	// if the client pulls by tag, use that
@@ -93,7 +94,7 @@ func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Conte
 		}
 	}
 
-	insecure, err := m.imageStream.tagIsInsecure(tag, dgst)
+	insecure, err := m.imageStream.TagIsInsecure(tag, dgst)
 	if err != nil {
 		return nil, err
 	}

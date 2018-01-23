@@ -14,6 +14,7 @@ import (
 	imageapiv1 "github.com/openshift/api/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
+	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
@@ -57,7 +58,7 @@ func (c *digestBlobStoreCache) Put(dgst digest.Digest, bs distribution.BlobStore
 // remoteBlobGetterService implements BlobGetterService and allows to serve blobs from remote
 // repositories.
 type remoteBlobGetterService struct {
-	imageStream   *imageStream
+	imageStream   imagestream.ImageStream
 	getSecrets    secretsGetter
 	cache         cache.RepositoryDigest
 	digestToStore *digestBlobStoreCache
@@ -68,7 +69,7 @@ var _ BlobGetterService = &remoteBlobGetterService{}
 // NewBlobGetterService returns a getter for remote blobs. Its cache will be shared among different middleware
 // wrappers, which is a must at least for stat calls made on manifest's dependencies during its verification.
 func NewBlobGetterService(
-	imageStream *imageStream,
+	imageStream imagestream.ImageStream,
 	secretsGetter secretsGetter,
 	cache cache.RepositoryDigest,
 ) BlobGetterService {
@@ -78,13 +79,6 @@ func NewBlobGetterService(
 		cache:         cache,
 		digestToStore: newDigestBlobStoreCache(),
 	}
-}
-
-// ImagePullthroughSpec contains a reference of remote image to pull associated with an insecure flag for the
-// corresponding registry.
-type ImagePullthroughSpec struct {
-	dockerImageReference *imageapi.DockerImageReference
-	insecure             bool
 }
 
 // Stat provides metadata about a blob identified by the digest. If the
@@ -176,16 +170,16 @@ func (rbgs *remoteBlobGetterService) ServeBlob(ctx context.Context, w http.Respo
 func (rbgs *remoteBlobGetterService) proxyStat(
 	ctx context.Context,
 	retriever registryclient.RepositoryRetriever,
-	spec *ImagePullthroughSpec,
+	spec *imagestream.ImagePullthroughSpec,
 	dgst digest.Digest,
 ) (distribution.Descriptor, error) {
-	ref := spec.dockerImageReference
+	ref := spec.DockerImageReference
 	insecureNote := ""
-	if spec.insecure {
+	if spec.Insecure {
 		insecureNote = " with a fall-back to insecure transport"
 	}
 	context.GetLogger(ctx).Infof("Trying to stat %q from %q%s", dgst, ref.AsRepository().Exact(), insecureNote)
-	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), spec.insecure)
+	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), spec.Insecure)
 	if err != nil {
 		context.GetLogger(ctx).Errorf("Error getting remote repository for image %q: %v", ref.AsRepository().Exact(), err)
 		return distribution.Descriptor{}, err
@@ -230,7 +224,7 @@ func (rbgs *remoteBlobGetterService) Get(ctx context.Context, dgst digest.Digest
 func (rbgs *remoteBlobGetterService) findCandidateRepository(
 	ctx context.Context,
 	repositoryCandidates []string,
-	search map[string]ImagePullthroughSpec,
+	search map[string]imagestream.ImagePullthroughSpec,
 	cachedRepos []string,
 	dgst digest.Digest,
 	retriever registryclient.RepositoryRetriever,
@@ -276,7 +270,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 type byInsecureFlag struct {
 	repositories []string
-	specs        []*ImagePullthroughSpec
+	specs        []*imagestream.ImagePullthroughSpec
 }
 
 func (by *byInsecureFlag) Len() int {
@@ -290,17 +284,17 @@ func (by *byInsecureFlag) Swap(i, j int) {
 	by.specs[i], by.specs[j] = by.specs[j], by.specs[i]
 }
 func (by *byInsecureFlag) Less(i, j int) bool {
-	if by.specs[i].insecure == by.specs[j].insecure {
+	if by.specs[i].Insecure == by.specs[j].Insecure {
 		switch {
 		case by.repositories[i] < by.repositories[j]:
 			return true
 		case by.repositories[i] > by.repositories[j]:
 			return false
 		default:
-			return by.specs[i].dockerImageReference.Exact() < by.specs[j].dockerImageReference.Exact()
+			return by.specs[i].DockerImageReference.Exact() < by.specs[j].DockerImageReference.Exact()
 		}
 	}
-	return !by.specs[i].insecure
+	return !by.specs[i].Insecure
 }
 
 // identifyCandidateRepositories returns a list of remote repository names sorted from the best candidate to
@@ -310,7 +304,7 @@ func identifyCandidateRepositories(
 	is *imageapiv1.ImageStream,
 	localRegistry string,
 	primary bool,
-) ([]string, map[string]ImagePullthroughSpec) {
+) ([]string, map[string]imagestream.ImagePullthroughSpec) {
 	insecureByDefault := false
 	if insecure, ok := is.Annotations[imageapi.InsecureRepositoryAnnotation]; ok {
 		insecureByDefault = insecure == "true"
@@ -362,14 +356,14 @@ func identifyCandidateRepositories(
 	}
 
 	repositories := make([]string, 0, len(search))
-	results := make(map[string]ImagePullthroughSpec)
-	specs := []*ImagePullthroughSpec{}
+	results := make(map[string]imagestream.ImagePullthroughSpec)
+	specs := []*imagestream.ImagePullthroughSpec{}
 	for repo, ref := range search {
 		repositories = append(repositories, repo)
 		// accompany the reference with corresponding registry's insecure flag
-		spec := ImagePullthroughSpec{
-			dockerImageReference: ref,
-			insecure:             insecureRegistries[ref.Registry],
+		spec := imagestream.ImagePullthroughSpec{
+			DockerImageReference: ref,
+			Insecure:             insecureRegistries[ref.Registry],
 		}
 		results[repo] = spec
 		specs = append(specs, &spec)

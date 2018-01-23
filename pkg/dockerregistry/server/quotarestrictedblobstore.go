@@ -23,6 +23,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
@@ -55,7 +56,7 @@ type quotaEnforcingConfig struct {
 	// if set, enables quota enforcement
 	enforcementEnabled bool
 	// if set, enables caching of quota objects per project
-	limitRanges projectObjectListStore
+	limitRanges imagestream.ProjectObjectListStore
 }
 
 // quotaRestrictedBlobStore wraps upstream blob store with a guard preventing big layers exceeding image quotas
@@ -120,10 +121,10 @@ func (bw *quotaRestrictedBlobWriter) Commit(ctx context.Context, provisional dis
 	return bw.BlobWriter.Commit(ctx, provisional)
 }
 
-// getLimitRangeList returns list of limit ranges for repo.
-func (is *imageStream) getLimitRangeList(ctx context.Context, cache projectObjectListStore) (*corev1.LimitRangeList, error) {
+// GetLimitRangeList returns list of limit ranges for repo.
+func (is *imageStream) GetLimitRangeList(ctx context.Context, cache imagestream.ProjectObjectListStore) (*corev1.LimitRangeList, error) {
 	if cache != nil {
-		obj, exists, _ := cache.get(is.namespace)
+		obj, exists, _ := cache.Get(is.namespace)
 		if exists {
 			return obj.(*corev1.LimitRangeList), nil
 		}
@@ -138,7 +139,7 @@ func (is *imageStream) getLimitRangeList(ctx context.Context, cache projectObjec
 	}
 
 	if cache != nil {
-		err = cache.add(is.namespace, lrs)
+		err = cache.Add(is.namespace, lrs)
 		if err != nil {
 			context.GetLogger(ctx).Errorf("failed to cache limit range list: %v", err)
 		}
@@ -154,7 +155,7 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 		return nil
 	}
 
-	lrs, err := repo.imageStream.getLimitRangeList(ctx, repo.app.quotaEnforcing.limitRanges)
+	lrs, err := repo.imageStream.GetLimitRangeList(ctx, repo.app.quotaEnforcing.limitRanges)
 	if err != nil {
 		return err
 	}

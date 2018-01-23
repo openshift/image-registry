@@ -81,7 +81,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireM
 		processedImages[tagEvent.Image] = struct{}{}
 
 		context.GetLogger(ctx).Debugf("getting image %s", tagEvent.Image)
-		image, err := is.getImage(ctx, digest.Digest(tagEvent.Image))
+		image, err := is.GetImage(ctx, digest.Digest(tagEvent.Image))
 		if err != nil {
 			if kerrors.IsNotFound(err) {
 				context.GetLogger(ctx).Debugf("image %q not found", tagEvent.Image)
@@ -102,7 +102,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireM
 			tagName := event2Name[tagEvent]
 			context.GetLogger(ctx).Debugf("blob found under istag %s:%s in image %s", is.Reference(), tagName, tagEvent.Image)
 			// remember all the layers of matching image
-			is.rememberLayersOfImage(ctx, image, repoCacheName)
+			is.RememberLayersOfImage(ctx, image, repoCacheName)
 			return logFound(true)
 		}
 	}

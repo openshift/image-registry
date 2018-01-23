@@ -141,7 +141,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 
 		remoteBlobGetter := NewBlobGetterService(
 			imageStream,
-			imageStream.getSecrets,
+			imageStream.GetSecrets,
 			imageStream.cache)
 
 		ptbs := &pullthroughBlobStore{
@@ -562,7 +562,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 
 			remoteBlobGetter := NewBlobGetterService(
 				imageStream,
-				imageStream.getSecrets,
+				imageStream.GetSecrets,
 				imageStream.cache)
 
 			ptbs := &pullthroughBlobStore{

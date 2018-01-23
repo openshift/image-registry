@@ -12,9 +12,11 @@ import (
 	restclient "k8s.io/client-go/rest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
+
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
+	"github.com/openshift/image-registry/pkg/imagestream"
 )
 
 var (
@@ -44,7 +46,7 @@ type repository struct {
 	app        *App
 	crossmount bool
 
-	imageStream *imageStream
+	imageStream imagestream.ImageStream
 
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
@@ -64,11 +66,8 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		return nil, nil, err
 	}
 
-	imageStreamGetter := &cachedImageStreamGetter{
-		ctx:          ctx,
-		namespace:    namespace,
-		name:         name,
-		isNamespacer: registryOSClient,
+	imageStreamCache := &cache.RepoDigest{
+		Cache: app.cache,
 	}
 
 	r := &repository{
@@ -79,22 +78,25 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		crossmount: crossmount,
 
 		imageStream: &imageStream{
-			namespace:         namespace,
-			name:              name,
-			registryOSClient:  registryOSClient,
-			cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
-			imageStreamGetter: imageStreamGetter,
-			cache: &cache.RepoDigest{
-				Cache: app.cache,
+			namespace:        namespace,
+			name:             name,
+			registryOSClient: registryOSClient,
+			cachedImages:     make(map[digest.Digest]*imageapiv1.Image),
+			imageStreamGetter: &cachedImageStreamGetter{
+				ctx:          ctx,
+				namespace:    namespace,
+				name:         name,
+				isNamespacer: registryOSClient,
 			},
+			cache: imageStreamCache,
 		},
 	}
 
 	if app.config.Pullthrough.Enabled {
 		r.remoteBlobGetter = NewBlobGetterService(
 			r.imageStream,
-			r.imageStream.getSecrets,
-			r.imageStream.cache)
+			r.imageStream.GetSecrets,
+			imageStreamCache)
 	}
 
 	bdsf := blobDescriptorServiceFactoryFunc(r.BlobDescriptorService)

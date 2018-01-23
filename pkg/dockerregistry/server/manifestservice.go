@@ -15,6 +15,7 @@ import (
 	imageapiv1 "github.com/openshift/api/image/v1"
 
 	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
+	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
@@ -39,7 +40,7 @@ type manifestService struct {
 	blobStore distribution.BlobStore
 
 	serverAddr  string
-	imageStream *imageStream
+	imageStream imagestream.ImageStream
 
 	// acceptSchema2 allows to refuse the manifest schema version 2
 	acceptSchema2 bool
@@ -49,7 +50,7 @@ type manifestService struct {
 func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Exists")
 
-	image, _, err := m.imageStream.getImageOfImageStream(ctx, dgst)
+	image, _, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return false, err
 	}
@@ -60,7 +61,7 @@ func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool,
 func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Get")
 
-	image, _, _, err := m.imageStream.getStoredImageOfImageStream(ctx, dgst)
+	image, _, _, err := m.imageStream.GetStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 
 	manifest, err := m.manifests.Get(ctx, dgst, options...)
 	if err == nil {
-		m.imageStream.rememberLayersOfImage(ctx, image, ref)
+		m.imageStream.RememberLayersOfImage(ctx, image, ref)
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
 	} else if _, ok := err.(distribution.ErrManifestUnknownRevision); !ok {
@@ -86,7 +87,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 
 	manifest, err = registrymanifest.NewFromImage(image)
 	if err == nil {
-		m.imageStream.rememberLayersOfImage(ctx, image, ref)
+		m.imageStream.RememberLayersOfImage(ctx, image, ref)
 		m.migrateManifest(ctx, image, dgst, manifest, false)
 		return manifest, nil
 	} else {
@@ -228,7 +229,7 @@ func (m *manifestService) storeManifestLocally(ctx context.Context, image *image
 	}
 	image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] = "true"
 
-	if _, err := m.imageStream.updateImage(image); err != nil {
+	if _, err := m.imageStream.UpdateImage(image); err != nil {
 		context.GetLogger(ctx).Errorf("error updating Image: %v", err)
 	}
 }

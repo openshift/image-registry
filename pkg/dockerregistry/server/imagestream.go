@@ -22,6 +22,7 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
+	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
 	util "github.com/openshift/image-registry/pkg/origin-common/util"
@@ -74,10 +75,10 @@ func (is *imageStream) createImageStream(ctx context.Context) (*imageapiv1.Image
 	return stream, nil
 }
 
-// getImage retrieves the Image with digest `dgst`. No authorization check is done.
-func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
+// GetImage retrieves the Image with digest `dgst`. No authorization check is done.
+func (is *imageStream) GetImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
 	if image, exists := is.cachedImages[dgst]; exists {
-		context.GetLogger(ctx).Infof("(*imageStream).getImage: returning cached copy of %s", image.Name)
+		context.GetLogger(ctx).Infof("(*imageStream).GetImage: returning cached copy of %s", image.Name)
 		return image, nil
 	}
 
@@ -87,7 +88,7 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 		return nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
-	context.GetLogger(ctx).Infof("(*imageStream).getImage: got image %s", image.Name)
+	context.GetLogger(ctx).Infof("(*imageStream).GetImage: got image %s", image.Name)
 	if err := util.ImageWithMetadata(image); err != nil {
 		return nil, err
 	}
@@ -95,7 +96,7 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 	return image, nil
 }
 
-// getStoredImageOfImageStream retrieves the Image with digest `dgst` and
+// GetStoredImageOfImageStream retrieves the Image with digest `dgst` and
 // ensures that the image belongs to the image stream `is`. It uses two
 // queries to master API:
 //
@@ -105,8 +106,8 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 // This allows us to cache the image stream for later use.
 //
 // If you need the image object to be modified according to image stream tag,
-// please use getImageOfImageStream.
-func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error) {
+// please use GetImageOfImageStream.
+func (is *imageStream) GetStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("failed to get ImageStream: %v", err)
@@ -119,7 +120,7 @@ func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst dig
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
-	image, err := is.getImage(ctx, dgst)
+	image, err := is.GetImage(ctx, dgst)
 	if err != nil {
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
@@ -127,7 +128,7 @@ func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst dig
 	return image, tagEvent, stream, nil
 }
 
-// getImageOfImageStream retrieves the Image with digest `dgst` for the image
+// GetImageOfImageStream retrieves the Image with digest `dgst` for the image
 // stream. The image's field DockerImageReference is modified on the fly to
 // pretend that we've got the image from the source from which the image was
 // tagged to match tag's DockerImageReference.
@@ -135,8 +136,8 @@ func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst dig
 // NOTE: due to on the fly modification, the returned image object should
 // not be sent to the master API. If you need unmodified version of the
 // image object, please use getStoredImageOfImageStream.
-func (is *imageStream) getImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error) {
-	image, tagEvent, stream, err := is.getStoredImageOfImageStream(ctx, dgst)
+func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error) {
+	image, tagEvent, stream, err := is.GetStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -146,13 +147,13 @@ func (is *imageStream) getImageOfImageStream(ctx context.Context, dgst digest.Di
 	return image, stream, nil
 }
 
-// updateImage modifies the Image.
-func (is *imageStream) updateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
+// UpdateImage modifies the Image.
+func (is *imageStream) UpdateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
 	return is.registryOSClient.Images().Update(image)
 }
 
-// rememberLayersOfImage caches the layer digests of given image
-func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageapiv1.Image, cacheName string) {
+// RememberLayersOfImage caches the layer digests of given image
+func (is *imageStream) RememberLayersOfImage(ctx context.Context, image *imageapiv1.Image, cacheName string) {
 	if len(image.DockerImageLayers) > 0 {
 		for _, layer := range image.DockerImageLayers {
 			_ = is.cache.AddDigest(digest.Digest(layer.Name), cacheName)
@@ -179,7 +180,7 @@ func (is *imageStream) rememberLayersOfImage(ctx context.Context, image *imageap
 	}
 }
 
-func (is *imageStream) getSecrets() ([]corev1.Secret, error) {
+func (is *imageStream) GetSecrets() ([]corev1.Secret, error) {
 	secrets, err := is.registryOSClient.ImageStreamSecrets(is.namespace).Secrets(is.name, metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error getting secrets for repository %s: %v", is.Reference(), err)
@@ -187,9 +188,9 @@ func (is *imageStream) getSecrets() ([]corev1.Secret, error) {
 	return secrets.Items, nil
 }
 
-// tagIsInsecure returns true if the given image stream or its tag allow for
+// TagIsInsecure returns true if the given image stream or its tag allow for
 // insecure transport.
-func (is *imageStream) tagIsInsecure(tag string, dgst digest.Digest) (bool, error) {
+func (is *imageStream) TagIsInsecure(tag string, dgst digest.Digest) (bool, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
 		return false, err
@@ -239,7 +240,7 @@ func (is *imageStream) localRegistry() (string, error) {
 	return local.Registry, nil
 }
 
-func (is *imageStream) IdentifyCandidateRepositories(primary bool) ([]string, map[string]ImagePullthroughSpec, error) {
+func (is *imageStream) IdentifyCandidateRepositories(primary bool) ([]string, map[string]imagestream.ImagePullthroughSpec, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
 		return nil, nil, err
@@ -324,7 +325,7 @@ func (is *imageStream) Untag(ctx context.Context, tag string, pullthroughEnabled
 			return err
 		}
 
-		image, err := is.getImage(ctx, dgst)
+		image, err := is.GetImage(ctx, dgst)
 		if err != nil {
 			return err
 		}
