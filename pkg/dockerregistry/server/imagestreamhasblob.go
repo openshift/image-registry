@@ -75,7 +75,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireM
 		processedImages[tagEvent.Image] = struct{}{}
 
 		context.GetLogger(ctx).Debugf("getting image %s", tagEvent.Image)
-		image, err := is.GetImage(ctx, digest.Digest(tagEvent.Image))
+		image, err := is.getImage(ctx, digest.Digest(tagEvent.Image))
 		if err != nil {
 			if kerrors.IsNotFound(err) {
 				context.GetLogger(ctx).Debugf("image %q not found", tagEvent.Image)

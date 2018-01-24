@@ -34,7 +34,7 @@ func (t tagService) Get(ctx context.Context, tag string) (distribution.Descripto
 	}
 
 	if !t.pullthroughEnabled {
-		image, err := t.imageStream.GetImage(ctx, dgst)
+		image, _, err := t.imageStream.GetImageOfImageStream(ctx, dgst)
 		if err != nil {
 			return distribution.Descriptor{}, err
 		}
@@ -71,7 +71,7 @@ func (t tagService) All(ctx context.Context) ([]string, error) {
 
 		managed, found := managedImages[dgst.String()]
 		if !found {
-			image, err := t.imageStream.GetImage(ctx, dgst)
+			image, _, err := t.imageStream.GetImageOfImageStream(ctx, dgst)
 			if err != nil {
 				context.GetLogger(ctx).Errorf("unable to get image %s %s: %v", t.imageStream.Reference(), dgst.String(), err)
 				continue
@@ -117,7 +117,7 @@ func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([
 
 		managed, found := managedImages[dgst.String()]
 		if !found {
-			image, err := t.imageStream.GetImage(ctx, dgst)
+			image, _, err := t.imageStream.GetImageOfImageStream(ctx, dgst)
 			if err != nil {
 				context.GetLogger(ctx).Errorf("unable to get image %s %s: %v", t.imageStream.Reference(), dgst.String(), err)
 				continue

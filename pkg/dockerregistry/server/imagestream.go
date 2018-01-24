@@ -69,10 +69,10 @@ func (is *imageStream) createImageStream(ctx context.Context) (*imageapiv1.Image
 	return stream, nil
 }
 
-// GetImage retrieves the Image with digest `dgst`. No authorization check is done.
-func (is *imageStream) GetImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
+// getImage retrieves the Image with digest `dgst`. No authorization check is done.
+func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
 	if image, exists := is.cachedImages[dgst]; exists {
-		context.GetLogger(ctx).Infof("(*imageStream).GetImage: returning cached copy of %s", image.Name)
+		context.GetLogger(ctx).Infof("(*imageStream).getImage: returning cached copy of %s", image.Name)
 		return image, nil
 	}
 
@@ -82,7 +82,7 @@ func (is *imageStream) GetImage(ctx context.Context, dgst digest.Digest) (*image
 		return nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
-	context.GetLogger(ctx).Infof("(*imageStream).GetImage: got image %s", image.Name)
+	context.GetLogger(ctx).Infof("(*imageStream).getImage: got image %s", image.Name)
 	if err := util.ImageWithMetadata(image); err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (is *imageStream) GetStoredImageOfImageStream(ctx context.Context, dgst dig
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
-	image, err := is.GetImage(ctx, dgst)
+	image, err := is.getImage(ctx, dgst)
 	if err != nil {
 		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
@@ -291,7 +291,7 @@ func (is *imageStream) Untag(ctx context.Context, tag string, pullthroughEnabled
 			return err
 		}
 
-		image, err := is.GetImage(ctx, dgst)
+		image, err := is.getImage(ctx, dgst)
 		if err != nil {
 			return err
 		}
