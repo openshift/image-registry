@@ -30,10 +30,9 @@ type ImageStream interface {
 	Reference() string
 	Exists() (bool, error)
 
-	GetStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error)
 	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error)
 	CreateImageStreamMapping(ctx context.Context, tag string, image *imageapiv1.Image) error
-	UpdateImage(image *imageapiv1.Image) (*imageapiv1.Image, error)
+	ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) error
 
 	HasBlob(ctx context.Context, dgst digest.Digest, requireManaged bool) *imageapiv1.Image
 	IdentifyCandidateRepositories(primary bool) ([]string, map[string]ImagePullthroughSpec, error)

@@ -101,7 +101,7 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 //
 // If you need the image object to be modified according to image stream tag,
 // please use GetImageOfImageStream.
-func (is *imageStream) GetStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error) {
+func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("failed to get ImageStream: %v", err)
@@ -131,19 +131,39 @@ func (is *imageStream) GetStoredImageOfImageStream(ctx context.Context, dgst dig
 // not be sent to the master API. If you need unmodified version of the
 // image object, please use getStoredImageOfImageStream.
 func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error) {
-	image, tagEvent, stream, err := is.GetStoredImageOfImageStream(ctx, dgst)
+	image, tagEvent, stream, err := is.getStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	image.DockerImageReference = tagEvent.DockerImageReference
+	// We don't want to mutate the origial image object, which we've got by reference.
+	img := *image
+	img.DockerImageReference = tagEvent.DockerImageReference
 
-	return image, stream, nil
+	return &img, stream, nil
 }
 
-// UpdateImage modifies the Image.
-func (is *imageStream) UpdateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
-	return is.registryOSClient.Images().Update(image)
+// ImageManifestBlobStored adds the imageapi.ImageManifestBlobStoredAnnotation annotation to image.
+func (is *imageStream) ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) error {
+	image, err := is.getImage(ctx, digest.Digest(image.Name)) // ensure that we have the image object from master API
+	if err != nil {
+		return err
+	}
+
+	if len(image.DockerImageManifest) == 0 || image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] == "true" {
+		return nil
+	}
+
+	if image.Annotations == nil {
+		image.Annotations = make(map[string]string)
+	}
+	image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] = "true"
+
+	if _, err := is.registryOSClient.Images().Update(image); err != nil {
+		context.GetLogger(ctx).Errorf("error updating Image: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (is *imageStream) GetSecrets() ([]corev1.Secret, error) {

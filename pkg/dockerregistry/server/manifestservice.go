@@ -63,7 +63,7 @@ func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool,
 func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Get")
 
-	image, _, _, err := m.imageStream.GetStoredImageOfImageStream(ctx, dgst)
+	image, _, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}
@@ -222,16 +222,7 @@ func (m *manifestService) storeManifestLocally(ctx context.Context, image *image
 		}
 	}
 
-	if len(image.DockerImageManifest) == 0 || image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] == "true" {
-		return
-	}
-
-	if image.Annotations == nil {
-		image.Annotations = make(map[string]string)
-	}
-	image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] = "true"
-
-	if _, err := m.imageStream.UpdateImage(image); err != nil {
+	if err := m.imageStream.ImageManifestBlobStored(ctx, image); err != nil {
 		context.GetLogger(ctx).Errorf("error updating Image: %v", err)
 	}
 }
