@@ -1,4 +1,4 @@
-package server
+package imagestream
 
 import (
 	"sort"
@@ -12,14 +12,6 @@ import (
 
 	"github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
-)
-
-const (
-	// DigestSha256EmptyTar is the canonical sha256 digest of empty data
-	digestSha256EmptyTar = digest.Digest("sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-
-	// digestSHA256GzippedEmptyTar is the canonical sha256 digest of gzippedEmptyTar
-	digestSHA256GzippedEmptyTar = digest.Digest("sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4")
 )
 
 // ByGeneration allows for sorting tag events from latest to oldest.
@@ -87,7 +79,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireM
 
 		// in case of pullthrough disabled, client won't be able to download a blob belonging to not managed image
 		// (image stored in external registry), thus don't consider them as candidates
-		if requireManaged && !isImageManaged(image) {
+		if requireManaged && !IsImageManaged(image) {
 			context.GetLogger(ctx).Debugf("skipping not managed image")
 			continue
 		}
@@ -135,8 +127,4 @@ func imageHasBlob(ctx context.Context, image *imageapiv1.Image, blobDigest diges
 	}
 
 	return false
-}
-
-func isEmptyDigest(dgst digest.Digest) bool {
-	return dgst == digestSha256EmptyTar || dgst == digestSHA256GzippedEmptyTar
 }

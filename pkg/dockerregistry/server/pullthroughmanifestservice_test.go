@@ -20,6 +20,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/testutil"
 )
@@ -124,7 +125,7 @@ func TestPullthroughManifests(t *testing.T) {
 	} {
 		localManifestService := newTestManifestService(repoName, tc.localData)
 
-		imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		digestCache, err := cache.NewBlobDigest(
 			defaultDescriptorCacheSize,
@@ -358,7 +359,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 
 			localManifestService := newTestManifestService(repoName, tc.localData)
 
-			imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+			imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 			digestCache, err := cache.NewBlobDigest(
 				defaultDescriptorCacheSize,
@@ -504,7 +505,7 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 			s.touched = false
 		}
 
-		imageStream := newTestImageStream(ctx, t, namespace, tc.repoName, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(ctx, namespace, tc.repoName, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ptms := &pullthroughManifestService{
 			ManifestService: newTestManifestService(tc.repoName, nil),
@@ -650,7 +651,7 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 	})
 	testutil.AddImage(t, fos, img, namespace, repo, "latest")
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &putWaiterManifestService{
 		done: make(chan struct{}),

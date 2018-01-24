@@ -8,21 +8,13 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
-	"github.com/docker/distribution/registry/api/errcode"
-	disterrors "github.com/docker/distribution/registry/api/v2"
-
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
-	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
 )
 
 func getNamespaceName(resourceName string) (string, string, error) {
@@ -44,33 +36,6 @@ func getNamespaceName(resourceName string) (string, string, error) {
 	return ns, name, nil
 }
 
-func isImageManaged(image *imageapiv1.Image) bool {
-	managed, ok := image.ObjectMeta.Annotations[imageapi.ManagedByOpenShiftAnnotation]
-	return ok && managed == "true"
-}
-
-// wrapKStatusErrorOnGetImage transforms the given kubernetes status error into a distribution one. Upstream
-// handler do not allow us to propagate custom error messages except for ErrManifetUnknownRevision. All the
-// other errors will result in an internal server error with details made out of returned error.
-func wrapKStatusErrorOnGetImage(repoName string, dgst digest.Digest, err error) error {
-	switch {
-	case kerrors.IsNotFound(err):
-		// This is the only error type we can propagate unchanged to the client.
-		return distribution.ErrManifestUnknownRevision{
-			Name:     repoName,
-			Revision: dgst,
-		}
-	case err != nil:
-		// We don't turn this error to distribution error on purpose: Upstream manifest handler wraps any
-		// error but distribution.ErrManifestUnknownRevision with errcode.ErrorCodeUnknown. If we wrap the
-		// original error with distribution.ErrorCodeUnknown, the "unknown error" will appear twice in the
-		// resulting error message.
-		return err
-	}
-
-	return nil
-}
-
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
 func getImportContext(ctx context.Context, secretsGetter secretsGetter) registryclient.RepositoryRetriever {
@@ -80,43 +45,6 @@ func getImportContext(ctx context.Context, secretsGetter secretsGetter) registry
 	}
 	credentials := registryclient.NewCredentialsForSecrets(secrets)
 	return registryclient.NewContext(secureTransport, insecureTransport).WithCredentials(credentials)
-}
-
-// cachedImageStreamGetter wraps a master API client for getting image streams with a cache.
-type cachedImageStreamGetter struct {
-	ctx               context.Context
-	namespace         string
-	name              string
-	isNamespacer      client.ImageStreamsNamespacer
-	cachedImageStream *imageapiv1.ImageStream
-}
-
-func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, error) {
-	if g.cachedImageStream != nil {
-		context.GetLogger(g.ctx).Debugf("(*cachedImageStreamGetter).getImageStream: returning cached copy")
-		return g.cachedImageStream, nil
-	}
-	is, err := g.isNamespacer.ImageStreams(g.namespace).Get(g.name, metav1.GetOptions{})
-	if err != nil {
-		context.GetLogger(g.ctx).Errorf("failed to get image stream: %v", err)
-		switch {
-		case kerrors.IsNotFound(err):
-			return nil, disterrors.ErrorCodeNameUnknown.WithDetail(err)
-		case kerrors.IsForbidden(err), kerrors.IsUnauthorized(err), quotautil.IsErrorQuotaExceeded(err):
-			return nil, errcode.ErrorCodeDenied.WithDetail(err)
-		default:
-			return nil, errcode.ErrorCodeUnknown.WithDetail(err)
-		}
-	}
-
-	context.GetLogger(g.ctx).Debugf("(*cachedImageStreamGetter).getImageStream: got image stream %s/%s", is.Namespace, is.Name)
-	g.cachedImageStream = is
-	return is, nil
-}
-
-func (g *cachedImageStreamGetter) cacheImageStream(is *imageapiv1.ImageStream) {
-	context.GetLogger(g.ctx).Debugf("(*cachedImageStreamGetter).cacheImageStream: got image stream %s/%s", is.Namespace, is.Name)
-	g.cachedImageStream = is
 }
 
 // RememberLayersOfImage caches the layer digests of given image.

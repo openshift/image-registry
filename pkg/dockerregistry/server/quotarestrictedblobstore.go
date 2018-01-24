@@ -20,7 +20,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/imagestream"
@@ -119,33 +118,6 @@ func (bw *quotaRestrictedBlobWriter) Commit(ctx context.Context, provisional dis
 	}
 
 	return bw.BlobWriter.Commit(ctx, provisional)
-}
-
-// GetLimitRangeList returns list of limit ranges for repo.
-func (is *imageStream) GetLimitRangeList(ctx context.Context, cache imagestream.ProjectObjectListStore) (*corev1.LimitRangeList, error) {
-	if cache != nil {
-		obj, exists, _ := cache.Get(is.namespace)
-		if exists {
-			return obj.(*corev1.LimitRangeList), nil
-		}
-	}
-
-	context.GetLogger(ctx).Debugf("listing limit ranges in namespace %s", is.namespace)
-
-	lrs, err := is.registryOSClient.LimitRanges(is.namespace).List(metav1.ListOptions{})
-	if err != nil {
-		context.GetLogger(ctx).Errorf("failed to list limitranges: %v", err)
-		return nil, err
-	}
-
-	if cache != nil {
-		err = cache.Add(is.namespace, lrs)
-		if err != nil {
-			context.GetLogger(ctx).Errorf("failed to cache limit range list: %v", err)
-		}
-	}
-
-	return lrs, nil
 }
 
 // admitBlobWrite checks whether the blob does not exceed image limit ranges if set. Returns ErrAccessDenied

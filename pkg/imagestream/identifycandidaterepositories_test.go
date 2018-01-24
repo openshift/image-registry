@@ -1,4 +1,4 @@
-package server
+package imagestream
 
 import (
 	"reflect"
@@ -11,7 +11,6 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
-	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
@@ -22,7 +21,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 		localRegistry        string
 		primary              bool
 		expectedRepositories []string
-		expectedSearch       map[string]imagestream.ImagePullthroughSpec
+		expectedSearch       map[string]ImagePullthroughSpec
 	}{
 		{
 			name:          "empty image stream",
@@ -45,7 +44,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 			localRegistry:        "localhost:5000",
 			primary:              true,
 			expectedRepositories: []string{"docker.io/library/busybox"},
-			expectedSearch: map[string]imagestream.ImagePullthroughSpec{
+			expectedSearch: map[string]ImagePullthroughSpec{
 				"docker.io/library/busybox": makeTestImagePullthroughSpec(t, "docker.io/library/busybox:latest", false),
 			},
 		},
@@ -83,7 +82,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 			localRegistry:        "localhost:5000",
 			primary:              true,
 			expectedRepositories: []string{"example.org/user/app", "registry.example.org/user/app"},
-			expectedSearch: map[string]imagestream.ImagePullthroughSpec{
+			expectedSearch: map[string]ImagePullthroughSpec{
 				"example.org/user/app":          makeTestImagePullthroughSpec(t, "example.org/user/app:tag", false),
 				"registry.example.org/user/app": makeTestImagePullthroughSpec(t, "registry.example.org/user/app:latest", true),
 			},
@@ -122,7 +121,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 			localRegistry:        "localhost:5000",
 			primary:              false,
 			expectedRepositories: []string{"example.org/app"},
-			expectedSearch: map[string]imagestream.ImagePullthroughSpec{
+			expectedSearch: map[string]ImagePullthroughSpec{
 				"example.org/app": makeTestImagePullthroughSpec(t, "example.org/app:tag2", true),
 			},
 		},
@@ -182,7 +181,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 			localRegistry:        "localhost:5000",
 			primary:              true,
 			expectedRepositories: []string{"a.a/app", "other.b/bar", "a.b/app", "a.b/c", "a.b/c/foo"},
-			expectedSearch: map[string]imagestream.ImagePullthroughSpec{
+			expectedSearch: map[string]ImagePullthroughSpec{
 				"a.a/app":     makeTestImagePullthroughSpec(t, "a.a/app:latest", false),
 				"other.b/bar": makeTestImagePullthroughSpec(t, "other.b/bar:latest", false),
 				"a.b/app":     makeTestImagePullthroughSpec(t, "a.b/app:latest", true),
@@ -212,7 +211,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 			localRegistry:        "localhost:5000",
 			primary:              true,
 			expectedRepositories: []string{"a.b.c/app", "a.b/app", "a.b/foo"},
-			expectedSearch: map[string]imagestream.ImagePullthroughSpec{
+			expectedSearch: map[string]ImagePullthroughSpec{
 				"a.b.c/app": makeTestImagePullthroughSpec(t, "a.b.c/app:latest", false),
 				"a.b/app":   makeTestImagePullthroughSpec(t, "a.b/app:latest", true),
 				"a.b/foo":   makeTestImagePullthroughSpec(t, "a.b/foo:latest", true),
@@ -242,10 +241,10 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 	}
 }
 
-func makeTestImagePullthroughSpec(t *testing.T, ref string, insecure bool) imagestream.ImagePullthroughSpec {
+func makeTestImagePullthroughSpec(t *testing.T, ref string, insecure bool) ImagePullthroughSpec {
 	r, err := imageapi.ParseDockerImageReference(ref)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return imagestream.ImagePullthroughSpec{DockerImageReference: &r, Insecure: insecure}
+	return ImagePullthroughSpec{DockerImageReference: &r, Insecure: insecure}
 }

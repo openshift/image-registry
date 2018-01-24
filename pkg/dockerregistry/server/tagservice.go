@@ -39,7 +39,7 @@ func (t tagService) Get(ctx context.Context, tag string) (distribution.Descripto
 			return distribution.Descriptor{}, err
 		}
 
-		if !isImageManaged(image) {
+		if !imagestream.IsImageManaged(image) {
 			return distribution.Descriptor{}, distribution.ErrTagUnknown{Tag: tag}
 		}
 	}
@@ -76,7 +76,7 @@ func (t tagService) All(ctx context.Context) ([]string, error) {
 				context.GetLogger(ctx).Errorf("unable to get image %s %s: %v", t.imageStream.Reference(), dgst.String(), err)
 				continue
 			}
-			managed = isImageManaged(image)
+			managed = imagestream.IsImageManaged(image)
 			managedImages[dgst.String()] = managed
 		}
 
@@ -122,7 +122,7 @@ func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([
 				context.GetLogger(ctx).Errorf("unable to get image %s %s: %v", t.imageStream.Reference(), dgst.String(), err)
 				continue
 			}
-			managed = isImageManaged(image)
+			managed = imagestream.IsImageManaged(image)
 			managedImages[dgst.String()] = managed
 		}
 

@@ -72,7 +72,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	// Reference without a registry part refers to repository containing locally managed images.
 	// Such an entry is retrieved, checked and set by blobDescriptorService operating only on local blobs.
 	ref := m.imageStream.Reference()
-	if !isImageManaged(image) {
+	if !imagestream.IsImageManaged(image) {
 		// Repository with a registry points to remote repository. This is used by pullthrough middleware.
 		// TODO(dmage): should ref contain image.DockerImageReferece if the image is not managed?
 		ref = fmt.Sprintf("%s/%s", m.serverAddr, ref)

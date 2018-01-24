@@ -6,6 +6,18 @@ import (
 	"github.com/docker/distribution/digest"
 )
 
+const (
+	// DigestSha256EmptyTar is the canonical sha256 digest of empty data
+	digestSha256EmptyTar = digest.Digest("sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+
+	// digestSHA256GzippedEmptyTar is the canonical sha256 digest of gzippedEmptyTar
+	digestSHA256GzippedEmptyTar = digest.Digest("sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4")
+)
+
+func isEmptyDigest(dgst digest.Digest) bool {
+	return dgst == digestSha256EmptyTar || dgst == digestSHA256GzippedEmptyTar
+}
+
 type blobDescriptorServiceFactoryFunc func(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService
 
 func (f blobDescriptorServiceFactoryFunc) BlobAccessController(svc distribution.BlobDescriptorService) distribution.BlobDescriptorService {

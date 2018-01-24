@@ -6,12 +6,9 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	registrystorage "github.com/docker/distribution/registry/storage"
 
 	restclient "k8s.io/client-go/rest"
-
-	imageapiv1 "github.com/openshift/api/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
@@ -74,18 +71,7 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		app:        app,
 		crossmount: crossmount,
 
-		imageStream: &imageStream{
-			namespace:        namespace,
-			name:             name,
-			registryOSClient: registryOSClient,
-			cachedImages:     make(map[digest.Digest]*imageapiv1.Image),
-			imageStreamGetter: &cachedImageStreamGetter{
-				ctx:          ctx,
-				namespace:    namespace,
-				name:         name,
-				isNamespacer: registryOSClient,
-			},
-		},
+		imageStream: imagestream.New(ctx, namespace, name, registryOSClient),
 		cache: &cache.RepoDigest{
 			Cache: app.cache,
 		},
