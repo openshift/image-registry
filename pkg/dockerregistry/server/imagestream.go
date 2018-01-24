@@ -41,18 +41,11 @@ func (is *imageStream) Reference() string {
 }
 
 // createImageStream creates a new image stream and caches it.
-func (is *imageStream) createImageStream(ctx context.Context) (*imageapiv1.ImageStream, error) {
+func (is *imageStream) createImageStream(ctx context.Context, userClient client.Interface) (*imageapiv1.ImageStream, error) {
 	stream := &imageapiv1.ImageStream{}
 	stream.Name = is.name
 
-	uclient, ok := userClientFrom(ctx)
-	if !ok {
-		errmsg := "error creating user client to auto provision image stream: user client to master API unavailable"
-		context.GetLogger(ctx).Errorf(errmsg)
-		return nil, errcode.ErrorCodeUnknown.WithDetail(errmsg)
-	}
-
-	stream, err := uclient.ImageStreams(is.namespace).Create(stream)
+	stream, err := userClient.ImageStreams(is.namespace).Create(stream)
 	switch {
 	case kerrors.IsAlreadyExists(err), kerrors.IsConflict(err):
 		context.GetLogger(ctx).Infof("conflict while creating ImageStream: %v", err)
@@ -324,7 +317,7 @@ func (is *imageStream) Untag(ctx context.Context, tag string, pullthroughEnabled
 	return is.registryOSClient.ImageStreamTags(is.namespace).Delete(imageapi.JoinImageStreamTag(is.name, tag), &metav1.DeleteOptions{})
 }
 
-func (is *imageStream) CreateImageStreamMapping(ctx context.Context, tag string, image *imageapiv1.Image) error {
+func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) error {
 	ism := imageapiv1.ImageStreamMapping{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: is.namespace,
@@ -355,7 +348,7 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, tag string,
 			return err
 		}
 
-		if _, err := is.createImageStream(ctx); err != nil {
+		if _, err := is.createImageStream(ctx, userClient); err != nil {
 			if e, ok := err.(errcode.Error); ok && e.ErrorCode() == errcode.ErrorCodeUnknown {
 				// TODO: convert statusErr to distribution error
 				return statusErr

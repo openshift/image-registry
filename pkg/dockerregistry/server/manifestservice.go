@@ -8,6 +8,7 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
+	"github.com/docker/distribution/registry/api/errcode"
 	regapi "github.com/docker/distribution/registry/api/v2"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -147,6 +148,13 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 	}
 
 	// Upload to openshift
+	uclient, ok := userClientFrom(ctx)
+	if !ok {
+		errmsg := "error creating user client to auto provision image stream: user client to master API unavailable"
+		context.GetLogger(ctx).Errorf(errmsg)
+		return "", errcode.ErrorCodeUnknown.WithDetail(errmsg)
+	}
+
 	image := &imageapiv1.Image{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: dgst.String(),
@@ -171,7 +179,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		}
 	}
 
-	if err = m.imageStream.CreateImageStreamMapping(ctx, tag, image); err != nil {
+	if err = m.imageStream.CreateImageStreamMapping(ctx, uclient, tag, image); err != nil {
 		return "", err
 	}
 

@@ -9,6 +9,7 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
@@ -31,7 +32,7 @@ type ImageStream interface {
 	Exists() (bool, error)
 
 	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error)
-	CreateImageStreamMapping(ctx context.Context, tag string, image *imageapiv1.Image) error
+	CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) error
 	ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) error
 
 	HasBlob(ctx context.Context, dgst digest.Digest, requireManaged bool) *imageapiv1.Image
