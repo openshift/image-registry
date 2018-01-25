@@ -309,16 +309,18 @@ func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, erro
 }
 
 func (is *imageStream) Tag(ctx context.Context, tag string, dgst digest.Digest, pullthroughEnabled bool) error {
-	image, err := is.registryOSClient.Images().Get(dgst.String(), metav1.GetOptions{})
+	image, err := is.getImage(ctx, dgst)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("unable to get image: %s", dgst.String())
 		return err
 	}
-	image.SetResourceVersion("")
 
 	if !pullthroughEnabled && !IsImageManaged(image) {
 		return distribution.ErrRepositoryUnknown{Name: is.Reference()}
 	}
+
+	// We don't want to mutate the origial image object, which we've got by reference.
+	img := *image
+	img.ResourceVersion = ""
 
 	ism := imageapiv1.ImageStreamMapping{
 		ObjectMeta: metav1.ObjectMeta{
@@ -326,7 +328,7 @@ func (is *imageStream) Tag(ctx context.Context, tag string, dgst digest.Digest, 
 			Name:      is.name,
 		},
 		Tag:   tag,
-		Image: *image,
+		Image: img,
 	}
 
 	_, err = is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism)
