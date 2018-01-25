@@ -8,6 +8,7 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 
+	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
@@ -72,7 +73,7 @@ func TestTagGet(t *testing.T) {
 			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "false"
 		}
 
-		imageStream := newTestImageStream(backgroundCtx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(backgroundCtx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
 			TagService:         newTestTagService(nil),
@@ -114,7 +115,7 @@ func TestTagGetWithoutImageStream(t *testing.T) {
 
 	_, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ts := &tagService{
 		TagService:  newTestTagService(nil),
@@ -179,7 +180,7 @@ func TestTagCreation(t *testing.T) {
 			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "false"
 		}
 
-		imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
 			TagService:         newTestTagService(nil),
@@ -195,7 +196,7 @@ func TestTagCreation(t *testing.T) {
 			continue
 		}
 
-		imageStream = newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream = imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts = &tagService{
 			TagService:         newTestTagService(nil),
@@ -225,7 +226,7 @@ func TestTagCreationWithoutImageStream(t *testing.T) {
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	anotherImage := testutil.AddRandomImage(t, fos, namespace, repo+"-another", tag)
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ts := &tagService{
 		TagService:  newTestTagService(nil),
@@ -299,7 +300,7 @@ func TestTagDeletion(t *testing.T) {
 			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "false"
 		}
 
-		imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
 			TagService:         newTestTagService(nil),
@@ -337,7 +338,7 @@ func TestTagDeletionWithoutImageStream(t *testing.T) {
 
 	_, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ts := &tagService{
 		TagService:  newTestTagService(nil),
@@ -397,7 +398,7 @@ func TestTagGetAll(t *testing.T) {
 			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "false"
 		}
 
-		imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
 			TagService:         newTestTagService(nil),
@@ -426,7 +427,7 @@ func TestTagGetAllWithoutImageStream(t *testing.T) {
 
 	_, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ts := &tagService{
 		TagService:  newTestTagService(nil),
@@ -497,7 +498,7 @@ func TestTagLookup(t *testing.T) {
 			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "false"
 		}
 
-		imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
 			TagService:         newTestTagService(nil),
@@ -535,7 +536,7 @@ func TestTagLookupWithoutImageStream(t *testing.T) {
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	anotherImage := testutil.AddRandomImage(t, fos, namespace, repo+"-another", tag)
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ts := &tagService{
 		TagService:  newTestTagService(nil),

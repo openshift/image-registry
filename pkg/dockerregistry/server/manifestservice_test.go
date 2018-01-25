@@ -10,9 +10,10 @@ import (
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
 
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/imagestream"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/testutil"
 )
 
@@ -27,7 +28,7 @@ func TestManifestServiceExists(t *testing.T) {
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testImage := testutil.AddRandomImage(t, fos, namespace, repo, tag)
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &manifestService{
 		imageStream:   imageStream,
@@ -81,13 +82,27 @@ func TestManifestServiceGetDoesntChangeDockerImageReference(t *testing.T) {
 		t.Fatalf("img.DockerImageReference: want %q, got %q", "1", img.DockerImageReference)
 	}
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+
+	digestCache, err := cache.NewBlobDigest(
+		defaultDescriptorCacheSize,
+		defaultDigestToRepositoryCacheSize,
+		24*time.Hour, // for tests it's virtually forever
+	)
+	if err != nil {
+		t.Fatalf("unable to create cache: %v", err)
+	}
+
+	cache := &cache.RepoDigest{
+		Cache: digestCache,
+	}
 
 	ms := &manifestService{
 		manifests: newTestManifestService(repo, map[digest.Digest]distribution.Manifest{
 			digest.Digest(testImage.Name): &schema2.DeserializedManifest{},
 		}),
 		imageStream:   imageStream,
+		cache:         cache,
 		acceptSchema2: true,
 	}
 
@@ -129,7 +144,7 @@ func TestManifestServicePut(t *testing.T) {
 
 	tms := newTestManifestService(repoName, nil)
 
-	imageStream := newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &manifestService{
 		manifests:     tms,
@@ -160,7 +175,7 @@ func TestManifestServicePut(t *testing.T) {
 	}
 
 	// recreate objects to reset cached image streams
-	imageStream = newTestImageStream(ctx, t, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream = imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms = &manifestService{
 		manifests:     tms,

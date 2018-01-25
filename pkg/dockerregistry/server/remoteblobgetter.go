@@ -2,21 +2,16 @@ package server
 
 import (
 	"net/http"
-	"sort"
 	"sync"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
-	"github.com/docker/distribution/registry/api/errcode"
-	disterrors "github.com/docker/distribution/registry/api/v2"
 
 	corev1 "k8s.io/api/core/v1"
 
-	imageapiv1 "github.com/openshift/api/image/v1"
-
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/image-registry/pkg/imagestream"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
 
@@ -27,7 +22,6 @@ type BlobGetterService interface {
 	distribution.BlobServer
 }
 
-type imageStreamGetter func() (*imageapiv1.ImageStream, error)
 type secretsGetter func() ([]corev1.Secret, error)
 
 // digestBlobStoreCache caches BlobStores by digests. It is safe to use it
@@ -60,10 +54,10 @@ func (c *digestBlobStoreCache) Put(dgst digest.Digest, bs distribution.BlobStore
 // remoteBlobGetterService implements BlobGetterService and allows to serve blobs from remote
 // repositories.
 type remoteBlobGetterService struct {
-	getImageStream imageStreamGetter
-	getSecrets     secretsGetter
-	cache          cache.RepositoryDigest
-	digestToStore  *digestBlobStoreCache
+	imageStream   imagestream.ImageStream
+	getSecrets    secretsGetter
+	cache         cache.RepositoryDigest
+	digestToStore *digestBlobStoreCache
 }
 
 var _ BlobGetterService = &remoteBlobGetterService{}
@@ -71,23 +65,16 @@ var _ BlobGetterService = &remoteBlobGetterService{}
 // NewBlobGetterService returns a getter for remote blobs. Its cache will be shared among different middleware
 // wrappers, which is a must at least for stat calls made on manifest's dependencies during its verification.
 func NewBlobGetterService(
-	imageStreamGetter imageStreamGetter,
+	imageStream imagestream.ImageStream,
 	secretsGetter secretsGetter,
 	cache cache.RepositoryDigest,
 ) BlobGetterService {
 	return &remoteBlobGetterService{
-		getImageStream: imageStreamGetter,
-		getSecrets:     secretsGetter,
-		cache:          cache,
-		digestToStore:  newDigestBlobStoreCache(),
+		imageStream:   imageStream,
+		getSecrets:    secretsGetter,
+		cache:         cache,
+		digestToStore: newDigestBlobStoreCache(),
 	}
-}
-
-// imagePullthroughSpec contains a reference of remote image to pull associated with an insecure flag for the
-// corresponding registry.
-type imagePullthroughSpec struct {
-	dockerImageReference *imageapi.DockerImageReference
-	insecure             bool
 }
 
 // Stat provides metadata about a blob identified by the digest. If the
@@ -96,32 +83,32 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 	context.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Stat: starting with dgst=%s", dgst.String())
 	// look up the potential remote repositories that this blob could be part of (at this time,
 	// we don't know which image in the image stream surfaced the content).
-	is, err := rbgs.getImageStream()
+	ok, err := rbgs.imageStream.Exists()
 	if err != nil {
-		if t, ok := err.(errcode.Error); ok && t.ErrorCode() == disterrors.ErrorCodeNameUnknown {
-			return distribution.Descriptor{}, distribution.ErrBlobUnknown
-		}
 		return distribution.Descriptor{}, err
+	}
+	if !ok {
+		return distribution.Descriptor{}, distribution.ErrBlobUnknown
 	}
 
 	cached, _ := rbgs.cache.Repositories(dgst)
 
-	var localRegistry string
-	if local, err := imageapi.ParseDockerImageReference(is.Status.DockerImageRepository); err == nil {
-		// TODO: normalize further?
-		localRegistry = local.Registry
-	}
-
 	retriever := getImportContext(ctx, rbgs.getSecrets)
 
 	// look at the first level of tagged repositories first
-	repositoryCandidates, search := identifyCandidateRepositories(is, localRegistry, true)
+	repositoryCandidates, search, err := rbgs.imageStream.IdentifyCandidateRepositories(true)
+	if err != nil {
+		return distribution.Descriptor{}, err
+	}
 	if desc, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, search, cached, dgst, retriever); err == nil {
 		return desc, nil
 	}
 
 	// look at all other repositories tagged by the server
-	repositoryCandidates, secondary := identifyCandidateRepositories(is, localRegistry, false)
+	repositoryCandidates, secondary, err := rbgs.imageStream.IdentifyCandidateRepositories(false)
+	if err != nil {
+		return distribution.Descriptor{}, err
+	}
 	for k := range search {
 		delete(secondary, k)
 	}
@@ -179,16 +166,16 @@ func (rbgs *remoteBlobGetterService) ServeBlob(ctx context.Context, w http.Respo
 func (rbgs *remoteBlobGetterService) proxyStat(
 	ctx context.Context,
 	retriever registryclient.RepositoryRetriever,
-	spec *imagePullthroughSpec,
+	spec *imagestream.ImagePullthroughSpec,
 	dgst digest.Digest,
 ) (distribution.Descriptor, error) {
-	ref := spec.dockerImageReference
+	ref := spec.DockerImageReference
 	insecureNote := ""
-	if spec.insecure {
+	if spec.Insecure {
 		insecureNote = " with a fall-back to insecure transport"
 	}
 	context.GetLogger(ctx).Infof("Trying to stat %q from %q%s", dgst, ref.AsRepository().Exact(), insecureNote)
-	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), spec.insecure)
+	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), spec.Insecure)
 	if err != nil {
 		context.GetLogger(ctx).Errorf("Error getting remote repository for image %q: %v", ref.AsRepository().Exact(), err)
 		return distribution.Descriptor{}, err
@@ -233,7 +220,7 @@ func (rbgs *remoteBlobGetterService) Get(ctx context.Context, dgst digest.Digest
 func (rbgs *remoteBlobGetterService) findCandidateRepository(
 	ctx context.Context,
 	repositoryCandidates []string,
-	search map[string]imagePullthroughSpec,
+	search map[string]imagestream.ImagePullthroughSpec,
 	cachedRepos []string,
 	dgst digest.Digest,
 	retriever registryclient.RepositoryRetriever,
@@ -275,110 +262,4 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 	}
 
 	return distribution.Descriptor{}, distribution.ErrBlobUnknown
-}
-
-type byInsecureFlag struct {
-	repositories []string
-	specs        []*imagePullthroughSpec
-}
-
-func (by *byInsecureFlag) Len() int {
-	if len(by.specs) < len(by.repositories) {
-		return len(by.specs)
-	}
-	return len(by.repositories)
-}
-func (by *byInsecureFlag) Swap(i, j int) {
-	by.repositories[i], by.repositories[j] = by.repositories[j], by.repositories[i]
-	by.specs[i], by.specs[j] = by.specs[j], by.specs[i]
-}
-func (by *byInsecureFlag) Less(i, j int) bool {
-	if by.specs[i].insecure == by.specs[j].insecure {
-		switch {
-		case by.repositories[i] < by.repositories[j]:
-			return true
-		case by.repositories[i] > by.repositories[j]:
-			return false
-		default:
-			return by.specs[i].dockerImageReference.Exact() < by.specs[j].dockerImageReference.Exact()
-		}
-	}
-	return !by.specs[i].insecure
-}
-
-// identifyCandidateRepositories returns a list of remote repository names sorted from the best candidate to
-// the worst and a map of remote repositories referenced by this image stream. The best candidate is a secure
-// one. The worst allows for insecure transport.
-func identifyCandidateRepositories(
-	is *imageapiv1.ImageStream,
-	localRegistry string,
-	primary bool,
-) ([]string, map[string]imagePullthroughSpec) {
-	insecureByDefault := false
-	if insecure, ok := is.Annotations[imageapi.InsecureRepositoryAnnotation]; ok {
-		insecureByDefault = insecure == "true"
-	}
-
-	// maps registry to insecure flag
-	insecureRegistries := make(map[string]bool)
-
-	// identify the canonical location of referenced registries to search
-	search := make(map[string]*imageapi.DockerImageReference)
-	for _, tagEvent := range is.Status.Tags {
-		tag := tagEvent.Tag
-		var candidates []imageapiv1.TagEvent
-		if primary {
-			if len(tagEvent.Items) == 0 {
-				continue
-			}
-			candidates = tagEvent.Items[:1]
-		} else {
-			if len(tagEvent.Items) <= 1 {
-				continue
-			}
-			candidates = tagEvent.Items[1:]
-		}
-		for _, event := range candidates {
-			ref, err := imageapi.ParseDockerImageReference(event.DockerImageReference)
-			if err != nil {
-				continue
-			}
-			// skip anything that matches the innate registry
-			// TODO: there may be a better way to make this determination
-			if len(localRegistry) != 0 && localRegistry == ref.Registry {
-				continue
-			}
-			ref = ref.DockerClientDefaults()
-			insecure := insecureByDefault
-			for _, t := range is.Spec.Tags {
-				if t.Name == tag {
-					insecure = insecureByDefault || t.ImportPolicy.Insecure
-					break
-				}
-			}
-			if is := insecureRegistries[ref.Registry]; !is && insecure {
-				insecureRegistries[ref.Registry] = insecure
-			}
-
-			search[ref.AsRepository().Exact()] = &ref
-		}
-	}
-
-	repositories := make([]string, 0, len(search))
-	results := make(map[string]imagePullthroughSpec)
-	specs := []*imagePullthroughSpec{}
-	for repo, ref := range search {
-		repositories = append(repositories, repo)
-		// accompany the reference with corresponding registry's insecure flag
-		spec := imagePullthroughSpec{
-			dockerImageReference: ref,
-			insecure:             insecureRegistries[ref.Registry],
-		}
-		results[repo] = spec
-		specs = append(specs, &spec)
-	}
-
-	sort.Sort(&byInsecureFlag{repositories: repositories, specs: specs})
-
-	return repositories, results
 }

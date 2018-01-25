@@ -169,7 +169,7 @@ func TestUnmarshalManifestSchema1(t *testing.T) {
 const manifestSchema1Signature = "{\"header\":{\"jwk\":{\"crv\":\"P-256\",\"kid\":\"QKEZ:N7ZA:BUSY:KPSH:PARP:NU4K:POHK:VLWF:EW22:4JFB:MKYJ:ZYSE\",\"kty\":\"EC\",\"x\":\"ppU7aXPngzHYJUswWcpDDL50hYkHWanmcrs_0X8L8Pc\",\"y\":\"dRpAggds8FfHRZsOms_g13XBOMnuqkP1fEWisGwvXso\"},\"alg\":\"ES256\"},\"signature\":\"KixitWkKYsVqNL0mkSxVSZMXQ61tzgXTlTlyeLHz4I2dZNXdDwHJZmYeoMGnYKM_HQKDcQHQeYSoxlu8AMTLOQ\",\"protected\":\"eyJmb3JtYXRMZW5ndGgiOjMyMTAsImZvcm1hdFRhaWwiOiJDbjAiLCJ0aW1lIjoiMjAxNy0wOS0xNVQwOTo0MzowNFoifQ\"}"
 
 var manifestSchema1Layers = []string{
-	digestSHA256GzippedEmptyTar.String(),
+	"sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4",
 	"sha256:9d7588d3c0635b53bd9a7dcd40bdf5d2d32cd3fb919c3a29ec2febbc2449eb19",
 }
 

@@ -24,11 +24,11 @@ import (
 
 type deferredErrors map[string]error
 
-func (d deferredErrors) Add(namespace string, name string, err error) {
-	d[namespace+"/"+name] = err
+func (d deferredErrors) Add(ref string, err error) {
+	d[ref] = err
 }
-func (d deferredErrors) Get(namespace string, name string) (error, bool) {
-	err, exists := d[namespace+"/"+name]
+func (d deferredErrors) Get(ref string) (error, bool) {
+	err, exists := d[ref]
 	return err, exists
 }
 func (d deferredErrors) Empty() bool {
@@ -256,7 +256,7 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 					if access.Action != "pull" {
 						return nil, ac.wrapErr(ctx, err)
 					}
-					possibleCrossMountErrors.Add(imageStreamNS, imageStreamName, ac.wrapErr(ctx, err))
+					possibleCrossMountErrors.Add(imageStreamNS+"/"+imageStreamName, ac.wrapErr(ctx, err))
 				}
 			}
 

@@ -20,10 +20,9 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
@@ -56,7 +55,7 @@ type quotaEnforcingConfig struct {
 	// if set, enables quota enforcement
 	enforcementEnabled bool
 	// if set, enables caching of quota objects per project
-	limitRanges projectObjectListStore
+	limitRanges imagestream.ProjectObjectListStore
 }
 
 // quotaRestrictedBlobStore wraps upstream blob store with a guard preventing big layers exceeding image quotas
@@ -121,33 +120,6 @@ func (bw *quotaRestrictedBlobWriter) Commit(ctx context.Context, provisional dis
 	return bw.BlobWriter.Commit(ctx, provisional)
 }
 
-// getLimitRangeList returns list of limit ranges for repo.
-func getLimitRangeList(ctx context.Context, limitClient client.LimitRangesGetter, namespace string, quotaEnforcing *quotaEnforcingConfig) (*corev1.LimitRangeList, error) {
-	if quotaEnforcing.limitRanges != nil {
-		obj, exists, _ := quotaEnforcing.limitRanges.get(namespace)
-		if exists {
-			return obj.(*corev1.LimitRangeList), nil
-		}
-	}
-
-	context.GetLogger(ctx).Debugf("listing limit ranges in namespace %s", namespace)
-
-	lrs, err := limitClient.LimitRanges(namespace).List(metav1.ListOptions{})
-	if err != nil {
-		context.GetLogger(ctx).Errorf("failed to list limitranges: %v", err)
-		return nil, err
-	}
-
-	if quotaEnforcing.limitRanges != nil {
-		err = quotaEnforcing.limitRanges.add(namespace, lrs)
-		if err != nil {
-			context.GetLogger(ctx).Errorf("failed to cache limit range list: %v", err)
-		}
-	}
-
-	return lrs, nil
-}
-
 // admitBlobWrite checks whether the blob does not exceed image limit ranges if set. Returns ErrAccessDenied
 // error if the limit is exceeded.
 func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
@@ -155,7 +127,7 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 		return nil
 	}
 
-	lrs, err := getLimitRangeList(ctx, repo.imageStream.registryOSClient, repo.imageStream.namespace, repo.app.quotaEnforcing)
+	lrs, err := repo.imageStream.GetLimitRangeList(ctx, repo.app.quotaEnforcing.limitRanges)
 	if err != nil {
 		return err
 	}

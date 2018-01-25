@@ -6,15 +6,14 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	registrystorage "github.com/docker/distribution/registry/storage"
 
 	restclient "k8s.io/client-go/rest"
 
-	imageapiv1 "github.com/openshift/api/image/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
+	"github.com/openshift/image-registry/pkg/imagestream"
 )
 
 var (
@@ -44,10 +43,11 @@ type repository struct {
 	app        *App
 	crossmount bool
 
-	imageStream *imageStream
+	imageStream imagestream.ImageStream
 
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
+	cache            cache.RepositoryDigest
 }
 
 // Repository returns a new repository middleware.
@@ -64,13 +64,6 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		return nil, nil, err
 	}
 
-	imageStreamGetter := &cachedImageStreamGetter{
-		ctx:          ctx,
-		namespace:    namespace,
-		name:         name,
-		isNamespacer: registryOSClient,
-	}
-
 	r := &repository{
 		Repository: repo,
 
@@ -78,23 +71,18 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		app:        app,
 		crossmount: crossmount,
 
-		imageStream: &imageStream{
-			namespace:         namespace,
-			name:              name,
-			registryOSClient:  registryOSClient,
-			cachedImages:      make(map[digest.Digest]*imageapiv1.Image),
-			imageStreamGetter: imageStreamGetter,
-			cache: &cache.RepoDigest{
-				Cache: app.cache,
-			},
+		imageStream: imagestream.New(ctx, namespace, name, registryOSClient),
+		cache: &cache.RepoDigest{
+			Cache: app.cache,
 		},
 	}
 
 	if app.config.Pullthrough.Enabled {
 		r.remoteBlobGetter = NewBlobGetterService(
-			imageStreamGetter.get,
-			r.imageStream.getSecrets,
-			r.imageStream.cache)
+			r.imageStream,
+			r.imageStream.GetSecrets,
+			r.cache,
+		)
 	}
 
 	bdsf := blobDescriptorServiceFactoryFunc(r.BlobDescriptorService)
@@ -118,6 +106,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 		blobStore:     r.Blobs(ctx),
 		serverAddr:    r.app.config.Server.Addr,
 		imageStream:   r.imageStream,
+		cache:         r.cache,
 		acceptSchema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
@@ -126,6 +115,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 			ManifestService:      ms,
 			localManifestService: localManifestService,
 			imageStream:          r.imageStream,
+			cache:                r.cache,
 			mirror:               r.app.config.Pullthrough.Mirror,
 		}
 	}
@@ -213,10 +203,10 @@ func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorServic
 }
 
 func (r *repository) checkPendingErrors(ctx context.Context) error {
-	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.imageStream.namespace, r.imageStream.name)
+	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.imageStream.Reference())
 }
 
-func checkPendingErrors(ctx context.Context, logger context.Logger, namespace, name string) error {
+func checkPendingErrors(ctx context.Context, logger context.Logger, ref string) error {
 	if !authPerformed(ctx) {
 		return fmt.Errorf("openshift.auth.completed missing from context")
 	}
@@ -226,11 +216,11 @@ func checkPendingErrors(ctx context.Context, logger context.Logger, namespace, n
 		return nil
 	}
 
-	repoErr, haveRepoErr := deferredErrors.Get(namespace, name)
+	repoErr, haveRepoErr := deferredErrors.Get(ref)
 	if !haveRepoErr {
 		return nil
 	}
 
-	logger.Debugf("Origin auth: found deferred error for %s/%s: %v", namespace, name, repoErr)
+	logger.Debugf("Origin auth: found deferred error for %s: %v", ref, repoErr)
 	return repoErr
 }
