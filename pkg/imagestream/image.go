@@ -2,13 +2,17 @@ package imagestream
 
 import (
 	"github.com/docker/distribution"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	util "github.com/openshift/image-registry/pkg/origin-common/util"
 )
 
 func IsImageManaged(image *imageapiv1.Image) bool {
@@ -36,4 +40,44 @@ func wrapKStatusErrorOnGetImage(repoName string, dgst digest.Digest, err error) 
 	}
 
 	return nil
+}
+
+type imageGetter interface {
+	Get(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error)
+}
+
+type cachedImageGetter struct {
+	client client.Interface
+	cache  map[digest.Digest]*imageapiv1.Image
+}
+
+func newCachedImageGetter(client client.Interface) imageGetter {
+	return &cachedImageGetter{
+		client: client,
+		cache:  make(map[digest.Digest]*imageapiv1.Image),
+	}
+}
+
+// Get retrieves the Image resource with the digest dgst. No authorization check is made.
+func (ig *cachedImageGetter) Get(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
+	if image, ok := ig.cache[dgst]; ok {
+		context.GetLogger(ctx).Infof("(*cachedImageGetter).Get: found image %s in cache", image.Name)
+		return image, nil
+	}
+
+	image, err := ig.client.Images().Get(dgst.String(), metav1.GetOptions{})
+	if err != nil {
+		context.GetLogger(ctx).Errorf("failed to get image %s: %v", dgst, err)
+		return nil, err
+	}
+
+	context.GetLogger(ctx).Infof("(*cachedImageGetter).Get: got image %s from server", image.Name)
+
+	if err := util.ImageWithMetadata(image); err != nil {
+		return nil, err
+	}
+
+	ig.cache[dgst] = image
+
+	return image, nil
 }

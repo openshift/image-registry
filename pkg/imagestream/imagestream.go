@@ -63,8 +63,8 @@ type imageStream struct {
 
 	registryOSClient client.Interface
 
-	// cachedImages contains images cached for the lifetime of the request being handled.
-	cachedImages map[digest.Digest]*imageapiv1.Image
+	imageClient imageGetter
+
 	// imageStreamGetter fetches and caches an image stream. The image stream stays cached for the entire time of handling single repository-scoped request.
 	imageStreamGetter *cachedImageStreamGetter
 }
@@ -76,7 +76,7 @@ func New(ctx context.Context, namespace, name string, client client.Interface) I
 		namespace:        namespace,
 		name:             name,
 		registryOSClient: client,
-		cachedImages:     make(map[digest.Digest]*imageapiv1.Image),
+		imageClient:      newCachedImageGetter(client),
 		imageStreamGetter: &cachedImageStreamGetter{
 			ctx:          ctx,
 			namespace:    namespace,
@@ -114,22 +114,10 @@ func (is *imageStream) createImageStream(ctx context.Context, userClient client.
 
 // getImage retrieves the Image with digest `dgst`. No authorization check is done.
 func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
-	if image, exists := is.cachedImages[dgst]; exists {
-		context.GetLogger(ctx).Infof("(*imageStream).getImage: returning cached copy of %s", image.Name)
-		return image, nil
-	}
-
-	image, err := is.registryOSClient.Images().Get(dgst.String(), metav1.GetOptions{})
+	image, err := is.imageClient.Get(ctx, dgst)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("failed to get image: %v", err)
 		return nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
-
-	context.GetLogger(ctx).Infof("(*imageStream).getImage: got image %s", image.Name)
-	if err := util.ImageWithMetadata(image); err != nil {
-		return nil, err
-	}
-	is.cachedImages[dgst] = image
 	return image, nil
 }
 
