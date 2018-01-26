@@ -64,4 +64,5 @@ import:
   version: ^1.13.0
 - package: github.com/bshuster-repo/logrus-logstash-hook
   version: 0e6d502573042a6563419fbcce4f284600bfe929
-
+- package: github.com/aws/aws-sdk-go
+  version: 1.6.10

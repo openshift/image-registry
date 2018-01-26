@@ -6,12 +6,11 @@ package main
 import (
 	"crypto/rsa"
 	"fmt"
-	"net/http"
-	"net/url"
-
 	"github.com/RangelReale/osin"
 	"github.com/RangelReale/osin/example"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
+	"net/http"
+	"net/url"
 )
 
 // JWT access token generator
@@ -22,7 +21,6 @@ type AccessTokenGenJWT struct {
 
 func (c *AccessTokenGenJWT) GenerateAccessToken(data *osin.AccessData, generaterefresh bool) (accesstoken string, refreshtoken string, err error) {
 	// generate JWT access token
-
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"cid": data.Client.GetId(),
 		"exp": data.ExpireAt().Unix(),
