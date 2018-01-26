@@ -7,7 +7,8 @@
     "protocol":"json",
     "serviceFullName":"AWS Device Farm",
     "signatureVersion":"v4",
-    "targetPrefix":"DeviceFarm_20150623"
+    "targetPrefix":"DeviceFarm_20150623",
+    "uid":"devicefarm-2015-06-23"
   },
   "operations":{
     "CreateDevicePool":{
@@ -33,6 +34,21 @@
       },
       "input":{"shape":"CreateProjectRequest"},
       "output":{"shape":"CreateProjectResult"},
+      "errors":[
+        {"shape":"ArgumentException"},
+        {"shape":"NotFoundException"},
+        {"shape":"LimitExceededException"},
+        {"shape":"ServiceAccountException"}
+      ]
+    },
+    "CreateRemoteAccessSession":{
+      "name":"CreateRemoteAccessSession",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"CreateRemoteAccessSessionRequest"},
+      "output":{"shape":"CreateRemoteAccessSessionResult"},
       "errors":[
         {"shape":"ArgumentException"},
         {"shape":"NotFoundException"},
@@ -78,6 +94,21 @@
       },
       "input":{"shape":"DeleteProjectRequest"},
       "output":{"shape":"DeleteProjectResult"},
+      "errors":[
+        {"shape":"ArgumentException"},
+        {"shape":"NotFoundException"},
+        {"shape":"LimitExceededException"},
+        {"shape":"ServiceAccountException"}
+      ]
+    },
+    "DeleteRemoteAccessSession":{
+      "name":"DeleteRemoteAccessSession",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"DeleteRemoteAccessSessionRequest"},
+      "output":{"shape":"DeleteRemoteAccessSessionResult"},
       "errors":[
         {"shape":"ArgumentException"},
         {"shape":"NotFoundException"},
@@ -221,6 +252,21 @@
         {"shape":"ServiceAccountException"}
       ]
     },
+    "GetRemoteAccessSession":{
+      "name":"GetRemoteAccessSession",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"GetRemoteAccessSessionRequest"},
+      "output":{"shape":"GetRemoteAccessSessionResult"},
+      "errors":[
+        {"shape":"ArgumentException"},
+        {"shape":"NotFoundException"},
+        {"shape":"LimitExceededException"},
+        {"shape":"ServiceAccountException"}
+      ]
+    },
     "GetRun":{
       "name":"GetRun",
       "http":{
@@ -274,6 +320,21 @@
       },
       "input":{"shape":"GetUploadRequest"},
       "output":{"shape":"GetUploadResult"},
+      "errors":[
+        {"shape":"ArgumentException"},
+        {"shape":"NotFoundException"},
+        {"shape":"LimitExceededException"},
+        {"shape":"ServiceAccountException"}
+      ]
+    },
+    "InstallToRemoteAccessSession":{
+      "name":"InstallToRemoteAccessSession",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"InstallToRemoteAccessSessionRequest"},
+      "output":{"shape":"InstallToRemoteAccessSessionResult"},
       "errors":[
         {"shape":"ArgumentException"},
         {"shape":"NotFoundException"},
@@ -381,6 +442,21 @@
       },
       "input":{"shape":"ListProjectsRequest"},
       "output":{"shape":"ListProjectsResult"},
+      "errors":[
+        {"shape":"ArgumentException"},
+        {"shape":"NotFoundException"},
+        {"shape":"LimitExceededException"},
+        {"shape":"ServiceAccountException"}
+      ]
+    },
+    "ListRemoteAccessSessions":{
+      "name":"ListRemoteAccessSessions",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"ListRemoteAccessSessionsRequest"},
+      "output":{"shape":"ListRemoteAccessSessionsResult"},
       "errors":[
         {"shape":"ArgumentException"},
         {"shape":"NotFoundException"},
@@ -526,6 +602,21 @@
         {"shape":"ServiceAccountException"}
       ]
     },
+    "StopRemoteAccessSession":{
+      "name":"StopRemoteAccessSession",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"StopRemoteAccessSessionRequest"},
+      "output":{"shape":"StopRemoteAccessSessionResult"},
+      "errors":[
+        {"shape":"ArgumentException"},
+        {"shape":"NotFoundException"},
+        {"shape":"LimitExceededException"},
+        {"shape":"ServiceAccountException"}
+      ]
+    },
     "StopRun":{
       "name":"StopRun",
       "http":{
@@ -626,6 +717,7 @@
         "SCREENSHOT",
         "DEVICE_LOG",
         "MESSAGE_LOG",
+        "VIDEO_LOG",
         "RESULT_LOG",
         "SERVICE_LOG",
         "WEBKIT_LOG",
@@ -718,6 +810,31 @@
         "project":{"shape":"Project"}
       }
     },
+    "CreateRemoteAccessSessionConfiguration":{
+      "type":"structure",
+      "members":{
+        "billingMethod":{"shape":"BillingMethod"}
+      }
+    },
+    "CreateRemoteAccessSessionRequest":{
+      "type":"structure",
+      "required":[
+        "projectArn",
+        "deviceArn"
+      ],
+      "members":{
+        "projectArn":{"shape":"AmazonResourceName"},
+        "deviceArn":{"shape":"AmazonResourceName"},
+        "name":{"shape":"Name"},
+        "configuration":{"shape":"CreateRemoteAccessSessionConfiguration"}
+      }
+    },
+    "CreateRemoteAccessSessionResult":{
+      "type":"structure",
+      "members":{
+        "remoteAccessSession":{"shape":"RemoteAccessSession"}
+      }
+    },
     "CreateUploadRequest":{
       "type":"structure",
       "required":[
@@ -767,6 +884,18 @@
       "members":{
       }
     },
+    "DeleteRemoteAccessSessionRequest":{
+      "type":"structure",
+      "required":["arn"],
+      "members":{
+        "arn":{"shape":"AmazonResourceName"}
+      }
+    },
+    "DeleteRemoteAccessSessionResult":{
+      "type":"structure",
+      "members":{
+      }
+    },
     "DeleteRunRequest":{
       "type":"structure",
       "required":["arn"],
@@ -807,7 +936,10 @@
         "memory":{"shape":"Long"},
         "image":{"shape":"String"},
         "carrier":{"shape":"String"},
-        "radio":{"shape":"String"}
+        "radio":{"shape":"String"},
+        "remoteAccessEnabled":{"shape":"Boolean"},
+        "fleetType":{"shape":"String"},
+        "fleetName":{"shape":"String"}
       }
     },
     "DeviceAttribute":{
@@ -816,7 +948,8 @@
         "ARN",
         "PLATFORM",
         "FORM_FACTOR",
-        "MANUFACTURER"
+        "MANUFACTURER",
+        "REMOTE_ACCESS_ENABLED"
       ]
     },
     "DeviceFormFactor":{
@@ -1003,6 +1136,19 @@
         "project":{"shape":"Project"}
       }
     },
+    "GetRemoteAccessSessionRequest":{
+      "type":"structure",
+      "required":["arn"],
+      "members":{
+        "arn":{"shape":"AmazonResourceName"}
+      }
+    },
+    "GetRemoteAccessSessionResult":{
+      "type":"structure",
+      "members":{
+        "remoteAccessSession":{"shape":"RemoteAccessSession"}
+      }
+    },
     "GetRunRequest":{
       "type":"structure",
       "required":["arn"],
@@ -1072,6 +1218,23 @@
     "IncompatibilityMessages":{
       "type":"list",
       "member":{"shape":"IncompatibilityMessage"}
+    },
+    "InstallToRemoteAccessSessionRequest":{
+      "type":"structure",
+      "required":[
+        "remoteAccessSessionArn",
+        "appArn"
+      ],
+      "members":{
+        "remoteAccessSessionArn":{"shape":"AmazonResourceName"},
+        "appArn":{"shape":"AmazonResourceName"}
+      }
+    },
+    "InstallToRemoteAccessSessionResult":{
+      "type":"structure",
+      "members":{
+        "appUpload":{"shape":"Upload"}
+      }
     },
     "Integer":{"type":"integer"},
     "Job":{
@@ -1203,6 +1366,21 @@
       "type":"structure",
       "members":{
         "projects":{"shape":"Projects"},
+        "nextToken":{"shape":"PaginationToken"}
+      }
+    },
+    "ListRemoteAccessSessionsRequest":{
+      "type":"structure",
+      "required":["arn"],
+      "members":{
+        "arn":{"shape":"AmazonResourceName"},
+        "nextToken":{"shape":"PaginationToken"}
+      }
+    },
+    "ListRemoteAccessSessionsResult":{
+      "type":"structure",
+      "members":{
+        "remoteAccessSessions":{"shape":"RemoteAccessSessions"},
         "nextToken":{"shape":"PaginationToken"}
       }
     },
@@ -1483,6 +1661,27 @@
       "type":"list",
       "member":{"shape":"RecurringCharge"}
     },
+    "RemoteAccessSession":{
+      "type":"structure",
+      "members":{
+        "arn":{"shape":"AmazonResourceName"},
+        "name":{"shape":"Name"},
+        "created":{"shape":"DateTime"},
+        "status":{"shape":"ExecutionStatus"},
+        "result":{"shape":"ExecutionResult"},
+        "message":{"shape":"Message"},
+        "started":{"shape":"DateTime"},
+        "stopped":{"shape":"DateTime"},
+        "device":{"shape":"Device"},
+        "billingMethod":{"shape":"BillingMethod"},
+        "deviceMinutes":{"shape":"DeviceMinutes"},
+        "endpoint":{"shape":"String"}
+      }
+    },
+    "RemoteAccessSessions":{
+      "type":"list",
+      "member":{"shape":"RemoteAccessSession"}
+    },
     "RenewOfferingRequest":{
       "type":"structure",
       "members":{
@@ -1633,6 +1832,19 @@
         "message":{"shape":"Message"}
       },
       "exception":true
+    },
+    "StopRemoteAccessSessionRequest":{
+      "type":"structure",
+      "required":["arn"],
+      "members":{
+        "arn":{"shape":"AmazonResourceName"}
+      }
+    },
+    "StopRemoteAccessSessionResult":{
+      "type":"structure",
+      "members":{
+        "remoteAccessSession":{"shape":"RemoteAccessSession"}
+      }
     },
     "StopRunRequest":{
       "type":"structure",

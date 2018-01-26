@@ -1,10 +1,10 @@
-hash: 876a55438a3e1629f2a388565d76133a15d1ee366e87a4596988e0b0b798fe4b
-updated: 2018-01-26T14:49:04.499709567+01:00
+hash: fe98ae9d86e7d18f15718ab82eb380e040412c9f670098ca0a8c7bb31afb42f7
+updated: 2018-01-26T14:54:08.79621819+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
 - name: github.com/aws/aws-sdk-go
-  version: 90dec2183a5f5458ee79cbaf4b8e9ab910bc81a6
+  version: 63ce630574a5ec05ecd8e8de5cea16332a5a684d
   subpackages:
   - aws
   - aws/awserr
@@ -14,12 +14,14 @@ imports:
   - aws/corehandlers
   - aws/credentials
   - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/credentials/stscreds
   - aws/defaults
   - aws/ec2metadata
+  - aws/endpoints
   - aws/request
   - aws/session
   - aws/signer/v4
-  - private/endpoints
   - private/protocol
   - private/protocol/query
   - private/protocol/query/queryutil
@@ -29,8 +31,7 @@ imports:
   - private/waiter
   - service/cloudfront/sign
   - service/s3
-  - vendor/github.com/go-ini/ini
-  - vendor/github.com/jmespath/go-jmespath
+  - service/sts
 - name: github.com/Azure/azure-sdk-for-go
   version: 0b5fe2abe0271ba07049eacaa65922d67c319543
   subpackages:
