@@ -2,8 +2,8 @@ package raven
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+	"log"
 )
 
 func Example() {
@@ -13,7 +13,7 @@ func Example() {
 	var sentryDSN string
 	// r is a request performed when error occured
 	var r *http.Request
-	client, err := New(sentryDSN)
+	client, err := NewClient(sentryDSN, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

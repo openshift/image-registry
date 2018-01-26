@@ -1,6 +1,7 @@
 package osin
 
 import (
+	"errors"
 	"strconv"
 	"time"
 )
@@ -73,7 +74,7 @@ func (s *TestingStorage) GetClient(id string) (Client, error) {
 	if c, ok := s.clients[id]; ok {
 		return c, nil
 	}
-	return nil, ErrNotFound
+	return nil, errors.New("Client not found")
 }
 
 func (s *TestingStorage) SetClient(id string, client Client) error {
@@ -90,7 +91,7 @@ func (s *TestingStorage) LoadAuthorize(code string) (*AuthorizeData, error) {
 	if d, ok := s.authorize[code]; ok {
 		return d, nil
 	}
-	return nil, ErrNotFound
+	return nil, errors.New("Authorize not found")
 }
 
 func (s *TestingStorage) RemoveAuthorize(code string) error {
@@ -110,7 +111,7 @@ func (s *TestingStorage) LoadAccess(code string) (*AccessData, error) {
 	if d, ok := s.access[code]; ok {
 		return d, nil
 	}
-	return nil, ErrNotFound
+	return nil, errors.New("Access not found")
 }
 
 func (s *TestingStorage) RemoveAccess(code string) error {
@@ -122,7 +123,7 @@ func (s *TestingStorage) LoadRefresh(code string) (*AccessData, error) {
 	if d, ok := s.refresh[code]; ok {
 		return s.LoadAccess(d)
 	}
-	return nil, ErrNotFound
+	return nil, errors.New("Refresh not found")
 }
 
 func (s *TestingStorage) RemoveRefresh(code string) error {

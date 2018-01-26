@@ -1,5 +1,5 @@
 hash: 876a55438a3e1629f2a388565d76133a15d1ee366e87a4596988e0b0b798fe4b
-updated: 2018-01-18T16:21:20.145860809-05:00
+updated: 2018-01-26T14:49:04.499709567+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -41,8 +41,6 @@ imports:
   - quantile
 - name: github.com/bshuster-repo/logrus-logstash-hook
   version: 0e6d502573042a6563419fbcce4f284600bfe929
-- name: github.com/certifi/gocertifi
-  version: deb3ae2ef2610fde3330947281941c562861188b
 - name: github.com/cloudflare/cfssl
   version: fca70798646c8689aeae5928d4ad1278ff8a3c17
   repo: https://github.com/openshift/cloudflare-cfssl
@@ -137,7 +135,7 @@ imports:
   - sockets
   - tlsconfig
 - name: github.com/docker/go-units
-  version: 9e638d38cf6977a37a8ea0078f3ee75a7cdb2dd1
+  version: e30f1e79f3cd72542f2026ceec18d3bd67ab859c
 - name: github.com/docker/libtrust
   version: fa567046d9b14f6aa788882a950d69651d230b21
 - name: github.com/emicklei/go-restful
@@ -153,11 +151,11 @@ imports:
   - internal
   - redis
 - name: github.com/getsentry/raven-go
-  version: 32a13797442ccb601b11761d74232773c1402d14
+  version: 86cd4063c535cbbcbf43d84424dbd5911ab1b818
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-ini/ini
-  version: 300e940a926eb277d3901b20bdfcc54928ad3642
+  version: 2e44421e256d82ebbf3d4d4fcabe8930b905eff3
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -218,7 +216,7 @@ imports:
 - name: github.com/imdario/mergo
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/jmespath/go-jmespath
-  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+  version: 3433f3ea46d9f8019119e7dd41274e112a2359a9
 - name: github.com/juju/ratelimit
   version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
 - name: github.com/mailru/easyjson
@@ -232,7 +230,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/Microsoft/go-winio
-  version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
+  version: f533f7a102197536779ea3a8cb881d639e21ec5a
 - name: github.com/mitchellh/mapstructure
   version: 482a9fd5fa83e8c4e7817413b80f3eb8feec03ef
 - name: github.com/ncw/swift
@@ -240,12 +238,12 @@ imports:
   subpackages:
   - swifttest
 - name: github.com/opencontainers/runc
-  version: 4d6e6720a7c885c37b4cb083c0d372dda3425120
+  version: d223e2adae83f62d58448a799a5da05730228089
   subpackages:
   - libcontainer/system
   - libcontainer/user
 - name: github.com/openshift/api
-  version: 3477075c1cb46b9635b4fda2fc08237cf37ce200
+  version: 0d921e363e951d89f583292c60d013c318df64dc
   subpackages:
   - authorization/v1
   - image/docker10
@@ -256,7 +254,7 @@ imports:
   - project/v1
   - user/v1
 - name: github.com/openshift/client-go
-  version: 5a2427467298401a1a6f5fc8845003a55072e63e
+  version: 54eeb57ead752fbf5564b4713bb7321f8aa24f8b
   subpackages:
   - authorization/clientset/versioned/scheme
   - authorization/clientset/versioned/typed/authorization/v1
@@ -276,9 +274,9 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/pkg/errors
-  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+  version: a22138067af1c4942683050411a841ade67fe1eb
 - name: github.com/pkg/profile
-  version: 5b67d428864e92711fcbd2f8629456121a56d91f
+  version: c795610ec6e479e5795f7852db65ea15073674a6
 - name: github.com/prometheus/client_golang
   version: e7e903064f5e9eb5da98208bae10b475d4db0f8c
   subpackages:
@@ -302,7 +300,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/RangelReale/osin
-  version: 92fc3c3539125bddc695a988974243479d82f8b4
+  version: 1c1a533224dd9c631fdd8df8851b167d24cabe96
 - name: github.com/Sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
 - name: github.com/skynetservices/skydns
@@ -572,6 +570,4 @@ imports:
 - name: k8s.io/metrics
   version: 89895fe67943a667a188dd1ae9821cd1168de69f
   repo: git@github.com:openshift/kubernetes-metrics
-testImports:
-- name: github.com/opencontainers/go-digest
-  version: a6d0ee40d4207ea02364bd3b9e8e77b9159ba1eb
+testImports: []

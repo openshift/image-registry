@@ -3,8 +3,7 @@
 raven is a Go client for the [Sentry](https://github.com/getsentry/sentry)
 event/error logging system.
 
-- [**API Documentation**](https://godoc.org/github.com/getsentry/raven-go)
-- [**Usage and Examples**](https://docs.sentry.io/clients/go/)
+[**Documentation**](http://godoc.org/github.com/getsentry/raven-go).
 
 ## Installation
 
