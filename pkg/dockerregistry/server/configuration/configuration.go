@@ -346,14 +346,14 @@ func getServerAddr(options configuration.Parameters, cfgValue string) (registryA
 		}
 	}
 
+	if len(registryAddr) == 0 && len(cfgValue) > 0 {
+		registryAddr = cfgValue
+	}
+
 	// TODO: This is a fallback to assuming there is a service named 'docker-registry'. This
 	// might change in the future and we should make this configurable.
 	if len(registryAddr) == 0 && len(os.Getenv("DOCKER_REGISTRY_SERVICE_HOST")) > 0 && len(os.Getenv("DOCKER_REGISTRY_SERVICE_PORT")) > 0 {
 		registryAddr = os.Getenv("DOCKER_REGISTRY_SERVICE_HOST") + ":" + os.Getenv("DOCKER_REGISTRY_SERVICE_PORT")
-	}
-
-	if len(registryAddr) == 0 && len(cfgValue) > 0 {
-		registryAddr = cfgValue
 	}
 
 	if len(registryAddr) == 0 {
