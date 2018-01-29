@@ -375,3 +375,43 @@ func ConvertImage(image *imageapi.Image) (*imageapiv1.Image, error) {
 	newImage.DockerImageMetadata.Raw = b
 	return newImage, nil
 }
+
+func VerifyRemoteImage(ctx context.Context, repo distribution.Repository, tag string) (mediatype string, dgst digest.Digest, err error) {
+	ms, err := repo.Manifests(ctx)
+	if err != nil {
+		return "", "", fmt.Errorf("verify %s:%s: get manifest service: %v", repo.Named(), tag, err)
+	}
+
+	m, err := ms.Get(ctx, "", distribution.WithTag(tag))
+	if err != nil {
+		return "", "", fmt.Errorf("verify %s:%s: get manifest: %v", repo.Named(), tag, err)
+	}
+
+	mediatype, payload, err := m.Payload()
+	if err != nil {
+		return mediatype, "", fmt.Errorf("verify %s:%s: get manifest payload: %v", repo.Named(), tag, err)
+	}
+
+	dgst = digest.FromBytes(payload)
+
+	bs := repo.Blobs(ctx)
+	for _, desc := range m.References() {
+		r, err := bs.Open(ctx, desc.Digest)
+		if err != nil {
+			return mediatype, dgst, fmt.Errorf("verify %s:%s: open blob %s: %v", repo.Named(), tag, desc.Digest, err)
+		}
+		dgst, readErr := digest.FromReader(r)
+		closeErr := r.Close()
+		if readErr != nil {
+			return mediatype, dgst, fmt.Errorf("verify %s:%s: read blob %s: %v", repo.Named(), tag, desc.Digest, readErr)
+		}
+		if closeErr != nil {
+			return mediatype, dgst, fmt.Errorf("verify %s:%s: close blob %s: %v", repo.Named(), tag, desc.Digest, closeErr)
+		}
+		if dgst != desc.Digest {
+			return mediatype, dgst, fmt.Errorf("verify %s:%s: blob digest mismatch: got %q, want %q", repo.Named(), tag, dgst, desc.Digest)
+		}
+	}
+
+	return mediatype, dgst, nil
+}
