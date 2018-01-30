@@ -21,6 +21,9 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	kubeclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	projectapiv1 "github.com/openshift/api/project/v1"
@@ -231,11 +234,50 @@ func NewMaster(t *testing.T) *Master {
 		t.Fatal(err)
 	}
 
-	return &Master{
+	m := &Master{
 		t:         t,
 		tmpDir:    tmpDir,
 		container: container,
 	}
+	m.WaitForRoles()
+	return m
+}
+
+func (m *Master) WaitForRoles() error {
+	// wait until the cluster roles have been aggregated
+	err := wait.Poll(time.Second, time.Minute, func() (bool, error) {
+		kubeClient, err := kubeclient.NewForConfig(m.AdminKubeConfig())
+		if err != nil {
+			return false, err
+		}
+		admin, err := kubeClient.RbacV1().ClusterRoles().Get("admin", metav1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		if len(admin.Rules) == 0 {
+			return false, nil
+		}
+		edit, err := kubeClient.RbacV1().ClusterRoles().Get("edit", metav1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		if len(edit.Rules) == 0 {
+			return false, nil
+		}
+		view, err := kubeClient.RbacV1().ClusterRoles().Get("view", metav1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		if len(view.Rules) == 0 {
+			return false, nil
+		}
+
+		return true, nil
+	})
+	if err != nil {
+		m.t.Fatalf("cluster roles did not aggregate: %v", err)
+	}
+	return err
 }
 
 func (m *Master) Close() {
