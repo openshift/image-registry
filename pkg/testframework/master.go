@@ -228,8 +228,8 @@ func NewMaster(t *testing.T) *Master {
 
 	container, err := StartMasterContainer(tmpDir)
 	if err != nil {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Logf("failed to remove the temporary directory: %v", err)
+		if removeErr := os.RemoveAll(tmpDir); removeErr != nil {
+			t.Logf("failed to remove the temporary directory: %v", removeErr)
 		}
 		t.Fatal(err)
 	}
@@ -239,7 +239,12 @@ func NewMaster(t *testing.T) *Master {
 		tmpDir:    tmpDir,
 		container: container,
 	}
-	m.WaitForRoles()
+	if err := m.WaitForRoles(); err != nil {
+		if removeErr := os.RemoveAll(tmpDir); removeErr != nil {
+			t.Logf("failed to remove the temporary directory: %v", removeErr)
+		}
+		t.Fatal(err)
+	}
 	return m
 }
 
