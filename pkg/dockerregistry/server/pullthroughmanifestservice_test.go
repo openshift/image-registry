@@ -52,6 +52,7 @@ func TestPullthroughManifests(t *testing.T) {
 	repo := "zapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
 	tag := "latest"
+	tag2 := "other"
 
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
@@ -83,11 +84,29 @@ func TestPullthroughManifests(t *testing.T) {
 	image.DockerImageReference = fmt.Sprintf("%s/%s/%s@%s", serverURL.Host, namespace, repo, image.Name)
 	image.DockerImageManifest = ""
 
+	ms2dgst, ms2canonical, _, ms2manifest, err := testutil.CreateAndUploadTestManifest(
+		ctx, testutil.ManifestSchema1, 2, serverURL, nil, repoName, "schema1")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	_, ms2payload, err := ms2manifest.Payload()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	t.Logf("ms2dgst=%s, ms2manifest: %s", ms2dgst, ms2canonical)
+
+	image2, err := testutil.NewImageForManifest(repoName, string(ms2payload), "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	image2.DockerImageManifest = ""
+
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, image, namespace, repo, tag)
+	testutil.AddImage(t, fos, image2, namespace, repo, tag2)
 
 	for _, tc := range []struct {
 		name                  string
@@ -109,7 +128,7 @@ func TestPullthroughManifests(t *testing.T) {
 		},
 		{
 			name:           "manifest served from remote repository",
-			manifestDigest: digest.Digest(image.Name),
+			manifestDigest: ms1dgst,
 			expectedLocalCalls: map[string]int{
 				"Get": 1,
 			},
@@ -117,6 +136,16 @@ func TestPullthroughManifests(t *testing.T) {
 		{
 			name:                  "unknown manifest digest",
 			manifestDigest:        unknownBlobDigest,
+			expectedNotFoundError: true,
+			expectedLocalCalls: map[string]int{
+				"Get": 1,
+			},
+		},
+		// an image for which pullthrough points to the internal registry, so
+		// pullthrough should not be performed.
+		{
+			name:                  "skip pullthrough for internal image manifest digest",
+			manifestDigest:        ms2dgst,
 			expectedNotFoundError: true,
 			expectedLocalCalls: map[string]int{
 				"Get": 1,
@@ -144,6 +173,7 @@ func TestPullthroughManifests(t *testing.T) {
 			ManifestService: localManifestService,
 			imageStream:     imageStream,
 			cache:           cache,
+			registryAddr:    "localhost:5000",
 		}
 
 		manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
