@@ -7,9 +7,6 @@ import:
   repo: git@github.com:openshift/docker-distribution
 
 # kube second
-- package: k8s.io/code-generator
-  version: master
-  repo: git@github.com:openshift/kubernetes-code-generator
 - package: k8s.io/apimachinery
   version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-apimachinery
@@ -25,9 +22,6 @@ import:
 - package: k8s.io/api
   repo:    git@github.com:openshift/kubernetes-api
   version: release-1.9.1
-- package: k8s.io/kube-aggregator
-  version: release-1.9.1
-  repo: git@github.com:openshift/kube-aggregator
 - package: k8s.io/apiextensions-apiserver
   version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-apiextensions-apiserver

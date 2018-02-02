@@ -77,8 +77,62 @@ func TestAccessRefreshToken(t *testing.T) {
 		ar.Authorized = true
 		server.FinishAccessRequest(resp, req, ar)
 	}
-
 	//fmt.Printf("%+v", resp)
+
+	if _, err := server.Storage.LoadRefresh("r9999"); err == nil {
+		t.Fatalf("token was not deleted")
+	}
+
+	if resp.IsError && resp.InternalError != nil {
+		t.Fatalf("Error in response: %s", resp.InternalError)
+	}
+
+	if resp.IsError {
+		t.Fatalf("Should not be an error")
+	}
+
+	if resp.Type != DATA {
+		t.Fatalf("Response should be data")
+	}
+
+	if d := resp.Output["access_token"]; d != "1" {
+		t.Fatalf("Unexpected access token: %s", d)
+	}
+
+	if d := resp.Output["refresh_token"]; d != "r1" {
+		t.Fatalf("Unexpected refresh token: %s", d)
+	}
+}
+
+func TestAccessRefreshTokenSaveToken(t *testing.T) {
+	sconfig := NewServerConfig()
+	sconfig.AllowedAccessTypes = AllowedAccessType{REFRESH_TOKEN}
+	server := NewServer(sconfig, NewTestingStorage())
+	server.AccessTokenGen = &TestingAccessTokenGen{}
+	server.Config.RetainTokenAfterRefresh = true
+	resp := server.NewResponse()
+
+	req, err := http.NewRequest("POST", "http://localhost:14000/appauth", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.SetBasicAuth("1234", "aabbccdd")
+
+	req.Form = make(url.Values)
+	req.Form.Set("grant_type", string(REFRESH_TOKEN))
+	req.Form.Set("refresh_token", "r9999")
+	req.Form.Set("state", "a")
+	req.PostForm = make(url.Values)
+
+	if ar := server.HandleAccessRequest(resp, req); ar != nil {
+		ar.Authorized = true
+		server.FinishAccessRequest(resp, req, ar)
+	}
+	//fmt.Printf("%+v", resp)
+
+	if _, err := server.Storage.LoadRefresh("r9999"); err != nil {
+		t.Fatalf("token incorrectly deleted: %s", err.Error())
+	}
 
 	if resp.IsError && resp.InternalError != nil {
 		t.Fatalf("Error in response: %s", resp.InternalError)
@@ -237,6 +291,8 @@ func TestGetClientWithoutMatcher(t *testing.T) {
 		RedirectUri: "http://www.example.com",
 	}
 	storage := &TestingStorage{clients: map[string]Client{myclient.Id: myclient}}
+	sconfig := NewServerConfig()
+	server := NewServer(sconfig, storage)
 
 	// Ensure bad secret fails
 	{
@@ -245,9 +301,38 @@ func TestGetClientWithoutMatcher(t *testing.T) {
 			Password: "invalidsecret",
 		}
 		w := &Response{}
-		client := getClient(auth, storage, w)
+		client := server.getClient(auth, storage, w)
 		if client != nil {
 			t.Errorf("Expected error, got client: %v", client)
+		}
+
+		if !w.IsError {
+			t.Error("No error in response")
+		}
+
+		if w.ErrorId != E_UNAUTHORIZED_CLIENT {
+			t.Errorf("Expected error %v, got %v", E_UNAUTHORIZED_CLIENT, w.ErrorId)
+		}
+	}
+
+	// Ensure nonexistent client fails
+	{
+		auth := &BasicAuth{
+			Username: "nonexistent",
+			Password: "nonexistent",
+		}
+		w := &Response{}
+		client := server.getClient(auth, storage, w)
+		if client != nil {
+			t.Errorf("Expected error, got client: %v", client)
+		}
+
+		if !w.IsError {
+			t.Error("No error in response")
+		}
+
+		if w.ErrorId != E_UNAUTHORIZED_CLIENT {
+			t.Errorf("Expected error %v, got %v", E_UNAUTHORIZED_CLIENT, w.ErrorId)
 		}
 	}
 
@@ -258,7 +343,7 @@ func TestGetClientWithoutMatcher(t *testing.T) {
 			Password: "myclientsecret",
 		}
 		w := &Response{}
-		client := getClient(auth, storage, w)
+		client := server.getClient(auth, storage, w)
 		if client != myclient {
 			t.Errorf("Expected client, got nil with response: %v", w)
 		}
@@ -287,6 +372,8 @@ func TestGetClientSecretMatcher(t *testing.T) {
 		RedirectUri: "http://www.example.com",
 	}
 	storage := &TestingStorage{clients: map[string]Client{myclient.Id: myclient}}
+	sconfig := NewServerConfig()
+	server := NewServer(sconfig, storage)
 
 	// Ensure bad secret fails, but does not panic (doesn't call GetSecret)
 	{
@@ -295,7 +382,7 @@ func TestGetClientSecretMatcher(t *testing.T) {
 			Password: "invalidsecret",
 		}
 		w := &Response{}
-		client := getClient(auth, storage, w)
+		client := server.getClient(auth, storage, w)
 		if client != nil {
 			t.Errorf("Expected error, got client: %v", client)
 		}
@@ -308,7 +395,7 @@ func TestGetClientSecretMatcher(t *testing.T) {
 			Password: "myclientsecret",
 		}
 		w := &Response{}
-		client := getClient(auth, storage, w)
+		client := server.getClient(auth, storage, w)
 		if client != myclient {
 			t.Errorf("Expected client, got nil with response: %v", w)
 		}
