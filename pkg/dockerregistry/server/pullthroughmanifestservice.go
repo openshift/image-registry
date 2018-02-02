@@ -20,6 +20,7 @@ type pullthroughManifestService struct {
 	imageStream          imagestream.ImageStream
 	cache                cache.RepositoryDigest
 	mirror               bool
+	registryAddr         string
 }
 
 var _ distribution.ManifestService = &pullthroughManifestService{}
@@ -53,6 +54,13 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 	}
 	ref = ref.DockerClientDefaults()
 
+	// don't attempt to pullthrough from ourself
+	if ref.Registry == m.registryAddr {
+		return nil, distribution.ErrManifestUnknownRevision{
+			Name:     m.imageStream.Reference(),
+			Revision: dgst,
+		}
+	}
 	repo, err := m.getRemoteRepositoryClient(ctx, &ref, dgst, options...)
 	if err != nil {
 		context.GetLogger(ctx).Errorf("error getting remote repository for image %q: %v", ref.Exact(), err)

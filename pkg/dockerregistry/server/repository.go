@@ -117,6 +117,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 			imageStream:          r.imageStream,
 			cache:                r.cache,
 			mirror:               r.app.config.Pullthrough.Mirror,
+			registryAddr:         r.app.config.Server.Addr,
 		}
 	}
 
