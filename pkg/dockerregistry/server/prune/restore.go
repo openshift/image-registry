@@ -196,7 +196,7 @@ func (r *Fsck) Database(namespace string) error {
 		if namespace == metav1.NamespaceAll {
 			namespace = "all"
 		}
-		return fmt.Errorf("failed to list image streams in the %s namespace(s): %s", namespace, err)
+		return fmt.Errorf("failed to list image streams in namespace(s): %s, error: %s", namespace, err)
 	}
 
 	var image *imageapiv1.Image
