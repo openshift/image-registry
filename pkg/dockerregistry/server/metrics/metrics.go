@@ -57,7 +57,7 @@ type metricTimer struct {
 }
 
 func (m *metricTimer) Stop() {
-	m.collector.WithLabelValues(m.labels...).Observe(float64(time.Since(m.startTime) / time.Second))
+	m.collector.WithLabelValues(m.labels...).Observe(float64(time.Since(m.startTime)) / float64(time.Second))
 }
 
 func newWrapper(reponame string) wrapped.Wrapper {
