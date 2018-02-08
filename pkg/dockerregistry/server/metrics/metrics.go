@@ -18,13 +18,13 @@ const (
 )
 
 var (
-	registryAPIRequests *prometheus.SummaryVec
+	registryAPIRequests *prometheus.HistogramVec
 )
 
 // Register the metrics.
 func Register() {
-	registryAPIRequests = prometheus.NewSummaryVec(
-		prometheus.SummaryOpts{
+	registryAPIRequests = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
 			Namespace: registryNamespace,
 			Subsystem: registrySubsystem,
 			Name:      "request_duration_seconds",
@@ -41,8 +41,8 @@ type Timer interface {
 	Stop()
 }
 
-// NewTimer wraps the SummaryVec and used to track amount of time passed since the Timer was created.
-func NewTimer(collector *prometheus.SummaryVec, labels []string) Timer {
+// NewTimer wraps the HistogramVec and used to track amount of time passed since the Timer was created.
+func NewTimer(collector *prometheus.HistogramVec, labels []string) Timer {
 	return &metricTimer{
 		collector: collector,
 		labels:    labels,
@@ -51,7 +51,7 @@ func NewTimer(collector *prometheus.SummaryVec, labels []string) Timer {
 }
 
 type metricTimer struct {
-	collector *prometheus.SummaryVec
+	collector *prometheus.HistogramVec
 	labels    []string
 	startTime time.Time
 }
