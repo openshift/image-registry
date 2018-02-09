@@ -42,7 +42,7 @@ func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest
 
 func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
-	image, _, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
+	image, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}

@@ -17,23 +17,10 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/manifesthandler"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
-
-// ErrManifestBlobBadSize is returned when the blob size in a manifest does
-// not match the actual size. The docker/distribution does not check this and
-// therefore does not provide an error for this.
-type ErrManifestBlobBadSize struct {
-	Digest         digest.Digest
-	ActualSize     int64
-	SizeInManifest int64
-}
-
-func (err ErrManifestBlobBadSize) Error() string {
-	return fmt.Sprintf("the blob %s has the size (%d) different from the one specified in the manifest (%d)",
-		err.Digest, err.ActualSize, err.SizeInManifest)
-}
 
 var _ distribution.ManifestService = &manifestService{}
 
@@ -53,7 +40,7 @@ type manifestService struct {
 func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Exists")
 
-	image, _, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
+	image, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return false, err
 	}
@@ -64,7 +51,7 @@ func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool,
 func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Get")
 
-	image, _, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
+	image, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +94,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifest, options ...distribution.ManifestServiceOption) (digest.Digest, error) {
 	context.GetLogger(ctx).Debugf("(*manifestService).Put")
 
-	mh, err := NewManifestHandler(m.serverAddr, m.blobStore, manifest)
+	mh, err := manifesthandler.NewManifestHandler(m.serverAddr, m.blobStore, manifest)
 	if err != nil {
 		return "", regapi.ErrorCodeManifestInvalid.WithDetail(err)
 	}

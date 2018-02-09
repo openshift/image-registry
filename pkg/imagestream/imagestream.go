@@ -21,7 +21,7 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
-	util "github.com/openshift/image-registry/pkg/origin-common/util"
+	originutil "github.com/openshift/image-registry/pkg/origin-common/util"
 )
 
 // ProjectObjectListStore represents a cache of objects indexed by a project name.
@@ -42,9 +42,10 @@ type ImageStream interface {
 	Reference() string
 	Exists() (bool, error)
 
-	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error)
+	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error)
 	CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) error
 	ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) error
+	ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, error)
 
 	HasBlob(ctx context.Context, dgst digest.Digest, requireManaged bool) *imageapiv1.Image
 	IdentifyCandidateRepositories(primary bool) ([]string, map[string]ImagePullthroughSpec, error)
@@ -121,6 +122,22 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 	return image, nil
 }
 
+// ResolveImageID returns latest TagEvent for specified imageID and an error if
+// there's more than one image matching the ID or when one does not exist.
+func (is *imageStream) ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, error) {
+	stream, err := is.imageStreamGetter.get()
+	if err != nil {
+		return nil, err
+	}
+
+	tagEvent, err := originutil.ResolveImageID(stream, dgst.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return tagEvent, nil
+}
+
 // GetStoredImageOfImageStream retrieves the Image with digest `dgst` and
 // ensures that the image belongs to the image stream `is`. It uses two
 // queries to master API:
@@ -132,25 +149,19 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 //
 // If you need the image object to be modified according to image stream tag,
 // please use GetImageOfImageStream.
-func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *imageapiv1.ImageStream, error) {
-	stream, err := is.imageStreamGetter.get()
-	if err != nil {
-		context.GetLogger(ctx).Errorf("failed to get ImageStream: %v", err)
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
-	}
-
-	tagEvent, err := util.ResolveImageID(stream, dgst.String())
+func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, error) {
+	tagEvent, err := is.ResolveImageID(ctx, dgst)
 	if err != nil {
 		context.GetLogger(ctx).Errorf("failed to resolve image %s in ImageStream %s: %v", dgst.String(), is.Reference(), err)
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
+		return nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
 	image, err := is.getImage(ctx, dgst)
 	if err != nil {
-		return nil, nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
+		return nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
 	}
 
-	return image, tagEvent, stream, nil
+	return image, tagEvent, nil
 }
 
 // GetImageOfImageStream retrieves the Image with digest `dgst` for the image
@@ -161,17 +172,17 @@ func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst dig
 // NOTE: due to on the fly modification, the returned image object should
 // not be sent to the master API. If you need unmodified version of the
 // image object, please use getStoredImageOfImageStream.
-func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.ImageStream, error) {
-	image, tagEvent, stream, err := is.getStoredImageOfImageStream(ctx, dgst)
+func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
+	image, tagEvent, err := is.getStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// We don't want to mutate the origial image object, which we've got by reference.
 	img := *image
 	img.DockerImageReference = tagEvent.DockerImageReference
 
-	return &img, stream, nil
+	return &img, nil
 }
 
 // ImageManifestBlobStored adds the imageapi.ImageManifestBlobStoredAnnotation annotation to image.
@@ -219,7 +230,7 @@ func (is *imageStream) TagIsInsecure(tag string, dgst digest.Digest) (bool, erro
 
 	if len(tag) == 0 {
 		// if the client pulled by digest, find the corresponding tag in the image stream
-		tag, _ = util.LatestImageTagEvent(stream, dgst.String())
+		tag, _ = originutil.LatestImageTagEvent(stream, dgst.String())
 	}
 
 	if len(tag) != 0 {
@@ -333,7 +344,7 @@ func (is *imageStream) Untag(ctx context.Context, tag string, pullthroughEnabled
 		return err
 	}
 
-	te := util.LatestTaggedImage(stream, tag)
+	te := originutil.LatestTaggedImage(stream, tag)
 	if te == nil {
 		return distribution.ErrTagUnknown{Tag: tag}
 	}

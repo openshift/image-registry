@@ -90,6 +90,7 @@ var _ ImageStreamInterface = imageclientv1.ImageStreamInterface(nil)
 type ImageStreamInterface interface {
 	Get(name string, options metav1.GetOptions) (*imageapiv1.ImageStream, error)
 	Create(stream *imageapiv1.ImageStream) (*imageapiv1.ImageStream, error)
+	List(opts metav1.ListOptions) (*imageapiv1.ImageStreamList, error)
 }
 
 var _ ImageStreamMappingInterface = imageclientv1.ImageStreamMappingInterface(nil)
