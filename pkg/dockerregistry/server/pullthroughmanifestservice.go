@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
@@ -16,11 +18,11 @@ import (
 // as to blobs.
 type pullthroughManifestService struct {
 	distribution.ManifestService
-	localManifestService distribution.ManifestService
-	imageStream          imagestream.ImageStream
-	cache                cache.RepositoryDigest
-	mirror               bool
-	registryAddr         string
+	newLocalManifestService func(ctx context.Context) (distribution.ManifestService, error)
+	imageStream             imagestream.ImageStream
+	cache                   cache.RepositoryDigest
+	mirror                  bool
+	registryAddr            string
 }
 
 var _ distribution.ManifestService = &pullthroughManifestService{}
@@ -77,8 +79,8 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 	switch err.(type) {
 	case nil:
 		if m.mirror {
-			if _, putErr := m.localManifestService.Put(ctx, manifest); putErr != nil {
-				context.GetLogger(ctx).Errorf("failed to mirror manifest %s: %v", ref.Exact(), putErr)
+			if mirrorErr := m.mirrorManifest(ctx, manifest); mirrorErr != nil {
+				context.GetLogger(ctx).Errorf("failed to mirror manifest %s: %v", ref.Exact(), mirrorErr)
 			}
 		}
 		RememberLayersOfImage(ctx, m.cache, image, ref.Exact())
@@ -89,6 +91,16 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 	}
 
 	return manifest, err
+}
+
+func (m *pullthroughManifestService) mirrorManifest(ctx context.Context, manifest distribution.Manifest) error {
+	localManifestService, err := m.newLocalManifestService(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create local manifest service: %v", err)
+	}
+
+	_, err = localManifestService.Put(ctx, manifest)
+	return err
 }
 
 func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {

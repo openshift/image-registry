@@ -19,9 +19,10 @@ import (
 type pullthroughBlobStore struct {
 	distribution.BlobStore
 
-	remoteBlobGetter BlobGetterService
-	writeLimiter     maxconnections.Limiter
-	mirror           bool
+	remoteBlobGetter  BlobGetterService
+	writeLimiter      maxconnections.Limiter
+	mirror            bool
+	newLocalBlobStore func(ctx context.Context) distribution.BlobStore
 }
 
 var _ distribution.BlobStore = &pullthroughBlobStore{}
@@ -80,7 +81,7 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 		inflight[dgst] = struct{}{}
 		mu.Unlock()
 
-		storeLocalInBackground(ctx, pbs.remoteBlobGetter, pbs.writeLimiter, pbs.BlobStore, dgst)
+		pbs.storeLocalInBackground(ctx, dgst)
 	}
 
 	_, err = copyContent(ctx, pbs.remoteBlobGetter, dgst, w, req)
@@ -176,9 +177,13 @@ func copyContent(ctx context.Context, store BlobGetterService, dgst digest.Diges
 // storeLocalInBackground spawns a separate thread to copy the remote blob from the remote registry to the
 // local blob store.
 // The function assumes that localBlobStore is thread-safe.
-func storeLocalInBackground(ctx context.Context, remoteGetter BlobGetterService, writeLimiter maxconnections.Limiter, localBlobStore distribution.BlobStore, dgst digest.Digest) {
+func (pbs *pullthroughBlobStore) storeLocalInBackground(ctx context.Context, dgst digest.Digest) {
 	// leave only the essential entries in the context (logger)
 	newCtx := context.WithLogger(context.Background(), context.GetLogger(ctx))
+
+	localBlobStore := pbs.newLocalBlobStore(newCtx)
+	writeLimiter := pbs.writeLimiter
+	remoteGetter := pbs.remoteBlobGetter
 
 	go func(dgst digest.Digest) {
 		if writeLimiter != nil {
@@ -191,7 +196,8 @@ func storeLocalInBackground(ctx context.Context, remoteGetter BlobGetterService,
 
 		context.GetLogger(newCtx).Infof("Start background mirroring of %q", dgst)
 		if err := storeLocal(newCtx, localBlobStore, remoteGetter, dgst); err != nil {
-			context.GetLogger(newCtx).Errorf("Error committing to storage: %s", err.Error())
+			context.GetLogger(newCtx).Errorf("Background mirroring failed: error committing to storage: %v", err.Error())
+			return
 		}
 		context.GetLogger(newCtx).Infof("Completed mirroring of %q", dgst)
 	}(dgst)
@@ -211,10 +217,9 @@ func storeLocal(ctx context.Context, localBlobStore distribution.BlobStore, remo
 		return err
 	}
 	defer func() {
-		cancelErr := bw.Cancel(ctx)
-		if err == nil {
-			err = cancelErr
-		}
+		// When everything is fine, it returns the "already closed" error.
+		// Otherwise we already have an error from another function.
+		_ = bw.Cancel(ctx)
 	}()
 
 	var desc distribution.Descriptor
