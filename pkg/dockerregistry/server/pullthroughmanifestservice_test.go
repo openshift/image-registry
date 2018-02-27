@@ -687,10 +687,10 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 		done: make(chan struct{}),
 	}
 	ptms := &pullthroughManifestService{
-		ManifestService:      ms,
-		localManifestService: ms,
-		imageStream:          imageStream,
-		mirror:               true,
+		ManifestService:         ms,
+		newLocalManifestService: func(ctx context.Context) (distribution.ManifestService, error) { return ms, nil },
+		imageStream:             imageStream,
+		mirror:                  true,
 	}
 
 	_, err = ptms.Get(ctx, digest.Digest(img.Name))
