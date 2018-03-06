@@ -11,6 +11,7 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage/driver"
 
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	dockerapiv10 "github.com/openshift/api/image/docker10"
@@ -141,7 +142,7 @@ func (r *Fsck) checkImage(image *imageapiv1.Image, blobStatter *statter) error {
 
 	exists, err := blobStatter.exists(r.Ctx, imageDigest)
 	if err != nil {
-		return err
+		return fmt.Errorf("blobStatter failed: %s", err)
 	} else if !exists {
 		return &ErrImage{
 			Digest:  imageDigest,
@@ -217,7 +218,15 @@ func (r *Fsck) Database(namespace string) error {
 				imageDigest, err := digest.ParseDigest(tagEvent.Image)
 				if err == nil {
 					image, err = r.Client.Images().Get(imageDigest.String(), metav1.GetOptions{})
-					if err != nil {
+					switch {
+					case kerrors.IsNotFound(err):
+						image := imageapiv1.Image{}
+						image.Name = imageDigest.String()
+						if handlerErr := r.Restore.BrokenImage(image, err); handlerErr != nil {
+							return fmt.Errorf("BrokenImage failed: %s", handlerErr)
+						}
+						continue
+					case err != nil:
 						return &ErrImage{
 							Digest:  imageDigest,
 							Problem: err,
@@ -232,7 +241,7 @@ func (r *Fsck) Database(namespace string) error {
 				}
 
 				if handlerErr := r.Restore.BrokenImageStreamTag(is, tagEventList, i, err); handlerErr != nil {
-					return handlerErr
+					return fmt.Errorf("BrokenImageStreamTag failed: %s", handlerErr)
 				}
 			}
 		}
@@ -259,7 +268,7 @@ func (r *Fsck) Database(namespace string) error {
 
 		err = r.Restore.BrokenImage(image, err)
 		if err != nil {
-			return err
+			return fmt.Errorf("BrokenImage failed: %s", err)
 		}
 	}
 
