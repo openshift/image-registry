@@ -281,8 +281,8 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 		case "metrics":
 			switch access.Action {
 			case "get":
-				if !isMetricsBearerToken(ac.metricsConfig, bearerToken) {
-					return nil, ac.wrapErr(ctx, ErrOpenShiftAccessDenied)
+				if err := verifyMetricsAccess(ctx, ac.metricsConfig, bearerToken, osClient); err != nil {
+					return nil, ac.wrapErr(ctx, err)
 				}
 			default:
 				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
@@ -402,21 +402,14 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 	return nil
 }
 
-func verifyImageStreamAccess(ctx context.Context, namespace, imageRepo, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	return verifyWithSAR(ctx, "imagestreams/layers", namespace, imageRepo, verb, c)
-}
-
-func verifyImageSignatureAccess(ctx context.Context, namespace, imageRepo string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	return verifyWithSAR(ctx, "imagesignatures", namespace, imageRepo, "create", c)
-}
-
-func verifyPruneAccess(ctx context.Context, c client.SelfSubjectAccessReviewsNamespacer) error {
+func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
 	sar := authorizationapi.SelfSubjectAccessReview{
 		Spec: authorizationapi.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &authorizationapi.ResourceAttributes{
-				Verb:     "delete",
-				Group:    imageapi.GroupName,
-				Resource: "images",
+				Verb:        verb,
+				Group:       imageapi.GroupName,
+				Resource:    resource,
+				Subresource: subresource,
 			},
 		},
 	}
@@ -432,6 +425,37 @@ func verifyPruneAccess(ctx context.Context, c client.SelfSubjectAccessReviewsNam
 		context.GetLogger(ctx).Errorf("OpenShift access denied: %s", response.Status.Reason)
 		return ErrOpenShiftAccessDenied
 	}
+	return nil
+}
+
+func verifyImageStreamAccess(ctx context.Context, namespace, imageRepo, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
+	return verifyWithSAR(ctx, "imagestreams/layers", namespace, imageRepo, verb, c)
+}
+
+func verifyImageSignatureAccess(ctx context.Context, namespace, imageRepo string, c client.SelfSubjectAccessReviewsNamespacer) error {
+	return verifyWithSAR(ctx, "imagesignatures", namespace, imageRepo, "create", c)
+}
+
+func verifyPruneAccess(ctx context.Context, c client.SelfSubjectAccessReviewsNamespacer) error {
+	return verifyWithGlobalSAR(ctx, "images", "", "delete", c)
+}
+
+func verifyMetricsAccess(ctx context.Context, metrics configuration.Metrics, token string, c client.SelfSubjectAccessReviewsNamespacer) error {
+	if !metrics.Enabled {
+		return ErrOpenShiftAccessDenied
+	}
+
+	if len(metrics.Secret) > 0 {
+		if metrics.Secret != token {
+			return ErrOpenShiftAccessDenied
+		}
+		return nil
+	}
+
+	if err := verifyWithGlobalSAR(ctx, "registry", "metrics", "get", c); err != nil {
+		return err
+	}
+
 	return nil
 }
 
