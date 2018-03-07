@@ -85,14 +85,14 @@ func ExecuteRestore(configFile io.Reader, mode, namespace string) {
 	switch mode {
 	case "check", "check-storage", "recover":
 		if err := fsck.Storage(namespace); err != nil {
-			log.Fatal(err)
+			log.Fatalf("Storage failed: %s", err)
 		}
 	}
 
 	switch mode {
 	case "check", "check-database", "recover":
 		if err := fsck.Database(namespace); err != nil {
-			log.Fatal(err)
+			log.Fatalf("Database failed: %s", err)
 		}
 	}
 }
