@@ -178,6 +178,19 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 // the content related to the manifest in the registry's storage (signatures).
 func (m *manifestService) Delete(ctx context.Context, dgst digest.Digest) error {
 	context.GetLogger(ctx).Debugf("(*manifestService).Delete")
+
+	_, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
+	if err == nil {
+		// The image stream has a reference to the manifest, so it will be
+		// served even when the repository doesn't have the manifest link. In
+		// other words, in this case deleting the manifest link will not
+		// change the availability of the manifest, so we reject this request.
+		return distribution.ErrUnsupported
+	}
+	if _, ok := err.(distribution.ErrManifestUnknownRevision); !ok {
+		return err
+	}
+
 	return m.manifests.Delete(ctx, dgst)
 }
 

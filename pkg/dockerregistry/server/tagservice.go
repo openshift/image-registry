@@ -136,25 +136,9 @@ func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([
 }
 
 func (t tagService) Tag(ctx context.Context, tag string, desc distribution.Descriptor) error {
-	ok, err := t.imageStream.Exists()
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return distribution.ErrRepositoryUnknown{Name: t.imageStream.Reference()}
-	}
-
-	return t.imageStream.Tag(ctx, tag, desc.Digest, t.pullthroughEnabled)
+	return nil
 }
 
 func (t tagService) Untag(ctx context.Context, tag string) error {
-	ok, err := t.imageStream.Exists()
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return distribution.ErrRepositoryUnknown{Name: t.imageStream.Reference()}
-	}
-
-	return t.imageStream.Untag(ctx, tag, t.pullthroughEnabled)
+	return nil
 }
