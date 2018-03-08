@@ -222,9 +222,10 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 				"name", "user/app",
 				"reference", testImage.Name,
 			},
-			expectedStatus: http.StatusNotFound,
-			// we don't allow to delete manifests from etcd; in this case, we attempt to delete layer link
-			expectedMethodInvocations: map[string]int{"Stat": 1},
+			// we don't allow to delete layer links when they have references
+			// from the image stream (though, in this case there is no layer
+			// links)
+			expectedStatus: http.StatusMethodNotAllowed,
 		},
 
 		{

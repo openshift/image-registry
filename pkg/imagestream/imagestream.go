@@ -54,8 +54,6 @@ type ImageStream interface {
 
 	TagIsInsecure(tag string, dgst digest.Digest) (bool, error)
 	Tags(ctx context.Context) (map[string]digest.Digest, error)
-	Tag(ctx context.Context, tag string, dgst digest.Digest, pullthroughEnabled bool) error
-	Untag(ctx context.Context, tag string, pullthroughEnabled bool) error
 }
 
 type imageStream struct {
@@ -305,67 +303,6 @@ func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, erro
 	}
 
 	return m, nil
-}
-
-func (is *imageStream) Tag(ctx context.Context, tag string, dgst digest.Digest, pullthroughEnabled bool) error {
-	image, err := is.getImage(ctx, dgst)
-	if err != nil {
-		return err
-	}
-
-	if !pullthroughEnabled && !IsImageManaged(image) {
-		return distribution.ErrRepositoryUnknown{Name: is.Reference()}
-	}
-
-	// We don't want to mutate the origial image object, which we've got by reference.
-	img := *image
-	img.ResourceVersion = ""
-
-	ism := imageapiv1.ImageStreamMapping{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: is.namespace,
-			Name:      is.name,
-		},
-		Tag:   tag,
-		Image: img,
-	}
-
-	_, err = is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism)
-	if quotautil.IsErrorQuotaExceeded(err) {
-		context.GetLogger(ctx).Errorf("denied creating ImageStreamMapping: %v", err)
-		return distribution.ErrAccessDenied
-	}
-	return err
-}
-
-func (is *imageStream) Untag(ctx context.Context, tag string, pullthroughEnabled bool) error {
-	stream, err := is.imageStreamGetter.get()
-	if err != nil {
-		return err
-	}
-
-	te := originutil.LatestTaggedImage(stream, tag)
-	if te == nil {
-		return distribution.ErrTagUnknown{Tag: tag}
-	}
-
-	if !pullthroughEnabled {
-		dgst, err := digest.ParseDigest(te.Image)
-		if err != nil {
-			return err
-		}
-
-		image, err := is.getImage(ctx, dgst)
-		if err != nil {
-			return err
-		}
-
-		if !IsImageManaged(image) {
-			return distribution.ErrTagUnknown{Tag: tag}
-		}
-	}
-
-	return is.registryOSClient.ImageStreamTags(is.namespace).Delete(imageapi.JoinImageStreamTag(is.name, tag), &metav1.DeleteOptions{})
 }
 
 func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) error {
