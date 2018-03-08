@@ -138,9 +138,6 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 
 	// Registry extensions endpoint provides prometheus metrics.
 	if extraConfig.Metrics.Enabled {
-		if len(extraConfig.Metrics.Secret) == 0 {
-			context.GetLogger(dockerApp).Fatalf("openshift.metrics.secret field cannot be empty when metrics are enabled")
-		}
 		RegisterMetricHandler(dockerApp)
 	}
 
