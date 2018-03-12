@@ -143,7 +143,7 @@ readonly -f os::util::list_test_packages_under
 
 # OS_ALL_IMAGES is the list of images built by os::build::images.
 readonly OS_ALL_IMAGES=(
-  openshift/origin-docker-registry
+  origin-docker-registry
 )
 
 # os::build::images builds all images in this repo.
