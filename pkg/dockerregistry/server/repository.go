@@ -12,7 +12,6 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/imagestream"
 )
 
@@ -82,12 +81,16 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 			r.imageStream,
 			r.imageStream.GetSecrets,
 			r.cache,
+			r.app.metrics,
 		)
 	}
 
+	repo = distribution.Repository(r)
+	repo = r.app.metrics.Repository(repo, repo.Named().Name())
+
 	bdsf := blobDescriptorServiceFactoryFunc(r.BlobDescriptorService)
 
-	return r, bdsf, nil
+	return repo, bdsf, nil
 }
 
 // Manifests returns r, which implements distribution.ManifestService.
@@ -119,6 +122,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 			cache:        r.cache,
 			mirror:       r.app.config.Pullthrough.Mirror,
 			registryAddr: r.app.config.Server.Addr,
+			metrics:      r.app.metrics,
 		}
 	}
 
@@ -126,10 +130,6 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 
 	if audit.LoggerExists(ctx) {
 		ms = audit.NewManifestService(ctx, ms)
-	}
-
-	if r.app.config.Metrics.Enabled {
-		ms = metrics.NewManifestService(ms, r.Named().Name())
 	}
 
 	return ms, nil
@@ -164,10 +164,6 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 		bs = audit.NewBlobStore(ctx, bs)
 	}
 
-	if r.app.config.Metrics.Enabled {
-		bs = metrics.NewBlobStore(bs, r.Named().Name())
-	}
-
 	return bs
 }
 
@@ -185,10 +181,6 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 
 	if audit.LoggerExists(ctx) {
 		ts = audit.NewTagService(ctx, ts)
-	}
-
-	if r.app.config.Metrics.Enabled {
-		ts = metrics.NewTagService(ts, r.Named().Name())
 	}
 
 	return ts

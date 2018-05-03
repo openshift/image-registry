@@ -22,10 +22,13 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	dockerregistryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
+	metricstesting "github.com/openshift/image-registry/pkg/dockerregistry/server/metrics/testing"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	originregistryclient "github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 	"github.com/openshift/image-registry/pkg/testutil"
+	"github.com/openshift/image-registry/pkg/testutil/counter"
 )
 
 func TestPullthroughServeBlob(t *testing.T) {
@@ -157,7 +160,9 @@ func TestPullthroughServeBlob(t *testing.T) {
 		remoteBlobGetter := NewBlobGetterService(
 			imageStream,
 			imageStream.GetSecrets,
-			cache)
+			cache,
+			metrics.NewNoopMetrics(),
+		)
 
 		ptbs := &pullthroughBlobStore{
 			BlobStore:        localBlobStore,
@@ -591,7 +596,9 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 			remoteBlobGetter := NewBlobGetterService(
 				imageStream,
 				imageStream.GetSecrets,
-				cache)
+				cache,
+				metrics.NewNoopMetrics(),
+			)
 
 			ptbs := &pullthroughBlobStore{
 				BlobStore:        localBlobStore,
@@ -652,6 +659,98 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 				t.Errorf("[%s] unexpected number of bytes served locally: %d != %d", tc.name, localBlobStore.bytesServed, tc.expectedBytesServed)
 			}
 		})
+	}
+}
+
+func TestPullthroughMetrics(t *testing.T) {
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+
+	namespace, name := "user", "app"
+	repoName := fmt.Sprintf("%s/%s", namespace, name)
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
+
+	testImage, err := testutil.NewImageForManifest(repoName, testutil.SampleImageManifestSchema1, "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	remoteRegistryServer := createTestRegistryServer(t, ctx)
+	defer remoteRegistryServer.Close()
+
+	serverURL, err := url.Parse(remoteRegistryServer.URL)
+	if err != nil {
+		t.Fatalf("error parsing server url: %v", err)
+	}
+	testImage.DockerImageReference = fmt.Sprintf("%s/%s@%s", serverURL.Host, repoName, testImage.Name)
+
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+	testutil.AddImageStream(t, fos, namespace, name, map[string]string{
+		imageapi.InsecureRepositoryAnnotation: "true",
+	})
+	testutil.AddImage(t, fos, testImage, namespace, name, "latest")
+
+	blobDesc, _, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	localBlobStore := newTestBlobStore(nil, nil)
+
+	imageStream := imagestream.New(ctx, namespace, name, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
+
+	digestCache, err := cache.NewBlobDigest(
+		defaultDescriptorCacheSize,
+		defaultDigestToRepositoryCacheSize,
+		24*time.Hour, // for tests it's virtually forever
+	)
+	if err != nil {
+		t.Fatalf("unable to create cache: %v", err)
+	}
+
+	cache := &cache.RepoDigest{
+		Cache: digestCache,
+	}
+	c, sink := metricstesting.NewCounterSink()
+	remoteBlobGetter := NewBlobGetterService(
+		imageStream,
+		imageStream.GetSecrets,
+		cache,
+		metrics.NewMetrics(sink),
+	)
+
+	ptbs := &pullthroughBlobStore{
+		BlobStore:        localBlobStore,
+		remoteBlobGetter: remoteBlobGetter,
+	}
+
+	dgst := digest.Digest(blobDesc.Digest)
+
+	_, err = ptbs.Stat(ctx, dgst)
+	if err != nil {
+		t.Fatalf("Stat returned unexpected error: %#+v", err)
+	}
+
+	if diff := c.Diff(counter.M{
+		"pullthrough_blobstore_cache_requests:Miss":                             1,
+		fmt.Sprintf("pullthrough_repository:%s:Init", serverURL.Host):           1,
+		fmt.Sprintf("pullthrough_repository:%s:BlobStore.Stat", serverURL.Host): 1,
+	}); diff != nil {
+		t.Fatal(diff)
+	}
+
+	_, err = ptbs.Stat(ctx, dgst)
+	if err != nil {
+		t.Fatalf("Stat returned unexpected error: %#+v", err)
+	}
+
+	if diff := c.Diff(counter.M{
+		"pullthrough_blobstore_cache_requests:Miss":                             1,
+		"pullthrough_blobstore_cache_requests:Hit":                              1,
+		fmt.Sprintf("pullthrough_repository:%s:Init", serverURL.Host):           1,
+		fmt.Sprintf("pullthrough_repository:%s:BlobStore.Stat", serverURL.Host): 2,
+	}); diff != nil {
+		t.Fatal(diff)
 	}
 }
 

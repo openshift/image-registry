@@ -11,7 +11,6 @@ import (
 )
 
 func RegisterMetricHandler(app *handlers.App) {
-	metrics.Register()
 	getMetricsAccess := func(r *http.Request) []auth.Access {
 		return []auth.Access{
 			{

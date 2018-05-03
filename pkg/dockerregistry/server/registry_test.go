@@ -16,6 +16,7 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/supermiddleware"
 )
 
@@ -68,6 +69,7 @@ func newTestRegistry(
 		quotaEnforcing: &quotaEnforcingConfig{
 			enforcementEnabled: false,
 		},
+		metrics: metrics.NewNoopMetrics(),
 	}
 
 	if storageDriver == nil {

@@ -1,83 +1,148 @@
 package metrics
 
 import (
+	"net/url"
 	"strings"
-	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
+	gocontext "golang.org/x/net/context"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
+	"github.com/docker/distribution/registry/api/errcode"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
+	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
 
-const (
-	registryNamespace = "openshift"
-	registrySubsystem = "registry"
-)
-
-var (
-	registryAPIRequests *prometheus.HistogramVec
-)
-
-// Register the metrics.
-func Register() {
-	registryAPIRequests = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: registryNamespace,
-			Subsystem: registrySubsystem,
-			Name:      "request_duration_seconds",
-			Help:      "Request latency summary in microseconds for each operation",
-		},
-		[]string{"operation", "name"},
-	)
-	prometheus.MustRegister(registryAPIRequests)
+// Observer captures individual observations.
+type Observer interface {
+	Observe(float64)
 }
 
-// Timer is a helper type to time functions.
-type Timer interface {
-	// Stop records the duration passed since the Timer was created with NewTimer.
-	Stop()
+// Counter represents a single numerical value that only goes up.
+type Counter interface {
+	Inc()
 }
 
-// NewTimer wraps the HistogramVec and used to track amount of time passed since the Timer was created.
-func NewTimer(collector *prometheus.HistogramVec, labels []string) Timer {
-	return &metricTimer{
-		collector: collector,
-		labels:    labels,
-		startTime: time.Now(),
+// Sink provides an interface for exposing metrics.
+type Sink interface {
+	RequestDuration(funcname, reponame string) Observer
+	PullthroughBlobstoreCacheRequests(resultType string) Counter
+	PullthroughRepositoryDuration(registry, funcname string) Observer
+	PullthroughRepositoryErrors(registry, funcname, errcode string) Counter
+}
+
+// Metrics is a set of all metrics that can be provided.
+type Metrics interface {
+	Core
+	Pullthrough
+}
+
+// Core is a set of metrics for the core functionality.
+type Core interface {
+	// Repository wraps a distribution.Repository to collect statistics.
+	Repository(r distribution.Repository, reponame string) distribution.Repository
+}
+
+// Pullthrough is a set of metrics for the pullthrough subsystem.
+type Pullthrough interface {
+	// RepositoryRetriever wraps RepositoryRetriever to collect statistics.
+	RepositoryRetriever(retriever registryclient.RepositoryRetriever) registryclient.RepositoryRetriever
+
+	// DigestBlobStoreCache() returns an interface to count cache hits/misses
+	// for pullthrough blobstores.
+	DigestBlobStoreCache() Cache
+}
+
+func dockerErrorCode(err error) string {
+	if e, ok := err.(errcode.Error); ok {
+		return e.ErrorCode().String()
+	}
+	return "UNKNOWN"
+}
+
+func pullthroughRepositoryWrapper(ctx context.Context, sink Sink, registry string, funcname string, f func(ctx context.Context) error) error {
+	registry = strings.ToLower(registry)
+	defer NewTimer(sink.PullthroughRepositoryDuration(registry, funcname)).Stop()
+	err := f(ctx)
+	if err != nil {
+		sink.PullthroughRepositoryErrors(registry, funcname, dockerErrorCode(err)).Inc()
+	}
+	return err
+}
+
+type repositoryRetriever struct {
+	retriever registryclient.RepositoryRetriever
+	sink      Sink
+}
+
+func (rr repositoryRetriever) Repository(ctx gocontext.Context, registry *url.URL, repoName string, insecure bool) (repo distribution.Repository, err error) {
+	err = pullthroughRepositoryWrapper(ctx, rr.sink, registry.Host, "Init", func(ctx context.Context) error {
+		repo, err = rr.retriever.Repository(ctx, registry, repoName, insecure)
+		return err
+	})
+	if err != nil {
+		return repo, err
+	}
+	return wrapped.NewRepository(repo, func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
+		return pullthroughRepositoryWrapper(ctx, rr.sink, registry.Host, funcname, f)
+	}), nil
+}
+
+type metrics struct {
+	sink Sink
+}
+
+var _ Metrics = &metrics{}
+
+// NewMetrics returns a helper that exposes the metrics through sink to
+// instrument the application.
+func NewMetrics(sink Sink) Metrics {
+	return &metrics{
+		sink: sink,
 	}
 }
 
-type metricTimer struct {
-	collector *prometheus.HistogramVec
-	labels    []string
-	startTime time.Time
-}
-
-func (m *metricTimer) Stop() {
-	m.collector.WithLabelValues(m.labels...).Observe(float64(time.Since(m.startTime)) / float64(time.Second))
-}
-
-func newWrapper(reponame string) wrapped.Wrapper {
-	return func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
-		defer NewTimer(registryAPIRequests, []string{strings.ToLower(funcname), reponame}).Stop()
+func (m *metrics) Repository(r distribution.Repository, reponame string) distribution.Repository {
+	return wrapped.NewRepository(r, func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
+		defer NewTimer(m.sink.RequestDuration(funcname, reponame)).Stop()
 		return f(ctx)
+	})
+}
+
+func (m *metrics) RepositoryRetriever(retriever registryclient.RepositoryRetriever) registryclient.RepositoryRetriever {
+	return repositoryRetriever{
+		retriever: retriever,
+		sink:      m.sink,
 	}
 }
 
-// NewBlobStore wraps a distribution.BlobStore to collect statistics.
-func NewBlobStore(bs distribution.BlobStore, reponame string) distribution.BlobStore {
-	return wrapped.NewBlobStore(bs, newWrapper(reponame))
+func (m *metrics) DigestBlobStoreCache() Cache {
+	return &cache{
+		hitCounter:  m.sink.PullthroughBlobstoreCacheRequests("Hit"),
+		missCounter: m.sink.PullthroughBlobstoreCacheRequests("Miss"),
+	}
 }
 
-// NewManifestService wraps a distribution.ManifestService to collect statistics
-func NewManifestService(ms distribution.ManifestService, reponame string) distribution.ManifestService {
-	return wrapped.NewManifestService(ms, newWrapper(reponame))
+type noopMetrics struct {
 }
 
-// NewTagService wraps a distribution.TagService to collect statistics
-func NewTagService(ts distribution.TagService, reponame string) distribution.TagService {
-	return wrapped.NewTagService(ts, newWrapper(reponame))
+var _ Metrics = noopMetrics{}
+
+// NewNoopMetrics return a helper that implements the Metrics interface, but
+// does nothing.
+func NewNoopMetrics() Metrics {
+	return noopMetrics{}
+}
+
+func (m noopMetrics) Repository(r distribution.Repository, reponame string) distribution.Repository {
+	return r
+}
+
+func (m noopMetrics) RepositoryRetriever(retriever registryclient.RepositoryRetriever) registryclient.RepositoryRetriever {
+	return retriever
+}
+
+func (m noopMetrics) DigestBlobStoreCache() Cache {
+	return noopCache{}
 }

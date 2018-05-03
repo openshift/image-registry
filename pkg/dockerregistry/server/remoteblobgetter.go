@@ -11,6 +11,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
@@ -28,21 +29,26 @@ type secretsGetter func() ([]corev1.Secret, error)
 // concurrently from different goroutines (from an HTTP handler and background
 // mirroring, for example).
 type digestBlobStoreCache struct {
-	mu   sync.RWMutex
-	data map[string]distribution.BlobStore
+	mu      sync.RWMutex
+	data    map[string]distribution.BlobStore
+	metrics metrics.Cache
 }
 
-func newDigestBlobStoreCache() *digestBlobStoreCache {
+func newDigestBlobStoreCache(m metrics.Pullthrough) *digestBlobStoreCache {
 	return &digestBlobStoreCache{
-		data: make(map[string]distribution.BlobStore),
+		data:    make(map[string]distribution.BlobStore),
+		metrics: m.DigestBlobStoreCache(),
 	}
 }
 
-func (c *digestBlobStoreCache) Get(dgst digest.Digest) (distribution.BlobStore, bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	bs, ok := c.data[dgst.String()]
-	return bs, ok
+func (c *digestBlobStoreCache) Get(dgst digest.Digest) (bs distribution.BlobStore, ok bool) {
+	func() {
+		c.mu.RLock()
+		defer c.mu.RUnlock()
+		bs, ok = c.data[dgst.String()]
+	}()
+	c.metrics.Request(ok)
+	return
 }
 
 func (c *digestBlobStoreCache) Put(dgst digest.Digest, bs distribution.BlobStore) {
@@ -58,6 +64,7 @@ type remoteBlobGetterService struct {
 	getSecrets    secretsGetter
 	cache         cache.RepositoryDigest
 	digestToStore *digestBlobStoreCache
+	metrics       metrics.Pullthrough
 }
 
 var _ BlobGetterService = &remoteBlobGetterService{}
@@ -68,12 +75,14 @@ func NewBlobGetterService(
 	imageStream imagestream.ImageStream,
 	secretsGetter secretsGetter,
 	cache cache.RepositoryDigest,
+	m metrics.Pullthrough,
 ) BlobGetterService {
 	return &remoteBlobGetterService{
 		imageStream:   imageStream,
 		getSecrets:    secretsGetter,
 		cache:         cache,
-		digestToStore: newDigestBlobStoreCache(),
+		digestToStore: newDigestBlobStoreCache(m),
+		metrics:       m,
 	}
 }
 
@@ -90,7 +99,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 
 	cached, _ := rbgs.cache.Repositories(dgst)
 
-	retriever := getImportContext(ctx, rbgs.getSecrets)
+	retriever := getImportContext(ctx, rbgs.getSecrets, rbgs.metrics)
 
 	// look at the first level of tagged repositories first
 	repositoryCandidates, search, err := rbgs.imageStream.IdentifyCandidateRepositories(true)
