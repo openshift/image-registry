@@ -116,7 +116,7 @@ func TestPullthroughBlob(t *testing.T) {
 		"GET /v2/remoteimage/manifests/latest":               1,
 		"GET /v2/remoteimage/blobs/" + configDigest.String(): 1,
 	}); diff != nil {
-		t.Fatalf("unexpected count of requests: %q", diff)
+		t.Fatalf("unexpected number of requests: %q", diff)
 	}
 
 	// Reset counter
@@ -138,12 +138,12 @@ func TestPullthroughBlob(t *testing.T) {
 		t.Fatalf("got %q, want %q", string(data), foo)
 	}
 
-	// TODO(dmage): reduce number of requests
+	// TODO(dmage): remove the HEAD request
 	if diff := requestCounter.Diff(counter.M{
-		"GET /v2/": 2,
-		"HEAD /v2/remoteimage/blobs/" + fooDigest.String(): 2,
+		"GET /v2/": 1,
+		"HEAD /v2/remoteimage/blobs/" + fooDigest.String(): 1,
 		"GET /v2/remoteimage/blobs/" + fooDigest.String():  1,
 	}); diff != nil {
-		t.Fatalf("unexpected count of requests: %q", diff)
+		t.Fatalf("unexpected number of requests: %q", diff)
 	}
 }
