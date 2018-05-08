@@ -7,6 +7,7 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
+	registrycache "github.com/docker/distribution/registry/storage/cache"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
@@ -76,6 +77,12 @@ func (app *App) BlobStatter() distribution.BlobStatter {
 		Cache: app.cache,
 		Svc:   app.registry.BlobStatter(),
 	}
+}
+
+func (app *App) CacheProvider(ctx context.Context, options map[string]interface{}) (registrycache.BlobDescriptorCacheProvider, error) {
+	return &cache.Provider{
+		Cache: app.cache,
+	}, nil
 }
 
 // NewApp configures the registry application and returns http.Handler for it.

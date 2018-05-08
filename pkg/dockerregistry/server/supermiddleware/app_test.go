@@ -15,6 +15,7 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/auth"
+	"github.com/docker/distribution/registry/storage/cache"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
@@ -108,6 +109,10 @@ func (app *testApp) Repository(ctx context.Context, repo distribution.Repository
 	return repo, bdsf, nil
 }
 
+func (app *testApp) CacheProvider(ctx context.Context, options map[string]interface{}) (cache.BlobDescriptorCacheProvider, error) {
+	return nil, nil
+}
+
 func TestApp(t *testing.T) {
 	log := &log{}
 
@@ -121,6 +126,9 @@ func TestApp(t *testing.T) {
 			"inmemory": nil,
 			"delete": configuration.Parameters{
 				"enabled": true,
+			},
+			"cache": configuration.Parameters{
+				"blobdescriptor": Name,
 			},
 		},
 		Middleware: map[string][]configuration.Middleware{
