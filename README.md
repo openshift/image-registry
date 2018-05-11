@@ -15,3 +15,7 @@ OpenShift Image Registry
 * Role-based access control (RBAC).
 * Audit log.
 * Promethus metrics.
+
+**License**
+
+Apache 2.0
