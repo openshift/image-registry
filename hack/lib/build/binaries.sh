@@ -61,6 +61,39 @@ function os::build::platform_arch() {
 }
 readonly -f os::build::platform_arch
 
+
+# compare semantic versions, from https://stackoverflow.com/a/4025065/6788026
+function vercomp() {
+    if [[ $1 == $2 ]]
+    then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 2
+        fi
+    done
+    return 0
+}
+
 # os::build::setup_env will check that the `go` commands is available in
 # ${PATH}. If not running on Travis, it will also check that the Go version is
 # good enough for the Kubernetes build.
@@ -85,7 +118,12 @@ function os::build::setup_env() {
   if [[ "${TRAVIS:-}" != "true" ]]; then
     local go_version
     go_version=($(go version))
-    if [[ "${go_version[2]}" < "${OS_REQUIRED_GO_VERSION}" ]]; then
+    go_version=${go_version[2]#go}
+    set +ue
+    vercomp ${go_version} ${OS_REQUIRED_GO_VERSION#go}
+    rc=$?
+    set -eu
+    if [[ $rc -eq 2 ]]; then
       os::log::fatal "Detected Go version: ${go_version[*]}.
 Builds require Go version ${OS_REQUIRED_GO_VERSION} or greater."
     fi
