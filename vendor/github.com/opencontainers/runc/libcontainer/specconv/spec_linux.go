@@ -31,13 +31,15 @@ var namespaceMapping = map[specs.LinuxNamespaceType]configs.NamespaceType{
 }
 
 var mountPropagationMapping = map[string]int{
-	"rprivate": unix.MS_PRIVATE | unix.MS_REC,
-	"private":  unix.MS_PRIVATE,
-	"rslave":   unix.MS_SLAVE | unix.MS_REC,
-	"slave":    unix.MS_SLAVE,
-	"rshared":  unix.MS_SHARED | unix.MS_REC,
-	"shared":   unix.MS_SHARED,
-	"":         unix.MS_PRIVATE | unix.MS_REC,
+	"rprivate":    unix.MS_PRIVATE | unix.MS_REC,
+	"private":     unix.MS_PRIVATE,
+	"rslave":      unix.MS_SLAVE | unix.MS_REC,
+	"slave":       unix.MS_SLAVE,
+	"rshared":     unix.MS_SHARED | unix.MS_REC,
+	"shared":      unix.MS_SHARED,
+	"runbindable": unix.MS_UNBINDABLE | unix.MS_REC,
+	"unbindable":  unix.MS_UNBINDABLE,
+	"":            0,
 }
 
 var allowedDevices = []*configs.Device{
@@ -184,20 +186,10 @@ func CreateLibcontainerConfig(opts *CreateOpts) (*configs.Config, error) {
 	}
 
 	exists := false
-	if config.Namespaces.Contains(configs.NEWNET) {
-		config.Networks = []*configs.Network{
-			{
-				Type: "loopback",
-			},
-		}
-	}
 	for _, m := range spec.Mounts {
 		config.Mounts = append(config.Mounts, createLibcontainerMount(cwd, m))
 	}
 	if err := createDevices(spec, config); err != nil {
-		return nil, err
-	}
-	if err := setupUserNamespace(spec, config); err != nil {
 		return nil, err
 	}
 	c, err := createCgroupConfig(opts)
@@ -210,6 +202,9 @@ func CreateLibcontainerConfig(opts *CreateOpts) (*configs.Config, error) {
 		if config.RootPropagation, exists = mountPropagationMapping[spec.Linux.RootfsPropagation]; !exists {
 			return nil, fmt.Errorf("rootfsPropagation=%v is not supported", spec.Linux.RootfsPropagation)
 		}
+		if config.NoPivotRoot && (config.RootPropagation&unix.MS_PRIVATE != 0) {
+			return nil, fmt.Errorf("rootfsPropagation of [r]private is not safe without pivot_root")
+		}
 
 		for _, ns := range spec.Linux.Namespaces {
 			t, exists := namespaceMapping[ns.Type]
@@ -221,12 +216,24 @@ func CreateLibcontainerConfig(opts *CreateOpts) (*configs.Config, error) {
 			}
 			config.Namespaces.Add(t, ns.Path)
 		}
+		if config.Namespaces.Contains(configs.NEWNET) && config.Namespaces.PathOf(configs.NEWNET) == "" {
+			config.Networks = []*configs.Network{
+				{
+					Type: "loopback",
+				},
+			}
+		}
+		if config.Namespaces.Contains(configs.NEWUSER) {
+			if err := setupUserNamespace(spec, config); err != nil {
+				return nil, err
+			}
+		}
 		config.MaskPaths = spec.Linux.MaskedPaths
 		config.ReadonlyPaths = spec.Linux.ReadonlyPaths
 		config.MountLabel = spec.Linux.MountLabel
 		config.Sysctl = spec.Linux.Sysctl
 		if spec.Linux.Seccomp != nil {
-			seccomp, err := setupSeccomp(spec.Linux.Seccomp)
+			seccomp, err := SetupSeccomp(spec.Linux.Seccomp)
 			if err != nil {
 				return nil, err
 			}
@@ -250,19 +257,29 @@ func CreateLibcontainerConfig(opts *CreateOpts) (*configs.Config, error) {
 	}
 	createHooks(spec, config)
 	config.Version = specs.Version
+	if spec.Linux.IntelRdt != nil {
+		config.IntelRdt = &configs.IntelRdt{}
+		if spec.Linux.IntelRdt.L3CacheSchema != "" {
+			config.IntelRdt.L3CacheSchema = spec.Linux.IntelRdt.L3CacheSchema
+		}
+	}
 	return config, nil
 }
 
 func createLibcontainerMount(cwd string, m specs.Mount) *configs.Mount {
 	flags, pgflags, data, ext := parseMountOptions(m.Options)
 	source := m.Source
-	if m.Type == "bind" {
+	device := m.Type
+	if flags|unix.MS_BIND != 0 {
+		if device == "" {
+			device = "bind"
+		}
 		if !filepath.IsAbs(source) {
 			source = filepath.Join(cwd, m.Source)
 		}
 	}
 	return &configs.Mount{
-		Device:           m.Type,
+		Device:           device,
 		Source:           source,
 		Destination:      m.Destination,
 		Data:             data,
@@ -609,9 +626,6 @@ func setupUserNamespace(spec *specs.Spec, config *configs.Config) error {
 		}
 	}
 	if spec.Linux != nil {
-		if len(spec.Linux.UIDMappings) == 0 {
-			return nil
-		}
 		for _, m := range spec.Linux.UIDMappings {
 			config.UidMappings = append(config.UidMappings, create(m))
 		}
@@ -722,7 +736,7 @@ func parseMountOptions(options []string) (int, []int, string, int) {
 	return flag, pgflag, strings.Join(data, ","), extFlags
 }
 
-func setupSeccomp(config *specs.LinuxSeccomp) (*configs.Seccomp, error) {
+func SetupSeccomp(config *specs.LinuxSeccomp) (*configs.Seccomp, error) {
 	if config == nil {
 		return nil, nil
 	}

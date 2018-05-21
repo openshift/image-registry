@@ -1,10 +1,10 @@
 language: go
 
 go:
-  - 1.8
+  - 1.9
 
 script:
-  - make verify build
+  - make verify build build-examples
 
 notifications:
   irc: "chat.freenode.net#openshift-dev"
