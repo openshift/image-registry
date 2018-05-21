@@ -1,5 +1,5 @@
-hash: 4c575b889f2d7f9ce3f939529153f67f51eda0018c8d6ce4422adfa68b8365be
-updated: 2018-05-21T14:38:35.30040388+02:00
+hash: 83965a13f508895b68659ac283ec88779a8836ca7ef4f49f2142004e2130e185
+updated: 2018-05-21T14:52:46.460108273+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -58,7 +58,7 @@ imports:
   - oss
   - util
 - name: github.com/docker/distribution
-  version: 632d0beac414091a582d7a2d2c8e55ac83788e5b
+  version: 4e8e323b4b83451e20a564bc40e3b26968b3a887
   repo: git@github.com:openshift/docker-distribution
   subpackages:
   - configuration
