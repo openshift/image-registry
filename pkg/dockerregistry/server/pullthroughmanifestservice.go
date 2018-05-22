@@ -8,6 +8,7 @@ import (
 	"github.com/docker/distribution/digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
+	"github.com/openshift/image-registry/pkg/errors"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
@@ -29,17 +30,13 @@ var _ distribution.ManifestService = &pullthroughManifestService{}
 
 func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*pullthroughManifestService).Get: starting with dgst=%s", dgst.String())
+
 	manifest, err := m.ManifestService.Get(ctx, dgst, options...)
-	switch err.(type) {
-	case distribution.ErrManifestUnknownRevision:
-		break
-	case nil:
-		return manifest, nil
-	default:
-		return nil, err
+	if _, ok := err.(distribution.ErrManifestUnknownRevision); ok {
+		return m.remoteGet(ctx, dgst, options...)
 	}
 
-	return m.remoteGet(ctx, dgst, options...)
+	return manifest, err
 }
 
 func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
@@ -63,34 +60,31 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 			Revision: dgst,
 		}
 	}
+
 	repo, err := m.getRemoteRepositoryClient(ctx, &ref, dgst, options...)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error getting remote repository for image %q: %v", ref.Exact(), err)
-		return nil, err
+		return nil, errors.ErrorCodePullthroughManifest.WithArgs(ref.Exact(), err)
 	}
 
 	pullthroughManifestService, err := repo.Manifests(ctx)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error getting remote manifests for image %q: %v", ref.Exact(), err)
 		return nil, err
 	}
 
 	manifest, err := pullthroughManifestService.Get(ctx, dgst)
-	switch err.(type) {
-	case nil:
-		if m.mirror {
-			if mirrorErr := m.mirrorManifest(ctx, manifest); mirrorErr != nil {
-				context.GetLogger(ctx).Errorf("failed to mirror manifest %s: %v", ref.Exact(), mirrorErr)
-			}
-		}
-		RememberLayersOfImage(ctx, m.cache, image, ref.Exact())
-	case distribution.ErrManifestUnknownRevision:
-		break
-	default:
-		context.GetLogger(ctx).Errorf("error getting manifest from remote location %q: %v", ref.Exact(), err)
+	if err != nil {
+		return nil, errors.ErrorCodePullthroughManifest.WithArgs(ref.Exact(), err)
 	}
 
-	return manifest, err
+	if m.mirror {
+		if mirrorErr := m.mirrorManifest(ctx, manifest); mirrorErr != nil {
+			errors.Handle(ctx, fmt.Sprintf("failed to mirror manifest from %s", ref.Exact()), mirrorErr)
+		}
+	}
+
+	RememberLayersOfImage(ctx, m.cache, image, ref.Exact())
+
+	return manifest, nil
 }
 
 func (m *pullthroughManifestService) mirrorManifest(ctx context.Context, manifest distribution.Manifest) error {
