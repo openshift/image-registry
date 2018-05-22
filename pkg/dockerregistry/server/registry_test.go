@@ -3,6 +3,8 @@ package server
 import (
 	"time"
 
+	kubecache "k8s.io/apimachinery/pkg/util/cache"
+
 	"github.com/docker/distribution"
 	dockercfg "github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
@@ -68,7 +70,8 @@ func newTestRegistry(
 		quotaEnforcing: &quotaEnforcingConfig{
 			enforcementEnabled: false,
 		},
-		metrics: metrics.NewNoopMetrics(),
+		metrics:         metrics.NewNoopMetrics(),
+		paginationCache: kubecache.NewLRUExpireCache(128),
 	}
 
 	if storageDriver == nil {
