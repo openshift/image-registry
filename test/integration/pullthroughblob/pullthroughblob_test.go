@@ -30,7 +30,7 @@ func TestPullthroughBlob(t *testing.T) {
 	defer master.Close()
 
 	testuser := master.CreateUser("testuser", "testp@ssw0rd")
-	testproject := master.CreateProject("testproject", testuser.Name)
+	testproject := master.CreateProject("test-image-pullthrough-blob", testuser.Name)
 	teststreamName := "pullthrough"
 
 	requestCounter := counter.New()
