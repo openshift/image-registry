@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
@@ -22,6 +23,7 @@ import (
 	"github.com/docker/docker/pkg/archive"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
 	kubeclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -29,15 +31,71 @@ import (
 	projectapiv1 "github.com/openshift/api/project/v1"
 )
 
+type MasterInterface interface {
+	Stop() error
+	WaitHealthz(configDir string) error
+	AdminKubeConfigPath() string
+}
+
+type MasterProcess struct {
+	kubeconfig string
+}
+
+func StartMasterProcess(kubeconfig string) (MasterInterface, error) {
+	if err := os.Setenv("KUBECONFIG", kubeconfig); err != nil {
+		return nil, err
+	}
+	return &MasterProcess{
+		kubeconfig: kubeconfig,
+	}, nil
+}
+
+func (p *MasterProcess) AdminKubeConfigPath() string {
+	return p.kubeconfig
+}
+
+func (p *MasterProcess) Stop() error { return nil }
+
+func (p *MasterProcess) WaitHealthz(configDir string) error {
+	config, err := ConfigFromFile(p.kubeconfig)
+	if err != nil {
+		return err
+	}
+	u, _, err := rest.DefaultServerURL(config.Host, config.APIPath, schema.GroupVersion{}, true)
+	if err != nil {
+		return err
+	}
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	rt := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig:       tlsConfig,
+	}
+
+	return WaitHTTP(rt, fmt.Sprintf("https://%s/healthz", u.Host))
+}
+
 type MasterContainer struct {
 	ID              string
 	Port            int
 	NetworkSettings struct {
 		IPAddress string
 	}
+
+	KubeConfigPath string
 }
 
-func StartMasterContainer(configDir string) (*MasterContainer, error) {
+func StartMasterContainer(configDir string) (MasterInterface, error) {
 	cli, err := client.NewEnvClient()
 	if err != nil {
 		return nil, err
@@ -75,8 +133,9 @@ func StartMasterContainer(configDir string) (*MasterContainer, error) {
 	}
 
 	c := &MasterContainer{
-		ID:   resp.ID,
-		Port: 8443,
+		ID:             resp.ID,
+		Port:           8443,
+		KubeConfigPath: filepath.Join(configDir, "master", "admin.kubeconfig"),
 	}
 
 	inspectResult, err := cli.ContainerInspect(ctx, resp.ID)
@@ -104,6 +163,10 @@ func StartMasterContainer(configDir string) (*MasterContainer, error) {
 	}
 
 	return c, nil
+}
+
+func (m *MasterContainer) AdminKubeConfigPath() string {
+	return m.KubeConfigPath
 }
 
 func (c *MasterContainer) WriteConfigs(configDir string) error {
@@ -216,8 +279,9 @@ func (r *Repository) Transport() http.RoundTripper {
 type Master struct {
 	t               *testing.T
 	tmpDir          string
-	container       *MasterContainer
+	container       MasterInterface
 	adminKubeConfig *rest.Config
+	namespaces      []string
 }
 
 func NewMaster(t *testing.T) *Master {
@@ -226,7 +290,12 @@ func NewMaster(t *testing.T) *Master {
 		t.Fatalf("failed to create a temporary directory for the master container: %v", err)
 	}
 
-	container, err := StartMasterContainer(tmpDir)
+	var container MasterInterface
+	if path, ok := os.LookupEnv("TEST_KUBECONFIG"); ok {
+		container, err = StartMasterProcess(path)
+	} else {
+		container, err = StartMasterContainer(tmpDir)
+	}
 	if err != nil {
 		if removeErr := os.RemoveAll(tmpDir); removeErr != nil {
 			t.Logf("failed to remove the temporary directory: %v", removeErr)
@@ -286,6 +355,14 @@ func (m *Master) WaitForRoles() error {
 }
 
 func (m *Master) Close() {
+	if kubeClient, err := kubeclient.NewForConfig(m.AdminKubeConfig()); err == nil {
+		for _, ns := range m.namespaces {
+			if err := kubeClient.Core().Namespaces().Delete(ns, nil); err != nil {
+				m.t.Logf("failed to cleanup namespace %s: %v", ns, err)
+			}
+		}
+	}
+
 	if err := m.container.Stop(); err != nil {
 		m.t.Logf("failed to stop the master container: %v", err)
 	}
@@ -295,16 +372,12 @@ func (m *Master) Close() {
 	}
 }
 
-func (m *Master) AdminKubeConfigPath() string {
-	return path.Join(m.tmpDir, "master", "admin.kubeconfig")
-}
-
 func (m *Master) AdminKubeConfig() *rest.Config {
 	if m.adminKubeConfig != nil {
 		return m.adminKubeConfig
 	}
 
-	config, err := ConfigFromFile(m.AdminKubeConfigPath())
+	config, err := ConfigFromFile(m.container.AdminKubeConfigPath())
 	if err != nil {
 		m.t.Fatalf("failed to read the admin kubeconfig file: %v", err)
 	}
@@ -315,7 +388,7 @@ func (m *Master) AdminKubeConfig() *rest.Config {
 }
 
 func (m *Master) StartRegistry(t *testing.T, options ...RegistryOption) *Registry {
-	ln, closeFn := StartTestRegistry(t, m.AdminKubeConfigPath(), options...)
+	ln, closeFn := StartTestRegistry(t, m.container.AdminKubeConfigPath(), options...)
 	return &Registry{
 		t:        t,
 		listener: ln,
@@ -336,5 +409,6 @@ func (m *Master) CreateUser(username string, password string) *User {
 }
 
 func (m *Master) CreateProject(namespace, user string) *projectapiv1.Project {
+	m.namespaces = append(m.namespaces, namespace)
 	return CreateProject(m.t, m.AdminKubeConfig(), namespace, user)
 }

@@ -98,10 +98,7 @@ func TestCrossMount(t *testing.T) {
 	// Upload a random image to a new project.
 	uploadedImage := func(user *testframework.User, repoName string) sourceGenerator {
 		return func(t *testing.T, registry *testframework.Registry) (*projectapiv1.Project, reference.Named, distribution.Manifest, closeFn) {
-			project := testframework.CreateProject(t, adminKubeConfig, uniqueName(user.Name), user.Name)
-			close := func() {
-				testframework.DeleteProject(t, adminKubeConfig, project.Name)
-			}
+			project := master.CreateProject(uniqueName(user.Name), user.Name)
 
 			repo := registry.Repository(project.Name, repoName, user)
 			manifest, err := testutil.UploadSchema2Image(context.Background(), repo, "latest")
@@ -115,7 +112,7 @@ func TestCrossMount(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			return project, named, manifest, close
+			return project, named, manifest, noopClose
 		}
 	}
 
