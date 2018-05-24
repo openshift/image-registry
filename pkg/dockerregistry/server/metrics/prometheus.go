@@ -10,6 +10,7 @@ const (
 	namespace = "imageregistry"
 
 	pullthroughSubsystem = "pullthrough"
+	storageSubsystem     = "storage"
 )
 
 var (
@@ -49,6 +50,25 @@ var (
 		},
 		[]string{"registry", "operation", "code"},
 	)
+
+	storageDurationSeconds = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: namespace,
+			Subsystem: storageSubsystem,
+			Name:      "duration_seconds",
+			Help:      "Latency of operations with the storage.",
+		},
+		[]string{"operation"},
+	)
+	storageErrorsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: namespace,
+			Subsystem: storageSubsystem,
+			Name:      "errors_total",
+			Help:      "Cumulative number of failed operations with the storage.",
+		},
+		[]string{"operation", "code"},
+	)
 )
 
 var prometheusOnce sync.Once
@@ -62,6 +82,8 @@ func NewPrometheusSink() Sink {
 		prometheus.MustRegister(pullthroughBlobstoreCacheRequestsTotal)
 		prometheus.MustRegister(pullthroughRepositoryDurationSeconds)
 		prometheus.MustRegister(pullthroughRepositoryErrorsTotal)
+		prometheus.MustRegister(storageDurationSeconds)
+		prometheus.MustRegister(storageErrorsTotal)
 	})
 	return prometheusSink{}
 }
@@ -80,4 +102,12 @@ func (s prometheusSink) PullthroughRepositoryDuration(registry, funcname string)
 
 func (s prometheusSink) PullthroughRepositoryErrors(registry, funcname, errcode string) Counter {
 	return pullthroughRepositoryErrorsTotal.WithLabelValues(registry, funcname, errcode)
+}
+
+func (s prometheusSink) StorageDuration(funcname string) Observer {
+	return storageDurationSeconds.WithLabelValues(funcname)
+}
+
+func (s prometheusSink) StorageErrors(funcname, errcode string) Counter {
+	return storageErrorsTotal.WithLabelValues(funcname, errcode)
 }

@@ -49,6 +49,18 @@ func (s counterSink) PullthroughRepositoryErrors(registry, funcname, errcode str
 	})
 }
 
+func (s counterSink) StorageDuration(funcname string) metrics.Observer {
+	return callbackObserver(func(float64) {
+		s.c.Add(fmt.Sprintf("storage:%s", funcname), 1)
+	})
+}
+
+func (s counterSink) StorageErrors(funcname, errcode string) metrics.Counter {
+	return callbackCounter(func() {
+		s.c.Add(fmt.Sprintf("storage_errors:%s:%s", funcname, errcode), 1)
+	})
+}
+
 func NewCounterSink() (counter.Counter, metrics.Sink) {
 	c := counter.New()
 	return c, counterSink{c: c}

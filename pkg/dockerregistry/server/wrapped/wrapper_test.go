@@ -29,6 +29,16 @@ func TestWrapper(t *testing.T) {
 		"BlobWriter.Size":      true,
 		"BlobWriter.StartedAt": true,
 		"BlobWriter.Write":     true,
+		"StorageDriver.Name":   true,
+		"FileWriter.Size":      true,
+	}
+
+	simplify := func(wrapper Wrapper) SimpleWrapper {
+		return func(funcname string, f func() error) error {
+			return wrapper(context.Background(), funcname, func(ctx context.Context) error {
+				return f()
+			})
+		}
 	}
 
 	// check funcname
@@ -43,6 +53,9 @@ func TestWrapper(t *testing.T) {
 		reflect.ValueOf(&tagService{wrapper: captureFuncName}),
 		reflect.ValueOf(&blobWriter{wrapper: captureFuncName}),
 		reflect.ValueOf(&blobDescriptorService{wrapper: captureFuncName}),
+		reflect.ValueOf(&storageDriver{wrapper: simplify(captureFuncName)}),
+		reflect.ValueOf(&readCloser{wrapper: simplify(captureFuncName)}),
+		reflect.ValueOf(&fileWriter{wrapper: simplify(captureFuncName)}),
 	}
 	for _, v := range objects {
 		typeName := strings.Title(v.Elem().Type().Name())
@@ -97,6 +110,9 @@ func TestWrapper(t *testing.T) {
 		reflect.ValueOf(NewTagService(NewTagService(nil, dummyWrapper), checkWrapper)),
 		reflect.ValueOf(NewBlobWriter(NewBlobWriter(nil, dummyWrapper), checkWrapper)),
 		reflect.ValueOf(NewBlobDescriptorService(NewBlobDescriptorService(nil, dummyWrapper), checkWrapper)),
+		reflect.ValueOf(NewStorageDriver(NewStorageDriver(nil, simplify(dummyWrapper)), simplify(checkWrapper))),
+		reflect.ValueOf(NewReadCloser(NewReadCloser(nil, simplify(dummyWrapper)), simplify(checkWrapper))),
+		reflect.ValueOf(NewFileWriter(NewFileWriter(nil, simplify(dummyWrapper)), simplify(checkWrapper))),
 	}
 	for _, v := range objects {
 		typeName := strings.Title(v.Elem().Type().Name())

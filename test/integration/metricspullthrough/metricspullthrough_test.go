@@ -150,6 +150,14 @@ func TestPullthroughBlob(t *testing.T) {
 		values []string
 	}{
 		{
+			name:   "imageregistry_storage_duration_seconds_bucket",
+			values: []string{`operation="StorageDriver.Stat"`},
+		},
+		{
+			name:   "imageregistry_storage_errors_total",
+			values: []string{`operation="StorageDriver.Stat"`, `code="PATH_NOT_FOUND"`},
+		},
+		{
 			name:   "imageregistry_pullthrough_repository_errors_total",
 			values: []string{`operation="BlobStore.Stat"`, `code="UNAUTHORIZED"`},
 		},
