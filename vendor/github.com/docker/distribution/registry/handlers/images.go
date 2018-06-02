@@ -78,7 +78,11 @@ func (imh *imageManifestHandler) GetImageManifest(w http.ResponseWriter, r *http
 		tags := imh.Repository.Tags(imh)
 		desc, err := tags.Get(imh, imh.Tag)
 		if err != nil {
-			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+			if _, ok := err.(distribution.ErrTagUnknown); ok {
+				imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+			} else {
+				imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
+			}
 			return
 		}
 		imh.Digest = desc.Digest
@@ -95,7 +99,11 @@ func (imh *imageManifestHandler) GetImageManifest(w http.ResponseWriter, r *http
 	}
 	manifest, err = manifests.Get(imh, imh.Digest, options...)
 	if err != nil {
-		imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+		if _, ok := err.(distribution.ErrManifestUnknownRevision); ok {
+			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+		} else {
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
+		}
 		return
 	}
 
@@ -162,7 +170,11 @@ func (imh *imageManifestHandler) GetImageManifest(w http.ResponseWriter, r *http
 
 		manifest, err = manifests.Get(imh, manifestDigest)
 		if err != nil {
-			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+			if _, ok := err.(distribution.ErrManifestUnknownRevision); ok {
+				imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+			} else {
+				imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
+			}
 			return
 		}
 
@@ -192,7 +204,11 @@ func (imh *imageManifestHandler) convertSchema2Manifest(schema2Manifest *schema2
 	blobs := imh.Repository.Blobs(imh)
 	configJSON, err := blobs.Get(imh, targetDescriptor.Digest)
 	if err != nil {
-		imh.Errors = append(imh.Errors, v2.ErrorCodeManifestInvalid.WithDetail(err))
+		if err == distribution.ErrBlobUnknown {
+			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestInvalid.WithDetail(err))
+		} else {
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
+		}
 		return nil, err
 	}
 
