@@ -92,8 +92,8 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 
 // Manifests returns r, which implements distribution.ManifestService.
 func (r *repository) Manifests(ctx context.Context, options ...distribution.ManifestServiceOption) (distribution.ManifestService, error) {
-	// we do a verification of our own
-	// TODO: let upstream do the verification once they pass correct context object to their manifest handler
+	// We do a verification of our own. We do more restrictive checks and we
+	// know about remote blobs.
 	opts := append(options, registrystorage.SkipLayerVerification())
 	ms, err := r.Repository.Manifests(ctx, opts...)
 	if err != nil {

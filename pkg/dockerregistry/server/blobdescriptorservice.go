@@ -43,7 +43,6 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 
 	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: could not stat layer link %s in repository %s: %v", dgst.String(), bs.repo.Named().Name(), err)
 
-	// First attempt: looking for the blob locally
 	desc, err = bs.repo.app.BlobStatter().Stat(ctx, dgst)
 	if err == nil {
 		context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s exists in the global blob store", dgst.String())
@@ -62,11 +61,6 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 			}
 		}
 		return desc, nil
-	}
-
-	if err == distribution.ErrBlobUnknown && remoteBlobAccessCheckEnabledFrom(ctx) {
-		// Second attempt: looking for the blob on a remote server
-		desc, err = bs.repo.remoteBlobGetter.Stat(ctx, dgst)
 	}
 
 	return desc, err
