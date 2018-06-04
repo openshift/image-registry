@@ -749,7 +749,7 @@ func (app *App) logError(context context.Context, errors errcode.Errors) {
 		case errcode.Error:
 			e, _ := e1.(errcode.Error)
 			c = ctxu.WithValue(context, errCodeKey{}, e.Code)
-			c = ctxu.WithValue(c, errMessageKey{}, e.Code.Message())
+			c = ctxu.WithValue(c, errMessageKey{}, e.Message)
 			c = ctxu.WithValue(c, errDetailKey{}, e.Detail)
 		case errcode.ErrorCode:
 			e, _ := e1.(errcode.ErrorCode)
