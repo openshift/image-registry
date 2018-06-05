@@ -12,10 +12,6 @@ const (
 	// appMiddlewareKey is for testing purposes.
 	appMiddlewareKey contextKey = "appMiddleware"
 
-	// remoteBlobAccessCheckEnabledKey is the key for the flag in Contexts
-	// to allow blobDescriptorService to stat remote blobs.
-	remoteBlobAccessCheckEnabledKey contextKey = "remoteBlobAccessCheckEnabled"
-
 	// userClientKey is the key for a origin's client with the current user's
 	// credentials in Contexts.
 	userClientKey contextKey = "userClient"
@@ -31,20 +27,6 @@ const (
 func appMiddlewareFrom(ctx context.Context) appMiddleware {
 	am, _ := ctx.Value(appMiddlewareKey).(appMiddleware)
 	return am
-}
-
-// withRemoteBlobAccessCheckEnabled returns a new Context that allows
-// blobDescriptorService to stat remote blobs. It is useful only in case
-// of manifest verification.
-func withRemoteBlobAccessCheckEnabled(parent context.Context, enable bool) context.Context {
-	return context.WithValue(parent, remoteBlobAccessCheckEnabledKey, enable)
-}
-
-// remoteBlobAccessCheckEnabledFrom reports whether ctx allows
-// blobDescriptorService to stat remote blobs.
-func remoteBlobAccessCheckEnabledFrom(ctx context.Context) bool {
-	enabled, _ := ctx.Value(remoteBlobAccessCheckEnabledKey).(bool)
-	return enabled
 }
 
 // withUserClient returns a new Context with the origin's client.
