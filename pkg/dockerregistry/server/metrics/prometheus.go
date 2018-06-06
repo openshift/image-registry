@@ -4,6 +4,8 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
+
+	_ "github.com/openshift/image-registry/pkg/kubernetes-common/prometheus"
 )
 
 const (
