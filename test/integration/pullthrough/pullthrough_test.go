@@ -100,7 +100,6 @@ func TestPullThroughInsecure(t *testing.T) {
 	reponame := "testrepo"
 	repotag := "testtag"
 	isname := "test/" + reponame
-	countStat := 0
 
 	descriptors := map[string]int64{
 		"sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4": 3000,
@@ -140,7 +139,6 @@ func TestPullThroughInsecure(t *testing.T) {
 						w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
 						w.Header().Set("Docker-Content-Digest", dgst)
 						w.WriteHeader(http.StatusOK)
-						countStat++
 						return
 					}
 					w.Write(gzippedEmptyTar)
