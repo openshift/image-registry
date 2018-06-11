@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 const (
 	// Default values
 	defaultDescriptorCacheSize         = 4096
-	defaultDigestToRepositoryCacheSize = 2048
+	defaultDigestToRepositoryCacheSize = 20480
 )
 
 // appMiddleware should be used only in tests.
@@ -77,6 +78,8 @@ func (app *App) BlobStatter() distribution.BlobStatter {
 // NewApp configures the registry application and returns http.Handler for it.
 // The program will be terminated if an error happens.
 func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration, writeLimiter maxconnections.Limiter) http.Handler {
+	data, _ := json.Marshal(extraConfig)
+	context.GetLogger(ctx).Debugf("Configuration:\n%s", string(data))
 	app := &App{
 		ctx:            ctx,
 		registryClient: registryClient,
