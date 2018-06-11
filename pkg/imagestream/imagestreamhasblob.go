@@ -44,18 +44,28 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireM
 		return logFound(nil)
 	}
 
-	tagEvents := []*imageapiv1.TagEvent{}
+	// firstTagEvents holds the first tagevent for each tag
+	// so we can quickly scan those first, before checking older
+	// tagevents.
+	firstTagEvents := []*imageapiv1.TagEvent{}
+	olderTagEvents := []*imageapiv1.TagEvent{}
 	event2Name := make(map[*imageapiv1.TagEvent]string)
 	for _, eventList := range stream.Status.Tags {
 		name := eventList.Tag
 		for i := range eventList.Items {
 			event := &eventList.Items[i]
-			tagEvents = append(tagEvents, event)
+			if i == 0 {
+				firstTagEvents = append(firstTagEvents, event)
+			} else {
+				olderTagEvents = append(olderTagEvents, event)
+			}
 			event2Name[event] = name
 		}
 	}
-	// search from youngest to oldest
-	sort.Sort(ByGeneration(tagEvents))
+	// for older tag events, search from youngest to oldest
+	sort.Sort(ByGeneration(olderTagEvents))
+
+	tagEvents := append(firstTagEvents, olderTagEvents...)
 
 	processedImages := map[string]struct{}{}
 
