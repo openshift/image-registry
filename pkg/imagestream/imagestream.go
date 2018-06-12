@@ -53,7 +53,7 @@ type ImageStream interface {
 	ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) *rerrors.Error
 	ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, *rerrors.Error)
 
-	HasBlob(ctx context.Context, dgst digest.Digest) *imageapiv1.Image
+	HasBlob(ctx context.Context, dgst digest.Digest) (bool, *imageapiv1.ImageStreamLayers, *imageapiv1.Image)
 	IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, *rerrors.Error)
 	GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, *rerrors.Error)
 	GetSecrets() ([]corev1.Secret, *rerrors.Error)

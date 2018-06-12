@@ -22,10 +22,11 @@ const (
 
 // cachedImageStreamGetter wraps a master API client for getting image streams with a cache.
 type cachedImageStreamGetter struct {
-	namespace         string
-	name              string
-	isNamespacer      client.ImageStreamsNamespacer
-	cachedImageStream *imageapiv1.ImageStream
+	namespace               string
+	name                    string
+	isNamespacer            client.ImageStreamsNamespacer
+	cachedImageStream       *imageapiv1.ImageStream
+	cachedImageStreamLayers *imageapiv1.ImageStreamLayers
 }
 
 func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, *rerrors.Error) {
@@ -45,6 +46,26 @@ func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, *rerrors.Error
 	}
 
 	g.cachedImageStream = is
+	return is, nil
+}
+
+func (g *cachedImageStreamGetter) layers() (*imageapiv1.ImageStreamLayers, *rerrors.Error) {
+	if g.cachedImageStreamLayers != nil {
+		return g.cachedImageStreamLayers, nil
+	}
+	is, err := g.isNamespacer.ImageStreams(g.namespace).Layers(g.name, metav1.GetOptions{})
+	if err != nil {
+		switch {
+		case kerrors.IsNotFound(err):
+			return nil, rerrors.NewError(ErrImageStreamGetterNotFoundCode, fmt.Sprintf("%s/%s", g.namespace, g.name), err)
+		case kerrors.IsForbidden(err), kerrors.IsUnauthorized(err), quotautil.IsErrorQuotaExceeded(err):
+			return nil, rerrors.NewError(ErrImageStreamGetterForbiddenCode, fmt.Sprintf("%s/%s", g.namespace, g.name), err)
+		default:
+			return nil, rerrors.NewError(ErrImageStreamGetterUnknownCode, fmt.Sprintf("%s/%s", g.namespace, g.name), err)
+		}
+	}
+
+	g.cachedImageStreamLayers = is
 	return is, nil
 }
 

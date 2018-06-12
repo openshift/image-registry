@@ -60,12 +60,20 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 		context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: found cached blob %q in repository %s", dgst.String(), bs.repo.imageStream.Reference())
 		return desc, nil
 	}
-	if image := bs.repo.imageStream.HasBlob(ctx, dgst); image != nil {
-		// remember all the layers of matching image
-		RememberLayersOfImage(ctx, bs.repo.cache, image, bs.repo.imageStream.Reference())
-		return desc, nil
+
+	found, layers, image := bs.repo.imageStream.HasBlob(ctx, dgst)
+	if !found {
+		context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s is neither empty nor referenced in image stream %s", dgst.String(), bs.repo.Named().Name())
+		return distribution.Descriptor{}, distribution.ErrBlobUnknown
 	}
 
-	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s is neither empty nor referenced in image stream %s", dgst.String(), bs.repo.Named().Name())
-	return distribution.Descriptor{}, distribution.ErrBlobUnknown
+	if layers != nil {
+		// remember all the layers of matching image
+		RememberLayersOfImageStream(ctx, bs.repo.cache, layers, bs.repo.imageStream.Reference())
+	}
+	if image != nil {
+		// remember all the layers of matching image
+		RememberLayersOfImage(ctx, bs.repo.cache, image, bs.repo.imageStream.Reference())
+	}
+	return desc, nil
 }
