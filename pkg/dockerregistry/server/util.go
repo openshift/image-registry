@@ -14,6 +14,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
 
@@ -38,13 +39,16 @@ func getNamespaceName(resourceName string) (string, string, error) {
 
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
-func getImportContext(ctx context.Context, secretsGetter secretsGetter) registryclient.RepositoryRetriever {
+func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metrics.Pullthrough) registryclient.RepositoryRetriever {
 	secrets, err := secretsGetter()
 	if err != nil {
 		context.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
 	credentials := registryclient.NewCredentialsForSecrets(secrets)
-	return registryclient.NewContext(secureTransport, insecureTransport).WithCredentials(credentials)
+	var retriever registryclient.RepositoryRetriever
+	retriever = registryclient.NewContext(secureTransport, insecureTransport).WithCredentials(credentials)
+	retriever = m.RepositoryRetriever(retriever)
+	return retriever
 }
 
 // RememberLayersOfImage caches the layer digests of given image.

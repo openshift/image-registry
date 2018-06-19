@@ -20,9 +20,12 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
+	metricstesting "github.com/openshift/image-registry/pkg/dockerregistry/server/metrics/testing"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/testutil"
+	"github.com/openshift/image-registry/pkg/testutil/counter"
 )
 
 func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Server {
@@ -174,6 +177,7 @@ func TestPullthroughManifests(t *testing.T) {
 			imageStream:     imageStream,
 			cache:           cache,
 			registryAddr:    "localhost:5000",
+			metrics:         metrics.NewNoopMetrics(),
 		}
 
 		manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
@@ -408,6 +412,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 				ManifestService: localManifestService,
 				imageStream:     imageStream,
 				cache:           cache,
+				metrics:         metrics.NewNoopMetrics(),
 			}
 
 			manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
@@ -540,6 +545,7 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 		ptms := &pullthroughManifestService{
 			ManifestService: newTestManifestService(tc.repoName, nil),
 			imageStream:     imageStream,
+			metrics:         metrics.NewNoopMetrics(),
 		}
 
 		ptms.Get(ctx, digest.Digest(img.Name))
@@ -691,6 +697,7 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 		newLocalManifestService: func(ctx context.Context) (distribution.ManifestService, error) { return ms, nil },
 		imageStream:             imageStream,
 		mirror:                  true,
+		metrics:                 metrics.NewNoopMetrics(),
 	}
 
 	_, err = ptms.Get(ctx, digest.Digest(img.Name))
@@ -702,5 +709,76 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 	case <-ms.done:
 	case <-time.After(timeout):
 		t.Fatal("timeout while waiting for manifest to be mirrored")
+	}
+}
+
+func TestPullthroughManifestMetrics(t *testing.T) {
+	namespace := "myproject"
+	repo := "myapp"
+	repoName := fmt.Sprintf("%s/%s", namespace, repo)
+
+	mediaType := "application/vnd.docker.distribution.manifest.v2+json"
+	manifest := `{"schemaVersion":2,"mediaType":"` + mediaType + `"}`
+	config := `{}`
+
+	manifestDigest := digest.FromBytes([]byte(manifest))
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v2/":
+			fmt.Fprint(w, "{}")
+		case "/v2/remoteimage/manifests/" + manifestDigest.String():
+			w.Header().Set("Content-Type", mediaType)
+			fmt.Fprint(w, manifest)
+		default:
+			t.Logf("unhandled request: %s %v", r.Method, r.URL)
+			http.Error(w, "404 not found", http.StatusNotFound)
+		}
+	}))
+	defer ts.Close()
+
+	tsURL, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatalf("failed to parse test server URL: %v", err)
+	}
+
+	img, err := testutil.NewImageForManifest("unused", manifest, config, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img.DockerImageReference = fmt.Sprintf("%s/remoteimage", tsURL.Host)
+	img.DockerImageManifest = ""
+	img.DockerImageConfig = ""
+
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
+		imageapi.InsecureRepositoryAnnotation: "true",
+	})
+	testutil.AddImage(t, fos, img, namespace, repo, "latest")
+
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+
+	c, sink := metricstesting.NewCounterSink()
+	ms := newTestManifestService(repoName, nil)
+	ptms := &pullthroughManifestService{
+		ManifestService:         ms,
+		newLocalManifestService: func(ctx context.Context) (distribution.ManifestService, error) { return ms, nil },
+		imageStream:             imageStream,
+		metrics:                 metrics.NewMetrics(sink),
+	}
+
+	_, err = ptms.Get(ctx, digest.Digest(img.Name))
+	if err != nil {
+		t.Fatalf("failed to get manifest: %v", err)
+	}
+
+	if diff := c.Diff(counter.M{
+		fmt.Sprintf("pullthrough_repository:%s:Init", tsURL.Host):                1,
+		fmt.Sprintf("pullthrough_repository:%s:ManifestService.Get", tsURL.Host): 1,
+	}); diff != nil {
+		t.Fatalf("unexpected metrics: %v", diff)
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/docker/distribution/digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/errors"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
@@ -24,6 +25,7 @@ type pullthroughManifestService struct {
 	cache                   cache.RepositoryDigest
 	mirror                  bool
 	registryAddr            string
+	metrics                 metrics.Pullthrough
 }
 
 var _ distribution.ManifestService = &pullthroughManifestService{}
@@ -98,7 +100,7 @@ func (m *pullthroughManifestService) mirrorManifest(ctx context.Context, manifes
 }
 
 func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
-	retriever := getImportContext(ctx, m.imageStream.GetSecrets)
+	retriever := getImportContext(ctx, m.imageStream.GetSecrets, m.metrics)
 
 	// determine, whether to fall-back to insecure transport based on a specification of image's tag
 	// if the client pulls by tag, use that

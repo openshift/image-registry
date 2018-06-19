@@ -1,12 +1,16 @@
 package integration
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 	"testing"
 
+	"github.com/docker/distribution"
 	digest "github.com/docker/distribution/digest"
 
 	corev1 "k8s.io/api/core/v1"
@@ -16,7 +20,6 @@ import (
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
 
 	"github.com/openshift/image-registry/pkg/testframework"
-	"github.com/openshift/image-registry/pkg/testutil/counter"
 )
 
 func TestPullthroughBlob(t *testing.T) {
@@ -30,17 +33,22 @@ func TestPullthroughBlob(t *testing.T) {
 	defer master.Close()
 
 	testuser := master.CreateUser("testuser", "testp@ssw0rd")
-	testproject := master.CreateProject("test-image-pullthrough-blob", testuser.Name)
+	testproject := master.CreateProject("testproject", testuser.Name)
 	teststreamName := "pullthrough"
 
-	requestCounter := counter.New()
+	// TODO(dmage): use atomic variable
+	remoteRegistryRequiresAuth := false
 	ts := testframework.NewHTTPServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 
 		t.Logf("remote registry: %s", req)
-		requestCounter.Add(req, 1)
 
 		w.Header().Set("Docker-Distribution-API-Version", "registry/2.0")
+
+		if remoteRegistryRequiresAuth {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
 		switch req {
 		case "GET /v2/":
@@ -111,39 +119,80 @@ func TestPullthroughBlob(t *testing.T) {
 		t.Fatalf("failed to import image: %#+v %#+v", isi, teststream)
 	}
 
-	if diff := requestCounter.Diff(counter.M{
-		"GET /v2/":                                           1,
-		"GET /v2/remoteimage/manifests/latest":               1,
-		"GET /v2/remoteimage/blobs/" + configDigest.String(): 1,
-	}); diff != nil {
-		t.Fatalf("unexpected number of requests: %q", diff)
-	}
+	remoteRegistryRequiresAuth = true
 
-	// Reset counter
-	requestCounter = counter.New()
-
-	registry := master.StartRegistry(t, testframework.DisableMirroring{})
+	registry := master.StartRegistry(t, testframework.DisableMirroring{}, testframework.EnableMetrics{Secret: "MetricsSecret"})
 	defer registry.Close()
 
 	repo := registry.Repository(testproject.Name, teststream.Name, testuser)
 
 	ctx := context.Background()
 
-	data, err := repo.Blobs(ctx).Get(ctx, fooDigest)
-	if err != nil {
+	_, err = repo.Blobs(ctx).Get(ctx, fooDigest)
+	if err != distribution.ErrBlobUnknown {
 		t.Fatal(err)
 	}
 
-	if string(data) != foo {
-		t.Fatalf("got %q, want %q", string(data), foo)
+	req, err := http.NewRequest("GET", registry.BaseURL()+"/extensions/v2/metrics", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Authorization", "Bearer MetricsSecret")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	metrics := []struct {
+		name   string
+		values []string
+	}{
+		{
+			name:   "imageregistry_pullthrough_repository_errors_total",
+			values: []string{`operation="BlobStore.Stat"`, `code="UNAUTHORIZED"`},
+		},
+		{
+			name:   "imageregistry_pullthrough_blobstore_cache_requests_total",
+			values: []string{`type="Miss"`},
+		},
+		{
+			name:   "imageregistry_pullthrough_repository_duration_seconds_bucket",
+			values: []string{`operation="Init"`},
+		},
 	}
 
-	// TODO(dmage): remove the HEAD request
-	if diff := requestCounter.Diff(counter.M{
-		"GET /v2/": 1,
-		"HEAD /v2/remoteimage/blobs/" + fooDigest.String(): 1,
-		"GET /v2/remoteimage/blobs/" + fooDigest.String():  1,
-	}); diff != nil {
-		t.Fatalf("unexpected number of requests: %q", diff)
+	r := bufio.NewReader(resp.Body)
+	for {
+		line, err := r.ReadString('\n')
+		line = strings.TrimRight(line, "\n")
+		t.Log(line)
+
+	metric:
+		for i, m := range metrics {
+			if !strings.HasPrefix(line, m.name+"{") {
+				continue
+			}
+			for _, v := range m.values {
+				if !strings.Contains(line, v) {
+					continue metric
+				}
+			}
+
+			// metric found, delete it
+			metrics[i] = metrics[len(metrics)-1]
+			metrics = metrics[:len(metrics)-1]
+			break
+		}
+
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(metrics) != 0 {
+		t.Fatalf("unable to find metrics: %v", metrics)
 	}
 }

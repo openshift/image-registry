@@ -27,6 +27,15 @@ func (o DisableMirroring) Apply(dockerConfig *configuration.Configuration, extra
 	extraConfig.Pullthrough.Mirror = false
 }
 
+type EnableMetrics struct {
+	Secret string
+}
+
+func (o EnableMetrics) Apply(dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) {
+	extraConfig.Metrics.Enabled = true
+	extraConfig.Metrics.Secret = o.Secret
+}
+
 func StartTestRegistry(t *testing.T, kubeConfigPath string, options ...RegistryOption) (net.Listener, CloseFunc) {
 	localIPv4, err := DefaultLocalIP4()
 	if err != nil {
