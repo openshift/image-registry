@@ -7,6 +7,8 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
+	"github.com/docker/distribution/registry/api/errcode"
+	"github.com/docker/distribution/registry/api/v2"
 
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
@@ -127,8 +129,8 @@ func TestTagGetWithoutImageStream(t *testing.T) {
 		t.Fatalf("error expected")
 	}
 
-	_, ok := err.(distribution.ErrRepositoryUnknown)
-	if !ok {
+	e, ok := err.(errcode.Error)
+	if !ok || e.Code != v2.ErrorCodeNameUnknown {
 		t.Fatalf("unexpected error: %#+v", err)
 	}
 }

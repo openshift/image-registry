@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
+	"github.com/docker/distribution/registry/api/v2"
 
 	"github.com/openshift/image-registry/pkg/imagestream"
 )
@@ -20,7 +21,8 @@ func (t tagService) Get(ctx context.Context, tag string) (distribution.Descripto
 		return distribution.Descriptor{}, err
 	}
 	if !ok {
-		return distribution.Descriptor{}, distribution.ErrRepositoryUnknown{Name: t.imageStream.Reference()}
+		// TODO(dmage): keep the not found error from the master API
+		return distribution.Descriptor{}, v2.ErrorCodeNameUnknown.WithDetail(nil)
 	}
 
 	tags, err := t.imageStream.Tags(ctx)
