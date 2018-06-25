@@ -62,8 +62,8 @@ type App struct {
 }
 
 func (app *App) Storage(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
-	app.driver = driver
-	return driver, nil
+	app.driver = app.metrics.StorageDriver(driver)
+	return app.driver, nil
 }
 
 func (app *App) Registry(registry distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error) {
