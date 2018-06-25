@@ -37,7 +37,6 @@ func newTestRegistry(
 	osClient registryclient.Interface,
 	storageDriver driver.StorageDriver,
 	blobrepositorycachettl time.Duration,
-	pullthrough bool,
 	useBlobDescriptorCacheProvider bool,
 ) (distribution.Namespace, error) {
 	cfg := &configuration.Configuration{
@@ -45,7 +44,7 @@ func newTestRegistry(
 			Addr: "localhost:5000",
 		},
 		Pullthrough: &configuration.Pullthrough{
-			Enabled: pullthrough,
+			Enabled: true,
 		},
 		Cache: &configuration.Cache{
 			BlobRepositoryTTL: blobrepositorycachettl,

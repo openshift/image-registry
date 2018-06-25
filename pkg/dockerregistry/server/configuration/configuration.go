@@ -440,6 +440,12 @@ func migratePullthroughSection(cfg *Configuration, options configuration.Paramet
 	if err != nil {
 		err = fmt.Errorf("configuration error in openshift.pullthrough.mirror: %v", err)
 	}
+
+	if !cfg.Pullthrough.Enabled {
+		log.Warnf("pullthrough can't be disabled anymore")
+		cfg.Pullthrough.Enabled = true
+	}
+
 	return
 }
 

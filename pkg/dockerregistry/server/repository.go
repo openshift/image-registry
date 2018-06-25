@@ -76,14 +76,12 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		},
 	}
 
-	if app.config.Pullthrough.Enabled {
-		r.remoteBlobGetter = NewBlobGetterService(
-			r.imageStream,
-			r.imageStream.GetSecrets,
-			r.cache,
-			r.app.metrics,
-		)
-	}
+	r.remoteBlobGetter = NewBlobGetterService(
+		r.imageStream,
+		r.imageStream.GetSecrets,
+		r.cache,
+		r.app.metrics,
+	)
 
 	repo = distribution.Repository(r)
 	repo = r.app.metrics.Repository(repo, repo.Named().Name())
@@ -112,18 +110,16 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 		acceptSchema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 
-	if r.app.config.Pullthrough.Enabled {
-		ms = &pullthroughManifestService{
-			ManifestService: ms,
-			newLocalManifestService: func(ctx context.Context) (distribution.ManifestService, error) {
-				return r.Repository.Manifests(ctx, opts...)
-			},
-			imageStream:  r.imageStream,
-			cache:        r.cache,
-			mirror:       r.app.config.Pullthrough.Mirror,
-			registryAddr: r.app.config.Server.Addr,
-			metrics:      r.app.metrics,
-		}
+	ms = &pullthroughManifestService{
+		ManifestService: ms,
+		newLocalManifestService: func(ctx context.Context) (distribution.ManifestService, error) {
+			return r.Repository.Manifests(ctx, opts...)
+		},
+		imageStream:  r.imageStream,
+		cache:        r.cache,
+		mirror:       r.app.config.Pullthrough.Mirror,
+		registryAddr: r.app.config.Server.Addr,
+		metrics:      r.app.metrics,
 	}
 
 	ms = newPendingErrorsManifestService(ms, r)
@@ -147,15 +143,13 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 		}
 	}
 
-	if r.app.config.Pullthrough.Enabled {
-		bs = &pullthroughBlobStore{
-			BlobStore: bs,
+	bs = &pullthroughBlobStore{
+		BlobStore: bs,
 
-			remoteBlobGetter:  r.remoteBlobGetter,
-			writeLimiter:      r.app.writeLimiter,
-			mirror:            r.app.config.Pullthrough.Mirror,
-			newLocalBlobStore: r.Repository.Blobs,
-		}
+		remoteBlobGetter:  r.remoteBlobGetter,
+		writeLimiter:      r.app.writeLimiter,
+		mirror:            r.app.config.Pullthrough.Mirror,
+		newLocalBlobStore: r.Repository.Blobs,
 	}
 
 	bs = newPendingErrorsBlobStore(bs, r)
@@ -172,9 +166,8 @@ func (r *repository) Tags(ctx context.Context) distribution.TagService {
 	ts := r.Repository.Tags(ctx)
 
 	ts = &tagService{
-		TagService:         ts,
-		imageStream:        r.imageStream,
-		pullthroughEnabled: r.app.config.Pullthrough.Enabled,
+		TagService:  ts,
+		imageStream: r.imageStream,
 	}
 
 	ts = newPendingErrorsTagService(ts, r)

@@ -24,7 +24,7 @@ func (b ByGeneration) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 // HasBlob returns true if the given blob digest is referenced in image stream corresponding to
 // given repository. If not found locally, image stream's images will be iterated and fetched from newest to
 // oldest until found. Each processed image will update local cache of blobs.
-func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireManaged bool) *imageapiv1.Image {
+func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) *imageapiv1.Image {
 	context.GetLogger(ctx).Debugf("verifying presence of blob %q in image stream %s", dgst.String(), is.Reference())
 	started := time.Now()
 	logFound := func(found *imageapiv1.Image) *imageapiv1.Image {
@@ -84,13 +84,6 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest, requireM
 			} else {
 				context.GetLogger(ctx).Errorf("failed to get image: %v", err)
 			}
-			continue
-		}
-
-		// in case of pullthrough disabled, client won't be able to download a blob belonging to not managed image
-		// (image stored in external registry), thus don't consider them as candidates
-		if requireManaged && !IsImageManaged(image) {
-			context.GetLogger(ctx).Debugf("skipping not managed image")
 			continue
 		}
 

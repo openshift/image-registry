@@ -11,7 +11,6 @@ import (
 	"github.com/docker/distribution/registry/api/v2"
 
 	"github.com/openshift/image-registry/pkg/imagestream"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/testutil"
@@ -34,53 +33,26 @@ func TestTagGet(t *testing.T) {
 		tagValue              distribution.Descriptor
 		expectedError         bool
 		expectedNotFoundError bool
-		pullthrough           bool
-		imageManaged          bool
 	}{
 		{
-			title:        "get valid tag from managed image",
-			tagName:      tag,
-			tagValue:     distribution.Descriptor{Digest: digest.Digest(testImage.Name)},
-			pullthrough:  true,
-			imageManaged: true,
-		},
-		{
-			title:        "get valid tag from managed image without pullthrough",
-			tagName:      tag,
-			tagValue:     distribution.Descriptor{Digest: digest.Digest(testImage.Name)},
-			pullthrough:  false,
-			imageManaged: true,
-		},
-		{
-			title:                 "get valid tag from unmanaged image without pullthrough",
-			tagName:               tag,
-			pullthrough:           false,
-			imageManaged:          false,
-			expectedNotFoundError: true,
+			title:    "get valid tag from managed image",
+			tagName:  tag,
+			tagValue: distribution.Descriptor{Digest: digest.Digest(testImage.Name)},
 		},
 		{
 			title:                 "get missing tag",
 			tagName:               tag + "-no-found",
-			pullthrough:           true,
-			imageManaged:          true,
 			expectedError:         true,
 			expectedNotFoundError: true,
 		},
 	}
 
 	for _, tc := range testcases {
-		if tc.imageManaged {
-			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "true"
-		} else {
-			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "false"
-		}
-
 		imageStream := imagestream.New(backgroundCtx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
-			TagService:         newTestTagService(nil),
-			imageStream:        imageStream,
-			pullthroughEnabled: tc.pullthrough,
+			TagService:  newTestTagService(nil),
+			imageStream: imageStream,
 		}
 
 		resultDesc, err := ts.Get(backgroundCtx, tc.tagName)
@@ -144,45 +116,25 @@ func TestTagGetAll(t *testing.T) {
 	ctx = testutil.WithTestLogger(ctx, t)
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
-	testImage := testutil.AddRandomImage(t, fos, namespace, repo, tag)
+	testutil.AddRandomImage(t, fos, namespace, repo, tag)
 
 	testcases := []struct {
 		title         string
 		expectResult  []string
 		expectedError bool
-		pullthrough   bool
-		imageManaged  bool
 	}{
 		{
-			title:        "get all tags with pullthrough",
+			title:        "get all tags",
 			expectResult: []string{tag},
-			pullthrough:  true,
-			imageManaged: true,
-		},
-		{
-			title:        "get all tags without pullthrough",
-			expectResult: []string{tag},
-			imageManaged: true,
-		},
-		{
-			title:        "get all tags from unmanaged image without pullthrough",
-			expectResult: []string{},
 		},
 	}
 
 	for _, tc := range testcases {
-		if tc.imageManaged {
-			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "true"
-		} else {
-			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "false"
-		}
-
 		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
-			TagService:         newTestTagService(nil),
-			imageStream:        imageStream,
-			pullthroughEnabled: tc.pullthrough,
+			TagService:  newTestTagService(nil),
+			imageStream: imageStream,
 		}
 
 		result, err := ts.All(ctx)
@@ -240,49 +192,25 @@ func TestTagLookup(t *testing.T) {
 		tagValue      distribution.Descriptor
 		expectResult  []string
 		expectedError bool
-		pullthrough   bool
-		imageManaged  bool
 	}{
 		{
 			title:        "lookup tags with pullthrough",
 			tagValue:     distribution.Descriptor{Digest: digest.Digest(testImage.Name)},
 			expectResult: []string{tag},
-			pullthrough:  true,
-			imageManaged: true,
-		},
-		{
-			title:        "lookup tags without pullthrough",
-			tagValue:     distribution.Descriptor{Digest: digest.Digest(testImage.Name)},
-			expectResult: []string{tag},
-			imageManaged: true,
 		},
 		{
 			title:        "lookup tags by missing digest",
 			tagValue:     distribution.Descriptor{Digest: digest.Digest(etcdDigest)},
 			expectResult: []string{},
-			pullthrough:  true,
-			imageManaged: true,
-		},
-		{
-			title:        "lookup tags in unmanaged images without pullthrough",
-			tagValue:     distribution.Descriptor{Digest: digest.Digest(testImage.Name)},
-			expectResult: []string{},
 		},
 	}
 
 	for _, tc := range testcases {
-		if tc.imageManaged {
-			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "true"
-		} else {
-			testImage.Annotations[imageapi.ManagedByOpenShiftAnnotation] = "false"
-		}
-
 		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
-			TagService:         newTestTagService(nil),
-			imageStream:        imageStream,
-			pullthroughEnabled: tc.pullthrough,
+			TagService:  newTestTagService(nil),
+			imageStream: imageStream,
 		}
 
 		result, err := ts.Lookup(ctx, tc.tagValue)

@@ -52,7 +52,7 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 			// ensure it's referenced inside of corresponding image stream
 			if bs.repo.cache.ContainsRepository(dgst, bs.repo.imageStream.Reference()) {
 				context.GetLogger(ctx).Debugf("found cached blob %q in repository %s", dgst.String(), bs.repo.imageStream.Reference())
-			} else if image := bs.repo.imageStream.HasBlob(ctx, dgst, !bs.repo.app.config.Pullthrough.Enabled); image != nil {
+			} else if image := bs.repo.imageStream.HasBlob(ctx, dgst); image != nil {
 				// remember all the layers of matching image
 				RememberLayersOfImage(ctx, bs.repo.cache, image, bs.repo.imageStream.Reference())
 			} else {

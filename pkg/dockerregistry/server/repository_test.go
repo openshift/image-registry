@@ -99,7 +99,6 @@ func TestRepositoryBlobStat(t *testing.T) {
 		stat               string
 		images             []imageapiv1.Image
 		imageStreams       []imageapiv1.ImageStream
-		pullthrough        bool
 		skipAuth           bool
 		deferredErrors     deferredErrors
 		expectedDescriptor distribution.Descriptor
@@ -165,7 +164,6 @@ func TestRepositoryBlobStat(t *testing.T) {
 					},
 				},
 			},
-			pullthrough:        true,
 			expectedDescriptor: testNewDescriptorForLayer(testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1]),
 			expectedActions:    []clientAction{{"get", "imagestreams"}, {"get", "images"}},
 		},
@@ -205,7 +203,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 				},
 			},
 			expectedError:   distribution.ErrBlobUnknown,
-			expectedActions: []clientAction{{"get", "imagestreams"}, {"get", "images"}},
+			expectedActions: []clientAction{{"get", "imagestreams"}, {"get", "images"}, {"list", "imagestreams"}},
 		},
 
 		{
@@ -232,7 +230,8 @@ func TestRepositoryBlobStat(t *testing.T) {
 					},
 				},
 			},
-			expectedError: distribution.ErrBlobUnknown,
+			expectedError:   distribution.ErrBlobUnknown,
+			expectedActions: []clientAction{{"get", "imagestreams"}, {"list", "imagestreams"}},
 		},
 
 		{
@@ -259,7 +258,8 @@ func TestRepositoryBlobStat(t *testing.T) {
 					},
 				},
 			},
-			expectedError: distribution.ErrBlobUnknown,
+			expectedError:   distribution.ErrBlobUnknown,
+			expectedActions: []clientAction{{"get", "imagestreams"}, {"list", "imagestreams"}},
 		},
 
 		{
@@ -312,7 +312,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 				}
 			}
 
-			reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, cfg.Cache.BlobRepositoryTTL, tc.pullthrough, true)
+			reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, cfg.Cache.BlobRepositoryTTL, true)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -374,7 +374,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 	testutil.AddImageStream(t, fos, "nm", "is", nil)
 	testutil.AddImage(t, fos, testImage, "nm", "is", "latest")
 
-	reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, blobRepoCacheTTL, false, false)
+	reg, err := newTestRegistry(ctx, registryclient.NewFakeRegistryAPIClient(nil, imageClient), driver, blobRepoCacheTTL, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
