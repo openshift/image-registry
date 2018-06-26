@@ -301,6 +301,20 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 			default:
 				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
 			}
+
+		case "registry":
+			switch access.Resource.Name {
+			case "catalog":
+				if access.Action != "*" {
+					return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+				}
+				if err := verifyCatalogAccess(ctx, osClient); err != nil {
+					return nil, ac.wrapErr(ctx, err)
+				}
+			default:
+				return nil, ac.wrapErr(ctx, ErrUnsupportedResource)
+			}
+
 		default:
 			return nil, ac.wrapErr(ctx, ErrUnsupportedResource)
 		}
@@ -438,6 +452,10 @@ func verifyImageSignatureAccess(ctx context.Context, namespace, imageRepo string
 
 func verifyPruneAccess(ctx context.Context, c client.SelfSubjectAccessReviewsNamespacer) error {
 	return verifyWithGlobalSAR(ctx, "images", "", "delete", c)
+}
+
+func verifyCatalogAccess(ctx context.Context, c client.SelfSubjectAccessReviewsNamespacer) error {
+	return verifyWithGlobalSAR(ctx, "imagestreams", "", "list", c)
 }
 
 func verifyMetricsAccess(ctx context.Context, metrics configuration.Metrics, token string, c client.SelfSubjectAccessReviewsNamespacer) error {

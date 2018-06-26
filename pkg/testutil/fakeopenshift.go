@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 
 	"github.com/docker/distribution/context"
@@ -139,6 +140,27 @@ func (fos *FakeOpenShift) GetImageStream(namespace, repo string) (*imageapiv1.Im
 		return nil, errors.NewNotFound(imageapiv1.Resource("imagestreams"), repo)
 	}
 	return &is, nil
+}
+
+func (fos *FakeOpenShift) ListImageStreams(namespace string) (*imageapiv1.ImageStreamList, error) {
+	fos.mu.Lock()
+	defer fos.mu.Unlock()
+
+	iss := imageapiv1.ImageStreamList{
+		ListMeta: metav1.ListMeta{},
+		Items:    []imageapiv1.ImageStream{},
+	}
+
+	for _, is := range fos.imageStreams {
+		if len(namespace) != 0 && namespace != is.Namespace {
+			continue
+		}
+		iss.Items = append(iss.Items, is)
+	}
+
+	sort.Sort(byRepositoryName(iss.Items))
+
+	return &iss, nil
 }
 
 func (fos *FakeOpenShift) CreateImageStreamMapping(namespace string, ism *imageapiv1.ImageStreamMapping) (*imageapiv1.ImageStreamMapping, error) {
@@ -353,6 +375,11 @@ func (fos *FakeOpenShift) imageStreamsHandler(action clientgotesting.Action) (bo
 		fmt.Sprintf("(*FakeOpenShift).imageStreamsHandler: %s %s/%s",
 			action.GetVerb(), action.GetNamespace(), fos.getName(action)),
 		func() (bool, runtime.Object, error) {
+			if len(action.GetSubresource()) > 0 {
+				// ATM neither secrets nor any other subresource is handled here
+				return fos.todo(action)
+			}
+
 			switch action := action.(type) {
 			case clientgotesting.CreateActionImpl:
 				is, err := fos.CreateImageStream(
@@ -360,13 +387,19 @@ func (fos *FakeOpenShift) imageStreamsHandler(action clientgotesting.Action) (bo
 					action.Object.(*imageapiv1.ImageStream),
 				)
 				return true, is, err
+
 			case clientgotesting.GetActionImpl:
 				is, err := fos.GetImageStream(
 					action.GetNamespace(),
 					action.GetName(),
 				)
 				return true, is, err
+
+			case clientgotesting.ListActionImpl:
+				iss, err := fos.ListImageStreams(action.GetNamespace())
+				return true, iss, err
 			}
+
 			return fos.todo(action)
 		},
 	)
@@ -414,4 +447,16 @@ func (fos *FakeOpenShift) AddReactorsTo(c *imagefakeclient.FakeImageV1) {
 	c.AddReactor("*", "imagestreams", fos.imageStreamsHandler)
 	c.AddReactor("*", "imagestreammappings", fos.imageStreamMappingsHandler)
 	c.AddReactor("*", "imagestreamimages", fos.imageStreamImagesHandler)
+}
+
+type byRepositoryName []imageapiv1.ImageStream
+
+func (brn byRepositoryName) Len() int      { return len(brn) }
+func (brn byRepositoryName) Swap(i, j int) { brn[i], brn[j] = brn[j], brn[i] }
+func (brn byRepositoryName) Less(i, j int) bool {
+	a, b := brn[i], brn[j]
+	if a.Namespace < b.Namespace {
+		return true
+	}
+	return a.Namespace == b.Namespace && a.Name < b.Name
 }

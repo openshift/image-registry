@@ -8,6 +8,7 @@ import (
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
+	kubecache "k8s.io/apimachinery/pkg/util/cache"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
@@ -21,6 +22,7 @@ const (
 	// Default values
 	defaultDescriptorCacheSize         = 4096
 	defaultDigestToRepositoryCacheSize = 2048
+	defaultPaginationCacheSize         = 1024
 )
 
 // appMiddleware should be used only in tests.
@@ -59,6 +61,10 @@ type App struct {
 
 	// metrics provide methods to collect statistics.
 	metrics metrics.Metrics
+
+	// paginationCache maps repository names to opaque continue tokens received from master API for subsequent
+	// list imagestreams requests
+	paginationCache *kubecache.LRUExpireCache
 }
 
 func (app *App) Storage(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
@@ -66,9 +72,12 @@ func (app *App) Storage(driver storagedriver.StorageDriver, options map[string]i
 	return app.driver, nil
 }
 
-func (app *App) Registry(registry distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error) {
-	app.registry = registry
-	return registry, nil
+func (app *App) Registry(nm distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error) {
+	app.registry = nm
+	return &registry{
+		registry:   nm,
+		enumerator: NewCachingRepositoryEnumerator(app.registryClient, app.paginationCache),
+	}, nil
 }
 
 func (app *App) BlobStatter() distribution.BlobStatter {
@@ -82,11 +91,12 @@ func (app *App) BlobStatter() distribution.BlobStatter {
 // The program will be terminated if an error happens.
 func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration, writeLimiter maxconnections.Limiter) http.Handler {
 	app := &App{
-		ctx:            ctx,
-		registryClient: registryClient,
-		config:         extraConfig,
-		writeLimiter:   writeLimiter,
-		quotaEnforcing: newQuotaEnforcingConfig(ctx, extraConfig.Quota),
+		ctx:             ctx,
+		registryClient:  registryClient,
+		config:          extraConfig,
+		writeLimiter:    writeLimiter,
+		quotaEnforcing:  newQuotaEnforcingConfig(ctx, extraConfig.Quota),
+		paginationCache: kubecache.NewLRUExpireCache(defaultPaginationCacheSize),
 	}
 
 	if app.config.Metrics.Enabled {
