@@ -481,19 +481,16 @@ func migrateMiddleware(dockercfg *configuration.Configuration, cfg *Configuratio
 		}
 	}
 
-	// TODO(legion) Uncomment this when we will have our cache on the storage level.
-	/*
-		if cc, ok := dockercfg.Storage["cache"]; ok {
-			v, ok := cc["blobdescriptor"]
-			if !ok {
-				// Backwards compatible: "layerinfo" == "blobdescriptor"
-				v = cc["layerinfo"]
-			}
-			if v == "inmemory" {
-				delete(dockercfg.Storage, "cache")
-			}
+	if cc, ok := dockercfg.Storage["cache"]; ok {
+		v, ok := cc["blobdescriptor"]
+		if !ok {
+			// Backwards compatible: "layerinfo" == "blobdescriptor"
+			v = cc["layerinfo"]
 		}
-	*/
+		if v == "inmemory" {
+			dockercfg.Storage["cache"]["blobdescriptor"] = middlewareName
+		}
+	}
 
 	if cfg.Auth == nil {
 		cfg.Auth = &Auth{}

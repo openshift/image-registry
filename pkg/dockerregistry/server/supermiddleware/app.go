@@ -12,6 +12,8 @@ import (
 	"github.com/docker/distribution/registry/handlers"
 	registrymw "github.com/docker/distribution/registry/middleware/registry"
 	repositorymw "github.com/docker/distribution/registry/middleware/repository"
+	"github.com/docker/distribution/registry/storage/cache"
+	cacheprovider "github.com/docker/distribution/registry/storage/cache/provider"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	storagemw "github.com/docker/distribution/registry/storage/driver/middleware"
 )
@@ -27,6 +29,7 @@ type App interface {
 	Storage(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error)
 	Registry(registry distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error)
 	Repository(ctx context.Context, repo distribution.Repository, crossmount bool) (distribution.Repository, distribution.BlobDescriptorServiceFactory, error)
+	CacheProvider(ctx context.Context, options map[string]interface{}) (cache.BlobDescriptorCacheProvider, error)
 }
 
 type instance struct {
@@ -76,6 +79,10 @@ func updateConfig(config *configuration.Configuration, inst *instance) {
 				middleware.Options = putInstance(middleware.Options, inst)
 			}
 		}
+	}
+
+	if _, ok := config.Storage["cache"]; ok {
+		config.Storage["cache"] = putInstance(config.Storage["cache"], inst)
 	}
 }
 
@@ -137,5 +144,16 @@ func init() {
 	})
 	if err != nil {
 		logrus.Fatalf("Unable to register repository middleware: %v", err)
+	}
+
+	err = cacheprovider.Register(Name, func(ctx context.Context, options map[string]interface{}) (cache.BlobDescriptorCacheProvider, error) {
+		inst := getInstance(options)
+		if inst == nil {
+			return nil, fmt.Errorf("failed to find an application instance in the cache provider")
+		}
+		return inst.CacheProvider(ctx, options)
+	})
+	if err != nil {
+		logrus.Fatalf("Unable to register cache provider: %v", err)
 	}
 }
