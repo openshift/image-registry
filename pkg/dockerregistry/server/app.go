@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
@@ -163,11 +165,6 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 	}
 	RegisterSignatureHandler(dockerApp, isImageClient)
 
-	// Registry extensions endpoint provides prometheus metrics.
-	if extraConfig.Metrics.Enabled {
-		RegisterMetricHandler(dockerApp)
-	}
-
 	// Advertise features supported by OpenShift
 	if dockerApp.Config.HTTP.Headers == nil {
 		dockerApp.Config.HTTP.Headers = http.Header{}
@@ -176,5 +173,18 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 
 	dockerApp.RegisterHealthChecks()
 
-	return dockerApp
+	h := http.Handler(dockerApp)
+
+	// Registry extensions endpoint provides prometheus metrics.
+	if extraConfig.Metrics.Enabled {
+		RegisterMetricHandler(dockerApp)
+		h = promhttp.InstrumentHandlerCounter(metrics.HTTPRequestsTotal, h)
+		h = promhttp.InstrumentHandlerDuration(metrics.HTTPRequestDurationSeconds, h)
+		h = promhttp.InstrumentHandlerInFlight(metrics.HTTPInFlightRequests, h)
+		h = promhttp.InstrumentHandlerRequestSize(metrics.HTTPRequestSizeBytes, h)
+		h = promhttp.InstrumentHandlerResponseSize(metrics.HTTPResponseSizeBytes, h)
+		h = promhttp.InstrumentHandlerTimeToWriteHeader(metrics.HTTPTimeToWriteHeaderSeconds, h)
+	}
+
+	return h
 }

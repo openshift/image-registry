@@ -4,11 +4,14 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
+
+	_ "github.com/openshift/image-registry/pkg/kubernetes-common/prometheus"
 )
 
 const (
 	namespace = "imageregistry"
 
+	httpSubsystem        = "http"
 	pullthroughSubsystem = "pullthrough"
 	storageSubsystem     = "storage"
 )
@@ -21,6 +24,62 @@ var (
 			Help:      "Request latency in seconds for each operation.",
 		},
 		[]string{"operation", "name"},
+	)
+
+	HTTPInFlightRequests = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Subsystem: httpSubsystem,
+		Name:      "in_flight_requests",
+		Help:      "A gauge of requests currently being served by the registry.",
+	})
+	HTTPRequestsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: namespace,
+			Subsystem: httpSubsystem,
+			Name:      "requests_total",
+			Help:      "A counter for requests to the registry.",
+		},
+		[]string{"code", "method"},
+	)
+	HTTPRequestDurationSeconds = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: namespace,
+			Subsystem: httpSubsystem,
+			Name:      "request_duration_seconds",
+			Help:      "A histogram of latencies for requests to the registry.",
+			Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+		},
+		[]string{"method"},
+	)
+	HTTPRequestSizeBytes = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: namespace,
+			Subsystem: httpSubsystem,
+			Name:      "request_size_bytes",
+			Help:      "A histogram of sizes of requests to the registry.",
+			Buckets:   []float64{100, 200, 500, 1300, 3400, 8900},
+		},
+		[]string{},
+	)
+	HTTPResponseSizeBytes = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: namespace,
+			Subsystem: httpSubsystem,
+			Name:      "response_size_bytes",
+			Help:      "A histogram of response sizes for requests to the registry.",
+			Buckets:   []float64{100, 200, 500, 1300, 3400, 8900},
+		},
+		[]string{},
+	)
+	HTTPTimeToWriteHeaderSeconds = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: namespace,
+			Subsystem: httpSubsystem,
+			Name:      "time_to_write_header_seconds",
+			Help:      "A histogram of request durations until the response headers are written.",
+			Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+		},
+		[]string{},
 	)
 
 	pullthroughBlobstoreCacheRequestsTotal = prometheus.NewCounterVec(
@@ -38,6 +97,7 @@ var (
 			Subsystem: pullthroughSubsystem,
 			Name:      "repository_duration_seconds",
 			Help:      "Latency of operations with remote registries in seconds.",
+			Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
 		},
 		[]string{"registry", "operation"},
 	)
@@ -57,6 +117,7 @@ var (
 			Subsystem: storageSubsystem,
 			Name:      "duration_seconds",
 			Help:      "Latency of operations with the storage.",
+			Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
 		},
 		[]string{"operation"},
 	)
@@ -74,6 +135,14 @@ var (
 var prometheusOnce sync.Once
 
 type prometheusSink struct{}
+
+func init() {
+	prometheus.MustRegister(HTTPInFlightRequests)
+	prometheus.MustRegister(HTTPRequestsTotal)
+	prometheus.MustRegister(HTTPRequestDurationSeconds)
+	prometheus.MustRegister(HTTPRequestSizeBytes)
+	prometheus.MustRegister(HTTPResponseSizeBytes)
+}
 
 // NewPrometheusSink returns a sink for exposing Prometheus metrics.
 func NewPrometheusSink() Sink {
