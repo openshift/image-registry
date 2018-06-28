@@ -3,7 +3,7 @@ import:
 
 # docker first
 - package: github.com/docker/distribution
-  version: image-registry-3.10
+  version: image-registry-3.11
   repo: git@github.com:openshift/docker-distribution
 
 # kube second
@@ -30,6 +30,8 @@ import:
 - package: github.com/openshift/api
   version: master
 - package: github.com/openshift/client-go
+  version: master
+- package: github.com/openshift/library-go
   version: master
 
 
