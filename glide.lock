@@ -1,5 +1,5 @@
-hash: 83965a13f508895b68659ac283ec88779a8836ca7ef4f49f2142004e2130e185
-updated: 2018-05-21T14:52:46.460108273+02:00
+hash: 1946fe088720fb27c48685a2d6f866daf815006886ca720298ae885c9853eef5
+updated: 2018-06-29T10:12:00.810977023-04:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -45,7 +45,7 @@ imports:
 - name: github.com/certifi/gocertifi
   version: deb3ae2ef2610fde3330947281941c562861188b
 - name: github.com/cloudflare/cfssl
-  version: 82fc38d1a02688de28fa4fe7cae52e03e51ae48f
+  version: fca70798646c8689aeae5928d4ad1278ff8a3c17
   repo: https://github.com/openshift/cloudflare-cfssl
 - name: github.com/davecgh/go-spew
   version: 782f4967f2dc4564575ca782fe2d04090b5faca8
@@ -58,7 +58,7 @@ imports:
   - oss
   - util
 - name: github.com/docker/distribution
-  version: 4e8e323b4b83451e20a564bc40e3b26968b3a887
+  version: a48f09ee3ccb67a578317f1f4c851388da7ade00
   repo: git@github.com:openshift/docker-distribution
   subpackages:
   - configuration
@@ -132,13 +132,13 @@ imports:
   - pkg/system
   - pkg/tlsconfig
 - name: github.com/docker/go-connections
-  version: 7395e3f8aa162843a74ed6d48e79627d9792ac55
+  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
   subpackages:
   - nat
   - sockets
   - tlsconfig
 - name: github.com/docker/go-units
-  version: 47565b4f722fb6ceae66b95f853feed578a4a51c
+  version: 9e638d38cf6977a37a8ea0078f3ee75a7cdb2dd1
 - name: github.com/docker/libtrust
   version: fa567046d9b14f6aa788882a950d69651d230b21
 - name: github.com/emicklei/go-restful
@@ -146,7 +146,7 @@ imports:
   subpackages:
   - log
 - name: github.com/emicklei/go-restful-swagger12
-  version: 885875a92c2ab7d6222e257e41f6ca2c1f010b4e
+  version: 5e28dc7157ebd9247a268c26dd1bee7818aa33f7
   repo: https://github.com/openshift/emicklei-go-restful-swagger12
 - name: github.com/garyburd/redigo
   version: 535138d7bcd717d6531c701ef5933d98b1866257
@@ -154,11 +154,11 @@ imports:
   - internal
   - redis
 - name: github.com/getsentry/raven-go
-  version: ed7bcb39ff10f39ab08e317ce16df282845852fa
+  version: 32a13797442ccb601b11761d74232773c1402d14
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-ini/ini
-  version: bda519ae5f4cbc60d391ff8610711627a08b86ae
+  version: 300e940a926eb277d3901b20bdfcc54928ad3642
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -219,7 +219,7 @@ imports:
 - name: github.com/imdario/mergo
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/jmespath/go-jmespath
-  version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
+  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
 - name: github.com/juju/ratelimit
   version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
 - name: github.com/mailru/easyjson
@@ -233,7 +233,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/Microsoft/go-winio
-  version: ab35fc04b6365e8fcb18e6e9e41ea4a02b10b175
+  version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
 - name: github.com/mitchellh/mapstructure
   version: 482a9fd5fa83e8c4e7817413b80f3eb8feec03ef
 - name: github.com/ncw/swift
@@ -241,12 +241,12 @@ imports:
   subpackages:
   - swifttest
 - name: github.com/opencontainers/runc
-  version: 0cbfd8392fff2462701507296081e835b3b0b99a
+  version: 2c632d1a2de0192c3f18a2542ccb6f30a8719b1f
   subpackages:
   - libcontainer/system
   - libcontainer/user
 - name: github.com/openshift/api
-  version: 54917e0ae540d86047a321158f860f2143c1c81d
+  version: 6ef6704e604af539af656171d5c0bde774923a43
   subpackages:
   - authorization/v1
   - image/docker10
@@ -257,7 +257,7 @@ imports:
   - project/v1
   - user/v1
 - name: github.com/openshift/client-go
-  version: c6778f7b6f84c0d3a26cb3bae1d8fd6282bb8025
+  version: 6a9817e0a0720dd8e837d1d18cd2938342ef6e54
   subpackages:
   - authorization/clientset/versioned/scheme
   - authorization/clientset/versioned/typed/authorization/v1
@@ -277,7 +277,7 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/pkg/errors
-  version: 816c9085562cd7ee03e7f8188a1cfd942858cded
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pkg/profile
   version: 5b67d428864e92711fcbd2f8629456121a56d91f
 - name: github.com/prometheus/client_golang
@@ -303,11 +303,11 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/RangelReale/osin
-  version: a05b753d5af2a3272641e712dafc4de3a6f5d631
+  version: 2dc1b43167692cdc89446b99b98fa9de6bff020f
 - name: github.com/Sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
 - name: github.com/skynetservices/skydns
-  version: 30763c4e568fe411f1663af553c063cec8879929
+  version: 775ef406696380ce92b76e72421e86b6868905d8
   repo: https://github.com/openshift/skynetservices-skydns
 - name: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
