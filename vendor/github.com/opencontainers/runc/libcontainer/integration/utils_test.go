@@ -19,6 +19,10 @@ import (
 	"github.com/opencontainers/runc/libcontainer/configs"
 )
 
+func ptrInt(v int) *int {
+	return &v
+}
+
 func newStdBuffers() *stdBuffers {
 	return &stdBuffers{
 		Stdin:  bytes.NewBuffer(nil),
@@ -148,6 +152,7 @@ func runContainer(config *configs.Config, console string, args ...string) (buffe
 		Stdin:  buffers.Stdin,
 		Stdout: buffers.Stdout,
 		Stderr: buffers.Stderr,
+		Init:   true,
 	}
 
 	err = container.Run(process)
