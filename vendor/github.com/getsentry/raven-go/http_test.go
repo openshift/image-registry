@@ -39,7 +39,6 @@ func newBaseHttp() *Http {
 		Headers: map[string]string{"Foo": "bar"},
 		Env:     map[string]string{"REMOTE_ADDR": "127.0.0.1", "REMOTE_PORT": "8000"},
 	}
-	h.Headers["Host"] = "example.com"
 	return h
 }
 
