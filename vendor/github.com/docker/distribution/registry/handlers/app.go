@@ -809,7 +809,18 @@ func (app *App) logError(ctx context.Context, errors errcode.Errors) {
 			errCodeKey{},
 			errMessageKey{},
 			errDetailKey{}))
-		dcontext.GetResponseLogger(c).Errorf("response completed with error")
+
+		logf := dcontext.GetResponseLogger(c).Errorf
+
+		httpStatus, ok := c.Value("http.response.status").(int)
+		if ok && httpStatus == 404 {
+			httpMethod, ok := c.Value("http.request.method").(string)
+			if ok && strings.ToLower(httpMethod) == "head" {
+				logf = dcontext.GetResponseLogger(c).Infof
+			}
+		}
+
+		logf("response completed with error")
 	}
 }
 
