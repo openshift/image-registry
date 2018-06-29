@@ -13,8 +13,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"k8s.io/apiserver/pkg/util/logs"
 
+	"github.com/openshift/library-go/pkg/serviceability"
+
 	"github.com/openshift/image-registry/pkg/cmd/dockerregistry"
-	"github.com/openshift/image-registry/pkg/origin-common/cmd/util/serviceability"
 )
 
 func main() {

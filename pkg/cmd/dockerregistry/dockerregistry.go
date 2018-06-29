@@ -35,13 +35,14 @@ import (
 	_ "github.com/docker/distribution/registry/storage/driver/s3-aws"
 	_ "github.com/docker/distribution/registry/storage/driver/swift"
 
+	"github.com/openshift/library-go/pkg/crypto"
+
 	"github.com/openshift/image-registry/pkg/dockerregistry/server"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
 	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
-	"github.com/openshift/image-registry/pkg/origin-common/crypto"
 	"github.com/openshift/image-registry/pkg/version"
 )
 

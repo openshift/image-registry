@@ -10,16 +10,6 @@ The code is almost untouched, but there are some differences:
   * it doesn't support migrations for `KUBECONFIG` (i.e. the old default is ignored, which is `.kube/.config`),
   * it uses the field `openshift.kubeconfig` from our config instead of the `--config` flag.
 
-### cmd/util/serviceability
-
-This code is copied untouched from [github.com/openshift/origin/pkg/cmd/util/serviceability](https://godoc.org/github.com/openshift/origin/pkg/cmd/util/serviceability).
-
-### crypto
-
-The crypto package is a reduced copy of [github.com/openshift/origin/pkg/cmd/server/crypto](https://godoc.org/github.com/openshift/origin/pkg/cmd/server/crypto).
-
-We keep only functions that are required by the image registry.
-
 ### image/apis/image
 
 This is a significantly reduced set of code related to the internal api objects defined in [github.com/openshift/origin/pkg/image
