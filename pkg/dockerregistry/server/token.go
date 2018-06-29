@@ -39,7 +39,7 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			case "repository", "signature":
 				_, _, err := getNamespaceName(access.Resource.Name)
 				if err != nil {
-					context.GetRequestLogger(ctx).Debugf("auth token request for unsupported resource name: %s", access.Resource.Name)
+					context.GetRequestLogger(ctx).Errorf("auth token request for unsupported resource name: %s", access.Resource.Name)
 					t.writeError(w, req, err.Error())
 					return
 				}
@@ -71,7 +71,7 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if _, err := osClient.Users().Get("~", metav1.GetOptions{}); err != nil {
-		context.GetRequestLogger(ctx).Debugf("invalid token: %v", err)
+		context.GetRequestLogger(ctx).Errorf("invalid token: %v", err)
 		t.writeUnauthorized(w, req)
 		return
 	}

@@ -112,7 +112,7 @@ func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Conte
 		}
 	}
 
-	insecure, err := m.imageStream.TagIsInsecure(tag, dgst)
+	insecure, err := m.imageStream.TagIsInsecure(ctx, tag, dgst)
 	if err != nil {
 		return nil, err
 	}

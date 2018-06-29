@@ -89,7 +89,7 @@ func NewBlobGetterService(
 func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, distribution.BlobStore, error) {
 	// look up the potential remote repositories that this blob could be part of (at this time,
 	// we don't know which image in the image stream surfaced the content).
-	ok, err := rbgs.imageStream.Exists()
+	ok, err := rbgs.imageStream.Exists(ctx)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
@@ -102,7 +102,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	retriever := getImportContext(ctx, rbgs.getSecrets, rbgs.metrics)
 
 	// look at the first level of tagged repositories first
-	repositoryCandidates, search, err := rbgs.imageStream.IdentifyCandidateRepositories(true)
+	repositoryCandidates, search, err := rbgs.imageStream.IdentifyCandidateRepositories(ctx, true)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
@@ -111,7 +111,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	}
 
 	// look at all other repositories tagged by the server
-	repositoryCandidates, secondary, err := rbgs.imageStream.IdentifyCandidateRepositories(false)
+	repositoryCandidates, secondary, err := rbgs.imageStream.IdentifyCandidateRepositories(ctx, false)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}

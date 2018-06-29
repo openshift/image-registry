@@ -56,8 +56,6 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		return nil, nil, err
 	}
 
-	context.GetLogger(ctx).Infof("Using %q as Docker Registry URL", app.config.Server.Addr)
-
 	namespace, name, err := getNamespaceName(repo.Named().Name())
 	if err != nil {
 		return nil, nil, err
@@ -191,10 +189,6 @@ func (r *repository) BlobDescriptorService(svc distribution.BlobDescriptorServic
 }
 
 func (r *repository) checkPendingErrors(ctx context.Context) error {
-	return checkPendingErrors(ctx, context.GetLogger(r.ctx), r.imageStream.Reference())
-}
-
-func checkPendingErrors(ctx context.Context, logger context.Logger, ref string) error {
 	if !authPerformed(ctx) {
 		return fmt.Errorf("openshift.auth.completed missing from context")
 	}
@@ -204,11 +198,12 @@ func checkPendingErrors(ctx context.Context, logger context.Logger, ref string) 
 		return nil
 	}
 
-	repoErr, haveRepoErr := deferredErrors.Get(ref)
+	repoErr, haveRepoErr := deferredErrors.Get(r.imageStream.Reference())
 	if !haveRepoErr {
 		return nil
 	}
 
-	logger.Debugf("Origin auth: found deferred error for %s: %v", ref, repoErr)
+	context.GetLogger(r.ctx).Debugf("Origin auth: found deferred error for %s: %v", r.imageStream.Reference(), repoErr)
+
 	return repoErr
 }

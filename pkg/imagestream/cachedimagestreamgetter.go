@@ -1,7 +1,6 @@
 package imagestream
 
 import (
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
 	disterrors "github.com/docker/distribution/registry/api/v2"
 
@@ -16,7 +15,6 @@ import (
 
 // cachedImageStreamGetter wraps a master API client for getting image streams with a cache.
 type cachedImageStreamGetter struct {
-	ctx               context.Context
 	namespace         string
 	name              string
 	isNamespacer      client.ImageStreamsNamespacer
@@ -25,12 +23,10 @@ type cachedImageStreamGetter struct {
 
 func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, error) {
 	if g.cachedImageStream != nil {
-		context.GetLogger(g.ctx).Debugf("(*cachedImageStreamGetter).getImageStream: returning cached copy")
 		return g.cachedImageStream, nil
 	}
 	is, err := g.isNamespacer.ImageStreams(g.namespace).Get(g.name, metav1.GetOptions{})
 	if err != nil {
-		context.GetLogger(g.ctx).Errorf("failed to get image stream: %v", err)
 		switch {
 		case kerrors.IsNotFound(err):
 			return nil, disterrors.ErrorCodeNameUnknown.WithDetail(err)
@@ -41,12 +37,10 @@ func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, error) {
 		}
 	}
 
-	context.GetLogger(g.ctx).Debugf("(*cachedImageStreamGetter).getImageStream: got image stream %s/%s", is.Namespace, is.Name)
 	g.cachedImageStream = is
 	return is, nil
 }
 
 func (g *cachedImageStreamGetter) cacheImageStream(is *imageapiv1.ImageStream) {
-	context.GetLogger(g.ctx).Debugf("(*cachedImageStreamGetter).cacheImageStream: got image stream %s/%s", is.Namespace, is.Name)
 	g.cachedImageStream = is
 }

@@ -40,7 +40,7 @@ type ImagePullthroughSpec struct {
 
 type ImageStream interface {
 	Reference() string
-	Exists() (bool, error)
+	Exists(ctx context.Context) (bool, error)
 
 	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error)
 	CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) error
@@ -48,11 +48,11 @@ type ImageStream interface {
 	ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, error)
 
 	HasBlob(ctx context.Context, dgst digest.Digest) *imageapiv1.Image
-	IdentifyCandidateRepositories(primary bool) ([]string, map[string]ImagePullthroughSpec, error)
+	IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, error)
 	GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, error)
 	GetSecrets() ([]corev1.Secret, error)
 
-	TagIsInsecure(tag string, dgst digest.Digest) (bool, error)
+	TagIsInsecure(ctx context.Context, tag string, dgst digest.Digest) (bool, error)
 	Tags(ctx context.Context) (map[string]digest.Digest, error)
 }
 
@@ -77,7 +77,6 @@ func New(ctx context.Context, namespace, name string, client client.Interface) I
 		registryOSClient: client,
 		imageClient:      newCachedImageGetter(client),
 		imageStreamGetter: &cachedImageStreamGetter{
-			ctx:          ctx,
 			namespace:    namespace,
 			name:         name,
 			isNamespacer: client,
@@ -98,7 +97,11 @@ func (is *imageStream) createImageStream(ctx context.Context, userClient client.
 	switch {
 	case kerrors.IsAlreadyExists(err), kerrors.IsConflict(err):
 		context.GetLogger(ctx).Infof("conflict while creating ImageStream: %v", err)
-		return is.imageStreamGetter.get()
+		is, err := is.imageStreamGetter.get()
+		if err != nil {
+			context.GetLogger(ctx).Errorf("createImageStream: failed to get image stream: %v", err)
+		}
+		return is, err
 	case kerrors.IsForbidden(err), kerrors.IsUnauthorized(err), quotautil.IsErrorQuotaExceeded(err):
 		context.GetLogger(ctx).Errorf("denied creating ImageStream: %v", err)
 		return nil, errcode.ErrorCodeDenied.WithDetail(err)
@@ -107,7 +110,9 @@ func (is *imageStream) createImageStream(ctx context.Context, userClient client.
 		return nil, errcode.ErrorCodeUnknown.WithDetail(err)
 	}
 
+	context.GetLogger(ctx).Debugf("cache image stream %s/%s", stream.Namespace, stream.Name)
 	is.imageStreamGetter.cacheImageStream(stream)
+
 	return stream, nil
 }
 
@@ -125,6 +130,7 @@ func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*image
 func (is *imageStream) ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
+		context.GetLogger(ctx).Errorf("imageStream.ResolveImageID: failed to get image stream: %v", err)
 		return nil, err
 	}
 
@@ -200,8 +206,7 @@ func (is *imageStream) ImageManifestBlobStored(ctx context.Context, image *image
 	image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] = "true"
 
 	if _, err := is.registryOSClient.Images().Update(image); err != nil {
-		context.GetLogger(ctx).Errorf("error updating Image: %v", err)
-		return err
+		return fmt.Errorf("error updating Image: %v", err)
 	}
 	return nil
 }
@@ -216,9 +221,10 @@ func (is *imageStream) GetSecrets() ([]corev1.Secret, error) {
 
 // TagIsInsecure returns true if the given image stream or its tag allow for
 // insecure transport.
-func (is *imageStream) TagIsInsecure(tag string, dgst digest.Digest) (bool, error) {
+func (is *imageStream) TagIsInsecure(ctx context.Context, tag string, dgst digest.Digest) (bool, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
+		context.GetLogger(ctx).Errorf("imageStream.TagIsInsecure: failed to get image stream: %v", err)
 		return false, err
 	}
 
@@ -242,9 +248,10 @@ func (is *imageStream) TagIsInsecure(tag string, dgst digest.Digest) (bool, erro
 	return false, nil
 }
 
-func (is *imageStream) Exists() (bool, error) {
+func (is *imageStream) Exists(ctx context.Context) (bool, error) {
 	_, err := is.imageStreamGetter.get()
 	if err != nil {
+		context.GetLogger(ctx).Errorf("imageStream.Exists: failed to get image stream: %v", err)
 		if t, ok := err.(errcode.Error); ok && t.ErrorCode() == disterrors.ErrorCodeNameUnknown {
 			return false, nil
 		}
@@ -253,9 +260,10 @@ func (is *imageStream) Exists() (bool, error) {
 	return true, nil
 }
 
-func (is *imageStream) localRegistry() (string, error) {
+func (is *imageStream) localRegistry(ctx context.Context) (string, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
+		context.GetLogger(ctx).Errorf("imageStream.localRegistry: failed to get image stream: %v", err)
 		return "", err
 	}
 
@@ -266,13 +274,14 @@ func (is *imageStream) localRegistry() (string, error) {
 	return local.Registry, nil
 }
 
-func (is *imageStream) IdentifyCandidateRepositories(primary bool) ([]string, map[string]ImagePullthroughSpec, error) {
+func (is *imageStream) IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
+		context.GetLogger(ctx).Errorf("imageStream.IdentifyCandidateRepositories: failed to get image stream: %v", err)
 		return nil, nil, err
 	}
 
-	localRegistry, _ := is.localRegistry()
+	localRegistry, _ := is.localRegistry(ctx)
 
 	repositoryCandidates, search := identifyCandidateRepositories(stream, localRegistry, primary)
 	return repositoryCandidates, search, nil
@@ -281,6 +290,7 @@ func (is *imageStream) IdentifyCandidateRepositories(primary bool) ([]string, ma
 func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
+		context.GetLogger(ctx).Errorf("imageStream.Tags: failed to get image stream: %v", err)
 		return nil, err
 	}
 
@@ -324,7 +334,7 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 		}
 
 		if quotautil.IsErrorQuotaExceeded(statusErr) {
-			context.GetLogger(ctx).Errorf("denied creating ImageStreamMapping: %v", statusErr)
+			context.GetLogger(ctx).Errorf("quota exceeded during creation of ImageStreamMapping: %v", statusErr)
 			return distribution.ErrAccessDenied
 		}
 
@@ -339,25 +349,21 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 			}
 		}
 		if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != is.name {
-			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
+			context.GetLogger(ctx).Errorf("error creation of ImageStreamMapping: %s", err)
 			return err
 		}
 
 		if _, err := is.createImageStream(ctx, userClient); err != nil {
-			if e, ok := err.(errcode.Error); ok && e.ErrorCode() == errcode.ErrorCodeUnknown {
-				// TODO: convert statusErr to distribution error
-				return statusErr
-			}
 			return err
 		}
 
 		// try to create the ISM again
 		if _, err := is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism); err != nil {
 			if quotautil.IsErrorQuotaExceeded(err) {
-				context.GetLogger(ctx).Errorf("denied a creation of ImageStreamMapping: %v", err)
+				context.GetLogger(ctx).Errorf("quota exceeded during creation of ImageStreamMapping second time: %v", err)
 				return distribution.ErrAccessDenied
 			}
-			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
+			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping second time: %s", err)
 			return err
 		}
 	}

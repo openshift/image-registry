@@ -231,6 +231,6 @@ func (m *manifestService) storeManifestLocally(ctx context.Context, image *image
 	}
 
 	if err := m.imageStream.ImageManifestBlobStored(ctx, image); err != nil {
-		context.GetLogger(ctx).Errorf("error updating Image: %v", err)
+		context.GetLogger(ctx).Errorf("unable to update image: %v", err)
 	}
 }

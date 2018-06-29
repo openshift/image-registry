@@ -40,7 +40,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) *imageap
 	// verify directly with etcd
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("failed to get image stream: %v", err)
+		context.GetLogger(ctx).Errorf("imageStream.HasBlob: failed to get image stream: %v", err)
 		return logFound(nil)
 	}
 
