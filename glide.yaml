@@ -28,9 +28,9 @@ import:
 
 # openshift third
 - package: github.com/openshift/api
-  version: master
+  version: release-3.10
 - package: github.com/openshift/client-go
-  version: master
+  version: release-3.10
 
 
 # everything else last
