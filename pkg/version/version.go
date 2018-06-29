@@ -1,6 +1,10 @@
 package version
 
-import "github.com/prometheus/client_golang/prometheus"
+import (
+	"github.com/prometheus/client_golang/prometheus"
+
+	"k8s.io/apimachinery/pkg/version"
+)
 
 var (
 	// commitFromGit is a constant representing the source version that
@@ -17,34 +21,16 @@ var (
 	buildDate string
 )
 
-// Info contains versioning information.
-type Info struct {
-	Major      string `json:"major"`
-	Minor      string `json:"minor"`
-	GitCommit  string `json:"gitCommit"`
-	GitVersion string `json:"gitVersion"`
-	BuildDate  string `json:"buildDate"`
-}
-
 // Get returns the overall codebase version. It's for detecting
 // what code a binary was built from.
-func Get() Info {
-	return Info{
+func Get() version.Info {
+	return version.Info{
 		Major:      majorFromGit,
 		Minor:      minorFromGit,
 		GitCommit:  commitFromGit,
 		GitVersion: versionFromGit,
 		BuildDate:  buildDate,
 	}
-}
-
-// String returns info as a human-friendly version string.
-func (info Info) String() string {
-	version := info.GitVersion
-	if version == "" {
-		version = "unknown"
-	}
-	return version
 }
 
 func init() {

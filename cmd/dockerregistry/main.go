@@ -16,12 +16,13 @@ import (
 	"github.com/openshift/library-go/pkg/serviceability"
 
 	"github.com/openshift/image-registry/pkg/cmd/dockerregistry"
+	"github.com/openshift/image-registry/pkg/version"
 )
 
 func main() {
 	logs.InitLogs()
 	defer logs.FlushLogs()
-	defer serviceability.BehaviorOnPanic(os.Getenv("OPENSHIFT_ON_PANIC"))()
+	defer serviceability.BehaviorOnPanic(os.Getenv("OPENSHIFT_ON_PANIC"), version.Get())()
 	defer serviceability.Profile(os.Getenv("OPENSHIFT_PROFILE")).Stop()
 	startProfiler()
 

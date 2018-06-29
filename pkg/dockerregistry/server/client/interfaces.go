@@ -108,7 +108,7 @@ type ImageStreamTagInterface interface {
 var _ ImageStreamSecretInterface = imageclientv1.ImageStreamInterface(nil)
 
 type ImageStreamSecretInterface interface {
-	Secrets(name string, options metav1.ListOptions) (*corev1.SecretList, error)
+	Secrets(name string, options metav1.GetOptions) (*corev1.SecretList, error)
 }
 
 var _ LimitRangeInterface = coreclientv1.LimitRangeInterface(nil)
