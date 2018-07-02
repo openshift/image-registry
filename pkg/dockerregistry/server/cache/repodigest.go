@@ -4,7 +4,6 @@ import "github.com/docker/distribution/digest"
 
 type RepositoryDigest interface {
 	AddDigest(dgst digest.Digest, repository string) error
-	RemoveDigest(dgst digest.Digest, repository string) error
 	ContainsRepository(dgst digest.Digest, repository string) bool
 	Repositories(dgst digest.Digest) ([]string, error)
 }
@@ -25,10 +24,6 @@ func (rd *repositoryDigest) AddDigest(dgst digest.Digest, repository string) err
 	return rd.Cache.Add(dgst, &DigestValue{
 		repo: &repository,
 	})
-}
-
-func (rd *repositoryDigest) RemoveDigest(dgst digest.Digest, repository string) error {
-	return rd.Cache.RemoveRepository(dgst, repository)
 }
 
 func (rd *repositoryDigest) ContainsRepository(dgst digest.Digest, repository string) bool {

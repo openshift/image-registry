@@ -190,34 +190,6 @@ func TestDigestCacheInvalidDigest(t *testing.T) {
 	}
 }
 
-func TestDigestCachePurge(t *testing.T) {
-	digests := []digest.Digest{
-		digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"),
-		digest.Digest("sha256:53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"),
-		digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"),
-	}
-
-	cache, err := NewBlobDigest(5, 3, ttl1m)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, v := range digests {
-		if err := cache.Add(v, &DigestValue{}); err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-	}
-
-	cache.Purge()
-
-	for _, v := range digests {
-		_, err = cache.Get(v)
-		if err != distribution.ErrBlobUnknown {
-			t.Fatalf("unexpected error: %v", err)
-		}
-	}
-}
-
 func TestDigestCacheDigestMigration(t *testing.T) {
 	dgst256 := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 	dgst512 := digest.Digest("sha512:3abb6677af34ac57c0ca5828fd94f9d886c26ce59a8ce60ecf6778079423dccff1d6f19cb655805d56098e6d38a1a710dee59523eed7511e5a9e4b8ccb3a4686")

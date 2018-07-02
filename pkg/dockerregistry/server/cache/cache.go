@@ -16,7 +16,6 @@ type DigestCache interface {
 	Remove(dgst digest.Digest) error
 	RemoveRepository(dgst digest.Digest, repository string) error
 	Add(dgst digest.Digest, value *DigestValue) error
-	Purge()
 }
 
 type DigestValue struct {
@@ -67,13 +66,6 @@ func (gbd *digestCache) peek(dgst digest.Digest) *DigestItem {
 		return d
 	}
 	return nil
-}
-
-func (gbd *digestCache) Purge() {
-	gbd.mu.Lock()
-	defer gbd.mu.Unlock()
-
-	gbd.lru.Purge()
 }
 
 func (gbd *digestCache) Get(dgst digest.Digest) (DigestItem, error) {

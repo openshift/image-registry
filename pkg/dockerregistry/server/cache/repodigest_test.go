@@ -127,28 +127,4 @@ func TestRepoDigestRemove(t *testing.T) {
 			t.Fatalf("%q not found", n)
 		}
 	}
-
-	err = r.RemoveDigest(dgst, "bar")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	repos, err = r.Repositories(dgst)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	sort.Strings(repos)
-
-	if !reflect.DeepEqual(repos, []string{"foo"}) {
-		t.Fatalf("unexpected list of repositories: %#+v", repos)
-	}
-
-	if r.ContainsRepository(dgst, "bar") {
-		t.Fatalf("%q was found", "bar")
-	}
-
-	if !r.ContainsRepository(dgst, "foo") {
-		t.Fatalf("%q not found", "foo")
-	}
-
 }
