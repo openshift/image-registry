@@ -67,6 +67,7 @@ func TestPullthroughBlob(t *testing.T) {
 		case "GET /v2/remoteimage/blobs/" + configDigest.String():
 			w.Write([]byte(config))
 		case "HEAD /v2/remoteimage/blobs/" + fooDigest.String():
+			w.Header().Set("Content-Type", "application/octet-stream")
 			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(foo)))
 			w.WriteHeader(http.StatusOK)
 		case "GET /v2/remoteimage/blobs/" + fooDigest.String():
