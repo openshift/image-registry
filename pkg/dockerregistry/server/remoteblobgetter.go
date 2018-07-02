@@ -12,6 +12,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
+	rerrors "github.com/openshift/image-registry/pkg/errors"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
@@ -23,7 +24,7 @@ type BlobGetterService interface {
 	distribution.BlobServer
 }
 
-type secretsGetter func() ([]corev1.Secret, error)
+type secretsGetter func() ([]corev1.Secret, *rerrors.Error)
 
 // digestBlobStoreCache caches BlobStores by digests. It is safe to use it
 // concurrently from different goroutines (from an HTTP handler and background
@@ -91,6 +92,14 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	// we don't know which image in the image stream surfaced the content).
 	ok, err := rbgs.imageStream.Exists(ctx)
 	if err != nil {
+		switch err.Code {
+		case imagestream.ErrImageStreamNotFoundCode:
+			context.GetLogger(ctx).Errorf("findBlobStore: imagestream %s not found: %v", rbgs.imageStream.Reference(), err)
+			return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
+		case imagestream.ErrImageStreamForbiddenCode:
+			context.GetLogger(ctx).Errorf("findBlobStore: unable get access to imagestream %s: %v", rbgs.imageStream.Reference(), err)
+			return distribution.Descriptor{}, nil, distribution.ErrAccessDenied
+		}
 		return distribution.Descriptor{}, nil, err
 	}
 	if !ok {

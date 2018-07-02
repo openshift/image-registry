@@ -5,11 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
-	"github.com/docker/distribution/registry/api/errcode"
-	disterrors "github.com/docker/distribution/registry/api/v2"
 
 	corev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -19,9 +16,18 @@ import (
 	imageapiv1 "github.com/openshift/api/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	rerrors "github.com/openshift/image-registry/pkg/errors"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
 	originutil "github.com/openshift/image-registry/pkg/origin-common/util"
+)
+
+const (
+	ErrImageStreamCode              = "ImageStream:"
+	ErrImageStreamUnknownErrorCode  = ErrImageStreamCode + "Unknown"
+	ErrImageStreamNotFoundCode      = ErrImageStreamCode + "NotFound"
+	ErrImageStreamImageNotFoundCode = ErrImageStreamCode + "ImageNotFound"
+	ErrImageStreamForbiddenCode     = ErrImageStreamCode + "Forbidden"
 )
 
 // ProjectObjectListStore represents a cache of objects indexed by a project name.
@@ -40,20 +46,20 @@ type ImagePullthroughSpec struct {
 
 type ImageStream interface {
 	Reference() string
-	Exists(ctx context.Context) (bool, error)
+	Exists(ctx context.Context) (bool, *rerrors.Error)
 
-	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error)
-	CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) error
-	ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) error
-	ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, error)
+	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *rerrors.Error)
+	CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) *rerrors.Error
+	ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) *rerrors.Error
+	ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, *rerrors.Error)
 
 	HasBlob(ctx context.Context, dgst digest.Digest) *imageapiv1.Image
-	IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, error)
-	GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, error)
-	GetSecrets() ([]corev1.Secret, error)
+	IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, *rerrors.Error)
+	GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, *rerrors.Error)
+	GetSecrets() ([]corev1.Secret, *rerrors.Error)
 
-	TagIsInsecure(ctx context.Context, tag string, dgst digest.Digest) (bool, error)
-	Tags(ctx context.Context) (map[string]digest.Digest, error)
+	TagIsInsecure(ctx context.Context, tag string, dgst digest.Digest) (bool, *rerrors.Error)
+	Tags(ctx context.Context) (map[string]digest.Digest, *rerrors.Error)
 }
 
 type imageStream struct {
@@ -88,55 +94,50 @@ func (is *imageStream) Reference() string {
 	return fmt.Sprintf("%s/%s", is.namespace, is.name)
 }
 
-// createImageStream creates a new image stream and caches it.
-func (is *imageStream) createImageStream(ctx context.Context, userClient client.Interface) (*imageapiv1.ImageStream, error) {
-	stream := &imageapiv1.ImageStream{}
-	stream.Name = is.name
-
-	stream, err := userClient.ImageStreams(is.namespace).Create(stream)
-	switch {
-	case kerrors.IsAlreadyExists(err), kerrors.IsConflict(err):
-		context.GetLogger(ctx).Infof("conflict while creating ImageStream: %v", err)
-		is, err := is.imageStreamGetter.get()
-		if err != nil {
-			context.GetLogger(ctx).Errorf("createImageStream: failed to get image stream: %v", err)
-		}
-		return is, err
-	case kerrors.IsForbidden(err), kerrors.IsUnauthorized(err), quotautil.IsErrorQuotaExceeded(err):
-		context.GetLogger(ctx).Errorf("denied creating ImageStream: %v", err)
-		return nil, errcode.ErrorCodeDenied.WithDetail(err)
-	case err != nil:
-		context.GetLogger(ctx).Errorf("error auto provisioning ImageStream: %s", err)
-		return nil, errcode.ErrorCodeUnknown.WithDetail(err)
-	}
-
-	context.GetLogger(ctx).Debugf("cache image stream %s/%s", stream.Namespace, stream.Name)
-	is.imageStreamGetter.cacheImageStream(stream)
-
-	return stream, nil
-}
-
 // getImage retrieves the Image with digest `dgst`. No authorization check is done.
-func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
+func (is *imageStream) getImage(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *rerrors.Error) {
 	image, err := is.imageClient.Get(ctx, dgst)
-	if err != nil {
-		return nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
+
+	switch {
+	case kerrors.IsNotFound(err):
+		return nil, rerrors.NewError(
+			ErrImageStreamImageNotFoundCode,
+			fmt.Sprintf("getImage: unable to find image digest %s in %s", dgst.String(), is.name),
+			err,
+		)
+	case err != nil:
+		return nil, rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("getImage: unable to get image digest %s in %s", dgst.String(), is.name),
+			err,
+		)
 	}
+
 	return image, nil
 }
 
 // ResolveImageID returns latest TagEvent for specified imageID and an error if
 // there's more than one image matching the ID or when one does not exist.
-func (is *imageStream) ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, error) {
-	stream, err := is.imageStreamGetter.get()
-	if err != nil {
-		context.GetLogger(ctx).Errorf("imageStream.ResolveImageID: failed to get image stream: %v", err)
-		return nil, err
+func (is *imageStream) ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, *rerrors.Error) {
+	stream, rErr := is.imageStreamGetter.get()
+
+	if rErr != nil {
+		return nil, convertImageStreamGetterError(rErr, fmt.Sprintf("ResolveImageID: failed to get image stream %s", is.Reference()))
 	}
 
 	tagEvent, err := originutil.ResolveImageID(stream, dgst.String())
 	if err != nil {
-		return nil, err
+		code := ErrImageStreamUnknownErrorCode
+
+		if kerrors.IsNotFound(err) {
+			code = ErrImageStreamImageNotFoundCode
+		}
+
+		return nil, rerrors.NewError(
+			code,
+			fmt.Sprintf("ResolveImageID: unable to resolve ImageID %s in image stream %s", dgst.String(), is.Reference()),
+			err,
+		)
 	}
 
 	return tagEvent, nil
@@ -153,16 +154,15 @@ func (is *imageStream) ResolveImageID(ctx context.Context, dgst digest.Digest) (
 //
 // If you need the image object to be modified according to image stream tag,
 // please use GetImageOfImageStream.
-func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, error) {
+func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *imageapiv1.TagEvent, *rerrors.Error) {
 	tagEvent, err := is.ResolveImageID(ctx, dgst)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("failed to resolve image %s in ImageStream %s: %v", dgst.String(), is.Reference(), err)
-		return nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
+		return nil, nil, err
 	}
 
 	image, err := is.getImage(ctx, dgst)
 	if err != nil {
-		return nil, nil, wrapKStatusErrorOnGetImage(is.name, dgst, err)
+		return nil, nil, err
 	}
 
 	return image, tagEvent, nil
@@ -176,7 +176,7 @@ func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst dig
 // NOTE: due to on the fly modification, the returned image object should
 // not be sent to the master API. If you need unmodified version of the
 // image object, please use getStoredImageOfImageStream.
-func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, error) {
+func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *rerrors.Error) {
 	image, tagEvent, err := is.getStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
@@ -190,7 +190,7 @@ func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Di
 }
 
 // ImageManifestBlobStored adds the imageapi.ImageManifestBlobStoredAnnotation annotation to image.
-func (is *imageStream) ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) error {
+func (is *imageStream) ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) *rerrors.Error {
 	image, err := is.getImage(ctx, digest.Digest(image.Name)) // ensure that we have the image object from master API
 	if err != nil {
 		return err
@@ -206,26 +206,34 @@ func (is *imageStream) ImageManifestBlobStored(ctx context.Context, image *image
 	image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] = "true"
 
 	if _, err := is.registryOSClient.Images().Update(image); err != nil {
-		return fmt.Errorf("error updating Image: %v", err)
+		return rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("ImageManifestBlobStored: error updating image %s", image.Name),
+			err,
+		)
 	}
 	return nil
 }
 
-func (is *imageStream) GetSecrets() ([]corev1.Secret, error) {
+func (is *imageStream) GetSecrets() ([]corev1.Secret, *rerrors.Error) {
 	secrets, err := is.registryOSClient.ImageStreamSecrets(is.namespace).Secrets(is.name, metav1.GetOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("error getting secrets for repository %s: %v", is.Reference(), err)
+		return nil, rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("GetSecrets: error getting secrets for repository %s", is.Reference()),
+			err,
+		)
 	}
 	return secrets.Items, nil
 }
 
 // TagIsInsecure returns true if the given image stream or its tag allow for
 // insecure transport.
-func (is *imageStream) TagIsInsecure(ctx context.Context, tag string, dgst digest.Digest) (bool, error) {
+func (is *imageStream) TagIsInsecure(ctx context.Context, tag string, dgst digest.Digest) (bool, *rerrors.Error) {
 	stream, err := is.imageStreamGetter.get()
+
 	if err != nil {
-		context.GetLogger(ctx).Errorf("imageStream.TagIsInsecure: failed to get image stream: %v", err)
-		return false, err
+		return false, convertImageStreamGetterError(err, fmt.Sprintf("TagIsInsecure: failed to get image stream %s", is.Reference()))
 	}
 
 	if insecure, _ := stream.Annotations[imageapi.InsecureRepositoryAnnotation]; insecure == "true" {
@@ -248,37 +256,38 @@ func (is *imageStream) TagIsInsecure(ctx context.Context, tag string, dgst diges
 	return false, nil
 }
 
-func (is *imageStream) Exists(ctx context.Context) (bool, error) {
-	_, err := is.imageStreamGetter.get()
-	if err != nil {
-		context.GetLogger(ctx).Errorf("imageStream.Exists: failed to get image stream: %v", err)
-		if t, ok := err.(errcode.Error); ok && t.ErrorCode() == disterrors.ErrorCodeNameUnknown {
+func (is *imageStream) Exists(ctx context.Context) (bool, *rerrors.Error) {
+	_, rErr := is.imageStreamGetter.get()
+	if rErr != nil {
+		if rErr.Code == ErrImageStreamGetterNotFoundCode {
 			return false, nil
 		}
-		return false, err
+		return false, convertImageStreamGetterError(rErr, fmt.Sprintf("Exists: failed to get image stream %s", is.Reference()))
 	}
 	return true, nil
 }
 
-func (is *imageStream) localRegistry(ctx context.Context) (string, error) {
-	stream, err := is.imageStreamGetter.get()
-	if err != nil {
-		context.GetLogger(ctx).Errorf("imageStream.localRegistry: failed to get image stream: %v", err)
-		return "", err
+func (is *imageStream) localRegistry(ctx context.Context) (string, *rerrors.Error) {
+	stream, rErr := is.imageStreamGetter.get()
+	if rErr != nil {
+		return "", convertImageStreamGetterError(rErr, fmt.Sprintf("localRegistry: failed to get image stream %s", is.Reference()))
 	}
 
 	local, err := imageapi.ParseDockerImageReference(stream.Status.DockerImageRepository)
 	if err != nil {
-		return "", err
+		return "", rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("localRegistry: unable to parse reference %q", stream.Status.DockerImageRepository),
+			err,
+		)
 	}
 	return local.Registry, nil
 }
 
-func (is *imageStream) IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, error) {
+func (is *imageStream) IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, *rerrors.Error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("imageStream.IdentifyCandidateRepositories: failed to get image stream: %v", err)
-		return nil, nil, err
+		return nil, nil, convertImageStreamGetterError(err, fmt.Sprintf("IdentifyCandidateRepositories: failed to get image stream %s", is.Reference()))
 	}
 
 	localRegistry, _ := is.localRegistry(ctx)
@@ -287,11 +296,10 @@ func (is *imageStream) IdentifyCandidateRepositories(ctx context.Context, primar
 	return repositoryCandidates, search, nil
 }
 
-func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, error) {
+func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, *rerrors.Error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("imageStream.Tags: failed to get image stream: %v", err)
-		return nil, err
+		return nil, convertImageStreamGetterError(err, fmt.Sprintf("Tags: failed to get image stream %s", is.Reference()))
 	}
 
 	m := make(map[string]digest.Digest)
@@ -315,7 +323,7 @@ func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, erro
 	return m, nil
 }
 
-func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) error {
+func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) *rerrors.Error {
 	ism := imageapiv1.ImageStreamMapping{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: is.namespace,
@@ -325,53 +333,98 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 		Tag:   tag,
 	}
 
-	if _, err := is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism); err != nil {
-		// if the error was that the image stream wasn't found, try to auto provision it
-		statusErr, ok := err.(*kerrors.StatusError)
-		if !ok {
-			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping: %s", err)
-			return err
-		}
+	_, err := is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism)
 
-		if quotautil.IsErrorQuotaExceeded(statusErr) {
-			context.GetLogger(ctx).Errorf("quota exceeded during creation of ImageStreamMapping: %v", statusErr)
-			return distribution.ErrAccessDenied
-		}
+	if err == nil {
+		return nil
+	}
 
-		status := statusErr.ErrStatus
-		isValidKind := false
-		if status.Details != nil {
-			switch strings.ToLower(status.Details.Kind) {
-			case "imagestream", /*pre-1.2*/
-				"imagestreams", /*1.2 to 1.6*/
-				"imagestreammappings" /*1.7+*/ :
-				isValidKind = true
-			}
-		}
-		if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != is.name {
-			context.GetLogger(ctx).Errorf("error creation of ImageStreamMapping: %s", err)
-			return err
-		}
+	if quotautil.IsErrorQuotaExceeded(err) {
+		return rerrors.NewError(
+			ErrImageStreamForbiddenCode,
+			fmt.Sprintf("CreateImageStreamMapping: quota exceeded during creation of %s ImageStreamMapping", is.Reference()),
+			err,
+		)
+	}
 
-		if _, err := is.createImageStream(ctx, userClient); err != nil {
-			return err
-		}
+	// if the error was that the image stream wasn't found, try to auto provision it
+	statusErr, ok := err.(*kerrors.StatusError)
+	if !ok {
+		return rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("CreateImageStreamMapping: error creating %s ImageStreamMapping", is.Reference()),
+			err,
+		)
+	}
 
-		// try to create the ISM again
-		if _, err := is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism); err != nil {
-			if quotautil.IsErrorQuotaExceeded(err) {
-				context.GetLogger(ctx).Errorf("quota exceeded during creation of ImageStreamMapping second time: %v", err)
-				return distribution.ErrAccessDenied
-			}
-			context.GetLogger(ctx).Errorf("error creating ImageStreamMapping second time: %s", err)
-			return err
+	status := statusErr.ErrStatus
+	isValidKind := false
+
+	if status.Details != nil {
+		switch strings.ToLower(status.Details.Kind) {
+		case "imagestream", /*pre-1.2*/
+			"imagestreams", /*1.2 to 1.6*/
+			"imagestreammappings" /*1.7+*/ :
+			isValidKind = true
 		}
 	}
-	return nil
+	if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != is.name {
+		return rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("CreateImageStreamMapping: error creation of %s ImageStreamMapping", is.Reference()),
+			err,
+		)
+	}
+
+	stream := &imageapiv1.ImageStream{}
+	stream.Name = is.name
+
+	_, err = userClient.ImageStreams(is.namespace).Create(stream)
+
+	switch {
+	case kerrors.IsAlreadyExists(err), kerrors.IsConflict(err):
+		// It is ok.
+	case kerrors.IsForbidden(err), kerrors.IsUnauthorized(err), quotautil.IsErrorQuotaExceeded(err):
+		return rerrors.NewError(
+			ErrImageStreamForbiddenCode,
+			fmt.Sprintf("CreateImageStreamMapping: denied creating ImageStream %s", is.Reference()),
+			err,
+		)
+	case err != nil:
+		return rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("CreateImageStreamMapping: error auto provisioning ImageStream %s", is.Reference()),
+			err,
+		)
+	}
+
+	context.GetLogger(ctx).Debugf("cache image stream %s/%s", stream.Namespace, stream.Name)
+	is.imageStreamGetter.cacheImageStream(stream)
+
+	// try to create the ISM again
+	_, err = is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism)
+
+	if err == nil {
+		return nil
+	}
+
+	if quotautil.IsErrorQuotaExceeded(err) {
+		return rerrors.NewError(
+			ErrImageStreamForbiddenCode,
+			fmt.Sprintf("CreateImageStreamMapping: quota exceeded during creation of %s ImageStreamMapping second time", is.Reference()),
+			err,
+		)
+	}
+
+	return rerrors.NewError(
+		ErrImageStreamUnknownErrorCode,
+		fmt.Sprintf("CreateImageStreamMapping: error creating %s ImageStreamMapping second time", is.Reference()),
+		err,
+	)
 }
 
 // GetLimitRangeList returns list of limit ranges for repo.
-func (is *imageStream) GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, error) {
+func (is *imageStream) GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, *rerrors.Error) {
 	if cache != nil {
 		obj, exists, _ := cache.Get(is.namespace)
 		if exists {
@@ -383,16 +436,32 @@ func (is *imageStream) GetLimitRangeList(ctx context.Context, cache ProjectObjec
 
 	lrs, err := is.registryOSClient.LimitRanges(is.namespace).List(metav1.ListOptions{})
 	if err != nil {
-		context.GetLogger(ctx).Errorf("failed to list limitranges: %v", err)
-		return nil, err
+		return nil, rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("GetLimitRangeList: failed to list limitranges for %s", is.Reference()),
+			err,
+		)
 	}
 
 	if cache != nil {
 		err = cache.Add(is.namespace, lrs)
 		if err != nil {
-			context.GetLogger(ctx).Errorf("failed to cache limit range list: %v", err)
+			context.GetLogger(ctx).Errorf("GetLimitRangeList: failed to cache limit range list: %v", err)
 		}
 	}
 
 	return lrs, nil
+}
+
+func convertImageStreamGetterError(err *rerrors.Error, msg string) *rerrors.Error {
+	code := ErrImageStreamUnknownErrorCode
+
+	switch err.Code {
+	case ErrImageStreamGetterNotFoundCode:
+		code = ErrImageStreamNotFoundCode
+	case ErrImageStreamGetterForbiddenCode:
+		code = ErrImageStreamForbiddenCode
+	}
+
+	return rerrors.NewError(code, msg, err)
 }

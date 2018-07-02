@@ -1,8 +1,7 @@
 package imagestream
 
 import (
-	"github.com/docker/distribution/registry/api/errcode"
-	disterrors "github.com/docker/distribution/registry/api/v2"
+	"fmt"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -10,7 +9,15 @@ import (
 	imageapiv1 "github.com/openshift/api/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	rerrors "github.com/openshift/image-registry/pkg/errors"
 	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
+)
+
+const (
+	ErrImageStreamGetterCode          = "ImageStreamGetter:"
+	ErrImageStreamGetterUnknownCode   = ErrImageStreamGetterCode + "Unknown"
+	ErrImageStreamGetterNotFoundCode  = ErrImageStreamGetterCode + "NotFound"
+	ErrImageStreamGetterForbiddenCode = ErrImageStreamGetterCode + "Forbidden"
 )
 
 // cachedImageStreamGetter wraps a master API client for getting image streams with a cache.
@@ -21,7 +28,7 @@ type cachedImageStreamGetter struct {
 	cachedImageStream *imageapiv1.ImageStream
 }
 
-func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, error) {
+func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, *rerrors.Error) {
 	if g.cachedImageStream != nil {
 		return g.cachedImageStream, nil
 	}
@@ -29,11 +36,11 @@ func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, error) {
 	if err != nil {
 		switch {
 		case kerrors.IsNotFound(err):
-			return nil, disterrors.ErrorCodeNameUnknown.WithDetail(err)
+			return nil, rerrors.NewError(ErrImageStreamGetterNotFoundCode, fmt.Sprintf("%s/%s", g.namespace, g.name), err)
 		case kerrors.IsForbidden(err), kerrors.IsUnauthorized(err), quotautil.IsErrorQuotaExceeded(err):
-			return nil, errcode.ErrorCodeDenied.WithDetail(err)
+			return nil, rerrors.NewError(ErrImageStreamGetterForbiddenCode, fmt.Sprintf("%s/%s", g.namespace, g.name), err)
 		default:
-			return nil, errcode.ErrorCodeUnknown.WithDetail(err)
+			return nil, rerrors.NewError(ErrImageStreamGetterUnknownCode, fmt.Sprintf("%s/%s", g.namespace, g.name), err)
 		}
 	}
 

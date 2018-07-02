@@ -43,9 +43,20 @@ func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest
 
 func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	context.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
-	image, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
-	if err != nil {
-		return nil, err
+	image, rErr := m.imageStream.GetImageOfImageStream(ctx, dgst)
+	if rErr != nil {
+		switch rErr.Code {
+		case imagestream.ErrImageStreamNotFoundCode, imagestream.ErrImageStreamImageNotFoundCode:
+			context.GetLogger(ctx).Errorf("remoteGet: unable to get image %s in imagestream %s: %v", dgst.String(), m.imageStream.Reference(), rErr)
+			return nil, distribution.ErrManifestUnknownRevision{
+				Name:     m.imageStream.Reference(),
+				Revision: dgst,
+			}
+		case imagestream.ErrImageStreamForbiddenCode:
+			context.GetLogger(ctx).Errorf("remoteGet: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), rErr)
+			return nil, distribution.ErrAccessDenied
+		}
+		return nil, rErr
 	}
 
 	ref, err := imageapi.ParseDockerImageReference(image.DockerImageReference)
