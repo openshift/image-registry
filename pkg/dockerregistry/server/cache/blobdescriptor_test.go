@@ -23,7 +23,7 @@ func TestRepositoryScopedBlobDescriptor(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	svc := &fakeBlobDescriptorService{
 		digests: map[digest.Digest]distribution.Descriptor{
@@ -86,7 +86,7 @@ func TestRepositoryScopedBlobDescriptorFail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	svc := &fakeBlobDescriptorService{}
 

@@ -19,7 +19,7 @@ func TestGlobalProviderStat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	cacheprovider := &Provider{
 		Cache: cache,
@@ -79,7 +79,7 @@ func TestGlobalProviderClear(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	cacheprovider := &Provider{
 		Cache: cache,
@@ -126,7 +126,7 @@ func TestRepositoryScopedProviderStat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	cacheprovider := &Provider{
 		Cache: cache,

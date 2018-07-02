@@ -153,9 +153,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 			t.Fatalf("unable to create cache: %v", err)
 		}
 
-		cache := &cache.RepoDigest{
-			Cache: digestCache,
-		}
+		cache := cache.NewRepositoryDigest(digestCache)
 
 		remoteBlobGetter := NewBlobGetterService(
 			imageStream,
@@ -589,9 +587,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 				t.Fatalf("unable to create cache: %v", err)
 			}
 
-			cache := &cache.RepoDigest{
-				Cache: digestCache,
-			}
+			cache := cache.NewRepositoryDigest(digestCache)
 
 			remoteBlobGetter := NewBlobGetterService(
 				imageStream,
@@ -708,9 +704,7 @@ func TestPullthroughMetrics(t *testing.T) {
 		t.Fatalf("unable to create cache: %v", err)
 	}
 
-	cache := &cache.RepoDigest{
-		Cache: digestCache,
-	}
+	cache := cache.NewRepositoryDigest(digestCache)
 	c, sink := metricstesting.NewCounterSink()
 	remoteBlobGetter := NewBlobGetterService(
 		imageStream,

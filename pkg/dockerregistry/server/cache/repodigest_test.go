@@ -43,9 +43,9 @@ func TestRepoDigest(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
-	r := &RepoDigest{
+	r := &repositoryDigest{
 		Cache: cache,
 	}
 
@@ -99,9 +99,9 @@ func TestRepoDigestRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
-	r := &RepoDigest{
+	r := &repositoryDigest{
 		Cache: cache,
 	}
 

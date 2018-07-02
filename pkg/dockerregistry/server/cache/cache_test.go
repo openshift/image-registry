@@ -26,7 +26,7 @@ func TestDigestCacheAddDigest(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	cache.Add(dgst, &DigestValue{
 		desc: &distribution.Descriptor{

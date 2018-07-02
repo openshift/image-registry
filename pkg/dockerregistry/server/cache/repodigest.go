@@ -9,23 +9,29 @@ type RepositoryDigest interface {
 	Repositories(dgst digest.Digest) ([]string, error)
 }
 
-type RepoDigest struct {
+type repositoryDigest struct {
 	Cache DigestCache
 }
 
-var _ RepositoryDigest = &RepoDigest{}
+var _ RepositoryDigest = &repositoryDigest{}
 
-func (rd *RepoDigest) AddDigest(dgst digest.Digest, repository string) error {
+func NewRepositoryDigest(cache DigestCache) RepositoryDigest {
+	return &repositoryDigest{
+		Cache: cache,
+	}
+}
+
+func (rd *repositoryDigest) AddDigest(dgst digest.Digest, repository string) error {
 	return rd.Cache.Add(dgst, &DigestValue{
 		repo: &repository,
 	})
 }
 
-func (rd *RepoDigest) RemoveDigest(dgst digest.Digest, repository string) error {
+func (rd *repositoryDigest) RemoveDigest(dgst digest.Digest, repository string) error {
 	return rd.Cache.RemoveRepository(dgst, repository)
 }
 
-func (rd *RepoDigest) ContainsRepository(dgst digest.Digest, repository string) bool {
+func (rd *repositoryDigest) ContainsRepository(dgst digest.Digest, repository string) bool {
 	item, err := rd.Cache.Get(dgst)
 	if err != nil {
 		return false
@@ -34,7 +40,7 @@ func (rd *RepoDigest) ContainsRepository(dgst digest.Digest, repository string) 
 	return item.repositories.Contains(repository)
 }
 
-func (rd *RepoDigest) Repositories(dgst digest.Digest) (repos []string, err error) {
+func (rd *repositoryDigest) Repositories(dgst digest.Digest) (repos []string, err error) {
 	var item DigestItem
 
 	item, err = rd.Cache.Get(dgst)

@@ -30,7 +30,7 @@ type DigestItem struct {
 	repositories *simplelru.LRU
 }
 
-type BlobDigest struct {
+type digestCache struct {
 	ttl      time.Duration
 	repoSize int
 
@@ -40,20 +40,20 @@ type BlobDigest struct {
 }
 
 func NewBlobDigest(digestSize, repoSize int, itemTTL time.Duration) (DigestCache, error) {
-	digestCache, err := simplelru.NewLRU(digestSize, nil)
+	lru, err := simplelru.NewLRU(digestSize, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return &BlobDigest{
+	return &digestCache{
 		ttl:      itemTTL,
 		repoSize: repoSize,
 		clock:    clock.RealClock{},
-		lru:      digestCache,
+		lru:      lru,
 	}, nil
 }
 
-func (gbd *BlobDigest) get(dgst digest.Digest) *DigestItem {
+func (gbd *digestCache) get(dgst digest.Digest) *DigestItem {
 	if value, ok := gbd.lru.Get(dgst); ok {
 		d, _ := value.(*DigestItem)
 		return d
@@ -61,7 +61,7 @@ func (gbd *BlobDigest) get(dgst digest.Digest) *DigestItem {
 	return nil
 }
 
-func (gbd *BlobDigest) peek(dgst digest.Digest) *DigestItem {
+func (gbd *digestCache) peek(dgst digest.Digest) *DigestItem {
 	if value, ok := gbd.lru.Peek(dgst); ok {
 		d, _ := value.(*DigestItem)
 		return d
@@ -69,14 +69,14 @@ func (gbd *BlobDigest) peek(dgst digest.Digest) *DigestItem {
 	return nil
 }
 
-func (gbd *BlobDigest) Purge() {
+func (gbd *digestCache) Purge() {
 	gbd.mu.Lock()
 	defer gbd.mu.Unlock()
 
 	gbd.lru.Purge()
 }
 
-func (gbd *BlobDigest) Get(dgst digest.Digest) (DigestItem, error) {
+func (gbd *digestCache) Get(dgst digest.Digest) (DigestItem, error) {
 	if err := dgst.Validate(); err != nil {
 		return DigestItem{}, err
 	}
@@ -102,7 +102,7 @@ func (gbd *BlobDigest) Get(dgst digest.Digest) (DigestItem, error) {
 	return *value, nil
 }
 
-func (gbd *BlobDigest) Remove(dgst digest.Digest) error {
+func (gbd *digestCache) Remove(dgst digest.Digest) error {
 	if err := dgst.Validate(); err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (gbd *BlobDigest) Remove(dgst digest.Digest) error {
 	return nil
 }
 
-func (gbd *BlobDigest) RemoveRepository(dgst digest.Digest, repository string) error {
+func (gbd *digestCache) RemoveRepository(dgst digest.Digest, repository string) error {
 	if err := dgst.Validate(); err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func (gbd *BlobDigest) RemoveRepository(dgst digest.Digest, repository string) e
 	return nil
 }
 
-func (gbd *BlobDigest) Add(dgst digest.Digest, item *DigestValue) error {
+func (gbd *digestCache) Add(dgst digest.Digest, item *DigestValue) error {
 	if err := dgst.Validate(); err != nil {
 		return err
 	}

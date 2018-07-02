@@ -93,9 +93,7 @@ func TestManifestServiceGetDoesntChangeDockerImageReference(t *testing.T) {
 		t.Fatalf("unable to create cache: %v", err)
 	}
 
-	cache := &cache.RepoDigest{
-		Cache: digestCache,
-	}
+	cache := cache.NewRepositoryDigest(digestCache)
 
 	ms := &manifestService{
 		manifests: newTestManifestService(repo, map[digest.Digest]distribution.Manifest{
