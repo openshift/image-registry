@@ -12,9 +12,11 @@ import (
 )
 
 type DigestCache interface {
-	Get(dgst digest.Digest) (DigestItem, error)
+	Get(dgst digest.Digest) (distribution.Descriptor, error)
+	ScopedGet(dgst digest.Digest, repository string) (distribution.Descriptor, error)
+	Repositories(dgst digest.Digest) []string
 	Remove(dgst digest.Digest) error
-	RemoveRepository(dgst digest.Digest, repository string) error
+	ScopedRemove(dgst digest.Digest, repository string) error
 	Add(dgst digest.Digest, value *DigestValue) error
 }
 
@@ -52,9 +54,18 @@ func NewBlobDigest(digestSize, repoSize int, itemTTL time.Duration) (DigestCache
 	}, nil
 }
 
-func (gbd *digestCache) get(dgst digest.Digest) *DigestItem {
+func (gbd *digestCache) get(dgst digest.Digest, reuse bool) *DigestItem {
 	if value, ok := gbd.lru.Get(dgst); ok {
 		d, _ := value.(*DigestItem)
+		if d != nil && d.expireTime.Before(gbd.clock.Now()) {
+			if !reuse {
+				gbd.lru.Remove(dgst)
+				return nil
+			}
+			d.expireTime = gbd.clock.Now().Add(gbd.ttl)
+			d.desc = nil
+			d.repositories.Purge()
+		}
 		return d
 	}
 	return nil
@@ -68,30 +79,71 @@ func (gbd *digestCache) peek(dgst digest.Digest) *DigestItem {
 	return nil
 }
 
-func (gbd *digestCache) Get(dgst digest.Digest) (DigestItem, error) {
+func (gbd *digestCache) Get(dgst digest.Digest) (distribution.Descriptor, error) {
 	if err := dgst.Validate(); err != nil {
-		return DigestItem{}, err
+		return distribution.Descriptor{}, err
 	}
 
 	if gbd.ttl == 0 {
-		return DigestItem{}, distribution.ErrBlobUnknown
+		return distribution.Descriptor{}, distribution.ErrBlobUnknown
 	}
 
 	gbd.mu.Lock()
 	defer gbd.mu.Unlock()
 
-	value := gbd.get(dgst)
+	value := gbd.get(dgst, false)
 
-	if value == nil {
-		return DigestItem{}, distribution.ErrBlobUnknown
+	if value == nil || value.desc == nil {
+		return distribution.Descriptor{}, distribution.ErrBlobUnknown
 	}
 
-	if value.expireTime.Before(gbd.clock.Now()) {
-		gbd.lru.Remove(dgst)
-		return DigestItem{}, distribution.ErrBlobUnknown
+	return *value.desc, nil
+}
+
+func (gbd *digestCache) ScopedGet(dgst digest.Digest, repository string) (distribution.Descriptor, error) {
+	if err := dgst.Validate(); err != nil {
+		return distribution.Descriptor{}, err
 	}
 
-	return *value, nil
+	if gbd.ttl == 0 {
+		return distribution.Descriptor{}, distribution.ErrBlobUnknown
+	}
+
+	gbd.mu.Lock()
+	defer gbd.mu.Unlock()
+
+	value := gbd.get(dgst, false)
+
+	if value == nil || value.desc == nil || !value.repositories.Contains(repository) {
+		return distribution.Descriptor{}, distribution.ErrBlobUnknown
+	}
+
+	return *value.desc, nil
+}
+
+func (gbd *digestCache) Repositories(dgst digest.Digest) []string {
+	if err := dgst.Validate(); err != nil {
+		return nil
+	}
+
+	if gbd.ttl == 0 {
+		return nil
+	}
+
+	gbd.mu.Lock()
+	defer gbd.mu.Unlock()
+
+	item := gbd.get(dgst, false)
+	if item == nil {
+		return nil
+	}
+
+	var repos []string
+	for _, v := range item.repositories.Keys() {
+		s := v.(string)
+		repos = append(repos, s)
+	}
+	return repos
 }
 
 func (gbd *digestCache) Remove(dgst digest.Digest) error {
@@ -110,7 +162,7 @@ func (gbd *digestCache) Remove(dgst digest.Digest) error {
 	return nil
 }
 
-func (gbd *digestCache) RemoveRepository(dgst digest.Digest, repository string) error {
+func (gbd *digestCache) ScopedRemove(dgst digest.Digest, repository string) error {
 	if err := dgst.Validate(); err != nil {
 		return err
 	}
@@ -148,7 +200,7 @@ func (gbd *digestCache) Add(dgst digest.Digest, item *DigestValue) error {
 	gbd.mu.Lock()
 	defer gbd.mu.Unlock()
 
-	value := gbd.get(dgst)
+	value := gbd.get(dgst, true)
 
 	if value == nil {
 		lru, err := simplelru.NewLRU(gbd.repoSize, nil)

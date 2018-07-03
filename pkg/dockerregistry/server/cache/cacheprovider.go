@@ -25,17 +25,7 @@ func (c *Provider) RepositoryScoped(repo string) (distribution.BlobDescriptorSer
 }
 
 func (c *Provider) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	item, err := c.Cache.Get(dgst)
-
-	if err != nil && err != distribution.ErrBlobUnknown {
-		return distribution.Descriptor{}, err
-	}
-
-	if item.desc == nil {
-		return distribution.Descriptor{}, distribution.ErrBlobUnknown
-	}
-
-	return *item.desc, nil
+	return c.Cache.Get(dgst)
 }
 
 func (c *Provider) SetDescriptor(ctx context.Context, dgst digest.Digest, desc distribution.Descriptor) error {

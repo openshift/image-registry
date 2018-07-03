@@ -8,7 +8,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/clock"
 
-	"github.com/docker/distribution"
 	"github.com/docker/distribution/digest"
 )
 
@@ -56,10 +55,7 @@ func TestRepoDigest(t *testing.T) {
 		}
 	}
 
-	repos, err := r.Repositories(digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	repos := r.Repositories(digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"))
 	sort.Strings(repos)
 
 	if !reflect.DeepEqual(repos, []string{"bar", "foo"}) {
@@ -68,8 +64,8 @@ func TestRepoDigest(t *testing.T) {
 
 	clock.Step(ttl5m)
 
-	_, err = r.Repositories(digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"))
-	if err != distribution.ErrBlobUnknown {
+	repos = r.Repositories(digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"))
+	if len(repos) != 0 {
 		t.Fatalf("item not expired")
 	}
 }
@@ -112,10 +108,7 @@ func TestRepoDigestRemove(t *testing.T) {
 		}
 	}
 
-	repos, err := r.Repositories(dgst)
-	if err != nil {
-		t.Fatal(err)
-	}
+	repos := r.Repositories(dgst)
 	sort.Strings(repos)
 
 	if !reflect.DeepEqual(repos, []string{"bar", "foo"}) {

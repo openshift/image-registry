@@ -5,7 +5,7 @@ import "github.com/docker/distribution/digest"
 type RepositoryDigest interface {
 	AddDigest(dgst digest.Digest, repository string) error
 	ContainsRepository(dgst digest.Digest, repository string) bool
-	Repositories(dgst digest.Digest) ([]string, error)
+	Repositories(dgst digest.Digest) []string
 }
 
 type repositoryDigest struct {
@@ -27,26 +27,14 @@ func (rd *repositoryDigest) AddDigest(dgst digest.Digest, repository string) err
 }
 
 func (rd *repositoryDigest) ContainsRepository(dgst digest.Digest, repository string) bool {
-	item, err := rd.Cache.Get(dgst)
-	if err != nil {
-		return false
+	for _, repo := range rd.Cache.Repositories(dgst) {
+		if repo == repository {
+			return true
+		}
 	}
-
-	return item.repositories.Contains(repository)
+	return false
 }
 
-func (rd *repositoryDigest) Repositories(dgst digest.Digest) (repos []string, err error) {
-	var item DigestItem
-
-	item, err = rd.Cache.Get(dgst)
-	if err != nil {
-		return
-	}
-
-	for _, v := range item.repositories.Keys() {
-		s := v.(string)
-		repos = append(repos, s)
-	}
-
-	return
+func (rd *repositoryDigest) Repositories(dgst digest.Digest) []string {
+	return rd.Cache.Repositories(dgst)
 }
