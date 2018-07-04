@@ -148,6 +148,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 			defaultDescriptorCacheSize,
 			defaultDigestToRepositoryCacheSize,
 			24*time.Hour, // for tests it's virtually forever
+			metrics.NewNoopMetrics(),
 		)
 		if err != nil {
 			t.Fatalf("unable to create cache: %v", err)
@@ -582,6 +583,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 				defaultDescriptorCacheSize,
 				defaultDigestToRepositoryCacheSize,
 				24*time.Hour, // for tests it's virtually forever
+				metrics.NewNoopMetrics(),
 			)
 			if err != nil {
 				t.Fatalf("unable to create cache: %v", err)
@@ -699,6 +701,7 @@ func TestPullthroughMetrics(t *testing.T) {
 		defaultDescriptorCacheSize,
 		defaultDigestToRepositoryCacheSize,
 		24*time.Hour, // for tests it's virtually forever
+		metrics.NewNoopMetrics(),
 	)
 	if err != nil {
 		t.Fatalf("unable to create cache: %v", err)

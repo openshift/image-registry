@@ -9,13 +9,15 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
 
 func TestGlobalProviderStat(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +77,7 @@ func TestGlobalProviderClear(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +124,7 @@ func TestRepositoryScopedProviderStat(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -61,6 +61,18 @@ func (s counterSink) StorageErrors(funcname, errcode string) metrics.Counter {
 	})
 }
 
+func (s counterSink) DigestCacheRequests(resultType string) metrics.Counter {
+	return callbackCounter(func() {
+		s.c.Add(fmt.Sprintf("digest_cache_requests:%s", resultType), 1)
+	})
+}
+
+func (s counterSink) DigestCacheScopedRequests(resultType string) metrics.Counter {
+	return callbackCounter(func() {
+		s.c.Add(fmt.Sprintf("digest_cache_scoped_requests:%s", resultType), 1)
+	})
+}
+
 func NewCounterSink() (counter.Counter, metrics.Sink) {
 	c := counter.New()
 	return c, counterSink{c: c}

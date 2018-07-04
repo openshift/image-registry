@@ -10,6 +10,8 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
 
 const (
@@ -23,7 +25,7 @@ func TestDigestCacheAddDigest(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +66,7 @@ func TestDigestCacheRemoveDigest(t *testing.T) {
 		Digest: dgst,
 	}
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +95,7 @@ func TestDigestCacheAddRepository(t *testing.T) {
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 	repos := []string{"foo", "bar", "baz"}
 
-	cache, err := NewBlobDigest(5, 1, ttl1m)
+	cache, err := NewBlobDigest(5, 1, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +116,7 @@ func TestDigestCacheScopedRemove(t *testing.T) {
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 	repos := []string{"bar", "baz", "foo"}
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +151,7 @@ func TestDigestCacheScopedRemove(t *testing.T) {
 }
 
 func TestDigestCacheInvalidDigest(t *testing.T) {
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +181,7 @@ func TestDigestCacheDigestMigration(t *testing.T) {
 	dgst256 := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 	dgst512 := digest.Digest("sha512:3abb6677af34ac57c0ca5828fd94f9d886c26ce59a8ce60ecf6778079423dccff1d6f19cb655805d56098e6d38a1a710dee59523eed7511e5a9e4b8ccb3a4686")
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}

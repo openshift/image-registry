@@ -56,7 +56,12 @@ func newTestRegistry(
 		return nil, err
 	}
 
-	digestCache, err := cache.NewBlobDigest(defaultDescriptorCacheSize, defaultDigestToRepositoryCacheSize, cfg.Cache.BlobRepositoryTTL)
+	digestCache, err := cache.NewBlobDigest(
+		defaultDescriptorCacheSize,
+		defaultDigestToRepositoryCacheSize,
+		cfg.Cache.BlobRepositoryTTL,
+		metrics.NewNoopMetrics(),
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -14,6 +14,7 @@ const (
 	httpSubsystem        = "http"
 	pullthroughSubsystem = "pullthrough"
 	storageSubsystem     = "storage"
+	digestCacheSubsystem = "digest_cache"
 )
 
 var (
@@ -130,6 +131,25 @@ var (
 		},
 		[]string{"operation", "code"},
 	)
+
+	digestCacheRequestsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: namespace,
+			Subsystem: digestCacheSubsystem,
+			Name:      "requests_total",
+			Help:      "Total number of requests without scope to the digest cache.",
+		},
+		[]string{"type"},
+	)
+	digestCacheScopedRequestsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: namespace,
+			Subsystem: digestCacheSubsystem,
+			Name:      "scoped_requests_total",
+			Help:      "Total number of scoped requests to the digest cache.",
+		},
+		[]string{"type"},
+	)
 )
 
 var prometheusOnce sync.Once
@@ -153,6 +173,8 @@ func NewPrometheusSink() Sink {
 		prometheus.MustRegister(pullthroughRepositoryErrorsTotal)
 		prometheus.MustRegister(storageDurationSeconds)
 		prometheus.MustRegister(storageErrorsTotal)
+		prometheus.MustRegister(digestCacheRequestsTotal)
+		prometheus.MustRegister(digestCacheScopedRequestsTotal)
 	})
 	return prometheusSink{}
 }
@@ -179,4 +201,12 @@ func (s prometheusSink) StorageDuration(funcname string) Observer {
 
 func (s prometheusSink) StorageErrors(funcname, errcode string) Counter {
 	return storageErrorsTotal.WithLabelValues(funcname, errcode)
+}
+
+func (s prometheusSink) DigestCacheRequests(resultType string) Counter {
+	return digestCacheRequestsTotal.WithLabelValues(resultType)
+}
+
+func (s prometheusSink) DigestCacheScopedRequests(resultType string) Counter {
+	return digestCacheScopedRequestsTotal.WithLabelValues(resultType)
 }

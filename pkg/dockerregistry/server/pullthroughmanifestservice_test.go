@@ -163,6 +163,7 @@ func TestPullthroughManifests(t *testing.T) {
 			defaultDescriptorCacheSize,
 			defaultDigestToRepositoryCacheSize,
 			24*time.Hour, // for tests it's virtually forever
+			metrics.NewNoopMetrics(),
 		)
 		if err != nil {
 			t.Fatalf("unable to create cache: %v", err)
@@ -397,6 +398,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 				defaultDescriptorCacheSize,
 				defaultDigestToRepositoryCacheSize,
 				24*time.Hour, // for tests it's virtually forever
+				metrics.NewNoopMetrics(),
 			)
 			if err != nil {
 				t.Fatalf("unable to create cache: %v", err)

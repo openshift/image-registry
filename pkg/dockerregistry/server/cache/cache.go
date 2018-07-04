@@ -9,6 +9,8 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
 
 type DigestCache interface {
@@ -34,13 +36,14 @@ type DigestItem struct {
 type digestCache struct {
 	ttl      time.Duration
 	repoSize int
+	metrics  metrics.DigestCache
 
 	mu    sync.Mutex
 	clock clock.Clock
 	lru   *simplelru.LRU
 }
 
-func NewBlobDigest(digestSize, repoSize int, itemTTL time.Duration) (DigestCache, error) {
+func NewBlobDigest(digestSize, repoSize int, itemTTL time.Duration, metrics metrics.DigestCache) (DigestCache, error) {
 	lru, err := simplelru.NewLRU(digestSize, nil)
 	if err != nil {
 		return nil, err
@@ -49,6 +52,7 @@ func NewBlobDigest(digestSize, repoSize int, itemTTL time.Duration) (DigestCache
 	return &digestCache{
 		ttl:      itemTTL,
 		repoSize: repoSize,
+		metrics:  metrics,
 		clock:    clock.RealClock{},
 		lru:      lru,
 	}, nil
@@ -94,9 +98,11 @@ func (gbd *digestCache) Get(dgst digest.Digest) (distribution.Descriptor, error)
 	value := gbd.get(dgst, false)
 
 	if value == nil || value.desc == nil {
+		gbd.metrics.DigestCache().Request(false)
 		return distribution.Descriptor{}, distribution.ErrBlobUnknown
 	}
 
+	gbd.metrics.DigestCache().Request(true)
 	return *value.desc, nil
 }
 
@@ -115,9 +121,11 @@ func (gbd *digestCache) ScopedGet(dgst digest.Digest, repository string) (distri
 	value := gbd.get(dgst, false)
 
 	if value == nil || value.desc == nil || !value.repositories.Contains(repository) {
+		gbd.metrics.DigestCacheScoped().Request(false)
 		return distribution.Descriptor{}, distribution.ErrBlobUnknown
 	}
 
+	gbd.metrics.DigestCacheScoped().Request(true)
 	return *value.desc, nil
 }
 

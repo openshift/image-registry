@@ -9,6 +9,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/clock"
 
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
 
 func TestRepoDigest(t *testing.T) {
@@ -37,7 +39,7 @@ func TestRepoDigest(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(2, 3, ttl1m)
+	cache, err := NewBlobDigest(2, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +92,7 @@ func TestRepoDigestRemove(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(2, 3, ttl1m)
+	cache, err := NewBlobDigest(2, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
