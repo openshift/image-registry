@@ -191,7 +191,9 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 	handler = alive("/healthz", handler)
 	handler = health.Handler(handler)
 	handler = panicHandler(handler)
-	handler = gorillahandlers.CombinedLoggingHandler(os.Stdout, handler)
+	if !dockerConfig.Log.AccessLog.Disabled {
+		handler = gorillahandlers.CombinedLoggingHandler(os.Stdout, handler)
+	}
 
 	var tlsConf *tls.Config
 	if dockerConfig.HTTP.TLS.Certificate != "" {
