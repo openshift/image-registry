@@ -207,7 +207,7 @@ func (is *imageStream) ImageManifestBlobStored(ctx context.Context, image *image
 }
 
 func (is *imageStream) GetSecrets() ([]corev1.Secret, error) {
-	secrets, err := is.registryOSClient.ImageStreamSecrets(is.namespace).Secrets(is.name, metav1.ListOptions{})
+	secrets, err := is.registryOSClient.ImageStreamSecrets(is.namespace).Secrets(is.name, metav1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error getting secrets for repository %s: %v", is.Reference(), err)
 	}
