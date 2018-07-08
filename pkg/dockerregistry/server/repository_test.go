@@ -99,6 +99,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 		stat               string
 		images             []imageapiv1.Image
 		imageStreams       []imageapiv1.ImageStream
+		imageStreamLayers  []imageapiv1.ImageStreamLayers
 		skipAuth           bool
 		deferredErrors     deferredErrors
 		expectedDescriptor distribution.Descriptor
@@ -141,7 +142,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 		},
 
 		{
-			name:   "blob referenced only by unmanaged image with pullthrough on",
+			name:   "blob referenced only by unmanaged image with pullthrough on and server doesn't support layers subresource",
 			stat:   "nm/unmanaged@" + testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
 			images: []imageapiv1.Image{*testImages["nm/unmanaged:missing-layer-links"][0]},
 			imageStreams: []imageapiv1.ImageStream{
@@ -166,6 +167,87 @@ func TestRepositoryBlobStat(t *testing.T) {
 			},
 			expectedDescriptor: testNewDescriptorForLayer(testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1]),
 			expectedActions:    []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "images"}},
+		},
+
+		{
+			name: "blob not referenced and server supports layers subresource",
+			stat: "nm/unmanaged@" + testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
+			imageStreams: []imageapiv1.ImageStream{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "nm",
+						Name:      "unmanaged",
+					},
+					Status: imageapiv1.ImageStreamStatus{
+						Tags: []imageapiv1.NamedTagEventList{
+							{
+								Tag: "latest",
+								Items: []imageapiv1.TagEvent{
+									{
+										Image: testImages["nm/unmanaged:missing-layer-links"][0].Name,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			imageStreamLayers: []imageapiv1.ImageStreamLayers{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "nm",
+						Name:      "unmanaged",
+					},
+					Blobs: map[string]imageapiv1.ImageLayerData{
+						testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].Name: {
+							LayerSize: &testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].LayerSize,
+							MediaType: testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].MediaType,
+						},
+					},
+					Images: map[string]imageapiv1.ImageBlobReferences{
+						testImages["nm/unmanaged:missing-layer-links"][0].Name: {
+							Layers: []string{
+								testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].Name,
+							},
+						},
+					},
+				},
+			},
+			expectedError:   distribution.ErrBlobUnknown,
+			expectedActions: []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "imagestreams/secrets"}},
+		},
+
+		{
+			name: "blob referenced only by unmanaged image with pullthrough on and server supports layers subresource",
+			stat: "nm/unmanaged@" + testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
+			imageStreamLayers: []imageapiv1.ImageStreamLayers{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "nm",
+						Name:      "unmanaged",
+					},
+					Blobs: map[string]imageapiv1.ImageLayerData{
+						testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].Name: {
+							LayerSize: &testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].LayerSize,
+							MediaType: testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].MediaType,
+						},
+						testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name: {
+							LayerSize: &testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].LayerSize,
+							MediaType: testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].MediaType,
+						},
+					},
+					Images: map[string]imageapiv1.ImageBlobReferences{
+						testImages["nm/unmanaged:missing-layer-links"][0].Name: {
+							Layers: []string{
+								testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].Name,
+								testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
+							},
+						},
+					},
+				},
+			},
+			expectedDescriptor: testNewDescriptorForLayer(testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1]),
+			expectedActions:    []clientAction{{"get", "imagestreams/layers"}},
 		},
 
 		{
@@ -307,6 +389,13 @@ func TestRepositoryBlobStat(t *testing.T) {
 
 			for _, image := range tc.images {
 				_, err = fos.CreateImage(&image)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			for _, image := range tc.imageStreamLayers {
+				_, err = fos.CreateImageStreamLayers(image.Namespace, &image)
 				if err != nil {
 					t.Fatal(err)
 				}
