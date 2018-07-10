@@ -6,6 +6,7 @@
 package log
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -62,13 +63,12 @@ func SetLogger(logger SyslogWriter) {
 	syslogWriter = logger
 }
 
-// DISABLED: Conflicts with --loglevel in oc
-// func init() {
-// 	// Only define loglevel flag once.
-// 	if flag.Lookup("loglevel") == nil {
-// 		flag.IntVar(&Level, "loglevel", LevelInfo, "Log level (0 = DEBUG, 5 = FATAL)")
-// 	}
-// }
+func init() {
+	// Only define loglevel flag once.
+	if flag.Lookup("loglevel") == nil {
+		flag.IntVar(&Level, "loglevel", LevelInfo, "Log level (0 = DEBUG, 5 = FATAL)")
+	}
+}
 
 func print(l int, msg string) {
 	if l >= Level {
