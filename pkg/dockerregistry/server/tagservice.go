@@ -15,7 +15,7 @@ type tagService struct {
 }
 
 func (t tagService) Get(ctx context.Context, tag string) (distribution.Descriptor, error) {
-	ok, err := t.imageStream.Exists()
+	ok, err := t.imageStream.Exists(ctx)
 	if err != nil {
 		return distribution.Descriptor{}, err
 	}
@@ -38,7 +38,7 @@ func (t tagService) Get(ctx context.Context, tag string) (distribution.Descripto
 }
 
 func (t tagService) All(ctx context.Context) ([]string, error) {
-	ok, err := t.imageStream.Exists()
+	ok, err := t.imageStream.Exists(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (t tagService) All(ctx context.Context) ([]string, error) {
 }
 
 func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([]string, error) {
-	ok, err := t.imageStream.Exists()
+	ok, err := t.imageStream.Exists(ctx)
 	if err != nil {
 		return nil, err
 	}

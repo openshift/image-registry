@@ -14,7 +14,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	logrus_logstash "github.com/bshuster-repo/logrus-logstash-hook"
-	gorillahandlers "github.com/gorilla/handlers"
 
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
@@ -191,7 +190,9 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 	handler = alive("/healthz", handler)
 	handler = health.Handler(handler)
 	handler = panicHandler(handler)
-	handler = gorillahandlers.CombinedLoggingHandler(os.Stdout, handler)
+	if !dockerConfig.Log.AccessLog.Disabled {
+		handler = logrusLoggingHandler(ctx, handler)
+	}
 
 	var tlsConf *tls.Config
 	if dockerConfig.HTTP.TLS.Certificate != "" {
@@ -380,4 +381,29 @@ func setDefaultLogParameters(config *configuration.Configuration) {
 		config.Log.Fields = make(map[string]interface{})
 	}
 	config.Log.Fields[audit.LogEntryType] = audit.DefaultLoggerType
+}
+
+func logrusLoggingHandler(ctx context.Context, h http.Handler) http.Handler {
+	return loggingHandler{
+		ctx:     ctx,
+		handler: h,
+	}
+}
+
+type loggingHandler struct {
+	ctx     context.Context
+	handler http.Handler
+}
+
+func (h loggingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := h.ctx
+
+	ctx = context.WithRequest(ctx, r)
+	ctx, w = context.WithResponseWriter(ctx, w)
+	logger := context.GetRequestLogger(ctx)
+	ctx = context.WithLogger(ctx, logger)
+
+	h.handler.ServeHTTP(w, r)
+
+	context.GetResponseLogger(ctx).Infof("response")
 }

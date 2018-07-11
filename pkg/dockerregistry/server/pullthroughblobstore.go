@@ -39,7 +39,7 @@ func (pbs *pullthroughBlobStore) Stat(ctx context.Context, dgst digest.Digest) (
 		// continue on to the code below and look up the blob in a remote store since it is not in
 		// the local store
 	case err != nil:
-		context.GetLogger(ctx).Errorf("Failed to find blob %q: %#v", dgst.String(), err)
+		context.GetLogger(ctx).Errorf("unable to find blob %q: %#v", dgst.String(), err)
 		fallthrough
 	default:
 		return desc, err
@@ -62,7 +62,7 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 		// continue on to the code below and look up the blob in a remote store since it is not in
 		// the local store
 	case err != nil:
-		context.GetLogger(ctx).Errorf("Failed to find blob %q: %#v", dgst.String(), err)
+		context.GetLogger(ctx).Errorf("unable to serve blob %q: %#v", dgst.String(), err)
 		fallthrough
 	default:
 		return err

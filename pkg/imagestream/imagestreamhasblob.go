@@ -8,8 +8,6 @@ import (
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
 
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
 )
@@ -40,7 +38,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) *imageap
 	// verify directly with etcd
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("failed to get image stream: %v", err)
+		context.GetLogger(ctx).Errorf("imageStream.HasBlob: failed to get image stream: %v", err)
 		return logFound(nil)
 	}
 
@@ -79,7 +77,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) *imageap
 		context.GetLogger(ctx).Debugf("getting image %s", tagEvent.Image)
 		image, err := is.getImage(ctx, digest.Digest(tagEvent.Image))
 		if err != nil {
-			if kerrors.IsNotFound(err) {
+			if err.Code == ErrImageStreamImageNotFoundCode {
 				context.GetLogger(ctx).Debugf("image %q not found", tagEvent.Image)
 			} else {
 				context.GetLogger(ctx).Errorf("failed to get image: %v", err)

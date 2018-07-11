@@ -186,5 +186,7 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 		h = promhttp.InstrumentHandlerTimeToWriteHeader(metrics.HTTPTimeToWriteHeaderSeconds, h)
 	}
 
+	context.GetLogger(dockerApp).Infof("Using %q as Docker Registry URL", extraConfig.Server.Addr)
+
 	return h
 }
