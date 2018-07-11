@@ -143,3 +143,7 @@ build-rpms:
 build-images: build-rpms
 	hack/build-images.sh
 .PHONY: build-images
+
+update-deps:
+	glide update --skip-test -v
+.PHONY: update-deps

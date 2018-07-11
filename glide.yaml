@@ -31,8 +31,9 @@ import:
   version: master
 - package: github.com/openshift/client-go
   version: master
+# lock library-go before the sirupsen/logrus case change
 - package: github.com/openshift/library-go
-  version: master
+  version: 077f461517a8617b5bdb5088afa7b451dd612b15
 
 
 # everything else last
@@ -49,6 +50,7 @@ import:
   repo: https://github.com/openshift/skynetservices-skydns
 - package: github.com/RangelReale/osin
 - package: github.com/Sirupsen/logrus
+  repo: https://github.com/sirupsen/logrus
   version: 1.0.2
 - package: github.com/Azure/azure-sdk-for-go
   version: 0b5fe2abe0271ba07049eacaa65922d67c319543
