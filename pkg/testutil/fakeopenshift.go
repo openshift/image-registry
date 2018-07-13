@@ -7,6 +7,7 @@ import (
 
 	"github.com/docker/distribution/context"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -23,8 +24,9 @@ type FakeOpenShift struct {
 	logger context.Logger
 	mu     sync.Mutex
 
-	images       map[string]imageapiv1.Image
-	imageStreams map[string]imageapiv1.ImageStream
+	images            map[string]imageapiv1.Image
+	imageStreams      map[string]imageapiv1.ImageStream
+	imageStreamLayers map[string]imageapiv1.ImageStreamLayers
 }
 
 // NewFakeOpenShift constructs the fake OpenShift reactors.
@@ -32,8 +34,9 @@ func NewFakeOpenShift(ctx context.Context) *FakeOpenShift {
 	return &FakeOpenShift{
 		logger: context.GetLogger(ctx),
 
-		images:       make(map[string]imageapiv1.Image),
-		imageStreams: make(map[string]imageapiv1.ImageStream),
+		images:            make(map[string]imageapiv1.Image),
+		imageStreams:      make(map[string]imageapiv1.ImageStream),
+		imageStreamLayers: make(map[string]imageapiv1.ImageStreamLayers),
 	}
 }
 
@@ -319,6 +322,39 @@ func (fos *FakeOpenShift) GetImageStreamImage(namespace string, id string) (*ima
 	return &isi, nil
 }
 
+func (fos *FakeOpenShift) CreateImageStreamLayers(namespace string, is *imageapiv1.ImageStreamLayers) (*imageapiv1.ImageStreamLayers, error) {
+	fos.mu.Lock()
+	defer fos.mu.Unlock()
+
+	ref := fmt.Sprintf("%s/%s", namespace, is.Name)
+
+	_, ok := fos.imageStreamLayers[ref]
+	if ok {
+		return nil, errors.NewAlreadyExists(imageapiv1.Resource("imagestreams/layers"), is.Name)
+	}
+
+	is.Namespace = namespace
+	is.CreationTimestamp = metav1.Now()
+
+	fos.imageStreamLayers[ref] = *is
+	fos.logger.Debugf("(*FakeOpenShift).imageStreamLayers[%q] created", ref)
+
+	return is, nil
+}
+
+func (fos *FakeOpenShift) GetImageStreamLayers(namespace, repo string) (*imageapiv1.ImageStreamLayers, error) {
+	fos.mu.Lock()
+	defer fos.mu.Unlock()
+
+	ref := fmt.Sprintf("%s/%s", namespace, repo)
+
+	is, ok := fos.imageStreamLayers[ref]
+	if !ok {
+		return nil, errors.NewNotFound(imageapiv1.Resource("imagestreams/layers"), repo)
+	}
+	return &is, nil
+}
+
 func (fos *FakeOpenShift) getName(action clientgotesting.Action) string {
 	if getnamer, ok := action.(interface {
 		GetName() string
@@ -375,8 +411,27 @@ func (fos *FakeOpenShift) imageStreamsHandler(action clientgotesting.Action) (bo
 		fmt.Sprintf("(*FakeOpenShift).imageStreamsHandler: %s %s/%s",
 			action.GetVerb(), action.GetNamespace(), fos.getName(action)),
 		func() (bool, runtime.Object, error) {
-			if len(action.GetSubresource()) > 0 {
-				// ATM neither secrets nor any other subresource is handled here
+			switch action.GetSubresource() {
+			case "":
+			case "layers":
+				switch action := action.(type) {
+				case clientgotesting.GetActionImpl:
+					is, err := fos.GetImageStreamLayers(
+						action.GetNamespace(),
+						action.GetName(),
+					)
+					return true, is, err
+				default:
+					return fos.todo(action)
+				}
+			case "secrets":
+				switch action := action.(type) {
+				case clientgotesting.GetActionImpl:
+					return true, &corev1.SecretList{}, nil
+				default:
+					return fos.todo(action)
+				}
+			default:
 				return fos.todo(action)
 			}
 

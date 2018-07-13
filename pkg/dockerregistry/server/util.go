@@ -78,3 +78,10 @@ func RememberLayersOfImage(ctx context.Context, cache cache.RepositoryDigest, im
 		_ = cache.AddDigest(ref.Digest, cacheName)
 	}
 }
+
+// RememberLayersOfImageStream caches the layer digests of given image stream.
+func RememberLayersOfImageStream(ctx context.Context, cache cache.RepositoryDigest, layers *imageapiv1.ImageStreamLayers, cacheName string) {
+	for dgst := range layers.Blobs {
+		_ = cache.AddDigest(digest.Digest(dgst), cacheName)
+	}
+}
