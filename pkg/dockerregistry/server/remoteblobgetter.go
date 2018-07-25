@@ -106,7 +106,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 		return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
 	}
 
-	cached, _ := rbgs.cache.Repositories(dgst)
+	cached := rbgs.cache.Repositories(dgst)
 
 	retriever := getImportContext(ctx, rbgs.getSecrets, rbgs.metrics)
 

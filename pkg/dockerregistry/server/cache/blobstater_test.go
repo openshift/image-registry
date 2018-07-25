@@ -9,18 +9,20 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
 
 func TestBlobStatter(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 
@@ -75,7 +77,7 @@ func TestBlobStatter(t *testing.T) {
 func TestBlobStatterFail(t *testing.T) {
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}

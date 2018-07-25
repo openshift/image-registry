@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -8,6 +10,8 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
 
 const (
@@ -21,12 +25,12 @@ func TestDigestCacheAddDigest(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	cache.Add(dgst, &DigestValue{
 		desc: &distribution.Descriptor{
@@ -36,26 +40,18 @@ func TestDigestCacheAddDigest(t *testing.T) {
 		repo: &repo,
 	})
 
-	item, err := cache.Get(dgst)
+	desc, err := cache.ScopedGet(dgst, repo)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if item.repositories == nil {
-		t.Fatalf("unexpected empty repositories")
-	}
-
-	if item.desc.Digest != dgst {
-		t.Fatalf("unexpected item: %#+v", item)
-	}
-
-	if !item.repositories.Contains(repo) {
-		t.Fatalf("%q not found in the repositories", repo)
+	if desc.Digest != dgst {
+		t.Fatalf("unexpected descriptor: %#+v", desc)
 	}
 
 	clock.Step(ttl5m)
 
-	item, err = cache.Get(dgst)
+	_, err = cache.Get(dgst)
 	if err == nil || err != distribution.ErrBlobUnknown {
 		t.Fatalf("item not expired")
 	}
@@ -65,16 +61,22 @@ func TestDigestCacheAddDigest(t *testing.T) {
 
 func TestDigestCacheRemoveDigest(t *testing.T) {
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
-	repo := "foo"
+	desc := distribution.Descriptor{
+		Size:   10,
+		Digest: dgst,
+	}
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cache.Add(dgst, &DigestValue{
-		repo: &repo,
+	err = cache.Add(dgst, &DigestValue{
+		desc: &desc,
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	_, err = cache.Get(dgst)
 	if err != nil {
@@ -93,7 +95,7 @@ func TestDigestCacheAddRepository(t *testing.T) {
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 	repos := []string{"foo", "bar", "baz"}
 
-	cache, err := NewBlobDigest(5, 1, ttl1m)
+	cache, err := NewBlobDigest(5, 1, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,27 +106,17 @@ func TestDigestCacheAddRepository(t *testing.T) {
 		})
 	}
 
-	item, err := cache.Get(dgst)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, v := range repos[0:2] {
-		if item.repositories.Contains(v) {
-			t.Fatalf("%q found in the repositories", v)
-		}
-	}
-
-	if !item.repositories.Contains(repos[len(repos)-1]) {
-		t.Fatalf("%q not found in the repositories", repos[len(repos)-1])
+	dgstRepos := cache.Repositories(dgst)
+	if len(dgstRepos) != 1 || dgstRepos[0] != repos[len(repos)-1] {
+		t.Fatalf("got %q, want [%s]", dgstRepos, repos[len(repos)-1])
 	}
 }
 
-func TestDigestCacheRemoveRepository(t *testing.T) {
+func TestDigestCacheScopedRemove(t *testing.T) {
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
-	repos := []string{"foo", "bar", "baz"}
+	repos := []string{"bar", "baz", "foo"}
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,36 +127,31 @@ func TestDigestCacheRemoveRepository(t *testing.T) {
 		})
 	}
 
-	item, err := cache.Get(dgst)
-	if err != nil {
-		t.Fatal(err)
+	dgstRepos := cache.Repositories(dgst)
+	sort.Strings(dgstRepos)
+	if !reflect.DeepEqual(dgstRepos, repos) {
+		t.Fatalf("got %q, want %q", dgstRepos, repos)
 	}
 
-	for _, v := range repos {
-		if !item.repositories.Contains(v) {
-			t.Fatalf("%q found in the repositories", v)
-		}
-	}
-
-	for _, v := range repos {
-		err = cache.RemoveRepository(dgst, v)
+	for i, v := range repos {
+		err = cache.ScopedRemove(dgst, v)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		item, err := cache.Get(dgst)
-		if err != nil {
-			t.Fatal(err)
+		dgstRepos := cache.Repositories(dgst)
+		if dgstRepos == nil {
+			dgstRepos = []string{}
 		}
-
-		if item.repositories.Contains(v) {
-			t.Fatalf("%q found in the repositories", v)
+		sort.Strings(dgstRepos)
+		if !reflect.DeepEqual(dgstRepos, repos[i+1:]) {
+			t.Fatalf("got %q, want %q", dgstRepos, repos[i+1:])
 		}
 	}
 }
 
 func TestDigestCacheInvalidDigest(t *testing.T) {
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,37 +171,9 @@ func TestDigestCacheInvalidDigest(t *testing.T) {
 		t.Fatalf("unexpected answer: %v", err)
 	}
 
-	err = cache.RemoveRepository(digest.Digest("XXX"), "foo")
+	err = cache.ScopedRemove(digest.Digest("XXX"), "foo")
 	if err != digest.ErrDigestInvalidFormat {
 		t.Fatalf("unexpected answer: %v", err)
-	}
-}
-
-func TestDigestCachePurge(t *testing.T) {
-	digests := []digest.Digest{
-		digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"),
-		digest.Digest("sha256:53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"),
-		digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"),
-	}
-
-	cache, err := NewBlobDigest(5, 3, ttl1m)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, v := range digests {
-		if err := cache.Add(v, &DigestValue{}); err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-	}
-
-	cache.Purge()
-
-	for _, v := range digests {
-		_, err = cache.Get(v)
-		if err != distribution.ErrBlobUnknown {
-			t.Fatalf("unexpected error: %v", err)
-		}
 	}
 }
 
@@ -222,7 +181,7 @@ func TestDigestCacheDigestMigration(t *testing.T) {
 	dgst256 := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 	dgst512 := digest.Digest("sha512:3abb6677af34ac57c0ca5828fd94f9d886c26ce59a8ce60ecf6778079423dccff1d6f19cb655805d56098e6d38a1a710dee59523eed7511e5a9e4b8ccb3a4686")
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,17 +193,17 @@ func TestDigestCacheDigestMigration(t *testing.T) {
 		},
 	})
 
-	item256, err := cache.Get(dgst256)
+	desc256, err := cache.Get(dgst256)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	item512, err := cache.Get(dgst512)
+	desc512, err := cache.Get(dgst512)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if item256.desc.Digest != item512.desc.Digest {
-		t.Fatalf("unexpected digest: %#+v != %#+v", item256.desc.Digest, item512.desc.Digest)
+	if desc256.Digest != desc512.Digest {
+		t.Fatalf("unexpected digest: %#+v != %#+v", desc256.Digest, desc512.Digest)
 	}
 }

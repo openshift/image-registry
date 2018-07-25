@@ -123,6 +123,7 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 		defaultDescriptorCacheSize,
 		defaultDigestToRepositoryCacheSize,
 		cacheTTL,
+		app.metrics,
 	)
 	if err != nil {
 		context.GetLogger(ctx).Fatalf("unable to create cache: %v", err)

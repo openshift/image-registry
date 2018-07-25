@@ -163,14 +163,13 @@ func TestPullthroughManifests(t *testing.T) {
 			defaultDescriptorCacheSize,
 			defaultDigestToRepositoryCacheSize,
 			24*time.Hour, // for tests it's virtually forever
+			metrics.NewNoopMetrics(),
 		)
 		if err != nil {
 			t.Fatalf("unable to create cache: %v", err)
 		}
 
-		cache := &cache.RepoDigest{
-			Cache: digestCache,
-		}
+		cache := cache.NewRepositoryDigest(digestCache)
 
 		ptms := &pullthroughManifestService{
 			ManifestService: localManifestService,
@@ -399,14 +398,13 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 				defaultDescriptorCacheSize,
 				defaultDigestToRepositoryCacheSize,
 				24*time.Hour, // for tests it's virtually forever
+				metrics.NewNoopMetrics(),
 			)
 			if err != nil {
 				t.Fatalf("unable to create cache: %v", err)
 			}
 
-			cache := &cache.RepoDigest{
-				Cache: digestCache,
-			}
+			cache := cache.NewRepositoryDigest(digestCache)
 
 			ptms := &pullthroughManifestService{
 				ManifestService: localManifestService,

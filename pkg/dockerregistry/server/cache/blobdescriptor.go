@@ -16,36 +16,27 @@ var _ distribution.BlobDescriptorService = &RepositoryScopedBlobDescriptor{}
 
 // Stat provides metadata about a blob identified by the digest.
 func (rbd *RepositoryScopedBlobDescriptor) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	item, err := rbd.Cache.Get(dgst)
-
-	if err != nil && err != distribution.ErrBlobUnknown {
-		return distribution.Descriptor{}, err
+	desc, err := rbd.Cache.ScopedGet(dgst, rbd.Repo)
+	if err == nil || err != distribution.ErrBlobUnknown || rbd.Svc == nil {
+		return desc, err
 	}
 
-	if item.desc == nil || !item.repositories.Contains(rbd.Repo) {
-		if rbd.Svc == nil {
-			return distribution.Descriptor{}, distribution.ErrBlobUnknown
-		}
-
-		desc, err := rbd.Svc.Stat(ctx, dgst)
-		if err != nil {
-			return distribution.Descriptor{}, err
-		}
-
-		_ = rbd.Cache.Add(dgst, &DigestValue{
-			repo: &rbd.Repo,
-			desc: &desc,
-		})
-
-		return desc, nil
+	desc, err = rbd.Svc.Stat(ctx, dgst)
+	if err != nil {
+		return desc, err
 	}
 
-	return *item.desc, nil
+	_ = rbd.Cache.Add(dgst, &DigestValue{
+		repo: &rbd.Repo,
+		desc: &desc,
+	})
+
+	return desc, nil
 }
 
 // Clear removes digest from the repository cache
 func (rbd *RepositoryScopedBlobDescriptor) Clear(ctx context.Context, dgst digest.Digest) error {
-	err := rbd.Cache.RemoveRepository(dgst, rbd.Repo)
+	err := rbd.Cache.ScopedRemove(dgst, rbd.Repo)
 	if err != nil {
 		return err
 	}

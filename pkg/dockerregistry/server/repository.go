@@ -69,9 +69,7 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		crossmount: crossmount,
 
 		imageStream: imagestream.New(ctx, namespace, name, registryOSClient),
-		cache: &cache.RepoDigest{
-			Cache: app.cache,
-		},
+		cache:       cache.NewRepositoryDigest(app.cache),
 	}
 
 	r.remoteBlobGetter = NewBlobGetterService(

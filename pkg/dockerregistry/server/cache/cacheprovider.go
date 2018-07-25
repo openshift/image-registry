@@ -18,24 +18,14 @@ func (c *Provider) RepositoryScoped(repo string) (distribution.BlobDescriptorSer
 	if _, err := reference.ParseNamed(repo); err != nil {
 		return nil, err
 	}
-	return &RepositoryScopedProvider{
+	return &RepositoryScopedBlobDescriptor{
 		Repo:  repo,
 		Cache: c.Cache,
 	}, nil
 }
 
 func (c *Provider) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	item, err := c.Cache.Get(dgst)
-
-	if err != nil && err != distribution.ErrBlobUnknown {
-		return distribution.Descriptor{}, err
-	}
-
-	if item.desc == nil {
-		return distribution.Descriptor{}, distribution.ErrBlobUnknown
-	}
-
-	return *item.desc, nil
+	return c.Cache.Get(dgst)
 }
 
 func (c *Provider) SetDescriptor(ctx context.Context, dgst digest.Digest, desc distribution.Descriptor) error {
@@ -46,36 +36,4 @@ func (c *Provider) SetDescriptor(ctx context.Context, dgst digest.Digest, desc d
 
 func (c *Provider) Clear(ctx context.Context, dgst digest.Digest) error {
 	return c.Cache.Remove(dgst)
-}
-
-type RepositoryScopedProvider struct {
-	Repo  string
-	Cache DigestCache
-}
-
-var _ distribution.BlobDescriptorService = &RepositoryScopedProvider{}
-
-func (c *RepositoryScopedProvider) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	item, err := c.Cache.Get(dgst)
-
-	if err != nil && err != distribution.ErrBlobUnknown {
-		return distribution.Descriptor{}, err
-	}
-
-	if item.desc == nil || !item.repositories.Contains(c.Repo) {
-		return distribution.Descriptor{}, distribution.ErrBlobUnknown
-	}
-
-	return *item.desc, nil
-}
-
-func (c *RepositoryScopedProvider) SetDescriptor(ctx context.Context, dgst digest.Digest, desc distribution.Descriptor) error {
-	return c.Cache.Add(dgst, &DigestValue{
-		desc: &desc,
-		repo: &c.Repo,
-	})
-}
-
-func (c *RepositoryScopedProvider) Clear(ctx context.Context, dgst digest.Digest) error {
-	return c.Cache.RemoveRepository(dgst, c.Repo)
 }

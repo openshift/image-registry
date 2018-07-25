@@ -9,6 +9,8 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
 
 func TestRepositoryScopedBlobDescriptor(t *testing.T) {
@@ -18,12 +20,12 @@ func TestRepositoryScopedBlobDescriptor(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	svc := &fakeBlobDescriptorService{
 		digests: map[digest.Digest]distribution.Descriptor{
@@ -81,12 +83,12 @@ func TestRepositoryScopedBlobDescriptorFail(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
 	svc := &fakeBlobDescriptorService{}
 
@@ -106,7 +108,7 @@ func TestRepositoryScopedBlobDescriptorFail(t *testing.T) {
 func TestRepositoryScopedBlobDescriptorClear(t *testing.T) {
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +166,7 @@ func TestRepositoryScopedBlobDescriptorClear(t *testing.T) {
 func TestRepositoryScopedBlobDescriptorAdd(t *testing.T) {
 	dgst := digest.Digest("sha256:4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865")
 
-	cache, err := NewBlobDigest(5, 3, ttl1m)
+	cache, err := NewBlobDigest(5, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -34,6 +34,8 @@ type Sink interface {
 	PullthroughRepositoryErrors(registry, funcname, errcode string) Counter
 	StorageDuration(funcname string) Observer
 	StorageErrors(funcname, errcode string) Counter
+	DigestCacheRequests(resultType string) Counter
+	DigestCacheScopedRequests(resultType string) Counter
 }
 
 // Metrics is a set of all metrics that can be provided.
@@ -41,6 +43,7 @@ type Metrics interface {
 	Core
 	Pullthrough
 	Storage
+	DigestCache
 }
 
 // Core is a set of metrics for the core functionality.
@@ -64,6 +67,12 @@ type Storage interface {
 	// StorageDriver wraps distribution/registry/storage/driver.StorageDriver
 	// to collect statistics.
 	StorageDriver(driver storagedriver.StorageDriver) storagedriver.StorageDriver
+}
+
+// DigestCache is a set of metrics for the digest cache subsystem.
+type DigestCache interface {
+	DigestCache() Cache
+	DigestCacheScoped() Cache
 }
 
 func dockerErrorCode(err error) string {
@@ -171,6 +180,20 @@ func (m *metrics) StorageDriver(driver storagedriver.StorageDriver) storagedrive
 	})
 }
 
+func (m *metrics) DigestCache() Cache {
+	return &cache{
+		hitCounter:  m.sink.DigestCacheRequests("Hit"),
+		missCounter: m.sink.DigestCacheRequests("Miss"),
+	}
+}
+
+func (m *metrics) DigestCacheScoped() Cache {
+	return &cache{
+		hitCounter:  m.sink.DigestCacheScopedRequests("Hit"),
+		missCounter: m.sink.DigestCacheScopedRequests("Miss"),
+	}
+}
+
 type noopMetrics struct {
 }
 
@@ -196,4 +219,12 @@ func (m noopMetrics) DigestBlobStoreCache() Cache {
 
 func (m noopMetrics) StorageDriver(driver storagedriver.StorageDriver) storagedriver.StorageDriver {
 	return driver
+}
+
+func (m noopMetrics) DigestCache() Cache {
+	return noopCache{}
+}
+
+func (m noopMetrics) DigestCacheScoped() Cache {
+	return noopCache{}
 }

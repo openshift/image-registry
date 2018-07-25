@@ -8,8 +8,9 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/clock"
 
-	"github.com/docker/distribution"
 	"github.com/docker/distribution/digest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
 
 func TestRepoDigest(t *testing.T) {
@@ -38,14 +39,14 @@ func TestRepoDigest(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(2, 3, ttl1m)
+	cache, err := NewBlobDigest(2, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
-	r := &RepoDigest{
+	r := &repositoryDigest{
 		Cache: cache,
 	}
 
@@ -56,10 +57,7 @@ func TestRepoDigest(t *testing.T) {
 		}
 	}
 
-	repos, err := r.Repositories(digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	repos := r.Repositories(digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"))
 	sort.Strings(repos)
 
 	if !reflect.DeepEqual(repos, []string{"bar", "foo"}) {
@@ -68,8 +66,8 @@ func TestRepoDigest(t *testing.T) {
 
 	clock.Step(ttl5m)
 
-	_, err = r.Repositories(digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"))
-	if err != distribution.ErrBlobUnknown {
+	repos = r.Repositories(digest.Digest("sha256:1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"))
+	if len(repos) != 0 {
 		t.Fatalf("item not expired")
 	}
 }
@@ -94,14 +92,14 @@ func TestRepoDigestRemove(t *testing.T) {
 	now := time.Now()
 	clock := clock.NewFakeClock(now)
 
-	cache, err := NewBlobDigest(2, 3, ttl1m)
+	cache, err := NewBlobDigest(2, 3, ttl1m, metrics.NewNoopMetrics())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cache.(*BlobDigest).clock = clock
+	cache.(*digestCache).clock = clock
 
-	r := &RepoDigest{
+	r := &repositoryDigest{
 		Cache: cache,
 	}
 
@@ -112,10 +110,7 @@ func TestRepoDigestRemove(t *testing.T) {
 		}
 	}
 
-	repos, err := r.Repositories(dgst)
-	if err != nil {
-		t.Fatal(err)
-	}
+	repos := r.Repositories(dgst)
 	sort.Strings(repos)
 
 	if !reflect.DeepEqual(repos, []string{"bar", "foo"}) {
@@ -127,28 +122,4 @@ func TestRepoDigestRemove(t *testing.T) {
 			t.Fatalf("%q not found", n)
 		}
 	}
-
-	err = r.RemoveDigest(dgst, "bar")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	repos, err = r.Repositories(dgst)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	sort.Strings(repos)
-
-	if !reflect.DeepEqual(repos, []string{"foo"}) {
-		t.Fatalf("unexpected list of repositories: %#+v", repos)
-	}
-
-	if r.ContainsRepository(dgst, "bar") {
-		t.Fatalf("%q was found", "bar")
-	}
-
-	if !r.ContainsRepository(dgst, "foo") {
-		t.Fatalf("%q not found", "foo")
-	}
-
 }

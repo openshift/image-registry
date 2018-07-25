@@ -4,48 +4,37 @@ import "github.com/docker/distribution/digest"
 
 type RepositoryDigest interface {
 	AddDigest(dgst digest.Digest, repository string) error
-	RemoveDigest(dgst digest.Digest, repository string) error
 	ContainsRepository(dgst digest.Digest, repository string) bool
-	Repositories(dgst digest.Digest) ([]string, error)
+	Repositories(dgst digest.Digest) []string
 }
 
-type RepoDigest struct {
+type repositoryDigest struct {
 	Cache DigestCache
 }
 
-var _ RepositoryDigest = &RepoDigest{}
+var _ RepositoryDigest = &repositoryDigest{}
 
-func (rd *RepoDigest) AddDigest(dgst digest.Digest, repository string) error {
+func NewRepositoryDigest(cache DigestCache) RepositoryDigest {
+	return &repositoryDigest{
+		Cache: cache,
+	}
+}
+
+func (rd *repositoryDigest) AddDigest(dgst digest.Digest, repository string) error {
 	return rd.Cache.Add(dgst, &DigestValue{
 		repo: &repository,
 	})
 }
 
-func (rd *RepoDigest) RemoveDigest(dgst digest.Digest, repository string) error {
-	return rd.Cache.RemoveRepository(dgst, repository)
+func (rd *repositoryDigest) ContainsRepository(dgst digest.Digest, repository string) bool {
+	for _, repo := range rd.Cache.Repositories(dgst) {
+		if repo == repository {
+			return true
+		}
+	}
+	return false
 }
 
-func (rd *RepoDigest) ContainsRepository(dgst digest.Digest, repository string) bool {
-	item, err := rd.Cache.Get(dgst)
-	if err != nil {
-		return false
-	}
-
-	return item.repositories.Contains(repository)
-}
-
-func (rd *RepoDigest) Repositories(dgst digest.Digest) (repos []string, err error) {
-	var item DigestItem
-
-	item, err = rd.Cache.Get(dgst)
-	if err != nil {
-		return
-	}
-
-	for _, v := range item.repositories.Keys() {
-		s := v.(string)
-		repos = append(repos, s)
-	}
-
-	return
+func (rd *repositoryDigest) Repositories(dgst digest.Digest) []string {
+	return rd.Cache.Repositories(dgst)
 }
