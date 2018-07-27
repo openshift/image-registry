@@ -1,5 +1,5 @@
 hash: 53b67d48288814b7bd09d5bf9e3e35adddc8f7d80ef04c9f493e7d0bb38197be
-updated: 2018-08-14T17:30:01.233166297-04:00
+updated: 2018-08-27T16:35:03.884085744+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -133,13 +133,13 @@ imports:
   - pkg/system
   - pkg/tlsconfig
 - name: github.com/docker/go-connections
-  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
+  version: 97c2040d34dfae1d1b1275fa3a78dbdd2f41cf7e
   subpackages:
   - nat
   - sockets
   - tlsconfig
 - name: github.com/docker/go-units
-  version: 9e638d38cf6977a37a8ea0078f3ee75a7cdb2dd1
+  version: 47565b4f722fb6ceae66b95f853feed578a4a51c
 - name: github.com/docker/libtrust
   version: fa567046d9b14f6aa788882a950d69651d230b21
 - name: github.com/emicklei/go-restful
@@ -147,7 +147,7 @@ imports:
   subpackages:
   - log
 - name: github.com/emicklei/go-restful-swagger12
-  version: 5e28dc7157ebd9247a268c26dd1bee7818aa33f7
+  version: 885875a92c2ab7d6222e257e41f6ca2c1f010b4e
   repo: https://github.com/openshift/emicklei-go-restful-swagger12
 - name: github.com/garyburd/redigo
   version: 535138d7bcd717d6531c701ef5933d98b1866257
@@ -159,7 +159,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-ini/ini
-  version: 300e940a926eb277d3901b20bdfcc54928ad3642
+  version: 5cf292cae48347c2490ac1a58fe36735fb78df7e
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -220,7 +220,7 @@ imports:
 - name: github.com/imdario/mergo
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/jmespath/go-jmespath
-  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+  version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
 - name: github.com/juju/ratelimit
   version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
 - name: github.com/mailru/easyjson
@@ -234,7 +234,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/Microsoft/go-winio
-  version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
+  version: 97e4973ce50b2ff5f09635a57e2b88a037aae829
 - name: github.com/mitchellh/mapstructure
   version: 482a9fd5fa83e8c4e7817413b80f3eb8feec03ef
 - name: github.com/ncw/swift
@@ -242,12 +242,12 @@ imports:
   subpackages:
   - swifttest
 - name: github.com/opencontainers/runc
-  version: 4056a41f58e35fd428d517de1326bc465aa6a461
+  version: 0228707b77ae6e3155060341a0819ead98a0cf84
   subpackages:
   - libcontainer/system
   - libcontainer/user
 - name: github.com/openshift/api
-  version: 072d1972d82ada59b68aed5e7c6ba93685edeb78
+  version: bccfa651752a8a9f963b9899b477dcffbe9be786
   subpackages:
   - authorization/v1
   - image/docker10
@@ -310,12 +310,12 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/RangelReale/osin
-  version: 2dc1b43167692cdc89446b99b98fa9de6bff020f
+  version: 0f3357bb07e801ea62327872d19913969001dd7a
 - name: github.com/Sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
   repo: https://github.com/sirupsen/logrus
 - name: github.com/skynetservices/skydns
-  version: 775ef406696380ce92b76e72421e86b6868905d8
+  version: 30763c4e568fe411f1663af553c063cec8879929
   repo: https://github.com/openshift/skynetservices-skydns
 - name: github.com/spf13/pflag
   version: 583c0c0531f06d5278b7d917446061adc344b5cd
