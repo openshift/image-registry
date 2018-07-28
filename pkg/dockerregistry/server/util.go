@@ -84,4 +84,7 @@ func RememberLayersOfImageStream(ctx context.Context, cache cache.RepositoryDige
 	for dgst := range layers.Blobs {
 		_ = cache.AddDigest(digest.Digest(dgst), cacheName)
 	}
+	for dgst := range layers.Images {
+		_ = cache.AddDigest(digest.Digest(dgst), cacheName)
+	}
 }
