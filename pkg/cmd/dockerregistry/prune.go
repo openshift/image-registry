@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/docker/go-units"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
