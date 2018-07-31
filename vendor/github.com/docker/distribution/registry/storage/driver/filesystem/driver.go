@@ -3,6 +3,7 @@ package filesystem
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/docker/distribution/context"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/base"
 	"github.com/docker/distribution/registry/storage/driver/factory"
@@ -184,11 +184,11 @@ func (d *driver) Reader(ctx context.Context, path string, offset int64) (io.Read
 		return nil, err
 	}
 
-	seekPos, err := file.Seek(int64(offset), os.SEEK_SET)
+	seekPos, err := file.Seek(offset, io.SeekStart)
 	if err != nil {
 		file.Close()
 		return nil, err
-	} else if seekPos < int64(offset) {
+	} else if seekPos < offset {
 		file.Close()
 		return nil, storagedriver.InvalidOffsetError{Path: path, Offset: offset}
 	}
@@ -217,12 +217,12 @@ func (d *driver) Writer(ctx context.Context, subPath string, append bool) (stora
 			return nil, err
 		}
 	} else {
-		n, err := fp.Seek(0, os.SEEK_END)
+		n, err := fp.Seek(0, io.SeekEnd)
 		if err != nil {
 			fp.Close()
 			return nil, err
 		}
-		offset = int64(n)
+		offset = n
 	}
 
 	return newFileWriter(fp, offset), nil
@@ -313,6 +313,12 @@ func (d *driver) Delete(ctx context.Context, subPath string) error {
 // May return an UnsupportedMethodErr in certain StorageDriver implementations.
 func (d *driver) URLFor(ctx context.Context, path string, options map[string]interface{}) (string, error) {
 	return "", storagedriver.ErrUnsupportedMethod{}
+}
+
+// Walk traverses a filesystem defined within driver, starting
+// from the given path, calling f on each file
+func (d *driver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
+	return storagedriver.WalkFallback(ctx, d, path, f)
 }
 
 // fullPath returns the absolute path of a key within the Driver's storage.

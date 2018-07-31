@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -220,7 +220,7 @@ func (p *Parser) overwriteStruct(v reflect.Value, fullpath string, path []string
 		}
 	case reflect.Ptr:
 		if field.IsNil() {
-			field.Set(reflect.New(field.Type().Elem()))
+			field.Set(reflect.New(sf.Type))
 		}
 	}
 

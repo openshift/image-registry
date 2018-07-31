@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/uuid"
 	"github.com/docker/libtrust"
+	"github.com/opencontainers/go-digest"
 )
 
 var (
@@ -43,7 +43,7 @@ func TestEventBridgeManifestPulled(t *testing.T) {
 		return nil
 	}))
 
-	repoRef, _ := reference.ParseNamed(repo)
+	repoRef, _ := reference.WithName(repo)
 	if err := l.ManifestPulled(repoRef, sm); err != nil {
 		t.Fatalf("unexpected error notifying manifest pull: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestEventBridgeManifestPushed(t *testing.T) {
 		return nil
 	}))
 
-	repoRef, _ := reference.ParseNamed(repo)
+	repoRef, _ := reference.WithName(repo)
 	if err := l.ManifestPushed(repoRef, sm); err != nil {
 		t.Fatalf("unexpected error notifying manifest pull: %v", err)
 	}
@@ -72,7 +72,7 @@ func TestEventBridgeManifestPushedWithTag(t *testing.T) {
 		return nil
 	}))
 
-	repoRef, _ := reference.ParseNamed(repo)
+	repoRef, _ := reference.WithName(repo)
 	if err := l.ManifestPushed(repoRef, sm, distribution.WithTag(m.Tag)); err != nil {
 		t.Fatalf("unexpected error notifying manifest pull: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestEventBridgeManifestPulledWithTag(t *testing.T) {
 		return nil
 	}))
 
-	repoRef, _ := reference.ParseNamed(repo)
+	repoRef, _ := reference.WithName(repo)
 	if err := l.ManifestPulled(repoRef, sm, distribution.WithTag(m.Tag)); err != nil {
 		t.Fatalf("unexpected error notifying manifest pull: %v", err)
 	}
@@ -97,12 +97,42 @@ func TestEventBridgeManifestPulledWithTag(t *testing.T) {
 func TestEventBridgeManifestDeleted(t *testing.T) {
 	l := createTestEnv(t, testSinkFn(func(events ...Event) error {
 		checkDeleted(t, EventActionDelete, events...)
+		if events[0].Target.Digest != dgst {
+			t.Fatalf("unexpected digest on event target: %q != %q", events[0].Target.Digest, dgst)
+		}
 		return nil
 	}))
 
-	repoRef, _ := reference.ParseNamed(repo)
+	repoRef, _ := reference.WithName(repo)
 	if err := l.ManifestDeleted(repoRef, dgst); err != nil {
 		t.Fatalf("unexpected error notifying manifest pull: %v", err)
+	}
+}
+
+func TestEventBridgeTagDeleted(t *testing.T) {
+	l := createTestEnv(t, testSinkFn(func(events ...Event) error {
+		checkDeleted(t, EventActionDelete, events...)
+		if events[0].Target.Tag != m.Tag {
+			t.Fatalf("unexpected tag on event target: %q != %q", events[0].Target.Tag, m.Tag)
+		}
+		return nil
+	}))
+
+	repoRef, _ := reference.WithName(repo)
+	if err := l.TagDeleted(repoRef, m.Tag); err != nil {
+		t.Fatalf("unexpected error notifying tag deletion: %v", err)
+	}
+}
+
+func TestEventBridgeRepoDeleted(t *testing.T) {
+	l := createTestEnv(t, testSinkFn(func(events ...Event) error {
+		checkDeleted(t, EventActionDelete, events...)
+		return nil
+	}))
+
+	repoRef, _ := reference.WithName(repo)
+	if err := l.RepoDeleted(repoRef); err != nil {
+		t.Fatalf("unexpected error notifying repo deletion: %v", err)
 	}
 }
 
@@ -142,14 +172,9 @@ func checkDeleted(t *testing.T, action string, events ...Event) {
 		t.Fatalf("request not equal: %#v != %#v", event.Actor, actor)
 	}
 
-	if event.Target.Digest != dgst {
-		t.Fatalf("unexpected digest on event target: %q != %q", event.Target.Digest, dgst)
-	}
-
 	if event.Target.Repository != repo {
 		t.Fatalf("unexpected repository: %q != %q", event.Target.Repository, repo)
 	}
-
 }
 
 func checkCommonManifest(t *testing.T, action string, events ...Event) {
@@ -160,7 +185,7 @@ func checkCommonManifest(t *testing.T, action string, events ...Event) {
 		t.Fatalf("unexpected event action: %q != %q", event.Action, action)
 	}
 
-	repoRef, _ := reference.ParseNamed(repo)
+	repoRef, _ := reference.WithName(repo)
 	ref, _ := reference.WithDigest(repoRef, dgst)
 	u, err := ub.BuildManifestURL(ref)
 	if err != nil {

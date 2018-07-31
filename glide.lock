@@ -1,8 +1,13 @@
-hash: ec19bf05113d8f0dc5e4c42709c86327123cb8e3604643b507da5e9df5d5c350
-updated: 2018-08-27T16:50:13.255790127+02:00
+hash: 198a50053d63edd26f9f7eeea487a6acbf59b0543254f080a74f01d50300d5ae
+updated: 2018-08-27T16:52:46.642922408+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
+- name: cloud.google.com/go
+  version: 3b1ae45394a234c385be014e9a488f2bb6eef821
+  subpackages:
+  - compute/metadata
+  - internal
 - name: github.com/aws/aws-sdk-go
   version: 5bcc0a238d880469f949fc7cd24e35f32ab80cbd
   subpackages:
@@ -68,18 +73,19 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/docker/distribution
-  version: e32ea477d62e6ae4e931cd6e584acbc405cbd540
-  repo: git@github.com:openshift/docker-distribution
+  version: 3354cf98e3a55ca01d9712714f2c69531abc2347
   subpackages:
   - configuration
   - context
-  - digest
+  - digestset
   - health
   - health/checks
   - manifest
   - manifest/manifestlist
+  - manifest/ocischema
   - manifest/schema1
   - manifest/schema2
+  - metrics
   - notifications
   - reference
   - registry/api/errcode
@@ -99,7 +105,6 @@ imports:
   - registry/storage
   - registry/storage/cache
   - registry/storage/cache/memory
-  - registry/storage/cache/provider
   - registry/storage/cache/redis
   - registry/storage/driver
   - registry/storage/driver/azure
@@ -151,6 +156,8 @@ imports:
   - nat
   - sockets
   - tlsconfig
+- name: github.com/docker/go-metrics
+  version: 399ea8c73916000c64c2c76e8da00ca82f8387ab
 - name: github.com/docker/go-units
   version: 47565b4f722fb6ceae66b95f853feed578a4a51c
 - name: github.com/docker/libtrust
@@ -254,8 +261,6 @@ imports:
   version: 482a9fd5fa83e8c4e7817413b80f3eb8feec03ef
 - name: github.com/ncw/swift
   version: ce444d6d47c51d4dda9202cd38f5094dd8e27e86
-  subpackages:
-  - swifttest
 - name: github.com/opencontainers/go-digest
   version: c9281466c8b2f606084ac71339773efd177436e7
 - name: github.com/opencontainers/image-spec
@@ -335,11 +340,11 @@ imports:
   version: 0f3357bb07e801ea62327872d19913969001dd7a
 - name: github.com/satori/go.uuid
   version: 36e9d2ebbde5e3f13ab2e25625fd453271d6522e
+- name: github.com/sirupsen/logrus
+  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/Sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
   repo: https://github.com/sirupsen/logrus
-- name: github.com/sirupsen/logrus
-  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/skynetservices/skydns
   version: 30763c4e568fe411f1663af553c063cec8879929
   repo: https://github.com/openshift/skynetservices-skydns
@@ -379,7 +384,7 @@ imports:
   - trace
   - websocket
 - name: golang.org/x/oauth2
-  version: 045497edb6234273d67dbc25da3f2ddbc4c4cacf
+  version: a6bd8cefa1811bd24b86f8902872e4e8225f74c4
   subpackages:
   - google
   - internal
@@ -426,7 +431,6 @@ imports:
 - name: google.golang.org/cloud
   version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
   subpackages:
-  - compute/metadata
   - internal
   - internal/opts
   - storage

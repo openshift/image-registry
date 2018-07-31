@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"io"
 	mrand "math/rand"
-	"os"
 	"testing"
 
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
-	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
+	"github.com/opencontainers/go-digest"
 )
 
 func TestSimpleRead(t *testing.T) {
@@ -42,11 +40,7 @@ func TestSimpleRead(t *testing.T) {
 		t.Fatalf("error allocating file reader: %v", err)
 	}
 
-	verifier, err := digest.NewDigestVerifier(dgst)
-	if err != nil {
-		t.Fatalf("error getting digest verifier: %s", err)
-	}
-
+	verifier := dgst.Verifier()
 	io.Copy(verifier, fr)
 
 	if !verifier.Verified() {
@@ -77,7 +71,7 @@ func TestFileReaderSeek(t *testing.T) {
 	for _, repitition := range mrand.Perm(repititions - 1) {
 		targetOffset := int64(len(pattern) * repitition)
 		// Seek to a multiple of pattern size and read pattern size bytes
-		offset, err := fr.Seek(targetOffset, os.SEEK_SET)
+		offset, err := fr.Seek(targetOffset, io.SeekStart)
 		if err != nil {
 			t.Fatalf("unexpected error seeking: %v", err)
 		}
@@ -102,7 +96,7 @@ func TestFileReaderSeek(t *testing.T) {
 		}
 
 		// Check offset
-		current, err := fr.Seek(0, os.SEEK_CUR)
+		current, err := fr.Seek(0, io.SeekCurrent)
 		if err != nil {
 			t.Fatalf("error checking current offset: %v", err)
 		}
@@ -112,7 +106,7 @@ func TestFileReaderSeek(t *testing.T) {
 		}
 	}
 
-	start, err := fr.Seek(0, os.SEEK_SET)
+	start, err := fr.Seek(0, io.SeekStart)
 	if err != nil {
 		t.Fatalf("error seeking to start: %v", err)
 	}
@@ -121,7 +115,7 @@ func TestFileReaderSeek(t *testing.T) {
 		t.Fatalf("expected to seek to start: %v != 0", start)
 	}
 
-	end, err := fr.Seek(0, os.SEEK_END)
+	end, err := fr.Seek(0, io.SeekEnd)
 	if err != nil {
 		t.Fatalf("error checking current offset: %v", err)
 	}
@@ -133,13 +127,13 @@ func TestFileReaderSeek(t *testing.T) {
 	// 4. Seek before start, ensure error.
 
 	// seek before start
-	before, err := fr.Seek(-1, os.SEEK_SET)
+	before, err := fr.Seek(-1, io.SeekStart)
 	if err == nil {
 		t.Fatalf("error expected, returned offset=%v", before)
 	}
 
 	// 5. Seek after end,
-	after, err := fr.Seek(1, os.SEEK_END)
+	after, err := fr.Seek(1, io.SeekEnd)
 	if err != nil {
 		t.Fatalf("unexpected error expected, returned offset=%v", after)
 	}
@@ -160,18 +154,22 @@ func TestFileReaderSeek(t *testing.T) {
 // missing or zero-length remote file. While the file may not exist, the
 // reader should not error out on creation and should return 0-bytes from the
 // read method, with an io.EOF error.
-// Not.
-// This logic is defective by design. We have not seen such race conditions.
-// On the other hand, a situation where instead of a blob an empty response
-// is returned is quite common (if you allow blob deletion).
 func TestFileReaderNonExistentFile(t *testing.T) {
 	driver := inmemory.New()
-	_, err := newFileReader(context.Background(), driver, "/doesnotexist", 10)
-	if err == nil {
-		t.Fatal("unexpected successful result")
+	fr, err := newFileReader(context.Background(), driver, "/doesnotexist", 10)
+	if err != nil {
+		t.Fatalf("unexpected error initializing reader: %v", err)
 	}
-	if _, ok := err.(storagedriver.PathNotFoundError); !ok {
-		t.Fatalf("read on missing file should return storagedriver.PathNotFoundError, got %v", err)
+
+	var buf [1024]byte
+
+	n, err := fr.Read(buf[:])
+	if n != 0 {
+		t.Fatalf("non-zero byte read reported: %d != 0", n)
+	}
+
+	if err != io.EOF {
+		t.Fatalf("read on missing file should return io.EOF, got %v", err)
 	}
 }
 
