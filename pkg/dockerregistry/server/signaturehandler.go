@@ -40,12 +40,14 @@ func RegisterSignatureHandler(app *handlers.App, isImageClient client.ImageStrea
 		}
 	)
 	app.RegisterRoute(
+		"extensions-signatures-get",
 		extensionsRouter.Path(api.SignaturesPath).Methods("GET"),
 		NewSignatureDispatcher(isImageClient),
 		handlers.NameRequired,
 		getSignatureAccess,
 	)
 	app.RegisterRoute(
+		"extensions-signatures-put",
 		extensionsRouter.Path(api.SignaturesPath).Methods("PUT"),
 		NewSignatureDispatcher(isImageClient),
 		handlers.NameRequired,

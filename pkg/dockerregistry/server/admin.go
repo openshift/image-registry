@@ -32,6 +32,7 @@ func (app *App) registerBlobHandler(dockerApp *handlers.App) {
 	}
 
 	dockerApp.RegisterRoute(
+		"admin-blobs",
 		// DELETE /admin/blobs/<digest>
 		adminRouter.Path(api.AdminPath).Methods("DELETE"),
 		// handler
