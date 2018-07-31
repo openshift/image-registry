@@ -48,13 +48,13 @@ func NewTransport(baseURL string, repoName string, creds auth.CredentialStore) (
 }
 
 // NewRepository creates a new Repository for the given repository name, base URL and creds.
-func NewRepository(ctx context.Context, repoName string, baseURL string, transport http.RoundTripper) (distribution.Repository, error) {
+func NewRepository(repoName string, baseURL string, transport http.RoundTripper) (distribution.Repository, error) {
 	ref, err := reference.ParseNamed(repoName)
 	if err != nil {
 		return nil, err
 	}
 
-	return distclient.NewRepository(ctx, ref, baseURL, transport)
+	return distclient.NewRepository(ref, baseURL, transport)
 }
 
 // UploadBlob uploads the blob with content to repo and verifies its digest.
@@ -120,7 +120,7 @@ func UploadRandomTestBlob(ctx context.Context, baseURL string, creds auth.Creden
 		return distribution.Descriptor{}, nil, err
 	}
 
-	repo, err := NewRepository(ctx, repoName, baseURL, rt)
+	repo, err := NewRepository(repoName, baseURL, rt)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}

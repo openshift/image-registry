@@ -157,7 +157,7 @@ func CreateAndUploadTestManifest(
 		return "", "", "", nil, err
 	}
 
-	repo, err := NewRepository(ctx, repoName, serverURL.String(), rt)
+	repo, err := NewRepository(repoName, serverURL.String(), rt)
 	if err != nil {
 		return "", "", "", nil, err
 	}

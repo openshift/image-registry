@@ -153,7 +153,7 @@ func (c *Context) Repository(ctx context.Context, registry *url.URL, repoName st
 
 	rt := c.wrapTransport(t, registry, repoName)
 
-	repo, err := registryclient.NewRepository(context.Context(ctx), named, src.String(), rt)
+	repo, err := registryclient.NewRepository(named, src.String(), rt)
 	if err != nil {
 		return nil, err
 	}
