@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/auth"
@@ -46,7 +46,7 @@ func (app *App) registerBlobHandler(dockerApp *handlers.App) {
 // blobDispatcher takes the request context and builds the appropriate handler
 // for handling blob requests.
 func (app *App) blobDispatcher(ctx *handlers.Context, r *http.Request) http.Handler {
-	reference := context.GetStringValue(ctx, "vars.digest")
+	reference := dcontext.GetStringValue(ctx, "vars.digest")
 	dgst, _ := digest.ParseDigest(reference)
 
 	blobHandler := &blobHandler{
@@ -100,7 +100,7 @@ func (bh *blobHandler) Delete(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 		}
-		context.GetLogger(bh).Infof("blobHandler: ignoring %T error: %v", err, err)
+		dcontext.GetLogger(bh).Infof("blobHandler: ignoring %T error: %v", err, err)
 	}
 
 	w.WriteHeader(http.StatusNoContent)

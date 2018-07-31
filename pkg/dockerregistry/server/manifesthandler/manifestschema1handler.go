@@ -1,11 +1,11 @@
 package manifesthandler
 
 import (
+	"context"
 	"fmt"
 	"path"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/libtrust"

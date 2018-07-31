@@ -1,13 +1,13 @@
 package server
 
 import (
+	"context"
 	"time"
 
 	kubecache "k8s.io/apimachinery/pkg/util/cache"
 
 	"github.com/docker/distribution"
 	dockercfg "github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/storage"
 	dockercache "github.com/docker/distribution/registry/storage/cache"
 	"github.com/docker/distribution/registry/storage/cache/memory"

@@ -1,7 +1,9 @@
 package errors
 
 import (
-	"github.com/docker/distribution/context"
+	"context"
+
+	dcontext "github.com/docker/distribution/context"
 	errcode "github.com/docker/distribution/registry/api/errcode"
 )
 
@@ -19,5 +21,5 @@ func Handle(ctx context.Context, message string, err error) {
 	case errcode.Error:
 		ctx = context.WithValue(ctx, errDetailKey{}, err.Detail)
 	}
-	context.GetLogger(ctx, errMessageKey{}, errDetailKey{}).Error(message)
+	dcontext.GetLogger(ctx, errMessageKey{}, errDetailKey{}).Error(message)
 }

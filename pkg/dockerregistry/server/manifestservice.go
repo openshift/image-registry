@@ -1,11 +1,12 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/registry/api/errcode"
 	regapi "github.com/docker/distribution/registry/api/v2"
@@ -38,13 +39,13 @@ type manifestService struct {
 
 // Exists returns true if the manifest specified by dgst exists.
 func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool, error) {
-	context.GetLogger(ctx).Debugf("(*manifestService).Exists")
+	dcontext.GetLogger(ctx).Debugf("(*manifestService).Exists")
 
 	image, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if err != nil {
 		switch err.Code {
 		case imagestream.ErrImageStreamImageNotFoundCode:
-			context.GetLogger(ctx).Errorf("manifestService.Exists: image %s is not found in imagestream %s", dgst.String(), m.imageStream.Reference())
+			dcontext.GetLogger(ctx).Errorf("manifestService.Exists: image %s is not found in imagestream %s", dgst.String(), m.imageStream.Reference())
 			fallthrough
 		case imagestream.ErrImageStreamNotFoundCode:
 			return false, distribution.ErrBlobUnknown
@@ -56,19 +57,19 @@ func (m *manifestService) Exists(ctx context.Context, dgst digest.Digest) (bool,
 
 // Get retrieves the manifest with digest `dgst`.
 func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
-	context.GetLogger(ctx).Debugf("(*manifestService).Get")
+	dcontext.GetLogger(ctx).Debugf("(*manifestService).Get")
 
 	image, rErr := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if rErr != nil {
 		switch rErr.Code {
 		case imagestream.ErrImageStreamNotFoundCode, imagestream.ErrImageStreamImageNotFoundCode:
-			context.GetLogger(ctx).Errorf("manifestService.Get: unable to get image %s in imagestream %s: %v", dgst.String(), m.imageStream.Reference(), rErr)
+			dcontext.GetLogger(ctx).Errorf("manifestService.Get: unable to get image %s in imagestream %s: %v", dgst.String(), m.imageStream.Reference(), rErr)
 			return nil, distribution.ErrManifestUnknownRevision{
 				Name:     m.imageStream.Reference(),
 				Revision: dgst,
 			}
 		case imagestream.ErrImageStreamForbiddenCode:
-			context.GetLogger(ctx).Errorf("manifestService.Get: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), rErr)
+			dcontext.GetLogger(ctx).Errorf("manifestService.Get: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), rErr)
 			return nil, distribution.ErrAccessDenied
 		}
 		return nil, rErr
@@ -89,7 +90,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 		m.migrateManifest(ctx, image, dgst, manifest, true)
 		return manifest, nil
 	} else if _, ok := err.(distribution.ErrManifestUnknownRevision); !ok {
-		context.GetLogger(ctx).Errorf("unable to get manifest from storage: %v", err)
+		dcontext.GetLogger(ctx).Errorf("unable to get manifest from storage: %v", err)
 		return nil, err
 	}
 
@@ -99,7 +100,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 		m.migrateManifest(ctx, image, dgst, manifest, false)
 		return manifest, nil
 	} else {
-		context.GetLogger(ctx).Errorf("unable to get manifest from image object: %v", err)
+		dcontext.GetLogger(ctx).Errorf("unable to get manifest from image object: %v", err)
 	}
 
 	return nil, distribution.ErrManifestUnknownRevision{
@@ -110,7 +111,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 
 // Put creates or updates the named manifest.
 func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifest, options ...distribution.ManifestServiceOption) (digest.Digest, error) {
-	context.GetLogger(ctx).Debugf("(*manifestService).Put")
+	dcontext.GetLogger(ctx).Debugf("(*manifestService).Put")
 
 	mh, err := manifesthandler.NewManifestHandler(m.serverAddr, m.blobStore, manifest)
 	if err != nil {
@@ -156,7 +157,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 	uclient, ok := userClientFrom(ctx)
 	if !ok {
 		errmsg := "error creating user client to auto provision image stream: user client to master API unavailable"
-		context.GetLogger(ctx).Errorf(errmsg)
+		dcontext.GetLogger(ctx).Errorf(errmsg)
 		return "", errcode.ErrorCodeUnknown.WithDetail(errmsg)
 	}
 
@@ -188,13 +189,13 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 	if rErr != nil {
 		switch rErr.Code {
 		case imagestream.ErrImageStreamNotFoundCode:
-			context.GetLogger(ctx).Errorf("manifestService.Put: imagestreammapping failed for image %s@%s: %v", m.imageStream.Reference(), image.Name, rErr)
+			dcontext.GetLogger(ctx).Errorf("manifestService.Put: imagestreammapping failed for image %s@%s: %v", m.imageStream.Reference(), image.Name, rErr)
 			return "", distribution.ErrManifestUnknownRevision{
 				Name:     m.imageStream.Reference(),
 				Revision: dgst,
 			}
 		case imagestream.ErrImageStreamForbiddenCode:
-			context.GetLogger(ctx).Errorf("manifestService.Put: imagestreammapping got access denied for image %s@%s: %v", m.imageStream.Reference(), image.Name, rErr)
+			dcontext.GetLogger(ctx).Errorf("manifestService.Put: imagestreammapping got access denied for image %s@%s: %v", m.imageStream.Reference(), image.Name, rErr)
 			return "", distribution.ErrAccessDenied
 		}
 		return "", rErr
@@ -207,7 +208,7 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 // in OpenShift are deleted via 'oc adm prune images'. This function deletes
 // the content related to the manifest in the registry's storage (signatures).
 func (m *manifestService) Delete(ctx context.Context, dgst digest.Digest) error {
-	context.GetLogger(ctx).Debugf("(*manifestService).Delete")
+	dcontext.GetLogger(ctx).Debugf("(*manifestService).Delete")
 
 	_, err := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if err == nil {
@@ -222,7 +223,7 @@ func (m *manifestService) Delete(ctx context.Context, dgst digest.Digest) error 
 	case imagestream.ErrImageStreamNotFoundCode, imagestream.ErrImageStreamImageNotFoundCode:
 		// There is no image/imagestream. Let's just delete the link.
 	case imagestream.ErrImageStreamForbiddenCode:
-		context.GetLogger(ctx).Errorf("manifestService.Delete: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), err)
+		dcontext.GetLogger(ctx).Errorf("manifestService.Delete: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), err)
 		return distribution.ErrAccessDenied
 	default:
 		return err
@@ -262,12 +263,12 @@ func (m *manifestService) storeManifestLocally(ctx context.Context, image *image
 
 	if !isLocalStored {
 		if _, err := m.manifests.Put(ctx, manifest); err != nil {
-			context.GetLogger(ctx).Errorf("unable to put manifest to storage: %v", err)
+			dcontext.GetLogger(ctx).Errorf("unable to put manifest to storage: %v", err)
 			return
 		}
 	}
 
 	if err := m.imageStream.ImageManifestBlobStored(ctx, image); err != nil {
-		context.GetLogger(ctx).Errorf("unable to update image: %v", err)
+		dcontext.GetLogger(ctx).Errorf("unable to update image: %v", err)
 	}
 }

@@ -13,10 +13,11 @@
 package server
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -31,18 +32,18 @@ import (
 // configuration file and will be overridden by enforceQuota and projectCacheTTL environment variable values.
 func newQuotaEnforcingConfig(ctx context.Context, quotaCfg *configuration.Quota) *quotaEnforcingConfig {
 	if !quotaCfg.Enabled {
-		context.GetLogger(ctx).Info("quota enforcement disabled")
+		dcontext.GetLogger(ctx).Info("quota enforcement disabled")
 		return &quotaEnforcingConfig{}
 	}
 
 	if quotaCfg.CacheTTL <= 0 {
-		context.GetLogger(ctx).Info("not using project caches for quota objects")
+		dcontext.GetLogger(ctx).Info("not using project caches for quota objects")
 		return &quotaEnforcingConfig{
 			enforcementEnabled: true,
 		}
 	}
 
-	context.GetLogger(ctx).Infof("caching project quota objects with TTL %s", quotaCfg.CacheTTL.String())
+	dcontext.GetLogger(ctx).Infof("caching project quota objects with TTL %s", quotaCfg.CacheTTL.String())
 	return &quotaEnforcingConfig{
 		enforcementEnabled: true,
 		limitRanges:        newProjectObjectListCache(quotaCfg.CacheTTL),
@@ -70,7 +71,7 @@ var _ distribution.BlobStore = &quotaRestrictedBlobStore{}
 
 // Create wraps returned blobWriter with quota guard wrapper.
 func (bs *quotaRestrictedBlobStore) Create(ctx context.Context, options ...distribution.BlobCreateOption) (distribution.BlobWriter, error) {
-	context.GetLogger(ctx).Debug("(*quotaRestrictedBlobStore).Create: starting")
+	dcontext.GetLogger(ctx).Debug("(*quotaRestrictedBlobStore).Create: starting")
 
 	bw, err := bs.BlobStore.Create(ctx, options...)
 	if err != nil {
@@ -87,7 +88,7 @@ func (bs *quotaRestrictedBlobStore) Create(ctx context.Context, options ...distr
 
 // Resume wraps returned blobWriter with quota guard wrapper.
 func (bs *quotaRestrictedBlobStore) Resume(ctx context.Context, id string) (distribution.BlobWriter, error) {
-	context.GetLogger(ctx).Debug("(*quotaRestrictedBlobStore).Resume: starting")
+	dcontext.GetLogger(ctx).Debug("(*quotaRestrictedBlobStore).Resume: starting")
 
 	bw, err := bs.BlobStore.Resume(ctx, id)
 	if err != nil {
@@ -111,7 +112,7 @@ type quotaRestrictedBlobWriter struct {
 }
 
 func (bw *quotaRestrictedBlobWriter) Commit(ctx context.Context, provisional distribution.Descriptor) (canonical distribution.Descriptor, err error) {
-	context.GetLogger(ctx).Debug("(*quotaRestrictedBlobWriter).Commit: starting")
+	dcontext.GetLogger(ctx).Debug("(*quotaRestrictedBlobWriter).Commit: starting")
 
 	if err := admitBlobWrite(ctx, bw.repo, provisional.Size); err != nil {
 		return distribution.Descriptor{}, err
@@ -133,10 +134,10 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 	}
 
 	for _, limitrange := range lrs.Items {
-		context.GetLogger(ctx).Debugf("processing limit range %s/%s", limitrange.Namespace, limitrange.Name)
+		dcontext.GetLogger(ctx).Debugf("processing limit range %s/%s", limitrange.Namespace, limitrange.Name)
 		for _, limit := range limitrange.Spec.Limits {
 			if err := admitImage(size, limit); err != nil {
-				context.GetLogger(ctx).Errorf("refusing to write blob exceeding limit range %s: %s", limitrange.Name, err.Error())
+				dcontext.GetLogger(ctx).Errorf("refusing to write blob exceeding limit range %s: %s", limitrange.Name, err.Error())
 				return distribution.ErrAccessDenied
 			}
 		}

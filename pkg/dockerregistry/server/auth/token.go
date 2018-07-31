@@ -1,10 +1,11 @@
 package auth
 
 import (
+	"context"
 	"regexp"
 	"strings"
 
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/auth"
 )
 
@@ -19,7 +20,7 @@ func ResolveScopeSpecifiers(ctx context.Context, scopeSpecs []string) []auth.Acc
 		parts := strings.SplitN(scopeSpecifier, ":", 4)
 
 		if len(parts) != 3 {
-			context.GetLogger(ctx).Infof("ignoring unsupported scope format %s", scopeSpecifier)
+			dcontext.GetLogger(ctx).Infof("ignoring unsupported scope format %s", scopeSpecifier)
 			continue
 		}
 

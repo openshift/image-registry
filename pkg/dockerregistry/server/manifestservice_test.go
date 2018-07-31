@@ -1,12 +1,12 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/opencontainers/go-digest"
 

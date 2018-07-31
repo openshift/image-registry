@@ -1,11 +1,12 @@
 package imagestream
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
@@ -313,7 +314,7 @@ func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, *rer
 
 		dgst, err := digest.ParseDigest(history.Items[0].Image)
 		if err != nil {
-			context.GetLogger(ctx).Errorf("bad digest %s: %v", history.Items[0].Image, err)
+			dcontext.GetLogger(ctx).Errorf("bad digest %s: %v", history.Items[0].Image, err)
 			continue
 		}
 
@@ -398,7 +399,7 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 		)
 	}
 
-	context.GetLogger(ctx).Debugf("cache image stream %s/%s", stream.Namespace, stream.Name)
+	dcontext.GetLogger(ctx).Debugf("cache image stream %s/%s", stream.Namespace, stream.Name)
 	is.imageStreamGetter.cacheImageStream(stream)
 
 	// try to create the ISM again
@@ -432,7 +433,7 @@ func (is *imageStream) GetLimitRangeList(ctx context.Context, cache ProjectObjec
 		}
 	}
 
-	context.GetLogger(ctx).Debugf("listing limit ranges in namespace %s", is.namespace)
+	dcontext.GetLogger(ctx).Debugf("listing limit ranges in namespace %s", is.namespace)
 
 	lrs, err := is.registryOSClient.LimitRanges(is.namespace).List(metav1.ListOptions{})
 	if err != nil {
@@ -446,7 +447,7 @@ func (is *imageStream) GetLimitRangeList(ctx context.Context, cache ProjectObjec
 	if cache != nil {
 		err = cache.Add(is.namespace, lrs)
 		if err != nil {
-			context.GetLogger(ctx).Errorf("GetLimitRangeList: failed to cache limit range list: %v", err)
+			dcontext.GetLogger(ctx).Errorf("GetLimitRangeList: failed to cache limit range list: %v", err)
 		}
 	}
 

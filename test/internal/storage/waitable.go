@@ -1,10 +1,9 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"sync"
-
-	"github.com/docker/distribution/context"
 
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 )

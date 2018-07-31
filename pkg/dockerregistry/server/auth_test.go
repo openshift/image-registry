@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
@@ -11,17 +12,17 @@ import (
 	"testing"
 
 	"github.com/docker/distribution"
+	dockercfg "github.com/docker/distribution/configuration"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/auth"
 
+	authorizationapi "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	restclient "k8s.io/client-go/rest"
 
-	dockercfg "github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
 	userapi "github.com/openshift/api/user/v1"
-	authorizationapi "k8s.io/api/authorization/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
@@ -441,7 +442,7 @@ func TestAccessController(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			ctx = context.WithRequest(ctx, req)
+			ctx = dcontext.WithRequest(ctx, req)
 			authCtx, err := accessController.Authorized(ctx, test.access...)
 			server.Close()
 

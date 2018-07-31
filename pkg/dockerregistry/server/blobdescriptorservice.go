@@ -1,8 +1,10 @@
 package server
 
 import (
+	"context"
+
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -33,21 +35,21 @@ type blobDescriptorService struct {
 // corresponding image stream. This method is invoked from inside of upstream's linkedBlobStore. It expects
 // a proper repository object to be set on given context by upper openshift middleware wrappers.
 func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: starting with digest=%s", dgst.String())
+	dcontext.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: starting with digest=%s", dgst.String())
 
 	// if there is a repo layer link, return its descriptor
 	desc, err := bs.BlobDescriptorService.Stat(ctx, dgst)
 	if err == nil {
 		return desc, nil
 	}
-	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: could not stat layer link %s in repository %s: %v", dgst.String(), bs.repo.Named().Name(), err)
+	dcontext.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: could not stat layer link %s in repository %s: %v", dgst.String(), bs.repo.Named().Name(), err)
 
 	// we couldn't find the layer link
 	desc, err = bs.repo.app.BlobStatter().Stat(ctx, dgst)
 	if err != nil {
 		return desc, err
 	}
-	context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s exists in the global blob store", dgst.String())
+	dcontext.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s exists in the global blob store", dgst.String())
 
 	// Empty layers are considered to be "public" and we don't need to check whether they are referenced - schema v2
 	// has no empty layers.
@@ -57,13 +59,13 @@ func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (
 
 	// ensure it's referenced inside of corresponding image stream
 	if bs.repo.cache.ContainsRepository(dgst, bs.repo.imageStream.Reference()) {
-		context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: found cached blob %q in repository %s", dgst.String(), bs.repo.imageStream.Reference())
+		dcontext.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: found cached blob %q in repository %s", dgst.String(), bs.repo.imageStream.Reference())
 		return desc, nil
 	}
 
 	found, layers, image := bs.repo.imageStream.HasBlob(ctx, dgst)
 	if !found {
-		context.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s is neither empty nor referenced in image stream %s", dgst.String(), bs.repo.Named().Name())
+		dcontext.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: blob %s is neither empty nor referenced in image stream %s", dgst.String(), bs.repo.Named().Name())
 		return distribution.Descriptor{}, distribution.ErrBlobUnknown
 	}
 

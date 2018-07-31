@@ -1,11 +1,12 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/opencontainers/go-digest"
 
@@ -42,7 +43,7 @@ func getNamespaceName(resourceName string) (string, string, error) {
 func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metrics.Pullthrough) registryclient.RepositoryRetriever {
 	secrets, err := secretsGetter()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("error getting secrets: %v", err)
+		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
 	credentials := registryclient.NewCredentialsForSecrets(secrets)
 	var retriever registryclient.RepositoryRetriever
@@ -59,7 +60,7 @@ func RememberLayersOfImage(ctx context.Context, cache cache.RepositoryDigest, im
 		}
 		meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
 		if !ok {
-			context.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
+			dcontext.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
 			return
 		}
 		// remember reference to manifest config as well for schema 2
@@ -71,7 +72,7 @@ func RememberLayersOfImage(ctx context.Context, cache cache.RepositoryDigest, im
 
 	manifest, err := registrymanifest.NewFromImage(image)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
+		dcontext.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
 		return
 	}
 	for _, ref := range manifest.References() {

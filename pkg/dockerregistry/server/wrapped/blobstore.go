@@ -1,10 +1,10 @@
 package wrapped
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 )
 

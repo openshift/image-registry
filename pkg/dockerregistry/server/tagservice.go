@@ -1,8 +1,9 @@
 package server
 
 import (
+	"context"
+
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/v2"
 
 	"github.com/openshift/image-registry/pkg/imagestream"

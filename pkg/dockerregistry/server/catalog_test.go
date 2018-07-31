@@ -1,11 +1,10 @@
 package server
 
 import (
+	"context"
 	"io"
 	"testing"
 	"time"
-
-	"github.com/docker/distribution/context"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/testutil"

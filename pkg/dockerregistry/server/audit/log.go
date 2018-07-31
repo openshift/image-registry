@@ -1,10 +1,11 @@
 package audit
 
 import (
+	"context"
 	"sync"
 
+	dcontext "github.com/docker/distribution/context"
 	"github.com/sirupsen/logrus"
-	"github.com/docker/distribution/context"
 )
 
 const (
@@ -38,9 +39,9 @@ func NewLogger(ctx context.Context) *Logger {
 		logger: logrus.New(),
 		ctx:    ctx,
 	}
-	if entry, ok := context.GetLogger(ctx).(*logrus.Entry); ok {
+	if entry, ok := dcontext.GetLogger(ctx).(*logrus.Entry); ok {
 		logger.SetFormatter(entry.Logger.Formatter)
-	} else if lgr, ok := context.GetLogger(ctx).(*logrus.Logger); ok {
+	} else if lgr, ok := dcontext.GetLogger(ctx).(*logrus.Logger); ok {
 		logger.SetFormatter(lgr.Formatter)
 	}
 	return logger
@@ -97,7 +98,7 @@ func (l *Logger) LogResultf(err error, format string, args ...interface{}) {
 }
 
 func (l *Logger) getEntry() *logrus.Entry {
-	if entry, ok := context.GetLogger(l.ctx).(*logrus.Entry); ok {
+	if entry, ok := dcontext.GetLogger(l.ctx).(*logrus.Entry); ok {
 		return l.logger.WithFields(entry.Data)
 	}
 	return logrus.NewEntry(l.logger)

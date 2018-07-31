@@ -1,11 +1,12 @@
 package testutil
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"sync"
 
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -21,7 +22,7 @@ import (
 
 // FakeOpenShift is an in-mempory reactors for fake.Client.
 type FakeOpenShift struct {
-	logger context.Logger
+	logger dcontext.Logger
 	mu     sync.Mutex
 
 	images            map[string]imageapiv1.Image
@@ -32,7 +33,7 @@ type FakeOpenShift struct {
 // NewFakeOpenShift constructs the fake OpenShift reactors.
 func NewFakeOpenShift(ctx context.Context) *FakeOpenShift {
 	return &FakeOpenShift{
-		logger: context.GetLogger(ctx),
+		logger: dcontext.GetLogger(ctx),
 
 		images:            make(map[string]imageapiv1.Image),
 		imageStreams:      make(map[string]imageapiv1.ImageStream),

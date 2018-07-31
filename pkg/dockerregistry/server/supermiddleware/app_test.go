@@ -2,6 +2,7 @@ package supermiddleware
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/auth"
 	"github.com/docker/distribution/registry/storage/cache"

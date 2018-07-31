@@ -1,10 +1,11 @@
 package manifesthandler
 
 import (
+	"context"
 	"errors"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/opencontainers/go-digest"
 
@@ -29,7 +30,7 @@ func (h *manifestSchema2Handler) Config(ctx context.Context) ([]byte, error) {
 	if h.cachedConfig == nil {
 		blob, err := h.blobStore.Get(ctx, h.manifest.Config.Digest)
 		if err != nil {
-			context.GetLogger(ctx).Errorf("failed to get manifest config: %v", err)
+			dcontext.GetLogger(ctx).Errorf("failed to get manifest config: %v", err)
 			return nil, err
 		}
 		h.cachedConfig = blob

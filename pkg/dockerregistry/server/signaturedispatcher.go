@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,9 +11,7 @@ import (
 	kapierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	ctxu "github.com/docker/distribution/context"
-
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/handlers"
@@ -71,7 +70,7 @@ type signatureHandler struct {
 func NewSignatureDispatcher(isImageClient client.ImageStreamImagesNamespacer) func(*handlers.Context, *http.Request) http.Handler {
 	return func(ctx *handlers.Context, r *http.Request) http.Handler {
 		reference, _ := imageapi.ParseDockerImageReference(
-			ctxu.GetStringValue(ctx, "vars.name") + "@" + ctxu.GetStringValue(ctx, "vars.digest"),
+			dcontext.GetStringValue(ctx, "vars.name") + "@" + dcontext.GetStringValue(ctx, "vars.digest"),
 		)
 		signatureHandler := &signatureHandler{
 			ctx:           ctx,
@@ -86,7 +85,7 @@ func NewSignatureDispatcher(isImageClient client.ImageStreamImagesNamespacer) fu
 }
 
 func (s *signatureHandler) Put(w http.ResponseWriter, r *http.Request) {
-	context.GetLogger(s.ctx).Debugf("(*signatureHandler).Put")
+	dcontext.GetLogger(s.ctx).Debugf("(*signatureHandler).Put")
 	if len(s.reference.String()) == 0 {
 		s.handleError(s.ctx, v2.ErrorCodeNameInvalid.WithDetail("missing image name or image ID"), w)
 		return
@@ -142,11 +141,11 @@ func (s *signatureHandler) Put(w http.ResponseWriter, r *http.Request) {
 	// Return just 201 with no body.
 	// TODO: The docker registry actually returns the Location header
 	w.WriteHeader(http.StatusCreated)
-	context.GetLogger(s.ctx).Debugf("(*signatureHandler).Put signature successfully added to %s", s.reference.String())
+	dcontext.GetLogger(s.ctx).Debugf("(*signatureHandler).Put signature successfully added to %s", s.reference.String())
 }
 
 func (s *signatureHandler) Get(w http.ResponseWriter, req *http.Request) {
-	context.GetLogger(s.ctx).Debugf("(*signatureHandler).Get")
+	dcontext.GetLogger(s.ctx).Debugf("(*signatureHandler).Get")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if len(s.reference.String()) == 0 {
 		s.handleError(s.ctx, v2.ErrorCodeNameInvalid.WithDetail("missing image name or image ID"), w)
@@ -192,10 +191,10 @@ func (s *signatureHandler) Get(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *signatureHandler) handleError(ctx context.Context, err error, w http.ResponseWriter) {
-	context.GetLogger(ctx).Errorf("(*signatureHandler): %v", err)
-	ctx, w = context.WithResponseWriter(ctx, w)
+	dcontext.GetLogger(ctx).Errorf("(*signatureHandler): %v", err)
+	ctx, w = dcontext.WithResponseWriter(ctx, w)
 	if serveErr := errcode.ServeJSON(w, err); serveErr != nil {
-		context.GetResponseLogger(ctx).Errorf("error sending error response: %v", serveErr)
+		dcontext.GetResponseLogger(ctx).Errorf("error sending error response: %v", serveErr)
 		return
 	}
 }

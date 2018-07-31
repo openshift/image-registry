@@ -1,10 +1,11 @@
 package server
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
@@ -31,7 +32,7 @@ type pullthroughManifestService struct {
 var _ distribution.ManifestService = &pullthroughManifestService{}
 
 func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
-	context.GetLogger(ctx).Debugf("(*pullthroughManifestService).Get: starting with dgst=%s", dgst.String())
+	dcontext.GetLogger(ctx).Debugf("(*pullthroughManifestService).Get: starting with dgst=%s", dgst.String())
 
 	manifest, err := m.ManifestService.Get(ctx, dgst, options...)
 	if _, ok := err.(distribution.ErrManifestUnknownRevision); ok {
@@ -42,18 +43,18 @@ func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest
 }
 
 func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
-	context.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
+	dcontext.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
 	image, rErr := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if rErr != nil {
 		switch rErr.Code {
 		case imagestream.ErrImageStreamNotFoundCode, imagestream.ErrImageStreamImageNotFoundCode:
-			context.GetLogger(ctx).Errorf("remoteGet: unable to get image %s in imagestream %s: %v", dgst.String(), m.imageStream.Reference(), rErr)
+			dcontext.GetLogger(ctx).Errorf("remoteGet: unable to get image %s in imagestream %s: %v", dgst.String(), m.imageStream.Reference(), rErr)
 			return nil, distribution.ErrManifestUnknownRevision{
 				Name:     m.imageStream.Reference(),
 				Revision: dgst,
 			}
 		case imagestream.ErrImageStreamForbiddenCode:
-			context.GetLogger(ctx).Errorf("remoteGet: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), rErr)
+			dcontext.GetLogger(ctx).Errorf("remoteGet: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), rErr)
 			return nil, distribution.ErrAccessDenied
 		}
 		return nil, rErr
@@ -61,7 +62,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 
 	ref, err := imageapi.ParseDockerImageReference(image.DockerImageReference)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s@%s: %v", image.DockerImageReference, m.imageStream.Reference(), dgst.String(), err)
+		dcontext.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s@%s: %v", image.DockerImageReference, m.imageStream.Reference(), dgst.String(), err)
 		return nil, err
 	}
 	ref = ref.DockerClientDefaults()

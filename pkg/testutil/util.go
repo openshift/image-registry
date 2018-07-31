@@ -3,6 +3,7 @@ package testutil
 import (
 	"archive/tar"
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	distclient "github.com/docker/distribution/registry/client"
 	"github.com/docker/distribution/registry/client/auth"

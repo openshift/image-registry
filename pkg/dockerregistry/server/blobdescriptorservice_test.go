@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	registryauth "github.com/docker/distribution/registry/auth"

@@ -1,10 +1,11 @@
 package prune
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage"
@@ -35,19 +36,19 @@ type DryRunPruner struct{}
 var _ Pruner = &DryRunPruner{}
 
 func (p *DryRunPruner) DeleteRepository(ctx context.Context, reponame string) error {
-	logger := context.GetLogger(ctx)
+	logger := dcontext.GetLogger(ctx)
 	logger.Printf("Would delete repository: %s", reponame)
 	return nil
 }
 
 func (p *DryRunPruner) DeleteManifestLink(ctx context.Context, svc distribution.ManifestService, reponame string, dgst digest.Digest) error {
-	logger := context.GetLogger(ctx)
+	logger := dcontext.GetLogger(ctx)
 	logger.Printf("Would delete manifest link: %s@%s", reponame, dgst)
 	return nil
 }
 
 func (p *DryRunPruner) DeleteBlob(ctx context.Context, dgst digest.Digest) error {
-	logger := context.GetLogger(ctx)
+	logger := dcontext.GetLogger(ctx)
 	logger.Printf("Would delete blob: %s", dgst)
 	return nil
 }
@@ -73,7 +74,7 @@ func (p *RegistryPruner) DeleteRepository(ctx context.Context, reponame string) 
 
 // DeleteManifestLink removes a manifest link from the storage
 func (p *RegistryPruner) DeleteManifestLink(ctx context.Context, svc distribution.ManifestService, reponame string, dgst digest.Digest) error {
-	logger := context.GetLogger(ctx)
+	logger := dcontext.GetLogger(ctx)
 
 	logger.Printf("Deleting manifest link: %s@%s", reponame, dgst)
 	if err := svc.Delete(ctx, dgst); err != nil {
@@ -172,7 +173,7 @@ type Summary struct {
 // TODO(dmage): remove layer links to a blob if the blob is removed or it doesn't belong to the ImageStream.
 // TODO(dmage): keep young blobs (docker/distribution#2297).
 func Prune(ctx context.Context, registry distribution.Namespace, registryClient client.RegistryClient, pruner Pruner) (Summary, error) {
-	logger := context.GetLogger(ctx)
+	logger := dcontext.GetLogger(ctx)
 
 	enumStorage := regstorage.Enumerator{Registry: registry}
 

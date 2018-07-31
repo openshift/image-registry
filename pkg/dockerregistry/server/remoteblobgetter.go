@@ -1,11 +1,12 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"sync"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
@@ -94,10 +95,10 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	if err != nil {
 		switch err.Code {
 		case imagestream.ErrImageStreamNotFoundCode:
-			context.GetLogger(ctx).Errorf("findBlobStore: imagestream %s not found: %v", rbgs.imageStream.Reference(), err)
+			dcontext.GetLogger(ctx).Errorf("findBlobStore: imagestream %s not found: %v", rbgs.imageStream.Reference(), err)
 			return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
 		case imagestream.ErrImageStreamForbiddenCode:
-			context.GetLogger(ctx).Errorf("findBlobStore: unable get access to imagestream %s: %v", rbgs.imageStream.Reference(), err)
+			dcontext.GetLogger(ctx).Errorf("findBlobStore: unable get access to imagestream %s: %v", rbgs.imageStream.Reference(), err)
 			return distribution.Descriptor{}, nil, distribution.ErrAccessDenied
 		}
 		return distribution.Descriptor{}, nil, err
@@ -137,7 +138,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 // Stat provides metadata about a blob identified by the digest. If the
 // blob is unknown to the describer, ErrBlobUnknown will be returned.
 func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	context.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Stat: starting with dgst=%s", dgst)
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Stat: starting with dgst=%s", dgst)
 
 	bs, ok := rbgs.digestToStore.Get(dgst)
 	if ok {
@@ -146,7 +147,7 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 			return desc, nil
 		}
 
-		context.GetLogger(ctx).Warnf("Stat: failed to stat blob %s in cached remote repository: %v", dgst, err)
+		dcontext.GetLogger(ctx).Warnf("Stat: failed to stat blob %s in cached remote repository: %v", dgst, err)
 
 		// There are two possible scenarios:
 		//
@@ -168,7 +169,7 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 }
 
 func (rbgs *remoteBlobGetterService) Open(ctx context.Context, dgst digest.Digest) (distribution.ReadSeekCloser, error) {
-	context.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Open: starting with dgst=%s", dgst)
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Open: starting with dgst=%s", dgst)
 	bs, ok := rbgs.digestToStore.Get(dgst)
 	if !ok {
 		var err error
@@ -183,7 +184,7 @@ func (rbgs *remoteBlobGetterService) Open(ctx context.Context, dgst digest.Diges
 }
 
 func (rbgs *remoteBlobGetterService) ServeBlob(ctx context.Context, w http.ResponseWriter, req *http.Request, dgst digest.Digest) error {
-	context.GetLogger(ctx).Debugf("(*remoteBlobGetterService).ServeBlob: starting with dgst=%s", dgst)
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).ServeBlob: starting with dgst=%s", dgst)
 	bs, ok := rbgs.digestToStore.Get(dgst)
 	if !ok {
 		var err error
@@ -210,10 +211,10 @@ func (rbgs *remoteBlobGetterService) proxyStat(
 	if spec.Insecure {
 		insecureNote = " with a fall-back to insecure transport"
 	}
-	context.GetLogger(ctx).Infof("Trying to stat %q from %q%s", dgst, ref.AsRepository().Exact(), insecureNote)
+	dcontext.GetLogger(ctx).Infof("Trying to stat %q from %q%s", dgst, ref.AsRepository().Exact(), insecureNote)
 	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), spec.Insecure)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("Error getting remote repository for image %q: %v", ref.AsRepository().Exact(), err)
+		dcontext.GetLogger(ctx).Errorf("Error getting remote repository for image %q: %v", ref.AsRepository().Exact(), err)
 		return distribution.Descriptor{}, nil, err
 	}
 
@@ -221,7 +222,7 @@ func (rbgs *remoteBlobGetterService) proxyStat(
 	desc, err := pullthroughBlobStore.Stat(ctx, dgst)
 	if err != nil {
 		if err != distribution.ErrBlobUnknown {
-			context.GetLogger(ctx).Errorf("Error statting blob %s in remote repository %q: %v", dgst, ref.AsRepository().Exact(), err)
+			dcontext.GetLogger(ctx).Errorf("Error statting blob %s in remote repository %q: %v", dgst, ref.AsRepository().Exact(), err)
 		}
 		return distribution.Descriptor{}, nil, err
 	}
@@ -231,7 +232,7 @@ func (rbgs *remoteBlobGetterService) proxyStat(
 
 // Get attempts to fetch the requested blob by digest using a remote proxy store if necessary.
 func (rbgs *remoteBlobGetterService) Get(ctx context.Context, dgst digest.Digest) ([]byte, error) {
-	context.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Get: starting with dgst=%s", dgst.String())
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Get: starting with dgst=%s", dgst.String())
 	bs, ok := rbgs.digestToStore.Get(dgst)
 	if !ok {
 		var err error
@@ -271,7 +272,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 			delete(search, repo)
 			continue
 		}
-		context.GetLogger(ctx).Infof("Found digest location from cache %q in %q", dgst, repo)
+		dcontext.GetLogger(ctx).Infof("Found digest location from cache %q in %q", dgst, repo)
 		return desc, bs, nil
 	}
 
@@ -286,7 +287,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 			continue
 		}
 		_ = rbgs.cache.AddDigest(dgst, repo)
-		context.GetLogger(ctx).Infof("Found digest location by search %q in %q", dgst, repo)
+		dcontext.GetLogger(ctx).Infof("Found digest location by search %q in %q", dgst, repo)
 		return desc, bs, nil
 	}
 

@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/opencontainers/go-digest"
 )

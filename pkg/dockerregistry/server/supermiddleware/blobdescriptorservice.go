@@ -1,10 +1,11 @@
 package supermiddleware
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	registrymw "github.com/docker/distribution/registry/middleware/registry"
 	"github.com/docker/distribution/registry/storage"

@@ -1,12 +1,11 @@
 package wrapped
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/docker/distribution/context"
 )
 
 func zeroIn(typ reflect.Type) []reflect.Value {

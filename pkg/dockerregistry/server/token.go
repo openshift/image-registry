@@ -1,11 +1,12 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	context "github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/auth"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 
@@ -31,7 +32,7 @@ func NewTokenHandler(ctx context.Context, client client.RegistryClient) http.Han
 const anonymousToken = "anonymous"
 
 func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	ctx := context.WithRequest(t.ctx, req)
+	ctx := dcontext.WithRequest(t.ctx, req)
 
 	params := req.URL.Query()
 	if len(params.Get("scope")) > 0 {
@@ -41,7 +42,7 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			case "repository", "signature":
 				_, _, err := getNamespaceName(access.Resource.Name)
 				if err != nil {
-					context.GetRequestLogger(ctx).Errorf("auth token request for unsupported resource name: %s", access.Resource.Name)
+					dcontext.GetRequestLogger(ctx).Errorf("auth token request for unsupported resource name: %s", access.Resource.Name)
 					t.writeError(w, req, err.Error())
 					return
 				}
@@ -51,7 +52,7 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	// If no authorization is provided, return a token the auth provider will treat as an anonymous user
 	if len(req.Header.Get("Authorization")) == 0 {
-		context.GetRequestLogger(ctx).Debugf("anonymous token request")
+		dcontext.GetRequestLogger(ctx).Debugf("anonymous token request")
 		t.writeToken(anonymousToken, w, req)
 		return
 	}
@@ -59,7 +60,7 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// use the password as the token
 	_, token, ok := req.BasicAuth()
 	if !ok {
-		context.GetRequestLogger(ctx).Debugf("no basic auth credentials provided")
+		dcontext.GetRequestLogger(ctx).Debugf("no basic auth credentials provided")
 		t.writeUnauthorized(w, req)
 		return
 	}
@@ -67,13 +68,13 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// TODO: if this doesn't validate as an API token, attempt to obtain an API token using the given username/password
 	osClient, err := t.client.ClientFromToken(token)
 	if err != nil {
-		context.GetRequestLogger(ctx).Errorf("error building client: %v", err)
+		dcontext.GetRequestLogger(ctx).Errorf("error building client: %v", err)
 		t.writeError(w, req, "invalid request")
 		return
 	}
 
 	if _, err := osClient.Users().Get("~", metav1.GetOptions{}); err != nil {
-		context.GetRequestLogger(ctx).Errorf("invalid token: %v", err)
+		dcontext.GetRequestLogger(ctx).Errorf("invalid token: %v", err)
 		if kerrors.IsUnauthorized(err) {
 			t.writeUnauthorized(w, req)
 		} else {

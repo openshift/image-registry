@@ -1,16 +1,17 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"time"
 
+	dcontext "github.com/docker/distribution/context"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/cache"
-
-	"github.com/docker/distribution/context"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
@@ -97,7 +98,7 @@ func (r *cachingRepositoryEnumerator) enumerateImageStreams(
 
 	client, ok := userClientFrom(ctx)
 	if !ok {
-		context.GetLogger(ctx).Warnf("user token not set, falling back to registry client")
+		dcontext.GetLogger(ctx).Warnf("user token not set, falling back to registry client")
 		osClient, err := r.client.Client()
 		if err != nil {
 			return err
@@ -107,7 +108,7 @@ func (r *cachingRepositoryEnumerator) enumerateImageStreams(
 
 	if len(last) > 0 {
 		if c, ok := r.cache.Get(last); !ok {
-			context.GetLogger(ctx).Warnf("failed to find opaque continue token for last repository=%q -> requesting the full image stream list instead of %d items", last, limit)
+			dcontext.GetLogger(ctx).Warnf("failed to find opaque continue token for last repository=%q -> requesting the full image stream list instead of %d items", last, limit)
 			warned = true
 			limit = 0
 		} else {
@@ -120,7 +121,7 @@ func (r *cachingRepositoryEnumerator) enumerateImageStreams(
 		Continue: start,
 	})
 	if apierrors.IsResourceExpired(err) {
-		context.GetLogger(ctx).Warnf("continuation token expired (%v) -> requesting the full image stream list", err)
+		dcontext.GetLogger(ctx).Warnf("continuation token expired (%v) -> requesting the full image stream list", err)
 		iss, err = client.ImageStreams("").List(metav1.ListOptions{})
 		warned = true
 	}
@@ -131,7 +132,7 @@ func (r *cachingRepositoryEnumerator) enumerateImageStreams(
 
 	warnBrokenPagination := func(msg string) {
 		if !warned {
-			context.GetLogger(ctx).Warnf("pagination not working: %s; the master API does not support chunking", msg)
+			dcontext.GetLogger(ctx).Warnf("pagination not working: %s; the master API does not support chunking", msg)
 			warned = true
 		}
 	}

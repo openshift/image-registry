@@ -1,11 +1,12 @@
 package prune
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage/driver"
@@ -277,7 +278,7 @@ func (r *Fsck) Database(namespace string) error {
 
 // Storage restores metadata based on the storage
 func (r *Fsck) Storage(namespace string) error {
-	logger := context.GetLogger(r.Ctx)
+	logger := dcontext.GetLogger(r.Ctx)
 	enumStorage := regstorage.Enumerator{Registry: r.Registry}
 
 	err := enumStorage.Repositories(r.Ctx, func(repoName string) error {

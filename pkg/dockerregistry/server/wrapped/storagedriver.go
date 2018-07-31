@@ -1,9 +1,9 @@
 package wrapped
 
 import (
+	"context"
 	"io"
 
-	"github.com/docker/distribution/context"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 )
 

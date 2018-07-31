@@ -1,14 +1,12 @@
 package metrics
 
 import (
+	"context"
 	"io"
 	"net/url"
 	"strings"
 
-	gocontext "golang.org/x/net/context"
-
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 
@@ -97,7 +95,7 @@ type repositoryRetriever struct {
 	sink      Sink
 }
 
-func (rr repositoryRetriever) Repository(ctx gocontext.Context, registry *url.URL, repoName string, insecure bool) (repo distribution.Repository, err error) {
+func (rr repositoryRetriever) Repository(ctx context.Context, registry *url.URL, repoName string, insecure bool) (repo distribution.Repository, err error) {
 	err = pullthroughRepositoryWrapper(ctx, rr.sink, registry.Host, "Init", func(ctx context.Context) error {
 		repo, err = rr.retriever.Repository(ctx, registry, repoName, insecure)
 		return err

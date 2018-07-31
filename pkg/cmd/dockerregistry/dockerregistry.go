@@ -1,6 +1,7 @@
 package dockerregistry
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"flag"
@@ -16,7 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/health"
 	"github.com/docker/distribution/uuid"
 	distversion "github.com/docker/distribution/version"
@@ -154,9 +155,9 @@ func Execute(configFile io.Reader) {
 
 	// inject a logger into the uuid library. warns us if there is a problem
 	// with uuid generation under low entropy.
-	uuid.Loggerf = context.GetLogger(ctx).Warnf
+	uuid.Loggerf = dcontext.GetLogger(ctx).Warnf
 
-	context.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
+	dcontext.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
 
 	srv, err := NewServer(ctx, dockerConfig, extraConfig)
 	if err != nil {
@@ -164,10 +165,10 @@ func Execute(configFile io.Reader) {
 	}
 
 	if dockerConfig.HTTP.TLS.Certificate == "" {
-		context.GetLogger(ctx).Infof("listening on %s", srv.Addr)
+		dcontext.GetLogger(ctx).Infof("listening on %s", srv.Addr)
 		err = srv.ListenAndServe()
 	} else {
-		context.GetLogger(ctx).Infof("listening on %s, tls", srv.Addr)
+		dcontext.GetLogger(ctx).Infof("listening on %s, tls", srv.Addr)
 		err = srv.ListenAndServeTLS(dockerConfig.HTTP.TLS.Certificate, dockerConfig.HTTP.TLS.Key)
 	}
 	if err != nil {
@@ -237,7 +238,7 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 			}
 
 			for _, subj := range pool.Subjects() {
-				context.GetLogger(ctx).Debugf("CA Subject: %s", string(subj))
+				dcontext.GetLogger(ctx).Debugf("CA Subject: %s", string(subj))
 			}
 
 			tlsConf.ClientAuth = tls.RequireAndVerifyClientCert
@@ -258,7 +259,7 @@ func configureLogging(ctx context.Context, config *configuration.Configuration) 
 	if config.Log.Level == "" && config.Log.Formatter == "" {
 		// If no config for logging is set, fallback to deprecated "Loglevel".
 		log.SetLevel(logLevel(config.Loglevel))
-		ctx = context.WithLogger(ctx, context.GetLogger(ctx))
+		ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx))
 		return ctx, nil
 	}
 
@@ -300,8 +301,8 @@ func configureLogging(ctx context.Context, config *configuration.Configuration) 
 			fields = append(fields, k)
 		}
 
-		ctx = context.WithValues(ctx, config.Log.Fields)
-		ctx = context.WithLogger(ctx, context.GetLogger(ctx, fields...))
+		ctx = dcontext.WithValues(ctx, config.Log.Fields)
+		ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx, fields...))
 	}
 
 	return ctx, nil
@@ -398,12 +399,12 @@ type loggingHandler struct {
 func (h loggingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := h.ctx
 
-	ctx = context.WithRequest(ctx, r)
-	ctx, w = context.WithResponseWriter(ctx, w)
-	logger := context.GetRequestLogger(ctx)
-	ctx = context.WithLogger(ctx, logger)
+	ctx = dcontext.WithRequest(ctx, r)
+	ctx, w = dcontext.WithResponseWriter(ctx, w)
+	logger := dcontext.GetRequestLogger(ctx)
+	ctx = dcontext.WithLogger(ctx, logger)
 
 	h.handler.ServeHTTP(w, r)
 
-	context.GetResponseLogger(ctx).Infof("response")
+	dcontext.GetResponseLogger(ctx).Infof("response")
 }

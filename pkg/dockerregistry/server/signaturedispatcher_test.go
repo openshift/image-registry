@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
