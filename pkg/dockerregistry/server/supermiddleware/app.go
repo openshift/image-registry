@@ -13,7 +13,7 @@ import (
 	registrymw "github.com/docker/distribution/registry/middleware/registry"
 	repositorymw "github.com/docker/distribution/registry/middleware/repository"
 	"github.com/docker/distribution/registry/storage/cache"
-	cacheprovider "github.com/docker/distribution/registry/storage/cache/provider"
+	//cacheprovider "github.com/docker/distribution/registry/storage/cache/provider"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	storagemw "github.com/docker/distribution/registry/storage/driver/middleware"
 )
@@ -146,14 +146,16 @@ func init() {
 		logrus.Fatalf("Unable to register repository middleware: %v", err)
 	}
 
-	err = cacheprovider.Register(Name, func(ctx context.Context, options map[string]interface{}) (cache.BlobDescriptorCacheProvider, error) {
-		inst := getInstance(options)
-		if inst == nil {
-			return nil, fmt.Errorf("failed to find an application instance in the cache provider")
+	/*
+		err = cacheprovider.Register(Name, func(ctx context.Context, options map[string]interface{}) (cache.BlobDescriptorCacheProvider, error) {
+			inst := getInstance(options)
+			if inst == nil {
+				return nil, fmt.Errorf("failed to find an application instance in the cache provider")
+			}
+			return inst.CacheProvider(ctx, options)
+		})
+		if err != nil {
+			logrus.Fatalf("Unable to register cache provider: %v", err)
 		}
-		return inst.CacheProvider(ctx, options)
-	})
-	if err != nil {
-		logrus.Fatalf("Unable to register cache provider: %v", err)
-	}
+	*/
 }
