@@ -100,7 +100,7 @@ const manifestSchema2ConfigDigest = `sha256:da5939581ac835614e3cf6c765e7489e6d0f
 var manifestSchema2ConfigDescriptor = distribution.Descriptor{
 	Digest:    digest.Digest(manifestSchema2ConfigDigest),
 	Size:      5838,
-	MediaType: schema2.MediaTypeConfig,
+	MediaType: schema2.MediaTypeImageConfig,
 }
 
 const manifestSchema2 = `{

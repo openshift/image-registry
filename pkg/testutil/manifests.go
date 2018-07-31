@@ -72,7 +72,7 @@ func MakeSchema2Manifest(config distribution.Descriptor, layers []distribution.D
 		Config:    config,
 		Layers:    make([]distribution.Descriptor, 0, len(layers)),
 	}
-	m.Config.MediaType = schema2.MediaTypeConfig
+	m.Config.MediaType = schema2.MediaTypeImageConfig
 
 	for _, layer := range layers {
 		layer.MediaType = schema2.MediaTypeLayer
