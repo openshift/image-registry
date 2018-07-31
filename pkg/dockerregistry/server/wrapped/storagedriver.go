@@ -103,3 +103,9 @@ func (d *storageDriver) URLFor(ctx context.Context, path string, options map[str
 	})
 	return
 }
+
+func (d *storageDriver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
+	return d.wrapper("StorageDriver.Walk", func() error {
+		return d.storageDriver.Walk(ctx, path, f)
+	})
+}

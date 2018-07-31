@@ -71,6 +71,11 @@ func (sd *storageDriver) URLFor(ctx context.Context, path string, options map[st
 	return sd.storageDriver.URLFor(ctx, path, options)
 }
 
+func (sd *storageDriver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
+	sd.logger.Printf("WALK %s", path)
+	return sd.storageDriver.Walk(ctx, path, f)
+}
+
 func TestManifest(t *testing.T) {
 	const reponame = "foo/bar"
 
