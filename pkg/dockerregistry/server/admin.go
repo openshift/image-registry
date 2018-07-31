@@ -47,7 +47,7 @@ func (app *App) registerBlobHandler(dockerApp *handlers.App) {
 // for handling blob requests.
 func (app *App) blobDispatcher(ctx *handlers.Context, r *http.Request) http.Handler {
 	reference := dcontext.GetStringValue(ctx, "vars.digest")
-	dgst, _ := digest.ParseDigest(reference)
+	dgst, _ := digest.Parse(reference)
 
 	blobHandler := &blobHandler{
 		Context: ctx,

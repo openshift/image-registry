@@ -106,7 +106,7 @@ func (r *mockTagService) Get(ctx context.Context, tag string) (distribution.Desc
 	if !ok {
 		return distribution.Descriptor{}, r.repo.getTagErr
 	}
-	dgst, err := godigest.ParseDigest(v)
+	dgst, err := godigest.Parse(v)
 	if err != nil {
 		panic(err)
 	}

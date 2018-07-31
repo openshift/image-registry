@@ -136,7 +136,7 @@ func (r *Fsck) checkImage(image *imageapiv1.Image, blobStatter *statter) error {
 		return fmt.Errorf("error getting image metadata: %s", err)
 	}
 
-	imageDigest, err := digest.ParseDigest(image.Name)
+	imageDigest, err := digest.Parse(image.Name)
 	if err != nil {
 		return fmt.Errorf("bad image name %q: %s", image.Name, err)
 	}
@@ -154,7 +154,7 @@ func (r *Fsck) checkImage(image *imageapiv1.Image, blobStatter *statter) error {
 	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest {
 		meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
 		if ok {
-			configDigest, err := digest.ParseDigest(meta.ID)
+			configDigest, err := digest.Parse(meta.ID)
 			if err != nil {
 				return fmt.Errorf("image %q: bad config %q: %s", imageDigest, meta.ID, err)
 			}
@@ -172,7 +172,7 @@ func (r *Fsck) checkImage(image *imageapiv1.Image, blobStatter *statter) error {
 	}
 
 	for _, layer := range image.DockerImageLayers {
-		layerDigest, err := digest.ParseDigest(layer.Name)
+		layerDigest, err := digest.Parse(layer.Name)
 		if err != nil {
 			return fmt.Errorf("image %q: bad layer %q: %s", imageDigest, layer.Name, err)
 		}
@@ -216,7 +216,7 @@ func (r *Fsck) Database(namespace string) error {
 				}
 				checkedImages[tagEvent.Image] = struct{}{}
 
-				imageDigest, err := digest.ParseDigest(tagEvent.Image)
+				imageDigest, err := digest.Parse(tagEvent.Image)
 				if err == nil {
 					image, err = r.Client.Images().Get(imageDigest.String(), metav1.GetOptions{})
 					switch {

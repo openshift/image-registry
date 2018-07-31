@@ -312,7 +312,7 @@ func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, *rer
 
 		tag := history.Tag
 
-		dgst, err := digest.ParseDigest(history.Items[0].Image)
+		dgst, err := digest.Parse(history.Items[0].Image)
 		if err != nil {
 			dcontext.GetLogger(ctx).Errorf("bad digest %s: %v", history.Items[0].Image, err)
 			continue
