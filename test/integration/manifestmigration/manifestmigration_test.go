@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
+	"github.com/opencontainers/go-digest"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/testutil/logger"
 	"github.com/openshift/image-registry/test/internal/storagepath"

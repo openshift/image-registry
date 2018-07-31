@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	digest "github.com/docker/distribution/digest"
+	digest "github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/docker/distribution/context"
-	digest "github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
+	digest "github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

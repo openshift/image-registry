@@ -6,7 +6,7 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
+	"github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
 

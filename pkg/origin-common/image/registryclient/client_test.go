@@ -13,9 +13,9 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	godigest "github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/api/errcode"
+	godigest "github.com/opencontainers/go-digest"
 )
 
 type mockRetriever struct {

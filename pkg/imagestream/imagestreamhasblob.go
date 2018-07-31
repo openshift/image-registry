@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"

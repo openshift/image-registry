@@ -8,8 +8,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/diff"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
+	"github.com/opencontainers/go-digest"
 )
 
 func TestUnmarshalManifestSchema2(t *testing.T) {

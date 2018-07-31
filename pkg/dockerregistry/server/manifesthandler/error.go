@@ -3,7 +3,7 @@ package manifesthandler
 import (
 	"fmt"
 
-	"github.com/docker/distribution/digest"
+	"github.com/opencontainers/go-digest"
 )
 
 // ErrManifestBlobBadSize is returned when the blob size in a manifest does

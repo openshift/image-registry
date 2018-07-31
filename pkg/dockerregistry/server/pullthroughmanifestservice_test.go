@@ -12,9 +12,9 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/handlers"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
+	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 

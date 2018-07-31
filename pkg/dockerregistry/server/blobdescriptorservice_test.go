@@ -13,10 +13,10 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	registryauth "github.com/docker/distribution/registry/auth"
+	"github.com/opencontainers/go-digest"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	srvconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"

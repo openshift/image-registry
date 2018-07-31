@@ -14,12 +14,12 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	distclient "github.com/docker/distribution/registry/client"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/distribution/registry/client/auth/challenge"
 	"github.com/docker/distribution/registry/client/transport"
+	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"

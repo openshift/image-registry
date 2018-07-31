@@ -6,7 +6,6 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/auth"
@@ -14,6 +13,7 @@ import (
 	"github.com/docker/distribution/registry/storage"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	gorillahandlers "github.com/gorilla/handlers"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/api"
 )

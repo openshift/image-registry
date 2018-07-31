@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
+	"github.com/opencontainers/go-digest"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

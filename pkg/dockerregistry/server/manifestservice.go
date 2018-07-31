@@ -6,10 +6,10 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/registry/api/errcode"
 	regapi "github.com/docker/distribution/registry/api/v2"
+	"github.com/opencontainers/go-digest"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 

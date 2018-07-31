@@ -13,12 +13,12 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	godigest "github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	registryclient "github.com/docker/distribution/registry/client"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/distribution/registry/client/auth/challenge"
 	"github.com/docker/distribution/registry/client/transport"
+	godigest "github.com/opencontainers/go-digest"
 )
 
 // RepositoryRetriever fetches a Docker distribution.Repository.

@@ -9,9 +9,9 @@ import (
 
 	"github.com/docker/distribution/configuration"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/storage"
 	"github.com/docker/distribution/registry/storage/driver/factory"
+	"github.com/opencontainers/go-digest"
 
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	regstorage "github.com/openshift/image-registry/pkg/dockerregistry/server/storage"
