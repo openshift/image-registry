@@ -1,10 +1,10 @@
-hash: b812751fa490304944135eed61ed61cefb3b7c83f142dfa56ce6f806d4616309
-updated: 2018-08-27T16:46:06.445076525+02:00
+hash: d3830abe43b4f85f5c086304c7567752ecdea4134c836d6e8761d9c4f159005e
+updated: 2018-08-27T16:47:41.007487837+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
 - name: github.com/aws/aws-sdk-go
-  version: 63ce630574a5ec05ecd8e8de5cea16332a5a684d
+  version: 5bcc0a238d880469f949fc7cd24e35f32ab80cbd
   subpackages:
   - aws
   - aws/awserr
@@ -22,13 +22,13 @@ imports:
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/shareddefaults
   - private/protocol
   - private/protocol/query
   - private/protocol/query/queryutil
   - private/protocol/rest
   - private/protocol/restxml
   - private/protocol/xml/xmlutil
-  - private/waiter
   - service/cloudfront/sign
   - service/s3
   - service/sts
@@ -359,11 +359,12 @@ imports:
   - http2
   - http2/hpack
   - idna
-  - internal/timeseries
   - lex/httplex
   - proxy
   - trace
   - websocket
+- name: golang.org/x/net/internal/timeseries
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
 - name: golang.org/x/oauth2
   version: 045497edb6234273d67dbc25da3f2ddbc4c4cacf
   subpackages:
