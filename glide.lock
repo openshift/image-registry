@@ -1,5 +1,5 @@
-hash: bc70822ef8e49097b3b6ec40ab48f2c564b3b4caff127a6222c869cc27b29e6f
-updated: 2018-08-27T16:37:24.608675995+02:00
+hash: b6aa53820a96fed589219b50bd3de7314cac9f1e3370cf9b834ecc94aca41b13
+updated: 2018-08-27T16:39:35.152552418+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -41,7 +41,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/bshuster-repo/logrus-logstash-hook
-  version: 0e6d502573042a6563419fbcce4f284600bfe929
+  version: dbc1e22735aa6ed7bd9579a407c17bc7c4a4e046
 - name: github.com/certifi/gocertifi
   version: deb3ae2ef2610fde3330947281941c562861188b
 - name: github.com/cloudflare/cfssl
