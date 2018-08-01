@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 hash: b6aa53820a96fed589219b50bd3de7314cac9f1e3370cf9b834ecc94aca41b13
 updated: 2018-08-27T16:39:35.152552418+02:00
+=======
+hash: d25968b13d12b64a35ff8acb1108f9014af6b5151a93228de9bdf9c5e51cf632
+updated: 2018-08-02T14:06:39.83025182+02:00
+>>>>>>> fb1ebb4d... bump(github.com/prometheus/common)
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -296,7 +301,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207
+  version: 3233b24a36715a2fe36d162260457857a56d672d
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -311,11 +316,11 @@ imports:
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/RangelReale/osin
   version: 0f3357bb07e801ea62327872d19913969001dd7a
-- name: github.com/sirupsen/logrus
-  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/Sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
   repo: https://github.com/sirupsen/logrus
+- name: github.com/sirupsen/logrus
+  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/skynetservices/skydns
   version: 30763c4e568fe411f1663af553c063cec8879929
   repo: https://github.com/openshift/skynetservices-skydns
