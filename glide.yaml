@@ -31,9 +31,8 @@ import:
   version: master
 - package: github.com/openshift/client-go
   version: master
-# lock library-go before the sirupsen/logrus case change
 - package: github.com/openshift/library-go
-  version: 077f461517a8617b5bdb5088afa7b451dd612b15
+  version: master
 
 
 # everything else last

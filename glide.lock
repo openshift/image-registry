@@ -1,5 +1,5 @@
-hash: 53b67d48288814b7bd09d5bf9e3e35adddc8f7d80ef04c9f493e7d0bb38197be
-updated: 2018-08-27T16:35:03.884085744+02:00
+hash: bc70822ef8e49097b3b6ec40ab48f2c564b3b4caff127a6222c869cc27b29e6f
+updated: 2018-08-27T16:37:24.608675995+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -274,7 +274,7 @@ imports:
   - user/clientset/versioned/scheme
   - user/clientset/versioned/typed/user/v1
 - name: github.com/openshift/library-go
-  version: 077f461517a8617b5bdb5088afa7b451dd612b15
+  version: 1d4fa7d16c15c6b51312c990be28c5976acb0380
   subpackages:
   - pkg/crypto
   - pkg/serviceability
@@ -311,6 +311,8 @@ imports:
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/RangelReale/osin
   version: 0f3357bb07e801ea62327872d19913969001dd7a
+- name: github.com/sirupsen/logrus
+  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/Sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
   repo: https://github.com/sirupsen/logrus
