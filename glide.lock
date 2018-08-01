@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-hash: b6aa53820a96fed589219b50bd3de7314cac9f1e3370cf9b834ecc94aca41b13
-updated: 2018-08-27T16:39:35.152552418+02:00
-=======
-hash: d25968b13d12b64a35ff8acb1108f9014af6b5151a93228de9bdf9c5e51cf632
-updated: 2018-08-02T14:06:39.83025182+02:00
->>>>>>> fb1ebb4d... bump(github.com/prometheus/common)
+hash: b812751fa490304944135eed61ed61cefb3b7c83f142dfa56ce6f806d4616309
+updated: 2018-08-27T16:46:06.445076525+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -111,19 +106,21 @@ imports:
   - uuid
   - version
 - name: github.com/docker/docker
-  version: 092cba3727bb9b4a2f0e922cd6c0f93ea270e363
+  version: 1009e6a40b295187e038b67e184e9c0384d95538
   subpackages:
+  - api
   - api/types
   - api/types/blkiodev
   - api/types/container
   - api/types/events
   - api/types/filters
+  - api/types/image
   - api/types/mount
   - api/types/network
-  - api/types/reference
   - api/types/registry
   - api/types/strslice
   - api/types/swarm
+  - api/types/swarm/runtime
   - api/types/time
   - api/types/versions
   - api/types/volume
@@ -133,6 +130,7 @@ imports:
   - pkg/idtools
   - pkg/ioutils
   - pkg/longpath
+  - pkg/mount
   - pkg/pools
   - pkg/promise
   - pkg/system
@@ -246,6 +244,13 @@ imports:
   version: ce444d6d47c51d4dda9202cd38f5094dd8e27e86
   subpackages:
   - swifttest
+- name: github.com/opencontainers/go-digest
+  version: c9281466c8b2f606084ac71339773efd177436e7
+- name: github.com/opencontainers/image-spec
+  version: e562b04403929d582d449ae5386ff79dd7961a11
+  subpackages:
+  - specs-go
+  - specs-go/v1
 - name: github.com/opencontainers/runc
   version: 0228707b77ae6e3155060341a0819ead98a0cf84
   subpackages:

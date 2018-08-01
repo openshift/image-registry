@@ -58,7 +58,7 @@ import:
 - package: google.golang.org/api
   version: 9bf6e6e569ff057f75d9604a46c52928f17d2b54
 - package: github.com/docker/docker
-  version: ^1.13.0
+  version: 1009e6a40b295187e038b67e184e9c0384d95538
 - package: github.com/bshuster-repo/logrus-logstash-hook
   version: ^0.4.1
 - package: github.com/prometheus/common
