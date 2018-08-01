@@ -169,8 +169,7 @@ func TestSignaturePut(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
-	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
-	ctx = withUserClient(ctx, osclient)
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t, userClient: osclient})
 
 	config := &registryconfig.Configuration{}
 	dockercfg := &configuration.Configuration{
