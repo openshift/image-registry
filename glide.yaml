@@ -51,8 +51,6 @@ import:
 - package: github.com/Sirupsen/logrus
   repo: https://github.com/sirupsen/logrus
   version: 1.0.2
-- package: github.com/Azure/azure-sdk-for-go
-  version: 0b5fe2abe0271ba07049eacaa65922d67c319543
 - package: google.golang.org/cloud
   version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
 - package: google.golang.org/api
@@ -65,3 +63,5 @@ import:
   version: 3233b24a36715a2fe36d162260457857a56d672d
 - package: github.com/aws/aws-sdk-go
   version: 1.12.36
+- package: github.com/Azure/azure-sdk-for-go
+  version: 16.2.1
