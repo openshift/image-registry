@@ -224,7 +224,7 @@ func TestApp(t *testing.T) {
 			url:          serverURL("/v2/foo/blobs/" + fooDigest),
 			expectStatus: http.StatusAccepted,
 			expectLog: []string{
-				"AccessController(repository::foo:*)",
+				"AccessController(repository::foo:delete)",
 				"foo: enter Registry.Repository",
 				"foo: leave Registry.Repository",
 				"foo(regular): enter BlobStore.Delete",
