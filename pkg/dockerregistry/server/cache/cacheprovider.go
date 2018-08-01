@@ -16,7 +16,7 @@ type Provider struct {
 var _ cache.BlobDescriptorCacheProvider = &Provider{}
 
 func (c *Provider) RepositoryScoped(repo string) (distribution.BlobDescriptorService, error) {
-	if _, err := reference.ParseNamed(repo); err != nil {
+	if _, err := reference.WithName(repo); err != nil {
 		return nil, err
 	}
 	return &RepositoryScopedBlobDescriptor{

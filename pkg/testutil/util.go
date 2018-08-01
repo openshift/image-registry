@@ -49,7 +49,7 @@ func NewTransport(baseURL string, repoName string, creds auth.CredentialStore) (
 
 // NewRepository creates a new Repository for the given repository name, base URL and creds.
 func NewRepository(repoName string, baseURL string, transport http.RoundTripper) (distribution.Repository, error) {
-	ref, err := reference.ParseNamed(repoName)
+	ref, err := reference.WithName(repoName)
 	if err != nil {
 		return nil, err
 	}

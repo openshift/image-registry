@@ -1,6 +1,7 @@
 package image
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/docker/distribution/reference"
@@ -20,9 +21,14 @@ type namedDockerImageReference struct {
 func parseNamedDockerImageReference(spec string) (namedDockerImageReference, error) {
 	var ref namedDockerImageReference
 
-	namedRef, err := reference.ParseNamed(spec)
+	parsedRef, err := reference.Parse(spec)
 	if err != nil {
 		return ref, err
+	}
+
+	namedRef, isNamed := parsedRef.(reference.Named)
+	if !isNamed {
+		return ref, fmt.Errorf("reference %s has no name", parsedRef.String())
 	}
 
 	name := namedRef.Name()

@@ -468,7 +468,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	ref, err := reference.ParseNamed("nm/is")
+	ref, err := reference.WithName("nm/is")
 	if err != nil {
 		t.Errorf("failed to parse blob reference %q: %v", "nm/is", err)
 	}
