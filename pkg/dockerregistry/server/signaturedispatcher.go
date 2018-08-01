@@ -17,7 +17,9 @@ import (
 	"github.com/docker/distribution/registry/handlers"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
+
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	rerrors "github.com/openshift/image-registry/pkg/errors"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	gorillahandlers "github.com/gorilla/handlers"
@@ -191,7 +193,7 @@ func (s *signatureHandler) Get(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *signatureHandler) handleError(ctx context.Context, err error, w http.ResponseWriter) {
-	dcontext.GetLogger(ctx).Errorf("(*signatureHandler): %v", err)
+	rerrors.Handle(ctx, "signature response completed with error", err)
 	ctx, w = dcontext.WithResponseWriter(ctx, w)
 	if serveErr := errcode.ServeJSON(w, err); serveErr != nil {
 		dcontext.GetResponseLogger(ctx).Errorf("error sending error response: %v", serveErr)
