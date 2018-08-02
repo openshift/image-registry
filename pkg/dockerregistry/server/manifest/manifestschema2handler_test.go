@@ -41,10 +41,9 @@ func TestUnmarshalManifestSchema2(t *testing.T) {
 		{
 			name:                   "manifest schema1 image",
 			manifestString:         manifestSchema1,
-			expectedErrorSubstring: "unexpected manifest schema version",
+			expectedErrorSubstring: "mediaType in manifest should be 'application/vnd.docker.distribution.manifest.v2+json'",
 		},
 	} {
-
 		t.Run(tc.name, func(t *testing.T) {
 			manifest, err := unmarshalManifestSchema2([]byte(tc.manifestString))
 			if err != nil {
