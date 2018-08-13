@@ -22,6 +22,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -324,28 +325,18 @@ func (m *Master) WaitForRoles() error {
 		if err != nil {
 			return false, err
 		}
-		admin, err := kubeClient.RbacV1().ClusterRoles().Get("admin", metav1.GetOptions{})
-		if err != nil {
-			return false, err
+		for _, roleName := range []string{"admin", "edit", "view"} {
+			role, err := kubeClient.RbacV1().ClusterRoles().Get(roleName, metav1.GetOptions{})
+			if kerrors.IsNotFound(err) {
+				return false, nil
+			}
+			if err != nil {
+				return false, err
+			}
+			if len(role.Rules) == 0 {
+				return false, nil
+			}
 		}
-		if len(admin.Rules) == 0 {
-			return false, nil
-		}
-		edit, err := kubeClient.RbacV1().ClusterRoles().Get("edit", metav1.GetOptions{})
-		if err != nil {
-			return false, err
-		}
-		if len(edit.Rules) == 0 {
-			return false, nil
-		}
-		view, err := kubeClient.RbacV1().ClusterRoles().Get("view", metav1.GetOptions{})
-		if err != nil {
-			return false, err
-		}
-		if len(view.Rules) == 0 {
-			return false, nil
-		}
-
 		return true, nil
 	})
 	if err != nil {
