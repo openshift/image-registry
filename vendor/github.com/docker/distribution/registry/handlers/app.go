@@ -659,6 +659,7 @@ func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare the context with our own little decorations.
 	ctx := r.Context()
+	ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(app))
 	ctx = dcontext.WithRequest(ctx, r)
 	ctx, w = dcontext.WithResponseWriter(ctx, w)
 	ctx = dcontext.WithLogger(ctx, dcontext.GetRequestLogger(ctx))
