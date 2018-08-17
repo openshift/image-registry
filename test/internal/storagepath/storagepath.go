@@ -27,3 +27,8 @@ func Manifest(repo string, dgst digest.Digest) string {
 	repo = repopath(repo)
 	return filepath.Join(prefix(), "repositories", repo, "_manifests", "revisions", dgst.Algorithm().String(), dgst.Hex(), "link")
 }
+
+// Blob returns the absolute path for blob.
+func Blob(dgst digest.Digest) string {
+	return filepath.Join(prefix(), "blobs", dgst.Algorithm().String(), dgst.Hex()[:2], dgst.Hex(), "data")
+}
