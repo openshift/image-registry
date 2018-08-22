@@ -2,12 +2,14 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	context "github.com/docker/distribution/context"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/auth"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -72,7 +74,15 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	if _, err := osClient.Users().Get("~", metav1.GetOptions{}); err != nil {
 		context.GetRequestLogger(ctx).Errorf("invalid token: %v", err)
-		t.writeUnauthorized(w, req)
+		if kerrors.IsUnauthorized(err) {
+			t.writeUnauthorized(w, req)
+		} else {
+			msg := "unable to validate token"
+			if reason := kerrors.ReasonForError(err); reason != metav1.StatusReasonUnknown {
+				msg = fmt.Sprintf("%s: %s", msg, reason)
+			}
+			t.writeError(w, req, msg)
+		}
 		return
 	}
 
