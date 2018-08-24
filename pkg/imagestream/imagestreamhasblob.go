@@ -39,10 +39,15 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) (bool, *
 	// perform the more efficient check for a layer in the image stream
 	layers, err := is.imageStreamGetter.layers()
 	if err == nil {
-		if _, ok := layers.Blobs[dgst.String()]; !ok {
-			return logFound(false, layers, nil)
+		// check for the blob in the layers
+		if _, ok := layers.Blobs[dgst.String()]; ok {
+			return logFound(true, layers, nil)
 		}
-		return logFound(true, layers, nil)
+		// check for the manifest as a blob
+		if _, ok := layers.Images[dgst.String()]; ok {
+			return logFound(true, layers, nil)
+		}
+		return logFound(false, layers, nil)
 	}
 
 	// perform the older, O(N) check for a layer in an image stream by scanning over all images
