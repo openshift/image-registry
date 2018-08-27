@@ -30,7 +30,7 @@ import (
 
 func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Server {
 	// pullthrough middleware will attempt to pull from this registry instance
-	remoteRegistryApp := handlers.NewApp(ctx, &configuration.Configuration{
+	config := &configuration.Configuration{
 		Loglevel: "debug",
 		Storage: configuration.Storage{
 			"inmemory": configuration.Parameters{},
@@ -46,7 +46,9 @@ func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Serve
 				},
 			},
 		},
-	})
+	}
+	config.Compatibility.Schema1.Enabled = true
+	remoteRegistryApp := handlers.NewApp(ctx, config)
 	return httptest.NewServer(remoteRegistryApp)
 }
 
