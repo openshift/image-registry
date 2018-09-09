@@ -9,9 +9,12 @@ OpenShift Image Registry
 
 ***OpenShift Image Registry*** is a tightly integrated with [OpenShift Origin](https://www.openshift.org/) application that lets you distribute Docker images.
 
+Installation and configuration instructions can be found in the
+[OpenShift documentation](https://docs.okd.io/latest/install_config/registry/index.html).
+
 **Features:**
 
 * Pull and cache images from remote registries.
 * Role-based access control (RBAC).
 * Audit log.
-* Promethus metrics.
+* Prometheus metrics.
