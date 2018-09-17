@@ -1,11 +1,11 @@
 package wrapped
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
+	"github.com/opencontainers/go-digest"
 )
 
 // blobStore wraps a distribution.BlobStore.

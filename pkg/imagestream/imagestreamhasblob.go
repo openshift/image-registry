@@ -1,12 +1,13 @@
 package imagestream
 
 import (
+	"context"
 	"sort"
 	"time"
 
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
@@ -24,14 +25,14 @@ func (b ByGeneration) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 // oldest until found. Each processed image will update local cache of blobs.
 // TODO: remove image lookup path after 3.11
 func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) (bool, *imageapiv1.ImageStreamLayers, *imageapiv1.Image) {
-	context.GetLogger(ctx).Debugf("verifying presence of blob %q in image stream %s", dgst.String(), is.Reference())
+	dcontext.GetLogger(ctx).Debugf("verifying presence of blob %q in image stream %s", dgst.String(), is.Reference())
 	started := time.Now()
 	logFound := func(found bool, layers *imageapiv1.ImageStreamLayers, image *imageapiv1.Image) (bool, *imageapiv1.ImageStreamLayers, *imageapiv1.Image) {
 		elapsed := time.Since(started)
 		if found {
-			context.GetLogger(ctx).Debugf("verified presence of blob %q in image stream %s after %s", dgst.String(), is.Reference(), elapsed.String())
+			dcontext.GetLogger(ctx).Debugf("verified presence of blob %q in image stream %s after %s", dgst.String(), is.Reference(), elapsed.String())
 		} else {
-			context.GetLogger(ctx).Debugf("detected absence of blob %q in image stream %s after %s", dgst.String(), is.Reference(), elapsed.String())
+			dcontext.GetLogger(ctx).Debugf("detected absence of blob %q in image stream %s after %s", dgst.String(), is.Reference(), elapsed.String())
 		}
 		return found, layers, image
 	}
@@ -53,11 +54,11 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) (bool, *
 	// perform the older, O(N) check for a layer in an image stream by scanning over all images
 
 	// TODO: drop this code path after 3.11
-	context.GetLogger(ctx).Debugf("API server was unable to fetch layers for the requested image stream: %v", err)
+	dcontext.GetLogger(ctx).Debugf("API server was unable to fetch layers for the requested image stream: %v", err)
 
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
-		context.GetLogger(ctx).Errorf("imageStream.HasBlob: failed to get image stream: %v", err)
+		dcontext.GetLogger(ctx).Errorf("imageStream.HasBlob: failed to get image stream: %v", err)
 		return logFound(false, nil, nil)
 	}
 
@@ -93,25 +94,25 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) (bool, *
 
 		processedImages[tagEvent.Image] = struct{}{}
 
-		context.GetLogger(ctx).Debugf("getting image %s", tagEvent.Image)
+		dcontext.GetLogger(ctx).Debugf("getting image %s", tagEvent.Image)
 		image, err := is.getImage(ctx, digest.Digest(tagEvent.Image))
 		if err != nil {
 			if err.Code == ErrImageStreamImageNotFoundCode {
-				context.GetLogger(ctx).Debugf("image %q not found", tagEvent.Image)
+				dcontext.GetLogger(ctx).Debugf("image %q not found", tagEvent.Image)
 			} else {
-				context.GetLogger(ctx).Errorf("failed to get image: %v", err)
+				dcontext.GetLogger(ctx).Errorf("failed to get image: %v", err)
 			}
 			continue
 		}
 
 		if imageHasBlob(ctx, image, dgst) {
 			tagName := event2Name[tagEvent]
-			context.GetLogger(ctx).Debugf("blob found under istag %s:%s in image %s", is.Reference(), tagName, tagEvent.Image)
+			dcontext.GetLogger(ctx).Debugf("blob found under istag %s:%s in image %s", is.Reference(), tagName, tagEvent.Image)
 			return logFound(true, nil, image)
 		}
 	}
 
-	context.GetLogger(ctx).Warnf("blob %q exists locally but is not referenced in repository %s", dgst.String(), is.Reference())
+	dcontext.GetLogger(ctx).Warnf("blob %q exists locally but is not referenced in repository %s", dgst.String(), is.Reference())
 
 	return logFound(false, nil, nil)
 }
@@ -137,7 +138,7 @@ func imageHasBlob(ctx context.Context, image *imageapiv1.Image, blobDigest diges
 
 	meta, ok := image.DockerImageMetadata.Object.(*docker10.DockerImage)
 	if !ok {
-		context.GetLogger(ctx).Errorf("image does not have metadata %s", image.Name)
+		dcontext.GetLogger(ctx).Errorf("image does not have metadata %s", image.Name)
 		return false
 	}
 

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/docker/distribution/digest"
+	"github.com/opencontainers/go-digest"
 )
 
 const (
@@ -120,7 +120,7 @@ func (r DockerImageReference) NameString() string {
 		return r.Name + ":" + r.Tag
 	case len(r.ID) > 0:
 		var ref string
-		if _, err := digest.ParseDigest(r.ID); err == nil {
+		if _, err := digest.Parse(r.ID); err == nil {
 			// if it parses as a digest, its v2 pull by id
 			ref = "@" + r.ID
 		} else {
@@ -188,7 +188,7 @@ func JoinImageStreamImage(name, id string) string {
 
 // DigestOrImageMatch matches the digest in the image name.
 func DigestOrImageMatch(image, imageID string) bool {
-	if d, err := digest.ParseDigest(image); err == nil {
+	if d, err := digest.Parse(image); err == nil {
 		return strings.HasPrefix(d.Hex(), imageID) || strings.HasPrefix(image, imageID)
 	}
 	return strings.HasPrefix(image, imageID)

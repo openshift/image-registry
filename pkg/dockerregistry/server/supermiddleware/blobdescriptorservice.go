@@ -1,14 +1,15 @@
 package supermiddleware
 
 import (
-	"github.com/Sirupsen/logrus"
+	"context"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	registrymw "github.com/docker/distribution/registry/middleware/registry"
 	"github.com/docker/distribution/registry/storage"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
 )

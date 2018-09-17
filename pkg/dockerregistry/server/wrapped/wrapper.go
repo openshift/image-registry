@@ -1,6 +1,6 @@
 package wrapped
 
-import "github.com/docker/distribution/context"
+import "context"
 
 // Wrapper is a user defined function that wraps methods to control their
 // execution flow, contexts and error reporing.

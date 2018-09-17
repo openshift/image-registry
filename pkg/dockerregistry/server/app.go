@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -8,7 +9,7 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	registrycache "github.com/docker/distribution/registry/storage/cache"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	kubecache "k8s.io/apimachinery/pkg/util/cache"
@@ -126,7 +127,7 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 		app.metrics,
 	)
 	if err != nil {
-		context.GetLogger(ctx).Fatalf("unable to create cache: %v", err)
+		dcontext.GetLogger(ctx).Fatalf("unable to create cache: %v", err)
 	}
 	app.cache = digestCache
 
@@ -137,23 +138,23 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 	dockerApp := supermiddleware.NewApp(ctx, dockerConfig, superapp)
 
 	if app.driver == nil {
-		context.GetLogger(ctx).Fatalf("configuration error: the storage driver middleware %q is not activated", supermiddleware.Name)
+		dcontext.GetLogger(ctx).Fatalf("configuration error: the storage driver middleware %q is not activated", supermiddleware.Name)
 	}
 	if app.registry == nil {
-		context.GetLogger(ctx).Fatalf("configuration error: the registry middleware %q is not activated", supermiddleware.Name)
+		dcontext.GetLogger(ctx).Fatalf("configuration error: the registry middleware %q is not activated", supermiddleware.Name)
 	}
 
 	// Add a token handling endpoint
 	if dockerConfig.Auth.Type() == supermiddleware.Name {
 		tokenRealm, err := registryconfig.TokenRealm(extraConfig.Auth.TokenRealm)
 		if err != nil {
-			context.GetLogger(dockerApp).Fatalf("error setting up token auth: %s", err)
+			dcontext.GetLogger(dockerApp).Fatalf("error setting up token auth: %s", err)
 		}
 		err = dockerApp.NewRoute().Methods("GET").PathPrefix(tokenRealm.Path).Handler(NewTokenHandler(ctx, registryClient)).GetError()
 		if err != nil {
-			context.GetLogger(dockerApp).Fatalf("error setting up token endpoint at %q: %v", tokenRealm.Path, err)
+			dcontext.GetLogger(dockerApp).Fatalf("error setting up token endpoint at %q: %v", tokenRealm.Path, err)
 		}
-		context.GetLogger(dockerApp).Debugf("configured token endpoint at %q", tokenRealm.String())
+		dcontext.GetLogger(dockerApp).Debugf("configured token endpoint at %q", tokenRealm.String())
 	}
 
 	app.registerBlobHandler(dockerApp)
@@ -162,7 +163,7 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 	// signatures.
 	isImageClient, err := registryClient.Client()
 	if err != nil {
-		context.GetLogger(dockerApp).Fatalf("unable to get client for signatures: %v", err)
+		dcontext.GetLogger(dockerApp).Fatalf("unable to get client for signatures: %v", err)
 	}
 	RegisterSignatureHandler(dockerApp, isImageClient)
 
@@ -187,7 +188,7 @@ func NewApp(ctx context.Context, registryClient client.RegistryClient, dockerCon
 		h = promhttp.InstrumentHandlerTimeToWriteHeader(metrics.HTTPTimeToWriteHeaderSeconds, h)
 	}
 
-	context.GetLogger(dockerApp).Infof("Using %q as Docker Registry URL", extraConfig.Server.Addr)
+	dcontext.GetLogger(dockerApp).Infof("Using %q as Docker Registry URL", extraConfig.Server.Addr)
 
 	return h
 }

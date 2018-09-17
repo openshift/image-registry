@@ -1,6 +1,6 @@
 package cache
 
-import "github.com/docker/distribution/digest"
+import "github.com/opencontainers/go-digest"
 
 type RepositoryDigest interface {
 	AddDigest(dgst digest.Digest, repository string) error

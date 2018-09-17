@@ -1,12 +1,13 @@
 package testutil
 
 import (
+	"context"
 	"io/ioutil"
 	"strings"
 	"testing"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
+	"github.com/sirupsen/logrus"
 )
 
 type logrusHook struct {
@@ -36,5 +37,5 @@ func WithTestLogger(parent context.Context, t *testing.T) context.Context {
 	log.Level = logrus.DebugLevel
 	log.Out = ioutil.Discard
 	log.Hooks.Add(&logrusHook{t: t})
-	return context.WithLogger(parent, logrus.NewEntry(log))
+	return dcontext.WithLogger(parent, logrus.NewEntry(log))
 }

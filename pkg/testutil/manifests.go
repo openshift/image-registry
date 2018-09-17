@@ -1,6 +1,7 @@
 package testutil
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -8,13 +9,12 @@ import (
 	"testing"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/libtrust"
+	"github.com/opencontainers/go-digest"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/diff"
@@ -72,7 +72,7 @@ func MakeSchema2Manifest(config distribution.Descriptor, layers []distribution.D
 		Config:    config,
 		Layers:    make([]distribution.Descriptor, 0, len(layers)),
 	}
-	m.Config.MediaType = schema2.MediaTypeConfig
+	m.Config.MediaType = schema2.MediaTypeImageConfig
 
 	for _, layer := range layers {
 		layer.MediaType = schema2.MediaTypeLayer
@@ -157,7 +157,7 @@ func CreateAndUploadTestManifest(
 		return "", "", "", nil, err
 	}
 
-	repo, err := NewRepository(ctx, repoName, serverURL.String(), rt)
+	repo, err := NewRepository(repoName, serverURL.String(), rt)
 	if err != nil {
 		return "", "", "", nil, err
 	}

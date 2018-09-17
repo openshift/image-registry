@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,8 +9,8 @@ import (
 	"time"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
+	dcontext "github.com/docker/distribution/context"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
 )
@@ -30,7 +31,7 @@ var _ distribution.BlobStore = &pullthroughBlobStore{}
 // Stat makes a local check for the blob, then falls through to the other servers referenced by
 // the image stream and looks for those that have the layer.
 func (pbs *pullthroughBlobStore) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
-	context.GetLogger(ctx).Debugf("(*pullthroughBlobStore).Stat: starting with dgst=%s", dgst.String())
+	dcontext.GetLogger(ctx).Debugf("(*pullthroughBlobStore).Stat: starting with dgst=%s", dgst.String())
 
 	// check the local store for the blob
 	desc, err := pbs.BlobStore.Stat(ctx, dgst)
@@ -39,7 +40,7 @@ func (pbs *pullthroughBlobStore) Stat(ctx context.Context, dgst digest.Digest) (
 		// continue on to the code below and look up the blob in a remote store since it is not in
 		// the local store
 	case err != nil:
-		context.GetLogger(ctx).Errorf("unable to find blob %q: %#v", dgst.String(), err)
+		dcontext.GetLogger(ctx).Errorf("unable to find blob %q: %#v", dgst.String(), err)
 		fallthrough
 	default:
 		return desc, err
@@ -54,7 +55,7 @@ func (pbs *pullthroughBlobStore) Stat(ctx context.Context, dgst digest.Digest) (
 // success response with no actual body content.
 // [1] https://docs.docker.com/registry/spec/api/#existing-layers
 func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseWriter, req *http.Request, dgst digest.Digest) error {
-	context.GetLogger(ctx).Debugf("(*pullthroughBlobStore).ServeBlob: starting with dgst=%s", dgst.String())
+	dcontext.GetLogger(ctx).Debugf("(*pullthroughBlobStore).ServeBlob: starting with dgst=%s", dgst.String())
 	// This call should be done without BlobGetterService in the context.
 	err := pbs.BlobStore.ServeBlob(ctx, w, req, dgst)
 	switch {
@@ -62,7 +63,7 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 		// continue on to the code below and look up the blob in a remote store since it is not in
 		// the local store
 	case err != nil:
-		context.GetLogger(ctx).Errorf("unable to serve blob %q: %#v", dgst.String(), err)
+		dcontext.GetLogger(ctx).Errorf("unable to serve blob %q: %#v", dgst.String(), err)
 		fallthrough
 	default:
 		return err
@@ -74,7 +75,7 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 		mu.Lock()
 		if _, ok := inflight[dgst]; ok {
 			mu.Unlock()
-			context.GetLogger(ctx).Infof("Serving %q while mirroring in background", dgst)
+			dcontext.GetLogger(ctx).Infof("Serving %q while mirroring in background", dgst)
 			_, err := copyContent(ctx, pbs.remoteBlobGetter, dgst, w, req)
 			return err
 		}
@@ -90,7 +91,7 @@ func (pbs *pullthroughBlobStore) ServeBlob(ctx context.Context, w http.ResponseW
 
 // Get attempts to fetch the requested blob by digest using a remote proxy store if necessary.
 func (pbs *pullthroughBlobStore) Get(ctx context.Context, dgst digest.Digest) ([]byte, error) {
-	context.GetLogger(ctx).Debugf("(*pullthroughBlobStore).Get: starting with dgst=%s", dgst.String())
+	dcontext.GetLogger(ctx).Debugf("(*pullthroughBlobStore).Get: starting with dgst=%s", dgst.String())
 	data, originalErr := pbs.BlobStore.Get(ctx, dgst)
 	if originalErr == nil {
 		return data, nil
@@ -179,7 +180,7 @@ func copyContent(ctx context.Context, store BlobGetterService, dgst digest.Diges
 // The function assumes that localBlobStore is thread-safe.
 func (pbs *pullthroughBlobStore) storeLocalInBackground(ctx context.Context, dgst digest.Digest) {
 	// leave only the essential entries in the context (logger)
-	newCtx := context.WithLogger(context.Background(), context.GetLogger(ctx))
+	newCtx := dcontext.WithLogger(context.Background(), dcontext.GetLogger(ctx))
 
 	localBlobStore := pbs.newLocalBlobStore(newCtx)
 	writeLimiter := pbs.writeLimiter
@@ -188,18 +189,18 @@ func (pbs *pullthroughBlobStore) storeLocalInBackground(ctx context.Context, dgs
 	go func(dgst digest.Digest) {
 		if writeLimiter != nil {
 			if !writeLimiter.Start(newCtx) {
-				context.GetLogger(newCtx).Infof("Skipped background mirroring of %q because write limits are reached", dgst)
+				dcontext.GetLogger(newCtx).Infof("Skipped background mirroring of %q because write limits are reached", dgst)
 				return
 			}
 			defer writeLimiter.Done()
 		}
 
-		context.GetLogger(newCtx).Infof("Start background mirroring of %q", dgst)
+		dcontext.GetLogger(newCtx).Infof("Start background mirroring of %q", dgst)
 		if err := storeLocal(newCtx, localBlobStore, remoteGetter, dgst); err != nil {
-			context.GetLogger(newCtx).Errorf("Background mirroring failed: error committing to storage: %v", err.Error())
+			dcontext.GetLogger(newCtx).Errorf("Background mirroring failed: error committing to storage: %v", err.Error())
 			return
 		}
-		context.GetLogger(newCtx).Infof("Completed mirroring of %q", dgst)
+		dcontext.GetLogger(newCtx).Infof("Completed mirroring of %q", dgst)
 	}(dgst)
 }
 

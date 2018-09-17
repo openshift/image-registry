@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/auth"
 	"github.com/docker/distribution/registry/handlers"
 
@@ -21,7 +21,7 @@ func RegisterSignatureHandler(app *handlers.App, isImageClient client.ImageStrea
 				{
 					Resource: auth.Resource{
 						Type: "signature",
-						Name: context.GetStringValue(context.WithVars(app, r), "vars.name"),
+						Name: dcontext.GetStringValue(dcontext.WithVars(app, r), "vars.name"),
 					},
 					Action: "get",
 				},
@@ -32,7 +32,7 @@ func RegisterSignatureHandler(app *handlers.App, isImageClient client.ImageStrea
 				{
 					Resource: auth.Resource{
 						Type: "signature",
-						Name: context.GetStringValue(context.WithVars(app, r), "vars.name"),
+						Name: dcontext.GetStringValue(dcontext.WithVars(app, r), "vars.name"),
 					},
 					Action: "put",
 				},
@@ -40,12 +40,14 @@ func RegisterSignatureHandler(app *handlers.App, isImageClient client.ImageStrea
 		}
 	)
 	app.RegisterRoute(
+		"extensions-signatures-get",
 		extensionsRouter.Path(api.SignaturesPath).Methods("GET"),
 		NewSignatureDispatcher(isImageClient),
 		handlers.NameRequired,
 		getSignatureAccess,
 	)
 	app.RegisterRoute(
+		"extensions-signatures-put",
 		extensionsRouter.Path(api.SignaturesPath).Methods("PUT"),
 		NewSignatureDispatcher(isImageClient),
 		handlers.NameRequired,

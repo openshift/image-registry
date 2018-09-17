@@ -8,7 +8,7 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )
@@ -31,7 +31,7 @@ func TestGlobalProviderStat(t *testing.T) {
 	if err == nil {
 		t.Fatal("error expected")
 	}
-	if err != digest.ErrDigestInvalidFormat {
+	if err != digest.ErrDigestInvalidLength {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -148,7 +148,7 @@ func TestRepositoryScopedProviderStat(t *testing.T) {
 	if err == nil {
 		t.Fatal("error expected")
 	}
-	if err != digest.ErrDigestInvalidFormat {
+	if err != digest.ErrDigestInvalidLength {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

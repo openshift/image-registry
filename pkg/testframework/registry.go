@@ -142,9 +142,7 @@ func (r *Registry) Repository(namespace string, imagestream string, user *User) 
 		r.t.Fatalf("failed to get transport for %s: %v", repoName, err)
 	}
 
-	ctx := context.Background()
-
-	repo, err := testutil.NewRepository(ctx, repoName, baseURL, transport)
+	repo, err := testutil.NewRepository(repoName, baseURL, transport)
 	if err != nil {
 		r.t.Fatalf("failed to get repository %s: %v", repoName, err)
 	}

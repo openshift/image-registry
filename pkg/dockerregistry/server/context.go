@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/docker/distribution/context"
+	"context"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 )

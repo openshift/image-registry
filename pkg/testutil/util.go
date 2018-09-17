@@ -3,6 +3,7 @@ package testutil
 import (
 	"archive/tar"
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
@@ -13,13 +14,12 @@ import (
 	"time"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	distclient "github.com/docker/distribution/registry/client"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/distribution/registry/client/auth/challenge"
 	"github.com/docker/distribution/registry/client/transport"
+	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
@@ -48,13 +48,13 @@ func NewTransport(baseURL string, repoName string, creds auth.CredentialStore) (
 }
 
 // NewRepository creates a new Repository for the given repository name, base URL and creds.
-func NewRepository(ctx context.Context, repoName string, baseURL string, transport http.RoundTripper) (distribution.Repository, error) {
-	ref, err := reference.ParseNamed(repoName)
+func NewRepository(repoName string, baseURL string, transport http.RoundTripper) (distribution.Repository, error) {
+	ref, err := reference.WithName(repoName)
 	if err != nil {
 		return nil, err
 	}
 
-	return distclient.NewRepository(ctx, ref, baseURL, transport)
+	return distclient.NewRepository(ref, baseURL, transport)
 }
 
 // UploadBlob uploads the blob with content to repo and verifies its digest.
@@ -120,7 +120,7 @@ func UploadRandomTestBlob(ctx context.Context, baseURL string, creds auth.Creden
 		return distribution.Descriptor{}, nil, err
 	}
 
-	repo, err := NewRepository(ctx, repoName, baseURL, rt)
+	repo, err := NewRepository(repoName, baseURL, rt)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}

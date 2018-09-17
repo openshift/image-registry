@@ -1,9 +1,9 @@
 package wrapped
 
 import (
+	"context"
 	"io"
 
-	"github.com/docker/distribution/context"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 )
 
@@ -102,4 +102,10 @@ func (d *storageDriver) URLFor(ctx context.Context, path string, options map[str
 		return err
 	})
 	return
+}
+
+func (d *storageDriver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
+	return d.wrapper("StorageDriver.Walk", func() error {
+		return d.storageDriver.Walk(ctx, path, f)
+	})
 }

@@ -5,8 +5,7 @@ import (
 	"net/http"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/auth"
@@ -14,6 +13,7 @@ import (
 	"github.com/docker/distribution/registry/storage"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	gorillahandlers "github.com/gorilla/handlers"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/api"
 )
@@ -32,6 +32,7 @@ func (app *App) registerBlobHandler(dockerApp *handlers.App) {
 	}
 
 	dockerApp.RegisterRoute(
+		"admin-blobs",
 		// DELETE /admin/blobs/<digest>
 		adminRouter.Path(api.AdminPath).Methods("DELETE"),
 		// handler
@@ -46,8 +47,8 @@ func (app *App) registerBlobHandler(dockerApp *handlers.App) {
 // blobDispatcher takes the request context and builds the appropriate handler
 // for handling blob requests.
 func (app *App) blobDispatcher(ctx *handlers.Context, r *http.Request) http.Handler {
-	reference := context.GetStringValue(ctx, "vars.digest")
-	dgst, _ := digest.ParseDigest(reference)
+	reference := dcontext.GetStringValue(ctx, "vars.digest")
+	dgst, _ := digest.Parse(reference)
 
 	blobHandler := &blobHandler{
 		Context: ctx,
@@ -100,7 +101,7 @@ func (bh *blobHandler) Delete(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 		}
-		context.GetLogger(bh).Infof("blobHandler: ignoring %T error: %v", err, err)
+		dcontext.GetLogger(bh).Infof("blobHandler: ignoring %T error: %v", err, err)
 	}
 
 	w.WriteHeader(http.StatusNoContent)

@@ -1,11 +1,11 @@
 package integration
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/client"
 

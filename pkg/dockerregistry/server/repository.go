@@ -1,11 +1,12 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	registrystorage "github.com/docker/distribution/registry/storage"
 
 	restclient "k8s.io/client-go/rest"
@@ -201,7 +202,7 @@ func (r *repository) checkPendingErrors(ctx context.Context) error {
 		return nil
 	}
 
-	context.GetLogger(r.ctx).Debugf("Origin auth: found deferred error for %s: %v", r.imageStream.Reference(), repoErr)
+	dcontext.GetLogger(r.ctx).Debugf("Origin auth: found deferred error for %s: %v", r.imageStream.Reference(), repoErr)
 
 	return repoErr
 }

@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/clock"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/digest"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 )

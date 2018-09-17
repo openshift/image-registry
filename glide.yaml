@@ -31,9 +31,8 @@ import:
   version: master
 - package: github.com/openshift/client-go
   version: master
-# lock library-go before the sirupsen/logrus case change
 - package: github.com/openshift/library-go
-  version: 077f461517a8617b5bdb5088afa7b451dd612b15
+  version: master
 
 
 # everything else last
@@ -52,15 +51,17 @@ import:
 - package: github.com/Sirupsen/logrus
   repo: https://github.com/sirupsen/logrus
   version: 1.0.2
-- package: github.com/Azure/azure-sdk-for-go
-  version: 0b5fe2abe0271ba07049eacaa65922d67c319543
 - package: google.golang.org/cloud
   version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
 - package: google.golang.org/api
   version: 9bf6e6e569ff057f75d9604a46c52928f17d2b54
 - package: github.com/docker/docker
-  version: ^1.13.0
+  version: 1009e6a40b295187e038b67e184e9c0384d95538
 - package: github.com/bshuster-repo/logrus-logstash-hook
-  version: 0e6d502573042a6563419fbcce4f284600bfe929
+  version: ^0.4.1
+- package: github.com/prometheus/common
+  version: 3233b24a36715a2fe36d162260457857a56d672d
 - package: github.com/aws/aws-sdk-go
-  version: 1.6.10
+  version: 1.12.36
+- package: github.com/Azure/azure-sdk-for-go
+  version: 16.2.1

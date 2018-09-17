@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -11,10 +12,9 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/handlers"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
+	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
@@ -30,7 +30,7 @@ import (
 
 func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Server {
 	// pullthrough middleware will attempt to pull from this registry instance
-	remoteRegistryApp := handlers.NewApp(ctx, &configuration.Configuration{
+	config := &configuration.Configuration{
 		Loglevel: "debug",
 		Storage: configuration.Storage{
 			"inmemory": configuration.Parameters{},
@@ -46,7 +46,9 @@ func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Serve
 				},
 			},
 		},
-	})
+	}
+	config.Compatibility.Schema1.Enabled = true
+	remoteRegistryApp := handlers.NewApp(ctx, config)
 	return httptest.NewServer(remoteRegistryApp)
 }
 

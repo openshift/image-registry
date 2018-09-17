@@ -1,10 +1,11 @@
 package imagestream
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
+	dcontext "github.com/docker/distribution/context"
+	"github.com/opencontainers/go-digest"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -48,7 +49,7 @@ func newCachedImageGetter(client client.Interface) imageGetter {
 // Get retrieves the Image resource with the digest dgst. No authorization check is made.
 func (ig *cachedImageGetter) Get(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *rerrors.Error) {
 	if image, ok := ig.cache[dgst]; ok {
-		context.GetLogger(ctx).Debugf("(*cachedImageGetter).Get: found image %s in cache", image.Name)
+		dcontext.GetLogger(ctx).Debugf("(*cachedImageGetter).Get: found image %s in cache", image.Name)
 		return image, nil
 	}
 
@@ -63,7 +64,7 @@ func (ig *cachedImageGetter) Get(ctx context.Context, dgst digest.Digest) (*imag
 		return nil, rerrors.NewError(ErrImageGetterUnknownCode, dgst.String(), err)
 	}
 
-	context.GetLogger(ctx).Debugf("(*cachedImageGetter).Get: got image %s from server", image.Name)
+	dcontext.GetLogger(ctx).Debugf("(*cachedImageGetter).Get: got image %s from server", image.Name)
 
 	if err := util.ImageWithMetadata(image); err != nil {
 		return nil, rerrors.NewError(

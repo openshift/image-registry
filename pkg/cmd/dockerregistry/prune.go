@@ -1,15 +1,16 @@
 package dockerregistry
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/docker/go-units"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/storage"
 	"github.com/docker/distribution/registry/storage/driver/factory"
 
@@ -48,7 +49,7 @@ func ExecutePruner(configFile io.Reader, dryRun bool) {
 	} else {
 		registryOptions = append(registryOptions, storage.EnableDelete)
 	}
-	context.GetLoggerWithFields(ctx, versionFields()).Info(startPrune)
+	dcontext.GetLoggerWithFields(ctx, versionFields()).Info(startPrune)
 
 	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig))
 

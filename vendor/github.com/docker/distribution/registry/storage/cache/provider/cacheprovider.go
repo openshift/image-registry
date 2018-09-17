@@ -1,9 +1,9 @@
 package cacheprovider
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/storage/cache"
 )
 

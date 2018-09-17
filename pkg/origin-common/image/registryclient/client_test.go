@@ -1,6 +1,7 @@
 package registryclient
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -9,13 +10,10 @@ import (
 	"testing"
 	"time"
 
-	gocontext "golang.org/x/net/context"
-
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	godigest "github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/api/errcode"
+	godigest "github.com/opencontainers/go-digest"
 )
 
 type mockRetriever struct {
@@ -24,7 +22,7 @@ type mockRetriever struct {
 	err      error
 }
 
-func (r *mockRetriever) Repository(ctx gocontext.Context, registry *url.URL, repoName string, insecure bool) (distribution.Repository, error) {
+func (r *mockRetriever) Repository(ctx context.Context, registry *url.URL, repoName string, insecure bool) (distribution.Repository, error) {
 	r.insecure = insecure
 	return r.repo, r.err
 }
@@ -108,7 +106,7 @@ func (r *mockTagService) Get(ctx context.Context, tag string) (distribution.Desc
 	if !ok {
 		return distribution.Descriptor{}, r.repo.getTagErr
 	}
-	dgst, err := godigest.ParseDigest(v)
+	dgst, err := godigest.Parse(v)
 	if err != nil {
 		panic(err)
 	}

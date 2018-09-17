@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,11 +13,10 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	registryauth "github.com/docker/distribution/registry/auth"
+	"github.com/opencontainers/go-digest"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	srvconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
@@ -389,24 +389,27 @@ func (bs *testBlobDescriptorService) Clear(ctx context.Context, dgst digest.Dige
 }
 
 type fakeAccessControllerMiddleware struct {
-	t *testing.T
+	t          *testing.T
+	userClient registryclient.Interface
 }
 
 func (m *fakeAccessControllerMiddleware) Apply(app supermiddleware.App) supermiddleware.App {
-	return &fakeAccessControllerApp{App: app, t: m.t}
+	return &fakeAccessControllerApp{App: app, t: m.t, userClient: m.userClient}
 }
 
 type fakeAccessControllerApp struct {
 	supermiddleware.App
-	t *testing.T
+	t          *testing.T
+	userClient registryclient.Interface
 }
 
 func (app *fakeAccessControllerApp) Auth(map[string]interface{}) (registryauth.AccessController, error) {
-	return &fakeAccessController{t: app.t}, nil
+	return &fakeAccessController{t: app.t, userClient: app.userClient}, nil
 }
 
 type fakeAccessController struct {
-	t *testing.T
+	t          *testing.T
+	userClient registryclient.Interface
 }
 
 func (f *fakeAccessController) Authorized(ctx context.Context, access ...registryauth.Access) (context.Context, error) {
@@ -414,6 +417,10 @@ func (f *fakeAccessController) Authorized(ctx context.Context, access ...registr
 		f.t.Logf("fake authorizer: authorizing access to %s:%s:%s", access.Resource.Type, access.Resource.Name, access.Action)
 	}
 
+	if f.userClient != nil {
+		ctx = withUserClient(ctx, f.userClient)
+	}
 	ctx = withAuthPerformed(ctx)
+
 	return ctx, nil
 }

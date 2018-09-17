@@ -1,6 +1,7 @@
 package registryclient
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -9,23 +10,21 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	gocontext "golang.org/x/net/context"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	godigest "github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	registryclient "github.com/docker/distribution/registry/client"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/distribution/registry/client/auth/challenge"
 	"github.com/docker/distribution/registry/client/transport"
+	godigest "github.com/opencontainers/go-digest"
 )
 
 // RepositoryRetriever fetches a Docker distribution.Repository.
 type RepositoryRetriever interface {
 	// Repository returns a properly authenticated distribution.Repository for the given registry, repository
 	// name, and insecure toleration behavior.
-	Repository(ctx gocontext.Context, registry *url.URL, repoName string, insecure bool) (distribution.Repository, error)
+	Repository(ctx context.Context, registry *url.URL, repoName string, insecure bool) (distribution.Repository, error)
 }
 
 // ErrNotV2Registry is returned when the server does not report itself as a V2 Docker registry
@@ -117,7 +116,7 @@ func (c *Context) wrapTransport(t http.RoundTripper, registry *url.URL, repoName
 	)
 }
 
-func (c *Context) Repository(ctx gocontext.Context, registry *url.URL, repoName string, insecure bool) (distribution.Repository, error) {
+func (c *Context) Repository(ctx context.Context, registry *url.URL, repoName string, insecure bool) (distribution.Repository, error) {
 	named, err := reference.WithName(repoName)
 	if err != nil {
 		return nil, err
@@ -154,7 +153,7 @@ func (c *Context) Repository(ctx gocontext.Context, registry *url.URL, repoName 
 
 	rt := c.wrapTransport(t, registry, repoName)
 
-	repo, err := registryclient.NewRepository(context.Context(ctx), named, src.String(), rt)
+	repo, err := registryclient.NewRepository(named, src.String(), rt)
 	if err != nil {
 		return nil, err
 	}

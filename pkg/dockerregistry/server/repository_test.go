@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"reflect"
@@ -11,8 +12,6 @@ import (
 
 	"github.com/docker/distribution"
 	dockercfg "github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/reference"
@@ -20,6 +19,7 @@ import (
 	"github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
 	"github.com/docker/libtrust"
+	"github.com/opencontainers/go-digest"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/diff"
@@ -468,7 +468,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	ref, err := reference.ParseNamed("nm/is")
+	ref, err := reference.WithName("nm/is")
 	if err != nil {
 		t.Errorf("failed to parse blob reference %q: %v", "nm/is", err)
 	}

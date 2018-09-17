@@ -23,6 +23,7 @@ func RegisterMetricHandler(app *handlers.App) {
 	}
 	extensionsRouter := app.NewRoute().PathPrefix(api.ExtensionsPrefix).Subrouter()
 	app.RegisterRoute(
+		"extensions-metrics",
 		extensionsRouter.Path(api.MetricsPath).Methods("GET"),
 		metrics.Dispatcher,
 		handlers.NameNotRequired,

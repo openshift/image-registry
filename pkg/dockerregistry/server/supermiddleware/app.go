@@ -1,13 +1,13 @@
 package supermiddleware
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/auth"
 	"github.com/docker/distribution/registry/handlers"
 	registrymw "github.com/docker/distribution/registry/middleware/registry"

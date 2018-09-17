@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
 	//"github.com/docker/distribution/registry/auth"
@@ -541,5 +541,6 @@ func migrateMiddleware(dockercfg *configuration.Configuration, cfg *Configuratio
 
 func InitExtraConfig(dockercfg *configuration.Configuration, cfg *Configuration) error {
 	setDefaultMiddleware(dockercfg)
+	dockercfg.Compatibility.Schema1.Enabled = true
 	return migrateMiddleware(dockercfg, cfg)
 }

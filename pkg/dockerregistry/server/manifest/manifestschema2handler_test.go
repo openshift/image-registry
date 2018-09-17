@@ -8,8 +8,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/diff"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/manifest/schema2"
+	"github.com/opencontainers/go-digest"
 )
 
 func TestUnmarshalManifestSchema2(t *testing.T) {
@@ -41,10 +41,9 @@ func TestUnmarshalManifestSchema2(t *testing.T) {
 		{
 			name:                   "manifest schema1 image",
 			manifestString:         manifestSchema1,
-			expectedErrorSubstring: "unexpected manifest schema version",
+			expectedErrorSubstring: "mediaType in manifest should be 'application/vnd.docker.distribution.manifest.v2+json'",
 		},
 	} {
-
 		t.Run(tc.name, func(t *testing.T) {
 			manifest, err := unmarshalManifestSchema2([]byte(tc.manifestString))
 			if err != nil {
@@ -100,7 +99,7 @@ const manifestSchema2ConfigDigest = `sha256:da5939581ac835614e3cf6c765e7489e6d0f
 var manifestSchema2ConfigDescriptor = distribution.Descriptor{
 	Digest:    digest.Digest(manifestSchema2ConfigDigest),
 	Size:      5838,
-	MediaType: schema2.MediaTypeConfig,
+	MediaType: schema2.MediaTypeImageConfig,
 }
 
 const manifestSchema2 = `{

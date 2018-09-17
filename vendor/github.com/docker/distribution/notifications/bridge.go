@@ -6,9 +6,9 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/uuid"
+	"github.com/opencontainers/go-digest"
 )
 
 type bridge struct {
@@ -106,6 +106,21 @@ func (b *bridge) BlobMounted(repo reference.Named, desc distribution.Descriptor,
 
 func (b *bridge) BlobDeleted(repo reference.Named, dgst digest.Digest) error {
 	return b.createBlobDeleteEventAndWrite(EventActionDelete, repo, dgst)
+}
+
+func (b *bridge) TagDeleted(repo reference.Named, tag string) error {
+	event := b.createEvent(EventActionDelete)
+	event.Target.Repository = repo.Name()
+	event.Target.Tag = tag
+
+	return b.sink.Write(*event)
+}
+
+func (b *bridge) RepoDeleted(repo reference.Named) error {
+	event := b.createEvent(EventActionDelete)
+	event.Target.Repository = repo.Name()
+
+	return b.sink.Write(*event)
 }
 
 func (b *bridge) createManifestEventAndWrite(action string, repo reference.Named, sm distribution.Manifest) error {

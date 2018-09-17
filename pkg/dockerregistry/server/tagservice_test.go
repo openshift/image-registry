@@ -1,14 +1,14 @@
 package server
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/imagestream"
 

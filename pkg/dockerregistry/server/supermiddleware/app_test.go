@@ -2,6 +2,7 @@ package supermiddleware
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/auth"
 	"github.com/docker/distribution/registry/storage/cache"
@@ -224,7 +224,7 @@ func TestApp(t *testing.T) {
 			url:          serverURL("/v2/foo/blobs/" + fooDigest),
 			expectStatus: http.StatusAccepted,
 			expectLog: []string{
-				"AccessController(repository::foo:*)",
+				"AccessController(repository::foo:delete)",
 				"foo: enter Registry.Repository",
 				"foo: leave Registry.Repository",
 				"foo(regular): enter BlobStore.Delete",

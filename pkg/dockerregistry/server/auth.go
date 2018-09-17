@@ -1,13 +1,14 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
-	context "github.com/docker/distribution/context"
+	dcontext "github.com/docker/distribution/context"
 	registryauth "github.com/docker/distribution/registry/auth"
 
 	authorizationapi "k8s.io/api/authorization/v1"
@@ -45,7 +46,7 @@ func WithUserInfoLogger(ctx context.Context, username, userid string) context.Co
 	if len(userid) > 0 {
 		ctx = context.WithValue(ctx, audit.AuditUserIDEntry, userid)
 	}
-	return context.WithLogger(ctx, context.GetLogger(ctx,
+	return dcontext.WithLogger(ctx, dcontext.GetLogger(ctx,
 		audit.AuditUserEntry,
 		audit.AuditUserIDEntry,
 	))
@@ -151,7 +152,7 @@ func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
 		}
 
 		// Auto-detect scheme/host from request
-		req, reqErr := context.GetRequest(ctx)
+		req, reqErr := dcontext.GetRequest(ctx)
 		if reqErr != nil {
 			return reqErr
 		}
@@ -179,7 +180,7 @@ func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
 //   origin/pkg/cmd/dockerregistry/dockerregistry.go#Execute
 //   docker/distribution/registry/handlers/app.go#appendAccessRecords
 func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...registryauth.Access) (context.Context, error) {
-	req, err := context.GetRequest(ctx)
+	req, err := dcontext.GetRequest(ctx)
 	if err != nil {
 		return nil, ac.wrapErr(ctx, err)
 	}
@@ -220,7 +221,7 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 	// Validate all requested accessRecords
 	// Only return failure errors from this loop. Success should continue to validate all records
 	for _, access := range accessRecords {
-		context.GetLogger(ctx).Debugf("Origin auth: checking for access to %s:%s:%s", access.Resource.Type, access.Resource.Name, access.Action)
+		dcontext.GetLogger(ctx).Debugf("Origin auth: checking for access to %s:%s:%s", access.Resource.Type, access.Resource.Name, access.Action)
 
 		switch access.Resource.Type {
 		case "repository":
@@ -334,7 +335,7 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 
 	// Conditionally add auth errors we want to handle later to the context
 	if !possibleCrossMountErrors.Empty() {
-		context.GetLogger(ctx).Debugf("Origin auth: deferring errors: %#v", possibleCrossMountErrors)
+		dcontext.GetLogger(ctx).Debugf("Origin auth: deferring errors: %#v", possibleCrossMountErrors)
 		ctx = withDeferredErrors(ctx, possibleCrossMountErrors)
 	}
 	// Always add a marker to the context so we know auth was run
@@ -377,7 +378,7 @@ func getOpenShiftAPIToken(req *http.Request) (string, error) {
 func verifyOpenShiftUser(ctx context.Context, c client.UsersInterfacer) (string, string, error) {
 	userInfo, err := c.Users().Get("~", metav1.GetOptions{})
 	if err != nil {
-		context.GetLogger(ctx).Errorf("Get user failed with error: %s", err)
+		dcontext.GetLogger(ctx).Errorf("Get user failed with error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
 			return "", "", ErrOpenShiftAccessDenied
 		}
@@ -401,7 +402,7 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 	}
 	response, err := c.SelfSubjectAccessReviews().Create(&sar)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
+		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
 			return ErrOpenShiftAccessDenied
 		}
@@ -409,7 +410,7 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 	}
 
 	if !response.Status.Allowed {
-		context.GetLogger(ctx).Errorf("OpenShift access denied: %s", response.Status.Reason)
+		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", response.Status.Reason)
 		return ErrOpenShiftAccessDenied
 	}
 
@@ -429,14 +430,14 @@ func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string
 	}
 	response, err := c.SelfSubjectAccessReviews().Create(&sar)
 	if err != nil {
-		context.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
+		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
 			return ErrOpenShiftAccessDenied
 		}
 		return err
 	}
 	if !response.Status.Allowed {
-		context.GetLogger(ctx).Errorf("OpenShift access denied: %s", response.Status.Reason)
+		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", response.Status.Reason)
 		return ErrOpenShiftAccessDenied
 	}
 	return nil

@@ -1,15 +1,15 @@
 package storagepath_test
 
 import (
+	"context"
 	"io"
 	"testing"
 
-	"github.com/docker/distribution/context"
-	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/testutil/logger"
 	"github.com/openshift/image-registry/test/internal/storagepath"
@@ -69,6 +69,11 @@ func (sd *storageDriver) Delete(ctx context.Context, path string) error {
 func (sd *storageDriver) URLFor(ctx context.Context, path string, options map[string]interface{}) (string, error) {
 	sd.logger.Printf("URL %s", path)
 	return sd.storageDriver.URLFor(ctx, path, options)
+}
+
+func (sd *storageDriver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
+	sd.logger.Printf("WALK %s", path)
+	return sd.storageDriver.Walk(ctx, path, f)
 }
 
 func TestManifest(t *testing.T) {

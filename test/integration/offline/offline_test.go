@@ -1,16 +1,15 @@
 package integration
 
 import (
-	gocontext "context"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/docker/distribution/context"
-	digest "github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
+	digest "github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -156,7 +155,7 @@ func TestPullthroughBlob(t *testing.T) {
 	}
 
 	/* Wait for mirroring to complete */
-	timeoutContext, timeoutCancel := gocontext.WithTimeout(ctx, 10*time.Second)
+	timeoutContext, timeoutCancel := context.WithTimeout(ctx, 10*time.Second)
 	if err := driver.WaitFor(
 		timeoutContext,
 		storagepath.Layer(testproject.Name+"/"+teststream.Name, configDigest),

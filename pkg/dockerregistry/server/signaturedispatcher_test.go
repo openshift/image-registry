@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/context"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -169,8 +169,7 @@ func TestSignaturePut(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
-	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
-	ctx = withUserClient(ctx, osclient)
+	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t, userClient: osclient})
 
 	config := &registryconfig.Configuration{}
 	dockercfg := &configuration.Configuration{
