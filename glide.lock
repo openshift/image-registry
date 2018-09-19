@@ -1,5 +1,5 @@
-hash: ec19bf05113d8f0dc5e4c42709c86327123cb8e3604643b507da5e9df5d5c350
-updated: 2018-09-19T15:53:32.802390042+02:00
+hash: b5406e3382630c308288fb524889478f8782647fb05b89ee7a91570b4c1f53fc
+updated: 2018-09-19T15:56:28.211459856+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -228,7 +228,7 @@ imports:
 - name: github.com/gorilla/handlers
   version: 60c7bfde3e33c201519a200a4507a158cc03a17b
 - name: github.com/gorilla/mux
-  version: e444e69cbd2e2e3e0749a2f3c717cec491552bbf
+  version: bcd8bc72b08df0f70df986b97f95590779502d31
 - name: github.com/gregjones/httpcache
   version: 787624de3eb7bd915c329cba748687a3b22666a6
   subpackages:
