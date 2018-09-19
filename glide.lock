@@ -1,5 +1,5 @@
-hash: 198a50053d63edd26f9f7eeea487a6acbf59b0543254f080a74f01d50300d5ae
-updated: 2018-08-27T16:52:46.642922408+02:00
+hash: ec19bf05113d8f0dc5e4c42709c86327123cb8e3604643b507da5e9df5d5c350
+updated: 2018-09-19T15:53:32.802390042+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -56,7 +56,7 @@ imports:
 - name: github.com/bshuster-repo/logrus-logstash-hook
   version: dbc1e22735aa6ed7bd9579a407c17bc7c4a4e046
 - name: github.com/certifi/gocertifi
-  version: deb3ae2ef2610fde3330947281941c562861188b
+  version: ee1a9a0726d2ae45f54118cac878c990d4016ded
 - name: github.com/cloudflare/cfssl
   version: 82fc38d1a02688de28fa4fe7cae52e03e51ae48f
   repo: https://github.com/openshift/cloudflare-cfssl
@@ -73,7 +73,8 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/docker/distribution
-  version: 3354cf98e3a55ca01d9712714f2c69531abc2347
+  version: 6fb4f5032d59278900c9f307078211f3d680a97b
+  repo: git@github.com:openshift/docker-distribution
   subpackages:
   - configuration
   - context
@@ -105,6 +106,7 @@ imports:
   - registry/storage
   - registry/storage/cache
   - registry/storage/cache/memory
+  - registry/storage/cache/provider
   - registry/storage/cache/redis
   - registry/storage/driver
   - registry/storage/driver/azure
@@ -179,7 +181,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-ini/ini
-  version: 5cf292cae48347c2490ac1a58fe36735fb78df7e
+  version: fa25069db393aecc09b71267d0489b357781c860
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -264,17 +266,17 @@ imports:
 - name: github.com/opencontainers/go-digest
   version: c9281466c8b2f606084ac71339773efd177436e7
 - name: github.com/opencontainers/image-spec
-  version: e562b04403929d582d449ae5386ff79dd7961a11
+  version: 7b1e489870acb042978a3935d2fb76f8a79aff81
   subpackages:
   - specs-go
   - specs-go/v1
 - name: github.com/opencontainers/runc
-  version: 0228707b77ae6e3155060341a0819ead98a0cf84
+  version: 578fe65e4fb86b95cc67b304d99d799f976dc40c
   subpackages:
   - libcontainer/system
   - libcontainer/user
 - name: github.com/openshift/api
-  version: bccfa651752a8a9f963b9899b477dcffbe9be786
+  version: 4507dcb6a81f6593aa336c5b47927cf0ae297b72
   subpackages:
   - authorization/v1
   - image/docker10
@@ -285,7 +287,7 @@ imports:
   - project/v1
   - user/v1
 - name: github.com/openshift/client-go
-  version: 5b198a036f098f34fbf0c42768382d80708cd2a9
+  version: 431ec9a26e5021f35fa41ee9a89842db9bfdb370
   subpackages:
   - authorization/clientset/versioned/scheme
   - authorization/clientset/versioned/typed/authorization/v1
@@ -301,7 +303,7 @@ imports:
   - user/clientset/versioned/scheme
   - user/clientset/versioned/typed/user/v1
 - name: github.com/openshift/library-go
-  version: 1d4fa7d16c15c6b51312c990be28c5976acb0380
+  version: b3c18f039607fbf9c8c6b2967fe6e32b0eed6998
   subpackages:
   - pkg/crypto
   - pkg/serviceability
@@ -364,9 +366,6 @@ imports:
   subpackages:
   - bcrypt
   - blowfish
-  - nacl/secretbox
-  - poly1305
-  - salsa20/salsa
   - ssh/terminal
 - name: golang.org/x/net
   version: 1c05540f6879653db88113bc4a2b70aec4bd491f
@@ -459,7 +458,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
-  version: 4a80308ab64deb462259d3d96a1d7825f0bb875e
+  version: b31eb08de4e8d98cf75dc3b31f75afee5b5243e9
   repo: git@github.com:openshift/kubernetes-api
   subpackages:
   - admissionregistration/v1alpha1
@@ -491,10 +490,10 @@ imports:
   - storage/v1alpha1
   - storage/v1beta1
 - name: k8s.io/apiextensions-apiserver
-  version: 8cdd78b7e067060cf564be740dd58e77f0e861c3
+  version: 3420cf9ba4b83258558ce3236b7898a955ab02fd
   repo: git@github.com:openshift/kubernetes-apiextensions-apiserver
 - name: k8s.io/apimachinery
-  version: b6fcf44e3f3db22881a94b089a171fad73b30b19
+  version: eb698cb3066e71ea02d0dc86173d0f8f16cc0f76
   repo: git@github.com:openshift/kubernetes-apimachinery
   subpackages:
   - pkg/api/errors
@@ -536,13 +535,13 @@ imports:
   - pkg/watch
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: fbcb407558281c12d3f4eca5cb3b2819de1000d0
+  version: 74254c49e33253692e377a2200981e7d51bae0ed
   repo: git@github.com:openshift/kubernetes-apiserver
   subpackages:
   - pkg/authentication/user
   - pkg/util/logs
 - name: k8s.io/client-go
-  version: 2ef70d1cd65223642ac2963c201823e01fc725b9
+  version: d63f93b713e1f52651c8d4c263f1bb761e29b921
   repo: git@github.com:openshift/kubernetes-client-go
   subpackages:
   - discovery
@@ -605,6 +604,6 @@ imports:
   - pkg/util
   - pkg/util/proto
 - name: k8s.io/metrics
-  version: ff454b3dae7059eae17d532cc35bfc478e20a88e
+  version: fb62c3f1f0e680446a29f26b2002b2dd63fe0370
   repo: git@github.com:openshift/kubernetes-metrics
 testImports: []
