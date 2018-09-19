@@ -421,6 +421,7 @@ func checkMountDestination(rootfs, dest string) error {
 		"/proc/stat",
 		"/proc/swaps",
 		"/proc/uptime",
+		"/proc/loadavg",
 		"/proc/net/dev",
 	}
 	for _, valid := range validDestinations {
@@ -437,7 +438,7 @@ func checkMountDestination(rootfs, dest string) error {
 		if err != nil {
 			return err
 		}
-		if path == "." || !strings.HasPrefix(path, "..") {
+		if path != "." && !strings.HasPrefix(path, "..") {
 			return fmt.Errorf("%q cannot be mounted because it is located inside %q", dest, invalid)
 		}
 	}

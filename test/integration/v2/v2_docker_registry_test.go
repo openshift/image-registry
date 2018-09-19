@@ -108,6 +108,11 @@ func TestV2RegistryGetTags(t *testing.T) {
 		t.Fatalf("error creating image stream: %s", err)
 	}
 
+	err := ping(baseURL, testuser.Name, testuser.Token)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tags, err := getTags(baseURL, namespace, stream.Name, testuser.Name, testuser.Token)
 	if err != nil {
 		t.Fatal(err)
@@ -363,4 +368,32 @@ func getTags(baseURL, namespace, streamName, user, token string) ([]string, erro
 		tags = append(tags, tag)
 	}
 	return tags, nil
+}
+
+func ping(baseURL, user, token string) error {
+	url := fmt.Sprintf("%s/v2/", baseURL)
+	client := http.DefaultClient
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("error creating request: %v", err)
+	}
+	req.SetBasicAuth(user, token)
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error pinging the registry: %s", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("error retrieving manifest: %v", err)
+	}
+	m := make(map[string]interface{})
+	err = json.Unmarshal(body, &m)
+	if err != nil {
+		return fmt.Errorf("error unmarhsaling response %q: %s", body, err)
+	}
+	return nil
 }

@@ -65,3 +65,5 @@ import:
   version: 1.12.36
 - package: github.com/Azure/azure-sdk-for-go
   version: 16.2.1
+- package: github.com/gorilla/mux
+  version: 1.4.0
