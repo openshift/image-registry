@@ -2,14 +2,12 @@ package integration
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
-	digest "github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,34 +21,11 @@ import (
 	"github.com/openshift/image-registry/test/internal/storagepath"
 )
 
-func TestPullthroughBlob(t *testing.T) {
-	config := []byte("{}")
-	configDigest := digest.FromBytes(config)
-
-	foo := []byte("foo")
-	fooDigest := digest.FromBytes(foo)
-
-	manifestMediaType := "application/vnd.docker.distribution.manifest.v2+json"
-	manifest, err := json.Marshal(map[string]interface{}{
-		"schemaVersion": 2,
-		"mediaType":     manifestMediaType,
-		"config": map[string]interface{}{
-			"mediaType": "application/vnd.docker.container.image.v1+json",
-			"size":      len(config),
-			"digest":    configDigest.String(),
-		},
-		"layers": []map[string]interface{}{
-			{
-				"mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
-				"size":      len(foo),
-				"digest":    fooDigest.String(),
-			},
-		},
-	})
+func TestOffline(t *testing.T) {
+	imageData, err := testframework.NewSchema2ImageData()
 	if err != nil {
-		t.Fatalf("unable to marshal manifest: %v", err)
+		t.Fatal(err)
 	}
-	manifestDigest := digest.FromBytes(manifest)
 
 	remoteRegistryUnavailable := false
 	ts := testframework.NewHTTPServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -65,26 +40,13 @@ func TestPullthroughBlob(t *testing.T) {
 			return
 		}
 
-		switch req {
-		case "GET /v2/":
-			w.Write([]byte(`{}`))
-		case "GET /v2/remoteimage/manifests/latest", "GET /v2/remoteimage/manifests/" + manifestDigest.String():
-			w.Header().Set("Content-Type", manifestMediaType)
-			w.Write(manifest)
-		case "HEAD /v2/remoteimage/blobs/" + configDigest.String():
-			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(config)))
-			w.WriteHeader(http.StatusOK)
-		case "GET /v2/remoteimage/blobs/" + configDigest.String():
-			w.Write(config)
-		case "HEAD /v2/remoteimage/blobs/" + fooDigest.String():
-			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(foo)))
-			w.WriteHeader(http.StatusOK)
-		case "GET /v2/remoteimage/blobs/" + fooDigest.String():
-			w.Write(foo)
-		default:
-			t.Errorf("error: remote registry got unexpected request %s: %#+v", req, r)
-			http.Error(w, "unable to handle the request", http.StatusInternalServerError)
+		if testframework.ServeV2(w, r) ||
+			testframework.ServeImage(w, r, "remoteimage", imageData, []string{"latest"}) {
+			return
 		}
+
+		t.Errorf("error: remote registry got unexpected request %s: %#+v", req, r)
+		http.Error(w, "unable to handle the request", http.StatusInternalServerError)
 	}))
 	defer ts.Close()
 
@@ -147,20 +109,20 @@ func TestPullthroughBlob(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mediatype != manifestMediaType {
-		t.Fatalf("manifest mediatype: got %q, want %q", mediatype, manifestMediaType)
+	if mediatype != imageData.ManifestMediaType {
+		t.Fatalf("manifest mediatype: got %q, want %q", mediatype, imageData.ManifestMediaType)
 	}
-	if dgst != manifestDigest {
-		t.Fatalf("manifest digest: got %q, want %q", dgst, manifestDigest)
+	if dgst != imageData.ManifestDigest {
+		t.Fatalf("manifest digest: got %q, want %q", dgst, imageData.ManifestDigest)
 	}
 
 	/* Wait for mirroring to complete */
 	timeoutContext, timeoutCancel := context.WithTimeout(ctx, 10*time.Second)
 	if err := driver.WaitFor(
 		timeoutContext,
-		storagepath.Layer(testproject.Name+"/"+teststream.Name, configDigest),
-		storagepath.Layer(testproject.Name+"/"+teststream.Name, fooDigest),
-		storagepath.Manifest(testproject.Name+"/"+teststream.Name, manifestDigest),
+		storagepath.Layer(testproject.Name+"/"+teststream.Name, imageData.ConfigDigest),
+		storagepath.Layer(testproject.Name+"/"+teststream.Name, imageData.LayerDigest),
+		storagepath.Manifest(testproject.Name+"/"+teststream.Name, imageData.ManifestDigest),
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -174,10 +136,10 @@ func TestPullthroughBlob(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mediatype != manifestMediaType {
-		t.Fatalf("manifest mediatype: got %q, want %q", mediatype, manifestMediaType)
+	if mediatype != imageData.ManifestMediaType {
+		t.Fatalf("manifest mediatype: got %q, want %q", mediatype, imageData.ManifestMediaType)
 	}
-	if dgst != manifestDigest {
-		t.Fatalf("manifest digest: got %q, want %q", dgst, manifestDigest)
+	if dgst != imageData.ManifestDigest {
+		t.Fatalf("manifest digest: got %q, want %q", dgst, imageData.ManifestDigest)
 	}
 }

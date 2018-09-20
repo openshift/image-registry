@@ -3,7 +3,6 @@ package integration
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/docker/distribution"
-	digest "github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,11 +21,10 @@ import (
 )
 
 func TestPullthroughBlob(t *testing.T) {
-	config := "{}"
-	configDigest := digest.FromBytes([]byte(config))
-
-	foo := "foo"
-	fooDigest := digest.FromBytes([]byte(foo))
+	imageData, err := testframework.NewSchema2ImageData()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	master := testframework.NewMaster(t)
 	defer master.Close()
@@ -50,38 +47,13 @@ func TestPullthroughBlob(t *testing.T) {
 			return
 		}
 
-		switch req {
-		case "GET /v2/":
-			w.Write([]byte(`{}`))
-		case "GET /v2/remoteimage/manifests/latest":
-			mediaType := "application/vnd.docker.distribution.manifest.v2+json"
-			w.Header().Set("Content-Type", mediaType)
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"schemaVersion": 2,
-				"mediaType":     mediaType,
-				"config": map[string]interface{}{
-					"mediaType": "application/vnd.docker.container.image.v1+json",
-					"size":      len(config),
-					"digest":    configDigest.String(),
-				},
-				"layers": []map[string]interface{}{
-					{
-						"mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
-						"size":      len(foo),
-						"digest":    fooDigest.String(),
-					},
-				},
-			})
-		case "GET /v2/remoteimage/blobs/" + configDigest.String():
-			w.Write([]byte(config))
-		case "HEAD /v2/remoteimage/blobs/" + fooDigest.String():
-			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(foo)))
-			w.WriteHeader(http.StatusOK)
-		case "GET /v2/remoteimage/blobs/" + fooDigest.String():
-			w.Write([]byte(foo))
-		default:
-			t.Errorf("error: remote registry got unexpected request %s: %#+v", req, r)
+		if testframework.ServeV2(w, r) ||
+			testframework.ServeImage(w, r, "remoteimage", imageData, []string{"latest"}) {
+			return
 		}
+
+		t.Errorf("error: remote registry got unexpected request %s: %#+v", req, r)
+		http.Error(w, "unable to handle the request", http.StatusInternalServerError)
 	}))
 	defer ts.Close()
 
@@ -128,7 +100,7 @@ func TestPullthroughBlob(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err = repo.Blobs(ctx).Get(ctx, fooDigest)
+	_, err = repo.Blobs(ctx).Get(ctx, imageData.LayerDigest)
 	if err != distribution.ErrBlobUnknown {
 		t.Fatal(err)
 	}
