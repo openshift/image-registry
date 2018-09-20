@@ -3,12 +3,10 @@ package integration
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"testing"
 	"time"
 
 	"github.com/docker/distribution/registry/storage/driver/inmemory"
-	"github.com/opencontainers/go-digest"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,33 +23,10 @@ import (
 )
 
 func TestManifestMigration(t *testing.T) {
-	config := []byte("{}")
-	configDigest := digest.FromBytes(config)
-
-	foo := []byte("foo-manifest-migration")
-	fooDigest := digest.FromBytes(foo)
-
-	manifestMediaType := "application/vnd.docker.distribution.manifest.v2+json"
-	manifest, err := json.Marshal(map[string]interface{}{
-		"schemaVersion": 2,
-		"mediaType":     manifestMediaType,
-		"config": map[string]interface{}{
-			"mediaType": "application/vnd.docker.container.image.v1+json",
-			"size":      len(config),
-			"digest":    configDigest.String(),
-		},
-		"layers": []map[string]interface{}{
-			{
-				"mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
-				"size":      len(foo),
-				"digest":    fooDigest.String(),
-			},
-		},
-	})
+	imageData, err := testframework.NewSchema2ImageData()
 	if err != nil {
-		t.Fatalf("unable to marshal manifest: %v", err)
+		t.Fatal(err)
 	}
-	manifestDigest := digest.FromBytes(manifest)
 
 	master := testframework.NewMaster(t)
 	defer master.Close()
@@ -72,7 +47,7 @@ func TestManifestMigration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = imageClient.Images().Delete(string(manifestDigest), &metav1.DeleteOptions{})
+	err = imageClient.Images().Delete(imageData.ManifestDigest.String(), &metav1.DeleteOptions{})
 	if err != nil && !kerrors.IsNotFound(err) {
 		t.Fatalf("failed to delete an old instance of the image: %v", err)
 	}
@@ -84,15 +59,15 @@ func TestManifestMigration(t *testing.T) {
 		},
 		Image: imageapiv1.Image{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: string(manifestDigest),
+				Name: imageData.ManifestDigest.String(),
 				Annotations: map[string]string{
 					imageapi.ManagedByOpenShiftAnnotation: "true",
 				},
 			},
 			DockerImageReference:         "shouldnt-be-resolved.example.com/this-is-a-fake-image",
-			DockerImageManifestMediaType: manifestMediaType,
-			DockerImageManifest:          string(manifest),
-			DockerImageConfig:            string(config),
+			DockerImageManifestMediaType: imageData.ManifestMediaType,
+			DockerImageManifest:          string(imageData.Manifest),
+			DockerImageConfig:            string(imageData.Config),
 		},
 		Tag: "latest",
 	})
@@ -114,25 +89,25 @@ func TestManifestMigration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = ms.Get(ctx, digest.Digest(manifestDigest))
+	_, err = ms.Get(ctx, imageData.ManifestDigest)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Logf("waiting for migration to finish...")
 
-	if err := driver.WaitFor(ctx, storagepath.Blob(manifestDigest)); err != nil {
+	if err := driver.WaitFor(ctx, storagepath.Blob(imageData.ManifestDigest)); err != nil {
 		t.Fatal(err)
 	}
 
 	t.Logf("manifest is migrated, checking results...")
 
-	manifestOnStorage, err := driver.GetContent(ctx, storagepath.Blob(manifestDigest))
+	manifestOnStorage, err := driver.GetContent(ctx, storagepath.Blob(imageData.ManifestDigest))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(manifestOnStorage, manifest) {
-		t.Errorf("migration has changed the manifest: got %q, want %q", manifestOnStorage, manifest)
+	if !bytes.Equal(manifestOnStorage, imageData.Manifest) {
+		t.Errorf("migration has changed the manifest: got %q, want %q", manifestOnStorage, imageData.Manifest)
 	}
 
 	w, err := imageClient.Images().Watch(metav1.ListOptions{
@@ -150,7 +125,7 @@ func TestManifestMigration(t *testing.T) {
 		if !ok {
 			return false, nil
 		}
-		if image.Name != string(manifestDigest) || image.DockerImageManifest != "" && image.DockerImageConfig != "" {
+		if image.Name != imageData.ManifestDigest.String() || image.DockerImageManifest != "" && image.DockerImageConfig != "" {
 			return false, nil
 		}
 		return true, nil

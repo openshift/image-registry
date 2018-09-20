@@ -237,7 +237,7 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 				pushChecks[imageStreamNS+"/"+imageStreamName] = true
 			case "pull":
 				verb = "get"
-			case "*":
+			case "delete":
 				verb = "prune"
 			default:
 				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)

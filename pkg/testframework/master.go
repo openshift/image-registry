@@ -21,7 +21,9 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/pborman/uuid"
 
+	corev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -29,7 +31,9 @@ import (
 	kubeclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
+	authorizationapiv1 "github.com/openshift/api/authorization/v1"
 	projectapiv1 "github.com/openshift/api/project/v1"
+	authorizationv1 "github.com/openshift/client-go/authorization/clientset/versioned/typed/authorization/v1"
 )
 
 type MasterInterface interface {
@@ -396,6 +400,22 @@ func (m *Master) CreateUser(username string, password string) *User {
 		Name:       username,
 		Token:      user.BearerToken,
 		kubeConfig: UserClientConfig(m.AdminKubeConfig(), user.BearerToken),
+	}
+}
+
+func (m *Master) GrantPrunerRole(user *User) {
+	authorizationClient := authorizationv1.NewForConfigOrDie(m.AdminKubeConfig())
+	_, err := authorizationClient.ClusterRoleBindings().Create(&authorizationapiv1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "image-registry-test-pruner-" + uuid.NewRandom().String(),
+		},
+		UserNames: []string{user.Name},
+		RoleRef: corev1.ObjectReference{
+			Name: "system:image-pruner",
+		},
+	})
+	if err != nil {
+		m.t.Fatalf("failed to grant the system:image-pruner role to the user %s: %v", user.Name, err)
 	}
 }
 
