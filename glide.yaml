@@ -48,9 +48,6 @@ import:
 - package: github.com/skynetservices/skydns
   repo: https://github.com/openshift/skynetservices-skydns
 - package: github.com/RangelReale/osin
-- package: github.com/Sirupsen/logrus
-  repo: https://github.com/sirupsen/logrus
-  version: 1.0.2
 - package: google.golang.org/cloud
   version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
 - package: google.golang.org/api

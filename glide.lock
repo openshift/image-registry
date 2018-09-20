@@ -344,9 +344,6 @@ imports:
   version: 36e9d2ebbde5e3f13ab2e25625fd453271d6522e
 - name: github.com/sirupsen/logrus
   version: 89742aefa4b206dcf400792f3bd35b542998eb3b
-- name: github.com/Sirupsen/logrus
-  version: a3f95b5c423586578a4e099b11a46c2479628cac
-  repo: https://github.com/sirupsen/logrus
 - name: github.com/skynetservices/skydns
   version: 30763c4e568fe411f1663af553c063cec8879929
   repo: https://github.com/openshift/skynetservices-skydns
