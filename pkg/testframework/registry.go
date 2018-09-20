@@ -51,6 +51,9 @@ func StartTestRegistry(t *testing.T, kubeConfigPath string, options ...RegistryO
 		Version: "0.1",
 		Storage: configuration.Storage{
 			"inmemory": configuration.Parameters{},
+			"delete": configuration.Parameters{
+				"enabled": true,
+			},
 		},
 		Auth: configuration.Auth{
 			"openshift": configuration.Parameters{},

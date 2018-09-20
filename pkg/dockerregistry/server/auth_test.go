@@ -373,7 +373,7 @@ func TestAccessController(t *testing.T) {
 						Type: "repository",
 						Name: "foo/bar",
 					},
-					Action: "*",
+					Action: "delete",
 				},
 			},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
