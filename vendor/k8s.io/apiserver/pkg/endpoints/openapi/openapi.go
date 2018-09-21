@@ -63,10 +63,6 @@ func GetOperationIDAndTags(r *restful.Route) (string, []string, error) {
 	op := r.Operation
 	path := r.Path
 	var tags []string
-	// FIXME: this is hacky way to get rid of conflict name
-	if strings.HasPrefix(path, "/oapi/v1/namespaces/{namespace}/deploymentconfigs/{name}/rollback") {
-		op = op + "Rollback"
-	}
 	prefix, exists := verbs.GetPrefix(op)
 	if !exists {
 		return op, tags, fmt.Errorf("operation names should start with a verb. Cannot determine operation verb from %v", op)
@@ -147,12 +143,24 @@ func typeName(t reflect.Type) string {
 }
 
 // NewDefinitionNamer constructs a new DefinitionNamer to be used to customize OpenAPI spec.
-func NewDefinitionNamer(s *runtime.Scheme) DefinitionNamer {
-	ret := DefinitionNamer{
+func NewDefinitionNamer(schemes ...*runtime.Scheme) *DefinitionNamer {
+	ret := &DefinitionNamer{
 		typeGroupVersionKinds: map[string]groupVersionKinds{},
 	}
-	for gvk, rtype := range s.AllKnownTypes() {
-		ret.typeGroupVersionKinds[typeName(rtype)] = append(ret.typeGroupVersionKinds[typeName(rtype)], gvkConvert(gvk))
+	for _, s := range schemes {
+		for gvk, rtype := range s.AllKnownTypes() {
+			newGVK := gvkConvert(gvk)
+			exists := false
+			for _, existingGVK := range ret.typeGroupVersionKinds[typeName(rtype)] {
+				if newGVK == existingGVK {
+					exists = true
+					break
+				}
+			}
+			if !exists {
+				ret.typeGroupVersionKinds[typeName(rtype)] = append(ret.typeGroupVersionKinds[typeName(rtype)], newGVK)
+			}
+		}
 	}
 	for _, gvk := range ret.typeGroupVersionKinds {
 		sort.Sort(gvk)

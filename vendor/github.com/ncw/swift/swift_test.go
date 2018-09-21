@@ -16,6 +16,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"crypto/md5"
+	"crypto/rand"
 	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
@@ -23,7 +24,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -35,7 +38,6 @@ import (
 )
 
 var (
-	c                *swift.Connection
 	srv              *swifttest.SwiftServer
 	m1               = swift.Metadata{"Hello": "1", "potato-Salad": "2"}
 	m2               = swift.Metadata{"hello": "", "potato-salad": ""}
@@ -44,6 +46,7 @@ var (
 
 const (
 	CONTAINER          = "GoSwiftUnitTest"
+	SEGMENTS_CONTAINER = "GoSwiftUnitTest_segments"
 	VERSIONS_CONTAINER = "GoSwiftUnitTestVersions"
 	CURRENT_CONTAINER  = "GoSwiftUnitTestCurrent"
 	OBJECT             = "test_object"
@@ -59,7 +62,7 @@ const (
 
 type someTransport struct{ http.Transport }
 
-func makeConnection() (*swift.Connection, error) {
+func makeConnection(t *testing.T) (*swift.Connection, func()) {
 	var err error
 
 	UserName := os.Getenv("SWIFT_API_USER")
@@ -72,18 +75,17 @@ func makeConnection() (*swift.Connection, error) {
 	ConnectionChannelTimeout := os.Getenv("SWIFT_CONNECTION_CHANNEL_TIMEOUT")
 	DataChannelTimeout := os.Getenv("SWIFT_DATA_CHANNEL_TIMEOUT")
 
+	internalServer := false
 	if UserName == "" || ApiKey == "" || AuthUrl == "" {
-		if srv != nil {
-			srv.Close()
-		}
 		srv, err = swifttest.NewSwiftServer("localhost")
-		if err != nil {
-			return nil, err
+		if err != nil && t != nil {
+			t.Fatal("Failed to create server", err)
 		}
 
 		UserName = "swifttest"
 		ApiKey = "swifttest"
 		AuthUrl = srv.AuthURL
+		internalServer = true
 	}
 
 	transport := &http.Transport{
@@ -105,6 +107,16 @@ func makeConnection() (*swift.Connection, error) {
 		EndpointType:   swift.EndpointType(EndpointType),
 	}
 
+	if !internalServer {
+		if isV3Api() {
+			c.Tenant = os.Getenv("SWIFT_TENANT")
+			c.Domain = os.Getenv("SWIFT_API_DOMAIN")
+		} else {
+			c.Tenant = os.Getenv("SWIFT_TENANT")
+			c.TenantId = os.Getenv("SWIFT_TENANT_ID")
+		}
+	}
+
 	var timeout int64
 	if ConnectionChannelTimeout != "" {
 		timeout, err = strconv.ParseInt(ConnectionChannelTimeout, 10, 32)
@@ -120,7 +132,165 @@ func makeConnection() (*swift.Connection, error) {
 		}
 	}
 
-	return &c, nil
+	return &c, func() {
+		if srv != nil {
+			srv.Close()
+		}
+	}
+}
+
+func makeConnectionAuth(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnection(t)
+	err := c.Authenticate()
+	if err != nil {
+		t.Fatal("Auth failed", err)
+	}
+	return c, rollback
+}
+
+func makeConnectionWithContainer(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnectionAuth(t)
+	err := c.ContainerCreate(CONTAINER, m1.ContainerHeaders())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c, func() {
+		c.ContainerDelete(CONTAINER)
+		rollback()
+	}
+}
+
+func makeConnectionWithObject(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnectionWithContainer(t)
+	err := c.ObjectPutString(CONTAINER, OBJECT, CONTENTS, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c, func() {
+		c.ObjectDelete(CONTAINER, OBJECT)
+		rollback()
+	}
+}
+
+func makeConnectionWithObjectHeaders(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnectionWithObject(t)
+	err := c.ObjectUpdate(CONTAINER, OBJECT, m1.ObjectHeaders())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c, rollback
+}
+
+func makeConnectionWithVersionsContainer(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnectionAuth(t)
+	err := c.VersionContainerCreate(CURRENT_CONTAINER, VERSIONS_CONTAINER)
+	newRollback := func() {
+		c.ContainerDelete(CURRENT_CONTAINER)
+		c.ContainerDelete(VERSIONS_CONTAINER)
+		rollback()
+	}
+	if err != nil {
+		if err == swift.Forbidden {
+			skipVersionTests = true
+			return c, newRollback
+		}
+		t.Fatal(err)
+	}
+	return c, newRollback
+}
+
+func makeConnectionWithVersionsObject(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnectionWithVersionsContainer(t)
+	if err := c.ObjectPutString(CURRENT_CONTAINER, OBJECT, CONTENTS, ""); err != nil {
+		t.Fatal(err)
+	}
+	// Version 2
+	if err := c.ObjectPutString(CURRENT_CONTAINER, OBJECT, CONTENTS2, ""); err != nil {
+		t.Fatal(err)
+	}
+	// Version 3
+	if err := c.ObjectPutString(CURRENT_CONTAINER, OBJECT, CONTENTS2, ""); err != nil {
+		t.Fatal(err)
+	}
+	return c, func() {
+		for i := 0; i < 3; i++ {
+			c.ObjectDelete(CURRENT_CONTAINER, OBJECT)
+		}
+		rollback()
+	}
+}
+
+func makeConnectionWithSegmentsContainer(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnectionWithContainer(t)
+	err := c.ContainerCreate(SEGMENTS_CONTAINER, swift.Headers{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c, func() {
+		err = c.ContainerDelete(SEGMENTS_CONTAINER)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rollback()
+	}
+}
+
+func makeConnectionWithDLO(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.DynamicLargeObjectCreate(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(out, "%d %s\n", i, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	return c, func() {
+		c.DynamicLargeObjectDelete(CONTAINER, OBJECT)
+		rollback()
+	}
+}
+
+func makeConnectionWithSLO(t *testing.T) (*swift.Connection, func()) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.StaticLargeObjectCreate(&opts)
+	if err != nil {
+		if err == swift.SLONotSupported {
+			t.Skip("SLO not supported")
+			return c, rollback
+		}
+		t.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(out, "%d %s\n", i, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	return c, func() {
+		c.StaticLargeObjectDelete(CONTAINER, OBJECT)
+		rollback()
+	}
 }
 
 func isV3Api() bool {
@@ -129,12 +299,8 @@ func isV3Api() bool {
 }
 
 func TestTransport(t *testing.T) {
-	var err error
-
-	c, err = makeConnection()
-	if err != nil {
-		t.Fatal("Failed to create server", err)
-	}
+	c, rollback := makeConnection(t)
+	defer rollback()
 
 	tr := &someTransport{
 		Transport: http.Transport{
@@ -150,43 +316,24 @@ func TestTransport(t *testing.T) {
 
 	c.Transport = tr
 
-	if isV3Api() {
-		c.Tenant = os.Getenv("SWIFT_TENANT")
-		c.Domain = os.Getenv("SWIFT_API_DOMAIN")
-	} else {
-		c.Tenant = os.Getenv("SWIFT_TENANT")
-		c.TenantId = os.Getenv("SWIFT_TENANT_ID")
-	}
-
-	err = c.Authenticate()
+	err := c.Authenticate()
 	if err != nil {
 		t.Fatal("Auth failed", err)
 	}
 	if !c.Authenticated() {
 		t.Fatal("Not authenticated")
 	}
-	if srv != nil {
-		srv.Close()
-	}
 }
 
 // The following Test functions are run in order - this one must come before the others!
 func TestV1V2Authenticate(t *testing.T) {
-	var err error
-
 	if isV3Api() {
 		return
 	}
+	c, rollback := makeConnection(t)
+	defer rollback()
 
-	c, err = makeConnection()
-	if err != nil {
-		t.Fatal("Failed to create server", err)
-	}
-
-	c.Tenant = os.Getenv("SWIFT_TENANT")
-	c.TenantId = os.Getenv("SWIFT_TENANT_ID")
-
-	err = c.Authenticate()
+	err := c.Authenticate()
 	if err != nil {
 		t.Fatal("Auth failed", err)
 	}
@@ -196,20 +343,19 @@ func TestV1V2Authenticate(t *testing.T) {
 }
 
 func TestV3AuthenticateWithDomainNameAndTenantId(t *testing.T) {
-	var err error
 	if !isV3Api() {
 		return
 	}
 
-	c, err = makeConnection()
-	if err != nil {
-		t.Fatal("Failed to create server", err)
-	}
+	c, rollback := makeConnection(t)
+	defer rollback()
 
-	c.TenantId = os.Getenv("SWIFT_TENANT_ID")
+	c.Tenant = ""
 	c.Domain = os.Getenv("SWIFT_API_DOMAIN")
+	c.TenantId = os.Getenv("SWIFT_TENANT_ID")
+	c.DomainId = ""
 
-	err = c.Authenticate()
+	err := c.Authenticate()
 	if err != nil {
 		t.Fatal("Auth failed", err)
 	}
@@ -219,19 +365,16 @@ func TestV3AuthenticateWithDomainNameAndTenantId(t *testing.T) {
 }
 
 func TestV3TrustWithTrustId(t *testing.T) {
-	var err error
 	if !isV3Api() {
 		return
 	}
 
-	c, err = makeConnection()
-	if err != nil {
-		t.Fatal("Failed to create server", err)
-	}
+	c, rollback := makeConnection(t)
+	defer rollback()
 
 	c.TrustId = os.Getenv("SWIFT_TRUST_ID")
 
-	err = c.Authenticate()
+	err := c.Authenticate()
 	if err != nil {
 		t.Fatal("Auth failed", err)
 	}
@@ -241,21 +384,19 @@ func TestV3TrustWithTrustId(t *testing.T) {
 }
 
 func TestV3AuthenticateWithDomainIdAndTenantId(t *testing.T) {
-	var err error
-
 	if !isV3Api() {
 		return
 	}
 
-	c, err = makeConnection()
-	if err != nil {
-		t.Fatal("Failed to create server", err)
-	}
+	c, rollback := makeConnection(t)
+	defer rollback()
 
+	c.Tenant = ""
+	c.Domain = ""
 	c.TenantId = os.Getenv("SWIFT_TENANT_ID")
 	c.DomainId = os.Getenv("SWIFT_API_DOMAIN_ID")
 
-	err = c.Authenticate()
+	err := c.Authenticate()
 	if err != nil {
 		t.Fatal("Auth failed", err)
 	}
@@ -265,21 +406,19 @@ func TestV3AuthenticateWithDomainIdAndTenantId(t *testing.T) {
 }
 
 func TestV3AuthenticateWithDomainNameAndTenantName(t *testing.T) {
-	var err error
-
 	if !isV3Api() {
 		return
 	}
 
-	c, err = makeConnection()
-	if err != nil {
-		t.Fatal("Failed to create server", err)
-	}
+	c, rollback := makeConnection(t)
+	defer rollback()
 
 	c.Tenant = os.Getenv("SWIFT_TENANT")
 	c.Domain = os.Getenv("SWIFT_API_DOMAIN")
+	c.TenantId = ""
+	c.DomainId = ""
 
-	err = c.Authenticate()
+	err := c.Authenticate()
 	if err != nil {
 		t.Fatal("Auth failed", err)
 	}
@@ -289,21 +428,19 @@ func TestV3AuthenticateWithDomainNameAndTenantName(t *testing.T) {
 }
 
 func TestV3AuthenticateWithDomainIdAndTenantName(t *testing.T) {
-	var err error
-
 	if !isV3Api() {
 		return
 	}
 
-	c, err = makeConnection()
-	if err != nil {
-		t.Fatal("Failed to create server", err)
-	}
+	c, rollback := makeConnection(t)
+	defer rollback()
 
 	c.Tenant = os.Getenv("SWIFT_TENANT")
+	c.Domain = ""
+	c.TenantId = ""
 	c.DomainId = os.Getenv("SWIFT_API_DOMAIN_ID")
 
-	err = c.Authenticate()
+	err := c.Authenticate()
 	if err != nil {
 		t.Fatal("Auth failed", err)
 	}
@@ -316,6 +453,8 @@ func TestV3AuthenticateWithDomainIdAndTenantName(t *testing.T) {
 //
 // Run with -race to test
 func TestAuthenticateRace(t *testing.T) {
+	c, rollback := makeConnection(t)
+	defer rollback()
 	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
@@ -335,6 +474,8 @@ func TestAuthenticateRace(t *testing.T) {
 
 // Test a connection can be serialized and unserialized with JSON
 func TestSerializeConnectionJson(t *testing.T) {
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
 	serializedConnection, err := json.Marshal(c)
 	if err != nil {
 		t.Fatalf("Failed to serialize connection: %v", err)
@@ -355,6 +496,8 @@ func TestSerializeConnectionJson(t *testing.T) {
 
 // Test a connection can be serialized and unserialized with XML
 func TestSerializeConnectionXml(t *testing.T) {
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
 	serializedConnection, err := xml.Marshal(c)
 	if err != nil {
 		t.Fatalf("Failed to serialize connection: %v", err)
@@ -375,14 +518,18 @@ func TestSerializeConnectionXml(t *testing.T) {
 
 // Test the reauthentication logic
 func TestOnReAuth(t *testing.T) {
-	c2 := c
-	c2.UnAuthenticate()
-	_, _, err := c2.Account()
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
+	c.UnAuthenticate()
+	_, _, err := c.Account()
 	if err != nil {
 		t.Fatalf("Failed to reauthenticate: %v", err)
 	}
 }
+
 func TestAccount(t *testing.T) {
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
 	info, headers, err := c.Account()
 	if err != nil {
 		t.Fatal(err)
@@ -396,8 +543,6 @@ func TestAccount(t *testing.T) {
 	if headers["X-Account-Object-Count"] != fmt.Sprintf("%d", info.Objects) {
 		t.Error("Bad objects count")
 	}
-	//fmt.Println(info)
-	//fmt.Println(headers)
 }
 
 func compareMaps(t *testing.T, a, b map[string]string) {
@@ -417,6 +562,8 @@ func compareMaps(t *testing.T, a, b map[string]string) {
 }
 
 func TestAccountUpdate(t *testing.T) {
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
 	err := c.AccountUpdate(m1.AccountHeaders())
 	if err != nil {
 		t.Fatal(err)
@@ -442,22 +589,24 @@ func TestAccountUpdate(t *testing.T) {
 	m = headers.AccountMetadata()
 	delete(m, "temp-url-key") // remove X-Account-Meta-Temp-URL-Key if set
 	compareMaps(t, m, map[string]string{})
-
-	//fmt.Println(c.Account())
-	//fmt.Println(headers)
-	//fmt.Println(headers.AccountMetadata())
-	//fmt.Println(c.AccountUpdate(m2.AccountHeaders()))
-	//fmt.Println(c.Account())
 }
 
 func TestContainerCreate(t *testing.T) {
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
 	err := c.ContainerCreate(CONTAINER, m1.ContainerHeaders())
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = c.ContainerDelete(CONTAINER)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestContainer(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	info, headers, err := c.Container(CONTAINER)
 	if err != nil {
 		t.Fatal(err)
@@ -472,11 +621,11 @@ func TestContainer(t *testing.T) {
 	if headers["X-Container-Object-Count"] != fmt.Sprintf("%d", info.Count) {
 		t.Error("Bad objects count")
 	}
-	//fmt.Println(info)
-	//fmt.Println(headers)
 }
 
 func TestContainersAll(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	containers1, err := c.ContainersAll(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -496,6 +645,8 @@ func TestContainersAll(t *testing.T) {
 }
 
 func TestContainersAllWithLimit(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	containers1, err := c.ContainersAll(&swift.ContainersOpts{Limit: 1})
 	if err != nil {
 		t.Fatal(err)
@@ -515,6 +666,8 @@ func TestContainersAllWithLimit(t *testing.T) {
 }
 
 func TestContainerUpdate(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	err := c.ContainerUpdate(CONTAINER, m2.ContainerHeaders())
 	if err != nil {
 		t.Fatal(err)
@@ -524,15 +677,15 @@ func TestContainerUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 	compareMaps(t, headers.ContainerMetadata(), map[string]string{})
-	//fmt.Println(headers)
 }
 
 func TestContainerNames(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	containers, err := c.ContainerNames(nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	// fmt.Printf("container %q\n", CONTAINER)
 	ok := false
 	for _, container := range containers {
 		if container == CONTAINER {
@@ -543,10 +696,11 @@ func TestContainerNames(t *testing.T) {
 	if !ok {
 		t.Errorf("Didn't find container %q in listing %q", CONTAINER, containers)
 	}
-	// fmt.Println(containers)
 }
 
 func TestContainerNamesAll(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	containers1, err := c.ContainerNamesAll(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -566,6 +720,8 @@ func TestContainerNamesAll(t *testing.T) {
 }
 
 func TestContainerNamesAllWithLimit(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	containers1, err := c.ContainerNamesAll(&swift.ContainersOpts{Limit: 1})
 	if err != nil {
 		t.Fatal(err)
@@ -585,10 +741,18 @@ func TestContainerNamesAllWithLimit(t *testing.T) {
 }
 
 func TestObjectPutString(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	err := c.ObjectPutString(CONTAINER, OBJECT, CONTENTS, "")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	info, _, err := c.Object(CONTAINER, OBJECT)
 	if err != nil {
@@ -606,6 +770,9 @@ func TestObjectPutString(t *testing.T) {
 }
 
 func TestObjectPut(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
+
 	headers := swift.Headers{}
 
 	// Set content size incorrectly - should produce an error
@@ -623,6 +790,12 @@ func TestObjectPut(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	if h["Etag"] != CONTENT_MD5 {
 		t.Errorf("Bad Etag want %q got %q", CONTENT_MD5, h["Etag"])
@@ -645,10 +818,18 @@ func TestObjectPut(t *testing.T) {
 }
 
 func TestObjectEmpty(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	err := c.ObjectPutString(CONTAINER, EMPTYOBJECT, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, EMPTYOBJECT)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 
 	info, _, err := c.Object(CONTAINER, EMPTYOBJECT)
 	if err != nil {
@@ -663,19 +844,21 @@ func TestObjectEmpty(t *testing.T) {
 	if info.Hash != EMPTY_MD5 {
 		t.Errorf("Bad MD5 want %v got %v", EMPTY_MD5, info.Hash)
 	}
-
-	// Tidy up
-	err = c.ObjectDelete(CONTAINER, EMPTYOBJECT)
-	if err != nil {
-		t.Error(err)
-	}
 }
 
 func TestObjectPutBytes(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	err := c.ObjectPutBytes(CONTAINER, OBJECT, []byte(CONTENTS), "")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 
 	info, _, err := c.Object(CONTAINER, OBJECT)
 	if err != nil {
@@ -693,10 +876,18 @@ func TestObjectPutBytes(t *testing.T) {
 }
 
 func TestObjectPutMimeType(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	err := c.ObjectPutString(CONTAINER, "test.jpg", CONTENTS, "")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, "test.jpg")
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 
 	info, _, err := c.Object(CONTAINER, "test.jpg")
 	if err != nil {
@@ -705,24 +896,31 @@ func TestObjectPutMimeType(t *testing.T) {
 	if info.ContentType != "image/jpeg" {
 		t.Error("Bad content type", info.ContentType)
 	}
-
-	// Tidy up
-	err = c.ObjectDelete(CONTAINER, "test.jpg")
-	if err != nil {
-		t.Error(err)
-	}
 }
 
 func TestObjectCreate(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	out, err := c.ObjectCreate(CONTAINER, OBJECT2, true, "", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, OBJECT2)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 	buf := &bytes.Buffer{}
 	hash := md5.New()
 	out2 := io.MultiWriter(out, buf, hash)
 	for i := 0; i < 100; i++ {
 		fmt.Fprintf(out2, "%d %s\n", i, CONTENTS)
+	}
+	// Ensure Headers fails if called prematurely
+	_, err = out.Headers()
+	if err == nil {
+		t.Error("Headers should fail if called before Close()")
 	}
 	err = out.Close()
 	if err != nil {
@@ -734,7 +932,16 @@ func TestObjectCreate(t *testing.T) {
 		t.Error(err)
 	}
 	if contents != expected {
-		t.Error("Contents wrong")
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+
+	// Ensure Headers succeeds when called after a good upload
+	headers, err := out.Headers()
+	if err != nil {
+		t.Error(err)
+	}
+	if len(headers) < 1 {
+		t.Error("The Headers returned by Headers() should not be empty")
 	}
 
 	// Test writing on closed file
@@ -761,7 +968,7 @@ func TestObjectCreate(t *testing.T) {
 		t.Error(err)
 	}
 	if contents != expected {
-		t.Error("Contents wrong")
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
 	}
 
 	// Now with bad hash
@@ -775,15 +982,11 @@ func TestObjectCreate(t *testing.T) {
 	if err != swift.ObjectCorrupted {
 		t.Error("Expecting object corrupted not", err)
 	}
-
-	// Tidy up
-	err = c.ObjectDelete(CONTAINER, OBJECT2)
-	if err != nil {
-		t.Error(err)
-	}
 }
 
 func TestObjectGetString(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
 	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
 	if err != nil {
 		t.Fatal(err)
@@ -791,10 +994,11 @@ func TestObjectGetString(t *testing.T) {
 	if contents != CONTENTS {
 		t.Error("Contents wrong")
 	}
-	//fmt.Println(contents)
 }
 
 func TestObjectGetBytes(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
 	contents, err := c.ObjectGetBytes(CONTAINER, OBJECT)
 	if err != nil {
 		t.Fatal(err)
@@ -802,10 +1006,11 @@ func TestObjectGetBytes(t *testing.T) {
 	if string(contents) != CONTENTS {
 		t.Error("Contents wrong")
 	}
-	//fmt.Println(contents)
 }
 
 func TestObjectOpen(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
 	file, _, err := c.ObjectOpen(CONTAINER, OBJECT, true, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -828,6 +1033,8 @@ func TestObjectOpen(t *testing.T) {
 }
 
 func TestObjectOpenPartial(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
 	file, _, err := c.ObjectOpen(CONTAINER, OBJECT, true, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -850,6 +1057,8 @@ func TestObjectOpenPartial(t *testing.T) {
 }
 
 func TestObjectOpenLength(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
 	file, _, err := c.ObjectOpen(CONTAINER, OBJECT, true, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -868,7 +1077,20 @@ func TestObjectOpenLength(t *testing.T) {
 	}
 }
 
+func TestObjectOpenNotModified(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
+	_, _, err := c.ObjectOpen(CONTAINER, OBJECT, true, swift.Headers{
+		"If-None-Match": CONTENT_MD5,
+	})
+	if err != swift.NotModified {
+		t.Fatal(err)
+	}
+}
+
 func TestObjectOpenSeek(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
 
 	plan := []struct {
 		whence int
@@ -899,7 +1121,8 @@ func TestObjectOpenSeek(t *testing.T) {
 
 	for _, p := range plan {
 		if p.whence >= 0 {
-			result, err := file.Seek(p.offset, p.whence)
+			var result int64
+			result, err = file.Seek(p.offset, p.whence)
 			if err != nil {
 				t.Fatal(err, p)
 			}
@@ -909,7 +1132,8 @@ func TestObjectOpenSeek(t *testing.T) {
 
 		}
 		var buf bytes.Buffer
-		n, err := io.CopyN(&buf, file, 1)
+		var n int64
+		n, err = io.CopyN(&buf, file, 1)
 		if err != nil {
 			t.Fatal(err, p)
 		}
@@ -929,7 +1153,54 @@ func TestObjectOpenSeek(t *testing.T) {
 	}
 }
 
+// Test seeking to the end to find the file size
+func TestObjectOpenSeekEnd(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
+	file, _, err := c.ObjectOpen(CONTAINER, OBJECT, true, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n, err := file.Seek(0, 2) // seek to end
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != CONTENT_SIZE {
+		t.Fatal("Wrong offset", n)
+	}
+
+	// Now check reading returns EOF
+	buf := make([]byte, 16)
+	nn, err := io.ReadFull(file, buf)
+	if err != io.EOF {
+		t.Fatal(err)
+	}
+	if nn != 0 {
+		t.Fatal("wrong length", n)
+	}
+
+	// Now seek back to start and check we can read the file
+	n, err = file.Seek(0, 0) // seek to start
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 0 {
+		t.Fatal("Wrong offset", n)
+	}
+
+	// read file and check contents
+	buf, err = ioutil.ReadAll(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(buf) != CONTENTS {
+		t.Fatal("wrong contents", string(buf))
+	}
+}
+
 func TestObjectUpdate(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
 	err := c.ObjectUpdate(CONTAINER, OBJECT, m1.ObjectHeaders())
 	if err != nil {
 		t.Fatal(err)
@@ -944,6 +1215,8 @@ func checkTime(t *testing.T, when time.Time, low, high int) {
 }
 
 func TestObject(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	object, headers, err := c.Object(CONTAINER, OBJECT)
 	if err != nil {
 		t.Fatal(err)
@@ -956,6 +1229,8 @@ func TestObject(t *testing.T) {
 }
 
 func TestObjectUpdate2(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	err := c.ObjectUpdate(CONTAINER, OBJECT, m2.ObjectHeaders())
 	if err != nil {
 		t.Fatal(err)
@@ -964,11 +1239,12 @@ func TestObjectUpdate2(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	//fmt.Println(headers, headers.ObjectMetadata())
 	compareMaps(t, headers.ObjectMetadata(), map[string]string{"hello": "", "potato-salad": ""})
 }
 
 func TestContainers(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	containers, err := c.Containers(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -992,10 +1268,11 @@ func TestContainers(t *testing.T) {
 	if !ok {
 		t.Errorf("Didn't find container %q in listing %q", CONTAINER, containers)
 	}
-	//fmt.Println(containers)
 }
 
 func TestObjectNames(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	objects, err := c.ObjectNames(CONTAINER, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -1003,10 +1280,11 @@ func TestObjectNames(t *testing.T) {
 	if len(objects) != 1 || objects[0] != OBJECT {
 		t.Error("Incorrect listing", objects)
 	}
-	//fmt.Println(objects)
 }
 
 func TestObjectNamesAll(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	objects, err := c.ObjectNamesAll(CONTAINER, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -1014,10 +1292,11 @@ func TestObjectNamesAll(t *testing.T) {
 	if len(objects) != 1 || objects[0] != OBJECT {
 		t.Error("Incorrect listing", objects)
 	}
-	//fmt.Println(objects)
 }
 
 func TestObjectNamesAllWithLimit(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	objects, err := c.ObjectNamesAll(CONTAINER, &swift.ObjectsOpts{Limit: 1})
 	if err != nil {
 		t.Fatal(err)
@@ -1025,10 +1304,11 @@ func TestObjectNamesAllWithLimit(t *testing.T) {
 	if len(objects) != 1 || objects[0] != OBJECT {
 		t.Error("Incorrect listing", objects)
 	}
-	//fmt.Println(objects)
 }
 
 func TestObjectsWalk(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	objects := make([]string, 0)
 	err := c.ObjectsWalk(container, nil, func(opts *swift.ObjectsOpts) (interface{}, error) {
 		newObjects, err := c.ObjectNames(CONTAINER, opts)
@@ -1043,10 +1323,11 @@ func TestObjectsWalk(t *testing.T) {
 	if len(objects) != 1 || objects[0] != OBJECT {
 		t.Error("Incorrect listing", objects)
 	}
-	//fmt.Println(objects)
 }
 
 func TestObjects(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	objects, err := c.Objects(CONTAINER, &swift.ObjectsOpts{Delimiter: '/'})
 	if err != nil {
 		t.Fatal(err)
@@ -1059,10 +1340,11 @@ func TestObjects(t *testing.T) {
 		t.Error("Bad object info", object)
 	}
 	checkTime(t, object.LastModified, -10, 10)
-	// fmt.Println(objects)
 }
 
 func TestObjectsDirectory(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	err := c.ObjectPutString(CONTAINER, "directory", "", "application/directory")
 	if err != nil {
 		t.Fatal(err)
@@ -1092,10 +1374,11 @@ func TestObjectsDirectory(t *testing.T) {
 	if !found {
 		t.Error("Didn't find directory object")
 	}
-	// fmt.Println(objects)
 }
 
 func TestObjectsPseudoDirectory(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	err := c.ObjectPutString(CONTAINER, "directory/puppy.jpg", "cute puppy", "")
 	if err != nil {
 		t.Fatal(err)
@@ -1137,10 +1420,11 @@ func TestObjectsPseudoDirectory(t *testing.T) {
 		t.Error("Bad object info", object)
 	}
 	checkTime(t, object.LastModified, -10, 10)
-	// fmt.Println(objects)
 }
 
 func TestObjectsAll(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	objects, err := c.ObjectsAll(CONTAINER, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -1148,10 +1432,11 @@ func TestObjectsAll(t *testing.T) {
 	if len(objects) != 1 || objects[0].Name != OBJECT {
 		t.Error("Incorrect listing", objects)
 	}
-	//fmt.Println(objects)
 }
 
 func TestObjectsAllWithLimit(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	objects, err := c.ObjectsAll(CONTAINER, &swift.ObjectsOpts{Limit: 1})
 	if err != nil {
 		t.Fatal(err)
@@ -1159,10 +1444,11 @@ func TestObjectsAllWithLimit(t *testing.T) {
 	if len(objects) != 1 || objects[0].Name != OBJECT {
 		t.Error("Incorrect listing", objects)
 	}
-	//fmt.Println(objects)
 }
 
 func TestObjectNamesWithPath(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	objects, err := c.ObjectNames(CONTAINER, &swift.ObjectsOpts{Delimiter: '/', Path: ""})
 	if err != nil {
 		t.Fatal(err)
@@ -1178,10 +1464,11 @@ func TestObjectNamesWithPath(t *testing.T) {
 	if len(objects) != 0 {
 		t.Error("Bad listing with path", objects)
 	}
-	// fmt.Println(objects)
 }
 
 func TestObjectCopy(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	_, err := c.ObjectCopy(CONTAINER, OBJECT, CONTAINER, OBJECT2, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -1192,16 +1479,38 @@ func TestObjectCopy(t *testing.T) {
 	}
 }
 
+func TestObjectCopyDifficultName(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
+	const dest = OBJECT + "?param %30%31%32 £100"
+	_, err := c.ObjectCopy(CONTAINER, OBJECT, CONTAINER, dest, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = c.ObjectDelete(CONTAINER, dest)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestObjectCopyWithMetadata(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	m := swift.Metadata{}
 	m["copy-special-metadata"] = "hello"
-	m["hello"] = "3"
+	m["hello"] = "9"
 	h := m.ObjectHeaders()
 	h["Content-Type"] = "image/jpeg"
 	_, err := c.ObjectCopy(CONTAINER, OBJECT, CONTAINER, OBJECT2, h)
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, OBJECT2)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 	// Re-read the metadata to see if it is correct
 	_, headers, err := c.Object(CONTAINER, OBJECT2)
 	if err != nil {
@@ -1210,19 +1519,17 @@ func TestObjectCopyWithMetadata(t *testing.T) {
 	if headers["Content-Type"] != "image/jpeg" {
 		t.Error("Didn't change content type")
 	}
-	compareMaps(t, headers.ObjectMetadata(), map[string]string{"hello": "3", "potato-salad": "", "copy-special-metadata": "hello"})
-	err = c.ObjectDelete(CONTAINER, OBJECT2)
-	if err != nil {
-		t.Fatal(err)
-	}
+	compareMaps(t, headers.ObjectMetadata(), map[string]string{"hello": "9", "potato-salad": "2", "copy-special-metadata": "hello"})
 }
 
 func TestObjectMove(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	err := c.ObjectMove(CONTAINER, OBJECT, CONTAINER, OBJECT2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	testExistenceAfterDelete(t, CONTAINER, OBJECT)
+	testExistenceAfterDelete(t, c, CONTAINER, OBJECT)
 	_, _, err = c.Object(CONTAINER, OBJECT2)
 	if err != nil {
 		t.Fatal(err)
@@ -1232,15 +1539,17 @@ func TestObjectMove(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	testExistenceAfterDelete(t, CONTAINER, OBJECT2)
+	testExistenceAfterDelete(t, c, CONTAINER, OBJECT2)
 	_, headers, err := c.Object(CONTAINER, OBJECT)
 	if err != nil {
 		t.Fatal(err)
 	}
-	compareMaps(t, headers.ObjectMetadata(), map[string]string{"hello": "", "potato-salad": ""})
+	compareMaps(t, headers.ObjectMetadata(), map[string]string{"hello": "1", "potato-salad": "2"})
 }
 
 func TestObjectUpdateContentType(t *testing.T) {
+	c, rollback := makeConnectionWithObjectHeaders(t)
+	defer rollback()
 	err := c.ObjectUpdateContentType(CONTAINER, OBJECT, "text/potato")
 	if err != nil {
 		t.Fatal(err)
@@ -1253,14 +1562,20 @@ func TestObjectUpdateContentType(t *testing.T) {
 	if headers["Content-Type"] != "text/potato" {
 		t.Error("Didn't change content type")
 	}
-	compareMaps(t, headers.ObjectMetadata(), map[string]string{"hello": "", "potato-salad": ""})
+	compareMaps(t, headers.ObjectMetadata(), map[string]string{"hello": "1", "potato-salad": "2"})
 }
 
 func TestVersionContainerCreate(t *testing.T) {
-	if err := c.VersionContainerCreate(CURRENT_CONTAINER, VERSIONS_CONTAINER); err != nil {
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
+	err := c.VersionContainerCreate(CURRENT_CONTAINER, VERSIONS_CONTAINER)
+	defer func() {
+		c.ContainerDelete(CURRENT_CONTAINER)
+		c.ContainerDelete(VERSIONS_CONTAINER)
+	}()
+	if err != nil {
 		if err == swift.Forbidden {
 			t.Log("Server doesn't support Versions - skipping test")
-			skipVersionTests = true
 			return
 		}
 		t.Fatal(err)
@@ -1268,6 +1583,8 @@ func TestVersionContainerCreate(t *testing.T) {
 }
 
 func TestVersionObjectAdd(t *testing.T) {
+	c, rollback := makeConnectionWithVersionsContainer(t)
+	defer rollback()
 	if skipVersionTests {
 		t.Log("Server doesn't support Versions - skipping test")
 		return
@@ -1276,6 +1593,12 @@ func TestVersionObjectAdd(t *testing.T) {
 	if err := c.ObjectPutString(CURRENT_CONTAINER, OBJECT, CONTENTS, ""); err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err := c.ObjectDelete(CURRENT_CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 	if contents, err := c.ObjectGetString(CURRENT_CONTAINER, OBJECT); err != nil {
 		t.Fatal(err)
 	} else if contents != CONTENTS {
@@ -1286,6 +1609,12 @@ func TestVersionObjectAdd(t *testing.T) {
 	if err := c.ObjectPutString(CURRENT_CONTAINER, OBJECT, CONTENTS2, ""); err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err := c.ObjectDelete(CURRENT_CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 	if contents, err := c.ObjectGetString(CURRENT_CONTAINER, OBJECT); err != nil {
 		t.Fatal(err)
 	} else if contents != CONTENTS2 {
@@ -1296,9 +1625,17 @@ func TestVersionObjectAdd(t *testing.T) {
 	if err := c.ObjectPutString(CURRENT_CONTAINER, OBJECT, CONTENTS2, ""); err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err := c.ObjectDelete(CURRENT_CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 }
 
 func TestVersionObjectList(t *testing.T) {
+	c, rollback := makeConnectionWithVersionsObject(t)
+	defer rollback()
 	if skipVersionTests {
 		t.Log("Server doesn't support Versions - skipping test")
 		return
@@ -1311,11 +1648,11 @@ func TestVersionObjectList(t *testing.T) {
 	if len(list) != 2 {
 		t.Error("Version list should return 2 objects")
 	}
-
-	//fmt.Print(list)
 }
 
 func TestVersionObjectDelete(t *testing.T) {
+	c, rollback := makeConnectionWithVersionsObject(t)
+	defer rollback()
 	if skipVersionTests {
 		t.Log("Server doesn't support Versions - skipping test")
 		return
@@ -1338,47 +1675,33 @@ func TestVersionObjectDelete(t *testing.T) {
 	}
 }
 
-// cleanUpContainer deletes everything in the container and then the
-// container.  It expects the container to be empty and if it wasn't
-// it logs an error.
-func cleanUpContainer(t *testing.T, container string) {
-	objects, err := c.Objects(container, nil)
-	if err != nil {
-		t.Error(err, container)
-	} else {
-		if len(objects) != 0 {
-			t.Error("Container not empty", container)
-		}
-		for _, object := range objects {
-			t.Log("Deleting spurious", object.Name)
-			err = c.ObjectDelete(container, object.Name)
-			if err != nil {
-				t.Error(err, container)
-			}
-		}
-	}
-
-	if err := c.ContainerDelete(container); err != nil {
-		t.Error(err, container)
-	}
-}
-
 func TestVersionDeleteContent(t *testing.T) {
+	c, rollback := makeConnectionWithVersionsObject(t)
+	defer rollback()
 	if skipVersionTests {
 		t.Log("Server doesn't support Versions - skipping test")
-	} else {
-		// Delete Version 1
-		if err := c.ObjectDelete(CURRENT_CONTAINER, OBJECT); err != nil {
-			t.Fatal(err)
-		}
+		return
 	}
-	cleanUpContainer(t, VERSIONS_CONTAINER)
-	cleanUpContainer(t, CURRENT_CONTAINER)
+	// Delete Version 3
+	if err := c.ObjectDelete(CURRENT_CONTAINER, OBJECT); err != nil {
+		t.Fatal(err)
+	}
+	// Delete Version 2
+	if err := c.ObjectDelete(CURRENT_CONTAINER, OBJECT); err != nil {
+		t.Fatal(err)
+	}
+	// Delete Version 1
+	if err := c.ObjectDelete(CURRENT_CONTAINER, OBJECT); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.ObjectDelete(CURRENT_CONTAINER, OBJECT); err != swift.ObjectNotFound {
+		t.Fatalf("Expecting Object not found error, got: %v", err)
+	}
 }
 
 // Check for non existence after delete
 // May have to do it a few times to wait for swift to be consistent.
-func testExistenceAfterDelete(t *testing.T, container, object string) {
+func testExistenceAfterDelete(t *testing.T, c *swift.Connection, container, object string) {
 	for i := 10; i <= 0; i-- {
 		_, _, err := c.Object(container, object)
 		if err == swift.ObjectNotFound {
@@ -1392,11 +1715,13 @@ func testExistenceAfterDelete(t *testing.T, container, object string) {
 }
 
 func TestObjectDelete(t *testing.T) {
+	c, rollback := makeConnectionWithObject(t)
+	defer rollback()
 	err := c.ObjectDelete(CONTAINER, OBJECT)
 	if err != nil {
 		t.Fatal(err)
 	}
-	testExistenceAfterDelete(t, CONTAINER, OBJECT)
+	testExistenceAfterDelete(t, c, CONTAINER, OBJECT)
 	err = c.ObjectDelete(CONTAINER, OBJECT)
 	if err != swift.ObjectNotFound {
 		t.Fatal("Expecting Object not found", err)
@@ -1404,6 +1729,8 @@ func TestObjectDelete(t *testing.T) {
 }
 
 func TestBulkDelete(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	result, err := c.BulkDelete(CONTAINER, []string{OBJECT})
 	if err == swift.Forbidden {
 		t.Log("Server doesn't support BulkDelete - skipping test")
@@ -1436,6 +1763,8 @@ func TestBulkDelete(t *testing.T) {
 }
 
 func TestBulkUpload(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	buffer := new(bytes.Buffer)
 	ds := tar.NewWriter(buffer)
 	var files = []struct{ Name, Body string }{
@@ -1466,6 +1795,16 @@ func TestBulkUpload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = c.ObjectDelete(CONTAINER, OBJECT2)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 	if result.NumberCreated != 2 {
 		t.Error("Expected 2, actual:", result.NumberCreated)
 	}
@@ -1479,16 +1818,22 @@ func TestBulkUpload(t *testing.T) {
 	if err != nil {
 		t.Error("Expecting object to be found")
 	}
-	c.ObjectDelete(CONTAINER, OBJECT)
-	c.ObjectDelete(CONTAINER, OBJECT2)
 }
 
 func TestObjectDifficultName(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	const name = `hello? sausage/êé/Hello, 世界/ " ' @ < > & ?/`
 	err := c.ObjectPutString(CONTAINER, name, CONTENTS, "")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, name)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 	objects, err := c.ObjectNamesAll(CONTAINER, nil)
 	if err != nil {
 		t.Error(err)
@@ -1503,17 +1848,21 @@ func TestObjectDifficultName(t *testing.T) {
 	if !found {
 		t.Errorf("Couldn't find %q in listing %q", name, objects)
 	}
-	err = c.ObjectDelete(CONTAINER, name)
-	if err != nil {
-		t.Fatal(err)
-	}
 }
 
 func TestTempUrl(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	err := c.ObjectPutBytes(CONTAINER, OBJECT, []byte(CONTENTS), "")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = c.ObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	m := swift.Metadata{}
 	m["temp-url-key"] = SECRET_KEY
@@ -1528,32 +1877,31 @@ func TestTempUrl(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to retrieve file from temporary url")
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode == 401 {
 		t.Log("Server doesn't support tempurl")
 	} else if resp.StatusCode != 200 {
 		t.Fatal("HTTP Error retrieving file from temporary url", resp.StatusCode)
 	} else {
-		if content, err := ioutil.ReadAll(resp.Body); err != nil || string(content) != CONTENTS {
+		var content []byte
+		if content, err = ioutil.ReadAll(resp.Body); err != nil || string(content) != CONTENTS {
 			t.Error("Bad content", err)
 		}
 
-		resp, err := http.Post(tempUrl, "image/jpeg", bytes.NewReader([]byte(CONTENTS)))
+		resp, err = http.Post(tempUrl, "image/jpeg", bytes.NewReader([]byte(CONTENTS)))
 		if err != nil {
 			t.Fatal("Failed to retrieve file from temporary url")
 		}
+		defer resp.Body.Close()
 		if resp.StatusCode != 401 {
 			t.Fatal("Expecting server to forbid access to object")
 		}
 	}
-
-	resp.Body.Close()
-	err = c.ObjectDelete(CONTAINER, OBJECT)
-	if err != nil {
-		t.Fatal(err)
-	}
 }
 
 func TestQueryInfo(t *testing.T) {
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
 	infos, err := c.QueryInfo()
 	if err != nil {
 		t.Log("Server doesn't support querying info")
@@ -1564,7 +1912,987 @@ func TestQueryInfo(t *testing.T) {
 	}
 }
 
+func TestDLOCreate(t *testing.T) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	defer rollback()
+
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.DynamicLargeObjectCreate(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = c.DynamicLargeObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(multi, "%d %s\n", i, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+	info, _, err := c.Object(CONTAINER, OBJECT)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.ObjectType != swift.DynamicLargeObjectType {
+		t.Errorf("Wrong ObjectType, expected %d, got: %d", swift.DynamicLargeObjectType, info.ObjectType)
+	}
+	if info.Bytes != int64(len(expected)) {
+		t.Errorf("Wrong Bytes size, expected %d, got: %d", len(expected), info.Bytes)
+	}
+}
+
+func TestDLOInsert(t *testing.T) {
+	c, rollback := makeConnectionWithDLO(t)
+	defer rollback()
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		CheckHash:   true,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.DynamicLargeObjectCreateFile(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	_, err = fmt.Fprintf(multi, "%d%s\n", 0, CONTENTS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Fprintf(buf, "\n%d %s\n", 1, CONTENTS)
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+}
+
+func TestDLOAppend(t *testing.T) {
+	c, rollback := makeConnectionWithDLO(t)
+	defer rollback()
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		Flags:       os.O_APPEND,
+		CheckHash:   true,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.DynamicLargeObjectCreateFile(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	buf := bytes.NewBuffer([]byte(contents))
+	multi := io.MultiWriter(buf, out)
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(multi, "%d %s\n", i+10, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err = c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+}
+
+func TestDLOTruncate(t *testing.T) {
+	c, rollback := makeConnectionWithDLO(t)
+	defer rollback()
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		Flags:       os.O_TRUNC,
+		CheckHash:   true,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.DynamicLargeObjectCreateFile(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	_, err = fmt.Fprintf(multi, "%s", CONTENTS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+}
+
+func TestDLOMove(t *testing.T) {
+	c, rollback := makeConnectionWithDLO(t)
+	defer rollback()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = c.DynamicLargeObjectMove(CONTAINER, OBJECT, CONTAINER, OBJECT2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = c.DynamicLargeObjectDelete(CONTAINER, OBJECT2)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	contents2, err := c.ObjectGetString(CONTAINER, OBJECT2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if contents2 != contents {
+		t.Error("Contents wrong")
+	}
+}
+
+func TestDLONoSegmentContainer(t *testing.T) {
+	c, rollback := makeConnectionWithDLO(t)
+	defer rollback()
+	opts := swift.LargeObjectOpts{
+		Container:        CONTAINER,
+		ObjectName:       OBJECT,
+		ContentType:      "image/jpeg",
+		SegmentContainer: CONTAINER,
+	}
+	out, err := c.DynamicLargeObjectCreate(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(multi, "%d %s\n", i, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+}
+
+func TestDLOCreateMissingSegmentsInList(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
+
+	if srv == nil {
+		t.Skipf("This test only runs with the fake swift server as it's needed to simulate eventual consistency problems.")
+		return
+	}
+
+	listURL := "/v1/AUTH_" + swifttest.TEST_ACCOUNT + "/" + SEGMENTS_CONTAINER
+	srv.SetOverride(listURL, func(w http.ResponseWriter, r *http.Request, recorder *httptest.ResponseRecorder) {
+		for k, v := range recorder.HeaderMap {
+			w.Header().Set(k, v[0])
+		}
+		w.WriteHeader(recorder.Code)
+		w.Write([]byte("null\n"))
+	})
+	defer srv.UnsetOverride(listURL)
+
+	headers := swift.Headers{}
+	err := c.ContainerCreate(SEGMENTS_CONTAINER, headers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = c.ContainerDelete(SEGMENTS_CONTAINER)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.DynamicLargeObjectCreate(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = c.DynamicLargeObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(multi, "%d %s\n", i, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+}
+
+func TestDLOCreateIncorrectSize(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
+
+	if srv == nil {
+		t.Skipf("This test only runs with the fake swift server as it's needed to simulate eventual consistency problems.")
+		return
+	}
+
+	listURL := "/v1/AUTH_" + swifttest.TEST_ACCOUNT + "/" + CONTAINER + "/" + OBJECT
+	headCount := 0
+	expectedHeadCount := 5
+	srv.SetOverride(listURL, func(w http.ResponseWriter, r *http.Request, recorder *httptest.ResponseRecorder) {
+		for k, v := range recorder.HeaderMap {
+			w.Header().Set(k, v[0])
+		}
+		if r.Method == "HEAD" {
+			headCount++
+			if headCount < expectedHeadCount {
+				w.Header().Set("Content-Length", "7")
+			}
+		}
+		w.WriteHeader(recorder.Code)
+		w.Write(recorder.Body.Bytes())
+	})
+	defer srv.UnsetOverride(listURL)
+
+	headers := swift.Headers{}
+	err := c.ContainerCreate(SEGMENTS_CONTAINER, headers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = c.ContainerDelete(SEGMENTS_CONTAINER)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.DynamicLargeObjectCreate(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = c.DynamicLargeObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(multi, "%d %s\n", i, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	if headCount != expectedHeadCount {
+		t.Errorf("Unexpected HEAD requests count, expected %d, got: %d", expectedHeadCount, headCount)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+}
+
+func TestDLOConcurrentWrite(t *testing.T) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	defer rollback()
+
+	nConcurrency := 5
+	nChunks := 100
+	var chunkSize int64 = 1024
+
+	writeFn := func(i int) {
+		objName := fmt.Sprintf("%s_concurrent_dlo_%d", OBJECT, i)
+		opts := swift.LargeObjectOpts{
+			Container:   CONTAINER,
+			ObjectName:  objName,
+			ContentType: "image/jpeg",
+		}
+		out, err := c.DynamicLargeObjectCreate(&opts)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer func() {
+			err = c.DynamicLargeObjectDelete(CONTAINER, objName)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}()
+		buf := &bytes.Buffer{}
+		for j := 0; j < nChunks; j++ {
+			var data []byte
+			var n int
+			data, err = ioutil.ReadAll(io.LimitReader(rand.Reader, chunkSize))
+			if err != nil {
+				t.Fatal(err)
+			}
+			multi := io.MultiWriter(buf, out)
+			n, err = multi.Write(data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if int64(n) != chunkSize {
+				t.Fatalf("expected to write %d, got: %d", chunkSize, n)
+			}
+		}
+		err = out.Close()
+		if err != nil {
+			t.Error(err)
+		}
+		expected := buf.String()
+		contents, err := c.ObjectGetString(CONTAINER, objName)
+		if err != nil {
+			t.Error(err)
+		}
+		if contents != expected {
+			t.Error("Contents wrong")
+		}
+	}
+
+	wg := sync.WaitGroup{}
+	for i := 0; i < nConcurrency; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			writeFn(i)
+		}(i)
+	}
+	wg.Wait()
+}
+
+func TestDLOSegmentation(t *testing.T) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	defer rollback()
+
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+		ChunkSize:   6,
+		NoBuffer:    true,
+	}
+
+	testSegmentation(t, c, func() swift.LargeObjectFile {
+		out, err := c.DynamicLargeObjectCreate(&opts)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return out
+	}, []segmentTest{
+		{
+			writes:        []string{"0", "1", "2", "3", "4", "5", "6", "7", "8"},
+			expectedSegs:  []string{"0", "1", "2", "3", "4", "5", "6", "7", "8"},
+			expectedValue: "012345678",
+		},
+		{
+			writes:        []string{"012345", "012345"},
+			expectedSegs:  []string{"012345", "012345"},
+			expectedValue: "012345012345",
+		},
+		{
+			writes:        []string{"0123456", "0123456"},
+			expectedSegs:  []string{"012345", "6", "012345", "6"},
+			expectedValue: "01234560123456",
+		},
+		{
+			writes:        []string{"0123456", "0123456"},
+			seeks:         []int{-4, 0},
+			expectedSegs:  []string{"012012", "3456"},
+			expectedValue: "0120123456",
+		},
+		{
+			writes:        []string{"0123456", "0123456", "abcde"},
+			seeks:         []int{0, -11, 0},
+			expectedSegs:  []string{"012abc", "d", "e12345", "6"},
+			expectedValue: "012abcde123456",
+		},
+		{
+			writes:        []string{"0123456", "ab"},
+			seeks:         []int{-4, 0},
+			expectedSegs:  []string{"012ab5", "6"},
+			expectedValue: "012ab56",
+		},
+	})
+}
+
+func TestDLOSegmentationBuffered(t *testing.T) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	defer rollback()
+
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+		ChunkSize:   6,
+	}
+
+	testSegmentation(t, c, func() swift.LargeObjectFile {
+		out, err := c.DynamicLargeObjectCreate(&opts)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return out
+	}, []segmentTest{
+		{
+			writes:        []string{"0", "1", "2", "3", "4", "5", "6", "7", "8"},
+			expectedSegs:  []string{"012345", "678"},
+			expectedValue: "012345678",
+		},
+		{
+			writes:        []string{"012345", "012345"},
+			expectedSegs:  []string{"012345", "012345"},
+			expectedValue: "012345012345",
+		},
+		{
+			writes:        []string{"0123456", "0123456"},
+			expectedSegs:  []string{"012345", "6", "012345", "6"},
+			expectedValue: "01234560123456",
+		},
+		{
+			writes:        []string{"0123456", "0123456"},
+			seeks:         []int{-4, 0},
+			expectedSegs:  []string{"012012", "3456"},
+			expectedValue: "0120123456",
+		},
+		{
+			writes:        []string{"0123456", "0123456", "abcde"},
+			seeks:         []int{0, -11, 0},
+			expectedSegs:  []string{"012abc", "d", "e12345", "6"},
+			expectedValue: "012abcde123456",
+		},
+		{
+			writes:        []string{"0123456", "ab"},
+			seeks:         []int{-4, 0},
+			expectedSegs:  []string{"012ab5", "6"},
+			expectedValue: "012ab56",
+		},
+	})
+}
+
+func TestSLOCreate(t *testing.T) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	defer rollback()
+
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.StaticLargeObjectCreate(&opts)
+	if err != nil {
+		if err == swift.SLONotSupported {
+			t.Skip("SLO not supported")
+			return
+		}
+		t.Fatal(err)
+	}
+	defer func() {
+		err = c.StaticLargeObjectDelete(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(multi, "%d %s\n", i, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+	info, _, err := c.Object(CONTAINER, OBJECT)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.ObjectType != swift.StaticLargeObjectType {
+		t.Errorf("Wrong ObjectType, expected %d, got: %d", swift.StaticLargeObjectType, info.ObjectType)
+	}
+	if info.Bytes != int64(len(expected)) {
+		t.Errorf("Wrong Bytes size, expected %d, got: %d", len(expected), info.Bytes)
+	}
+}
+
+func TestSLOInsert(t *testing.T) {
+	c, rollback := makeConnectionWithSLO(t)
+	defer rollback()
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.StaticLargeObjectCreateFile(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	_, err = fmt.Fprintf(multi, "%d%s\n", 0, CONTENTS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Fprintf(buf, "\n%d %s\n", 1, CONTENTS)
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+}
+
+func TestSLOAppend(t *testing.T) {
+	c, rollback := makeConnectionWithSLO(t)
+	defer rollback()
+	opts := swift.LargeObjectOpts{
+		Container:   CONTAINER,
+		ObjectName:  OBJECT,
+		Flags:       os.O_APPEND,
+		CheckHash:   true,
+		ContentType: "image/jpeg",
+	}
+	out, err := c.StaticLargeObjectCreateFile(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	buf := bytes.NewBuffer([]byte(contents))
+	multi := io.MultiWriter(buf, out)
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(multi, "%d %s\n", i+10, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err = c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+}
+
+func TestSLOMove(t *testing.T) {
+	c, rollback := makeConnectionWithSLO(t)
+	defer rollback()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = c.StaticLargeObjectMove(CONTAINER, OBJECT, CONTAINER, OBJECT2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = c.StaticLargeObjectDelete(CONTAINER, OBJECT2)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	contents2, err := c.ObjectGetString(CONTAINER, OBJECT2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if contents2 != contents {
+		t.Error("Contents wrong")
+	}
+}
+
+func TestSLONoSegmentContainer(t *testing.T) {
+	c, rollback := makeConnectionWithSLO(t)
+	defer rollback()
+
+	opts := swift.LargeObjectOpts{
+		Container:        CONTAINER,
+		ObjectName:       OBJECT,
+		ContentType:      "image/jpeg",
+		SegmentContainer: CONTAINER,
+	}
+	out, err := c.StaticLargeObjectCreate(&opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	buf := &bytes.Buffer{}
+	multi := io.MultiWriter(buf, out)
+	for i := 0; i < 2; i++ {
+		_, err = fmt.Fprintf(multi, "%d %s\n", i, CONTENTS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	err = out.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	expected := buf.String()
+	contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+	if err != nil {
+		t.Error(err)
+	}
+	if contents != expected {
+		t.Errorf("Contents wrong, expected %q, got: %q", expected, contents)
+	}
+
+	err = c.StaticLargeObjectDelete(CONTAINER, OBJECT)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSLOMinChunkSize(t *testing.T) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	defer rollback()
+	if srv == nil {
+		t.Skipf("This test only runs with the fake swift server as it's needed to simulate min segment size.")
+		return
+	}
+
+	srv.SetOverride("/info", func(w http.ResponseWriter, r *http.Request, recorder *httptest.ResponseRecorder) {
+		w.Write([]byte(`{"slo": {"min_segment_size": 4}}`))
+	})
+	defer srv.UnsetOverride("/info")
+	c.QueryInfo()
+
+	opts := swift.LargeObjectOpts{
+		Container:    CONTAINER,
+		ObjectName:   OBJECT,
+		ContentType:  "image/jpeg",
+		ChunkSize:    6,
+		MinChunkSize: 0,
+		NoBuffer:     true,
+	}
+
+	testSLOSegmentation(t, c, func() swift.LargeObjectFile {
+		out, err := c.StaticLargeObjectCreate(&opts)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return out
+	})
+}
+
+func TestSLOSegmentation(t *testing.T) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	defer rollback()
+	opts := swift.LargeObjectOpts{
+		Container:    CONTAINER,
+		ObjectName:   OBJECT,
+		ContentType:  "image/jpeg",
+		ChunkSize:    6,
+		MinChunkSize: 4,
+		NoBuffer:     true,
+	}
+	testSLOSegmentation(t, c, func() swift.LargeObjectFile {
+		out, err := c.StaticLargeObjectCreate(&opts)
+		if err != nil {
+			if err == swift.SLONotSupported {
+				t.Skip("SLO not supported")
+			}
+			t.Fatal(err)
+		}
+		return out
+	})
+}
+
+func TestSLOSegmentationBuffered(t *testing.T) {
+	c, rollback := makeConnectionWithSegmentsContainer(t)
+	defer rollback()
+	opts := swift.LargeObjectOpts{
+		Container:    CONTAINER,
+		ObjectName:   OBJECT,
+		ContentType:  "image/jpeg",
+		ChunkSize:    6,
+		MinChunkSize: 4,
+	}
+	testSegmentation(t, c, func() swift.LargeObjectFile {
+		out, err := c.StaticLargeObjectCreate(&opts)
+		if err != nil {
+			if err == swift.SLONotSupported {
+				t.Skip("SLO not supported")
+			}
+			t.Fatal(err)
+		}
+		return out
+	}, []segmentTest{
+		{
+			writes:        []string{"0", "1", "2", "3", "4", "5", "6", "7", "8"},
+			expectedSegs:  []string{"012345", "678"},
+			expectedValue: "012345678",
+		},
+		{
+			writes:        []string{"012345", "012345"},
+			expectedSegs:  []string{"012345", "012345"},
+			expectedValue: "012345012345",
+		},
+		{
+			writes:        []string{"0123456", "0123456"},
+			expectedSegs:  []string{"012345", "601234", "56"},
+			expectedValue: "01234560123456",
+		},
+		{
+			writes:        []string{"0123456", "0123456"},
+			seeks:         []int{-4, 0},
+			expectedSegs:  []string{"012012", "3456"},
+			expectedValue: "0120123456",
+		},
+		{
+			writes:        []string{"0123456", "0123456", "abcde"},
+			seeks:         []int{0, -11, 0},
+			expectedSegs:  []string{"012abc", "de1234", "56"},
+			expectedValue: "012abcde123456",
+		},
+		{
+			writes:        []string{"0123456", "ab"},
+			seeks:         []int{-4, 0},
+			expectedSegs:  []string{"012ab5", "6"},
+			expectedValue: "012ab56",
+		},
+	})
+}
+
+func testSLOSegmentation(t *testing.T, c *swift.Connection, createObj func() swift.LargeObjectFile) {
+	testCases := []segmentTest{
+		{
+			writes:        []string{"0", "1", "2", "3", "4", "5", "6", "7", "8"},
+			expectedSegs:  []string{"0123", "4567", "8"},
+			expectedValue: "012345678",
+		},
+		{
+			writes:        []string{"012345", "012345"},
+			expectedSegs:  []string{"012345", "012345"},
+			expectedValue: "012345012345",
+		},
+		{
+			writes:        []string{"0123456", "0123456"},
+			expectedSegs:  []string{"012345", "601234", "56"},
+			expectedValue: "01234560123456",
+		},
+		{
+			writes:        []string{"0123456", "0123456"},
+			seeks:         []int{-4, 0},
+			expectedSegs:  []string{"012012", "3456"},
+			expectedValue: "0120123456",
+		},
+		{
+			writes:        []string{"0123456", "0123456", "abcde"},
+			seeks:         []int{0, -11, 0},
+			expectedSegs:  []string{"012abc", "de1234", "56"},
+			expectedValue: "012abcde123456",
+		},
+		{
+			writes:        []string{"0123456", "ab"},
+			seeks:         []int{-4, 0},
+			expectedSegs:  []string{"012ab5", "6"},
+			expectedValue: "012ab56",
+		},
+	}
+	testSegmentation(t, c, createObj, testCases)
+}
+
+type segmentTest struct {
+	writes        []string
+	seeks         []int
+	expectedSegs  []string
+	expectedValue string
+}
+
+func testSegmentation(t *testing.T, c *swift.Connection, createObj func() swift.LargeObjectFile, testCases []segmentTest) {
+	var err error
+	runTestCase := func(tCase segmentTest) {
+		out := createObj()
+		defer func() {
+			err = c.LargeObjectDelete(CONTAINER, OBJECT)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}()
+		for i, data := range tCase.writes {
+			_, err = fmt.Fprint(out, data)
+			if err != nil {
+				t.Error(err)
+			}
+			if i < len(tCase.seeks)-1 {
+				_, err = out.Seek(int64(tCase.seeks[i]), os.SEEK_CUR)
+				if err != nil {
+					t.Error(err)
+				}
+			}
+		}
+		err = out.Close()
+		if err != nil {
+			t.Error(err)
+		}
+		contents, err := c.ObjectGetString(CONTAINER, OBJECT)
+		if err != nil {
+			t.Error(err)
+		}
+		if contents != tCase.expectedValue {
+			t.Errorf("Contents wrong, expected %q, got: %q", tCase.expectedValue, contents)
+		}
+		container, objects, err := c.LargeObjectGetSegments(CONTAINER, OBJECT)
+		if err != nil {
+			t.Error(err)
+		}
+		if container != SEGMENTS_CONTAINER {
+			t.Errorf("Segments container wrong, expected %q, got: %q", SEGMENTS_CONTAINER, container)
+		}
+		_, headers, err := c.Object(CONTAINER, OBJECT)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if headers.IsLargeObjectSLO() {
+			var info swift.SwiftInfo
+			info, err = c.QueryInfo()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if info.SLOMinSegmentSize() > 4 {
+				t.Log("Skipping checking segments because SLO min segment size imposed by server is larger than wanted for tests.")
+				return
+			}
+		}
+		var segContents []string
+		for _, obj := range objects {
+			var value string
+			value, err = c.ObjectGetString(SEGMENTS_CONTAINER, obj.Name)
+			if err != nil {
+				t.Error(err)
+			}
+			segContents = append(segContents, value)
+		}
+		if !reflect.DeepEqual(segContents, tCase.expectedSegs) {
+			t.Errorf("Segments wrong, expected %#v, got: %#v", tCase.expectedSegs, segContents)
+		}
+	}
+	for _, tCase := range testCases {
+		runTestCase(tCase)
+	}
+}
+
 func TestContainerDelete(t *testing.T) {
+	c, rollback := makeConnectionWithContainer(t)
+	defer rollback()
 	err := c.ContainerDelete(CONTAINER)
 	if err != nil {
 		t.Fatal(err)
@@ -1580,6 +2908,8 @@ func TestContainerDelete(t *testing.T) {
 }
 
 func TestUnAuthenticate(t *testing.T) {
+	c, rollback := makeConnectionAuth(t)
+	defer rollback()
 	c.UnAuthenticate()
 	if c.Authenticated() {
 		t.Fatal("Shouldn't be authenticated")

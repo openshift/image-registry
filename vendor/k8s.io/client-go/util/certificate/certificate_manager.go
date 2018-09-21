@@ -268,6 +268,13 @@ func getCurrentCertificateOrBootstrap(
 		return nil, false, fmt.Errorf("unable to parse certificate data: %v", err)
 	}
 	bootstrapCert.Leaf = certs[0]
+
+	if _, err := store.Update(bootstrapCertificatePEM, bootstrapKeyPEM); err != nil {
+		utilruntime.HandleError(fmt.Errorf("Unable to set the cert/key pair to the bootstrap certificate: %v", err))
+	} else {
+		glog.V(4).Infof("Updated the store to contain the initial bootstrap certificate")
+	}
+
 	return &bootstrapCert, true, nil
 }
 
@@ -293,7 +300,7 @@ func (m *manager) rotateCerts() (bool, error) {
 		return false, m.updateServerError(err)
 	}
 
-	// Wait for the certificate to be signed. Instead of one long watch, we retry with slighly longer
+	// Wait for the certificate to be signed. Instead of one long watch, we retry with slightly longer
 	// intervals each time in order to tolerate failures from the server AND to preserve the liveliness
 	// of the cert manager loop. This creates slightly more traffic against the API server in return
 	// for bounding the amount of time we wait when a certificate expires.

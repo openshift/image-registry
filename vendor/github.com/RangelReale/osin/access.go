@@ -129,7 +129,7 @@ func (s *Server) HandleAccessRequest(w *Response, r *http.Request) *AccessReques
 		return nil
 	}
 
-	grantType := AccessRequestType(r.FormValue("grant_type"))
+	grantType := AccessRequestType(r.Form.Get("grant_type"))
 	if s.Config.AllowedAccessTypes.Exists(grantType) {
 		switch grantType {
 		case AUTHORIZATION_CODE:
@@ -159,9 +159,9 @@ func (s *Server) handleAuthorizationCodeRequest(w *Response, r *http.Request) *A
 	// generate access token
 	ret := &AccessRequest{
 		Type:            AUTHORIZATION_CODE,
-		Code:            r.FormValue("code"),
-		CodeVerifier:    r.FormValue("code_verifier"),
-		RedirectUri:     r.FormValue("redirect_uri"),
+		Code:            r.Form.Get("code"),
+		CodeVerifier:    r.Form.Get("code_verifier"),
+		RedirectUri:     r.Form.Get("redirect_uri"),
 		GenerateRefresh: true,
 		Expiration:      s.Config.AccessExpiration,
 		HttpRequest:     r,
@@ -212,11 +212,9 @@ func (s *Server) handleAuthorizationCodeRequest(w *Response, r *http.Request) *A
 	if ret.RedirectUri == "" {
 		ret.RedirectUri = FirstUri(ret.Client.GetRedirectUri(), s.Config.RedirectUriSeparator)
 	}
-	if realRedirectUri, err := ValidateUriList(ret.Client.GetRedirectUri(), ret.RedirectUri, s.Config.RedirectUriSeparator); err != nil {
+	if err = ValidateUriList(ret.Client.GetRedirectUri(), ret.RedirectUri, s.Config.RedirectUriSeparator); err != nil {
 		s.setErrorAndLog(w, E_INVALID_REQUEST, err, "auth_code_request=%s", "error validating client redirect")
 		return nil
-	} else {
-		ret.RedirectUri = realRedirectUri
 	}
 	if ret.AuthorizeData.RedirectUri != ret.RedirectUri {
 		s.setErrorAndLog(w, E_INVALID_REQUEST, errors.New("Redirect uri is different"), "auth_code_request=%s", "client redirect does not match authorization data")
@@ -293,8 +291,8 @@ func (s *Server) handleRefreshTokenRequest(w *Response, r *http.Request) *Access
 	// generate access token
 	ret := &AccessRequest{
 		Type:            REFRESH_TOKEN,
-		Code:            r.FormValue("refresh_token"),
-		Scope:           r.FormValue("scope"),
+		Code:            r.Form.Get("refresh_token"),
+		Scope:           r.Form.Get("scope"),
 		GenerateRefresh: true,
 		Expiration:      s.Config.AccessExpiration,
 		HttpRequest:     r,
@@ -364,9 +362,9 @@ func (s *Server) handlePasswordRequest(w *Response, r *http.Request) *AccessRequ
 	// generate access token
 	ret := &AccessRequest{
 		Type:            PASSWORD,
-		Username:        r.FormValue("username"),
-		Password:        r.FormValue("password"),
-		Scope:           r.FormValue("scope"),
+		Username:        r.Form.Get("username"),
+		Password:        r.Form.Get("password"),
+		Scope:           r.Form.Get("scope"),
 		GenerateRefresh: true,
 		Expiration:      s.Config.AccessExpiration,
 		HttpRequest:     r,
@@ -399,7 +397,7 @@ func (s *Server) handleClientCredentialsRequest(w *Response, r *http.Request) *A
 	// generate access token
 	ret := &AccessRequest{
 		Type:            CLIENT_CREDENTIALS,
-		Scope:           r.FormValue("scope"),
+		Scope:           r.Form.Get("scope"),
 		GenerateRefresh: false,
 		Expiration:      s.Config.AccessExpiration,
 		HttpRequest:     r,
@@ -426,9 +424,9 @@ func (s *Server) handleAssertionRequest(w *Response, r *http.Request) *AccessReq
 	// generate access token
 	ret := &AccessRequest{
 		Type:            ASSERTION,
-		Scope:           r.FormValue("scope"),
-		AssertionType:   r.FormValue("assertion_type"),
-		Assertion:       r.FormValue("assertion"),
+		Scope:           r.Form.Get("scope"),
+		AssertionType:   r.Form.Get("assertion_type"),
+		Assertion:       r.Form.Get("assertion"),
 		GenerateRefresh: false, // assertion should NOT generate a refresh token, per the RFC
 		Expiration:      s.Config.AccessExpiration,
 		HttpRequest:     r,
@@ -456,7 +454,7 @@ func (s *Server) FinishAccessRequest(w *Response, r *http.Request, ar *AccessReq
 	if w.IsError {
 		return
 	}
-	redirectUri := r.FormValue("redirect_uri")
+	redirectUri := r.Form.Get("redirect_uri")
 	// Get redirect uri from AccessRequest if it's there (e.g., refresh token request)
 	if ar.RedirectUri != "" {
 		redirectUri = ar.RedirectUri
