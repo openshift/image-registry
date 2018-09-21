@@ -8,22 +8,22 @@ import:
 
 # kube second
 - package: k8s.io/apimachinery
-  version: release-1.9.1
+  version: origin-3.11-kubernetes-1.11.1
   repo: git@github.com:openshift/kubernetes-apimachinery
 - package: k8s.io/client-go
-  version: release-1.9.1
+  version: origin-3.11-kubernetes-1.11.1
   repo: git@github.com:openshift/kubernetes-client-go
 - package: k8s.io/metrics
-  version: release-1.9.1
+  version: origin-3.11-kubernetes-1.11.1
   repo: git@github.com:openshift/kubernetes-metrics
 - package: k8s.io/apiserver
-  version: release-1.9.1
+  version: origin-3.11-kubernetes-1.11.1
   repo: git@github.com:openshift/kubernetes-apiserver
 - package: k8s.io/api
-  repo:    git@github.com:openshift/kubernetes-api
-  version: release-1.9.1
+  version: origin-3.11-kubernetes-1.11.1
+  repo: git@github.com:openshift/kubernetes-api
 - package: k8s.io/apiextensions-apiserver
-  version: release-1.9.1
+  version: origin-3.11-kubernetes-1.11.1
   repo: git@github.com:openshift/kubernetes-apiextensions-apiserver
 
 # openshift third
@@ -48,9 +48,6 @@ import:
 - package: github.com/skynetservices/skydns
   repo: https://github.com/openshift/skynetservices-skydns
 - package: github.com/RangelReale/osin
-- package: github.com/Sirupsen/logrus
-  repo: https://github.com/sirupsen/logrus
-  version: 1.0.2
 - package: google.golang.org/cloud
   version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
 - package: google.golang.org/api

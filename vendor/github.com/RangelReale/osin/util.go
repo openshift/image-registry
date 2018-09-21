@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -52,26 +51,13 @@ func CheckBasicAuth(r *http.Request) (*BasicAuth, error) {
 		return nil, errors.New("Invalid authorization message")
 	}
 
-	// Decode the client_id and client_secret pairs as per
-	// https://tools.ietf.org/html/rfc6749#section-2.3.1
-
-	username, err := url.QueryUnescape(pair[0])
-	if err != nil {
-		return nil, err
-	}
-
-	password, err := url.QueryUnescape(pair[1])
-	if err != nil {
-		return nil, err
-	}
-
-	return &BasicAuth{Username: username, Password: password}, nil
+	return &BasicAuth{Username: pair[0], Password: pair[1]}, nil
 }
 
 // Return "Bearer" token from request. The header has precedence over query string.
 func CheckBearerAuth(r *http.Request) *BearerAuth {
 	authHeader := r.Header.Get("Authorization")
-	authForm := r.FormValue("code")
+	authForm := r.Form.Get("code")
 	if authHeader == "" && authForm == "" {
 		return nil
 	}
@@ -98,8 +84,8 @@ func (s Server) getClientAuth(w *Response, r *http.Request, allowQueryParams boo
 		// Allow for auth without password
 		if _, hasSecret := r.Form["client_secret"]; hasSecret {
 			auth := &BasicAuth{
-				Username: r.FormValue("client_id"),
-				Password: r.FormValue("client_secret"),
+				Username: r.Form.Get("client_id"),
+				Password: r.Form.Get("client_secret"),
 			}
 			if auth.Username != "" {
 				return auth

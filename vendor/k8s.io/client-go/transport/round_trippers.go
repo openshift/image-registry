@@ -19,14 +19,10 @@ package transport
 import (
 	"fmt"
 	"net/http"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/gregjones/httpcache"
-	"github.com/gregjones/httpcache/diskcache"
-	"github.com/peterbourgon/diskv"
 
 	utilnet "k8s.io/apimachinery/pkg/util/net"
 )
@@ -60,9 +56,6 @@ func HTTPWrappersForConfig(config *Config, rt http.RoundTripper) (http.RoundTrip
 		len(config.Impersonate.Extra) > 0 {
 		rt = NewImpersonatingRoundTripper(config.Impersonate, rt)
 	}
-	if len(config.CacheDir) > 0 {
-		rt = NewCacheRoundTripper(config.CacheDir, rt)
-	}
 	return rt, nil
 }
 
@@ -85,30 +78,6 @@ func DebugWrappers(rt http.RoundTripper) http.RoundTripper {
 type requestCanceler interface {
 	CancelRequest(*http.Request)
 }
-
-type cacheRoundTripper struct {
-	rt *httpcache.Transport
-}
-
-// NewCacheRoundTripper creates a roundtripper that reads the ETag on
-// response headers and send the If-None-Match header on subsequent
-// corresponding requests.
-func NewCacheRoundTripper(cacheDir string, rt http.RoundTripper) http.RoundTripper {
-	d := diskv.New(diskv.Options{
-		BasePath: cacheDir,
-		TempDir:  filepath.Join(cacheDir, ".diskv-temp"),
-	})
-	t := httpcache.NewTransport(diskcache.NewWithDiskv(d))
-	t.Transport = rt
-
-	return &cacheRoundTripper{rt: t}
-}
-
-func (rt *cacheRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	return rt.rt.RoundTrip(req)
-}
-
-func (rt *cacheRoundTripper) WrappedRoundTripper() http.RoundTripper { return rt.rt.Transport }
 
 type authProxyRoundTripper struct {
 	username string
@@ -169,7 +138,7 @@ func (rt *authProxyRoundTripper) CancelRequest(req *http.Request) {
 	if canceler, ok := rt.rt.(requestCanceler); ok {
 		canceler.CancelRequest(req)
 	} else {
-		glog.Errorf("CancelRequest not implemented")
+		glog.Errorf("CancelRequest not implemented by %T", rt.rt)
 	}
 }
 
@@ -197,7 +166,7 @@ func (rt *userAgentRoundTripper) CancelRequest(req *http.Request) {
 	if canceler, ok := rt.rt.(requestCanceler); ok {
 		canceler.CancelRequest(req)
 	} else {
-		glog.Errorf("CancelRequest not implemented")
+		glog.Errorf("CancelRequest not implemented by %T", rt.rt)
 	}
 }
 
@@ -228,7 +197,7 @@ func (rt *basicAuthRoundTripper) CancelRequest(req *http.Request) {
 	if canceler, ok := rt.rt.(requestCanceler); ok {
 		canceler.CancelRequest(req)
 	} else {
-		glog.Errorf("CancelRequest not implemented")
+		glog.Errorf("CancelRequest not implemented by %T", rt.rt)
 	}
 }
 
@@ -288,7 +257,7 @@ func (rt *impersonatingRoundTripper) CancelRequest(req *http.Request) {
 	if canceler, ok := rt.delegate.(requestCanceler); ok {
 		canceler.CancelRequest(req)
 	} else {
-		glog.Errorf("CancelRequest not implemented")
+		glog.Errorf("CancelRequest not implemented by %T", rt.delegate)
 	}
 }
 
@@ -319,7 +288,7 @@ func (rt *bearerAuthRoundTripper) CancelRequest(req *http.Request) {
 	if canceler, ok := rt.rt.(requestCanceler); ok {
 		canceler.CancelRequest(req)
 	} else {
-		glog.Errorf("CancelRequest not implemented")
+		glog.Errorf("CancelRequest not implemented by %T", rt.rt)
 	}
 }
 
@@ -366,7 +335,7 @@ func (r *requestInfo) toCurl() string {
 		}
 	}
 
-	return fmt.Sprintf("curl -k -v -X%s %s %s", r.RequestVerb, headers, r.RequestURL)
+	return fmt.Sprintf("curl -k -v -X%s %s '%s'", r.RequestVerb, headers, r.RequestURL)
 }
 
 // debuggingRoundTripper will display information about the requests passing
@@ -403,7 +372,7 @@ func (rt *debuggingRoundTripper) CancelRequest(req *http.Request) {
 	if canceler, ok := rt.delegatedRoundTripper.(requestCanceler); ok {
 		canceler.CancelRequest(req)
 	} else {
-		glog.Errorf("CancelRequest not implemented")
+		glog.Errorf("CancelRequest not implemented by %T", rt.delegatedRoundTripper)
 	}
 }
 

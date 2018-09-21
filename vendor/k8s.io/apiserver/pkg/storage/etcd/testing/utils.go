@@ -32,6 +32,8 @@ import (
 	"k8s.io/apiserver/pkg/storage/etcd/testing/testingcert"
 	"k8s.io/apiserver/pkg/storage/storagebackend"
 
+	"context"
+
 	etcd "github.com/coreos/etcd/client"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/etcdserver"
@@ -42,7 +44,6 @@ import (
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/etcd/pkg/types"
 	"github.com/golang/glog"
-	"golang.org/x/net/context"
 )
 
 // EtcdTestServer encapsulates the datastructures needed to start local instance for testing
@@ -280,32 +281,6 @@ func NewEtcdTestClientServer(t *testing.T) *EtcdTestServer {
 	if err := server.waitUntilUp(); err != nil {
 		server.Terminate(t)
 		t.Fatalf("Unexpected error in waitUntilUp (%v)", err)
-		return nil
-	}
-	return server
-}
-
-// NewUnsecuredEtcdTestClientServer DEPRECATED creates a new client and server for testing
-func NewUnsecuredEtcdTestClientServer(t *testing.T) *EtcdTestServer {
-	server := configureTestCluster(t, "foo", false)
-	err := server.launch(t)
-	if err != nil {
-		t.Fatalf("Failed to start etcd server error=%v", err)
-		return nil
-	}
-	cfg := etcd.Config{
-		Endpoints: server.ClientURLs.StringSlice(),
-		Transport: newHttpTransport(t, server.CertFile, server.KeyFile, server.CAFile),
-	}
-	server.Client, err = etcd.New(cfg)
-	if err != nil {
-		t.Errorf("Unexpected error in NewUnsecuredEtcdTestClientServer (%v)", err)
-		server.Terminate(t)
-		return nil
-	}
-	if err := server.waitUntilUp(); err != nil {
-		t.Errorf("Unexpected error in waitUntilUp (%v)", err)
-		server.Terminate(t)
 		return nil
 	}
 	return server

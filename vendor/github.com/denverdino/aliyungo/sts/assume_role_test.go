@@ -7,6 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"fmt"
+
+	"github.com/denverdino/aliyungo/ecs"
+
 	"github.com/denverdino/aliyungo/ram"
 )
 
@@ -136,6 +140,44 @@ func TestAssumeRole(t *testing.T) {
 		t.Errorf("Failed to AssumeRole %v", err)
 		return
 	}
+
+	ecsClient := ecs.NewECSClientWithSecurityToken(resp.Credentials.AccessKeyId, resp.Credentials.AccessKeySecret, resp.Credentials.SecurityToken, "")
+	_, err = ecsClient.DescribeRegions()
+	if err != nil {
+		t.Errorf("Failed to DescribeRegions %v", err)
+		return
+	}
+
+	ramClient = ram.NewClientWithSecurityToken(resp.Credentials.AccessKeyId, resp.Credentials.AccessKeySecret, resp.Credentials.SecurityToken)
+	req2 := ram.ListUserRequest{
+		Marker:   "",
+		MaxItems: 2,
+	}
+	_, err = ramClient.ListUsers(req2)
+	if err != nil {
+		t.Errorf("Failed to ListUsers %v", err)
+		return
+	}
+
 	t.Logf("pass AssumeRole %v", resp)
 
+}
+
+func TestSTSClient_AssumeRole(t *testing.T) {
+	client := NewTestClient()
+
+	roleArn := os.Getenv("RoleArn")
+
+	req := AssumeRoleRequest{
+		RoleArn:         roleArn,
+		RoleSessionName: fmt.Sprintf("commander-role-%d", time.Now().Unix()),
+		DurationSeconds: 3600,
+	}
+
+	response, err := client.AssumeRole(req)
+	if err != nil {
+		t.Fatalf("%++v", err)
+	} else {
+		t.Logf("Response=%++v", response)
+	}
 }

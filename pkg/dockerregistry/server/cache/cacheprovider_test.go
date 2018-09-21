@@ -31,6 +31,14 @@ func TestGlobalProviderStat(t *testing.T) {
 	if err == nil {
 		t.Fatal("error expected")
 	}
+	if err != digest.ErrDigestInvalidFormat {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	_, err = cacheprovider.Stat(context.Background(), digest.Digest("sha256:4355a46b19d348dc2f57c"))
+	if err == nil {
+		t.Fatal("error expected")
+	}
 	if err != digest.ErrDigestInvalidLength {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -145,6 +153,14 @@ func TestRepositoryScopedProviderStat(t *testing.T) {
 	}
 
 	_, err = repoprovider.Stat(context.Background(), digest.Digest("sha256:foo"))
+	if err == nil {
+		t.Fatal("error expected")
+	}
+	if err != digest.ErrDigestInvalidFormat {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	_, err = cacheprovider.Stat(context.Background(), digest.Digest("sha256:4355a46b19d348dc2f57c"))
 	if err == nil {
 		t.Fatal("error expected")
 	}
