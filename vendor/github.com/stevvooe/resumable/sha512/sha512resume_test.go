@@ -56,13 +56,11 @@ func compareResumableHash(t *testing.T, newResumable func() hash.Hash, newStdlib
 func TestResumable(t *testing.T) {
 	compareResumableHash(t, New384, sha512.New384)
 	compareResumableHash(t, New, sha512.New)
-	compareResumableHash(t, New512_224, sha512.New512_224)
-	compareResumableHash(t, New512_256, sha512.New512_256)
 }
 
 func TestResumableRegistered(t *testing.T) {
 
-	for _, hf := range []crypto.Hash{crypto.SHA384, crypto.SHA512, crypto.SHA512_224, crypto.SHA512_256} {
+	for _, hf := range []crypto.Hash{crypto.SHA384, crypto.SHA512} {
 		// make sure that the hash gets the resumable version from the global
 		// registry in crypto library.
 		h := hf.New()

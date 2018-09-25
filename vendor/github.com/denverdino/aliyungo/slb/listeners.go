@@ -2,7 +2,6 @@ package slb
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/denverdino/aliyungo/common"
@@ -50,33 +49,6 @@ const (
 	HTTP_5XX = HealthCheckHttpCodeType("http_5xx")
 )
 
-func EncodeHealthCheckHttpCodeType(healthCheckHttpCodes []HealthCheckHttpCodeType) (HealthCheckHttpCodeType, error) {
-	code := ""
-
-	if nil == healthCheckHttpCodes || len(healthCheckHttpCodes) < 1 {
-		return "", fmt.Errorf("Invalid size of healthCheckHttpCodes")
-	}
-
-	for _, healthCheckHttpCode := range healthCheckHttpCodes {
-		if strings.EqualFold(string(HTTP_2XX), string(healthCheckHttpCode)) ||
-			strings.EqualFold(string(HTTP_3XX), string(healthCheckHttpCode)) ||
-			strings.EqualFold(string(HTTP_4XX), string(healthCheckHttpCode)) ||
-			strings.EqualFold(string(HTTP_5XX), string(healthCheckHttpCode)) {
-			if "" == code {
-				code = string(healthCheckHttpCode)
-			} else {
-				if strings.Contains(code, string(healthCheckHttpCode)) {
-					return "", fmt.Errorf("Duplicates healthCheckHttpCode(%v in %v)", healthCheckHttpCode, healthCheckHttpCodes)
-				}
-				code += code + "," + string(healthCheckHttpCode)
-			}
-		} else {
-			return "", fmt.Errorf("Invalid healthCheckHttpCode(%v in %v)", healthCheckHttpCode, healthCheckHttpCodes)
-		}
-	}
-	return HealthCheckHttpCodeType(code), nil
-}
-
 type CommonLoadBalancerListenerResponse struct {
 	common.Response
 }
@@ -100,12 +72,7 @@ type HTTPListenerType struct {
 	HealthCheckTimeout     int
 	HealthCheckInterval    int
 	HealthCheckHttpCode    HealthCheckHttpCodeType
-	VServerGroup           FlagType
 	VServerGroupId         string
-	Gzip                   FlagType
-	XForwardedFor_SLBID    FlagType
-	XForwardedFor_SLBIP    FlagType
-	XForwardedFor_proto    FlagType
 }
 type CreateLoadBalancerHTTPListenerArgs HTTPListenerType
 
@@ -142,24 +109,22 @@ const (
 )
 
 type TCPListenerType struct {
-	LoadBalancerId            string
-	ListenerPort              int
-	BackendServerPort         int
-	Bandwidth                 int
-	Scheduler                 SchedulerType
-	PersistenceTimeout        int
-	HealthCheck               FlagType
-	HealthCheckType           HealthCheckType
-	HealthCheckDomain         string
-	HealthCheckURI            string
-	HealthCheckConnectPort    int
-	HealthyThreshold          int
-	UnhealthyThreshold        int
-	HealthCheckConnectTimeout int
-	HealthCheckInterval       int
-	HealthCheckHttpCode       HealthCheckHttpCodeType
-	VServerGroup              FlagType
-	VServerGroupId            string
+	LoadBalancerId         string
+	ListenerPort           int
+	BackendServerPort      int
+	Bandwidth              int
+	Scheduler              SchedulerType
+	PersistenceTimeout     int
+	HealthCheckType        HealthCheckType
+	HealthCheckDomain      string
+	HealthCheckURI         string
+	HealthCheckConnectPort int
+	HealthyThreshold       int
+	UnhealthyThreshold     int
+	HealthCheckTimeout     int
+	HealthCheckInterval    int
+	HealthCheckHttpCode    HealthCheckHttpCodeType
+	VServerGroupId         string
 }
 
 type CreateLoadBalancerTCPListenerArgs TCPListenerType
@@ -174,20 +139,18 @@ func (client *Client) CreateLoadBalancerTCPListener(args *CreateLoadBalancerTCPL
 }
 
 type UDPListenerType struct {
-	LoadBalancerId            string
-	ListenerPort              int
-	BackendServerPort         int
-	Bandwidth                 int
-	Scheduler                 SchedulerType
-	PersistenceTimeout        int
-	HealthCheck               FlagType
-	HealthCheckConnectPort    int
-	HealthyThreshold          int
-	UnhealthyThreshold        int
-	HealthCheckConnectTimeout int
-	HealthCheckInterval       int
-	VServerGroup              FlagType
-	VServerGroupId            string
+	LoadBalancerId         string
+	ListenerPort           int
+	BackendServerPort      int
+	Bandwidth              int
+	Scheduler              SchedulerType
+	PersistenceTimeout     int
+	HealthCheckConnectPort int
+	HealthyThreshold       int
+	UnhealthyThreshold     int
+	HealthCheckTimeout     int
+	HealthCheckInterval    int
+	VServerGroupId         string
 }
 type CreateLoadBalancerUDPListenerArgs UDPListenerType
 
@@ -478,42 +441,6 @@ func (client *Client) WaitForListener(loadBalancerId string, port int, listenerT
 		}
 	}
 	return response.Status, nil
-}
-
-// WaitForListener waits for listener to given status
-func (client *Client) WaitForListenerAsyn(loadBalancerId string, port int, listenerType ListenerType, status ListenerStatus, timeout int) error {
-	if timeout <= 0 {
-		timeout = DefaultTimeout
-	}
-
-	args := &CommonLoadBalancerListenerArgs{
-		LoadBalancerId: loadBalancerId,
-		ListenerPort:   port,
-	}
-
-	method := fmt.Sprintf("DescribeLoadBalancer%sListenerAttribute", listenerType)
-	response := &DescribeLoadBalancerListenerAttributeResponse{}
-
-	for {
-		err := client.Invoke(method, args, response)
-		e, _ := err.(*common.Error)
-		if e != nil {
-			if e.StatusCode == 404 || e.Code == "InvalidLoadBalancerId.NotFound" {
-				continue
-			}
-			return err
-		} else if response != nil && response.Status == status {
-			//TODO
-			break
-		}
-		timeout = timeout - DefaultWaitForInterval
-		if timeout <= 0 {
-			return common.GetClientErrorFromString("Timeout")
-		}
-		time.Sleep(DefaultWaitForInterval * time.Second)
-
-	}
-	return nil
 }
 
 type DescribeListenerAccessControlAttributeResponse struct {

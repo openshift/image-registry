@@ -4,7 +4,7 @@ import "testing"
 
 func TestDescribeRegions(t *testing.T) {
 
-	client := NewTestNewSLBClientForDebug()
+	client := NewTestClient()
 
 	regions, err := client.DescribeRegions()
 

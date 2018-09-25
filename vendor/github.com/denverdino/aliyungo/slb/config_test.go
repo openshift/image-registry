@@ -1,22 +1,11 @@
 package slb
 
-import (
-	"os"
-
-	"github.com/denverdino/aliyungo/common"
-)
-
 //Modify with your Access Key Id and Access Key Secret
 
-var (
-	TestAccessKeyId     = os.Getenv("AccessKeyId")
-	TestAccessKeySecret = os.Getenv("AccessKeySecret")
-	TestSecurityToken   = os.Getenv("SecurityToken")
-	TestLoadBlancerID   = "MY_LOADBALANCEID"
-	TestVServerGroupID  = "MY_VSERVER_GROUPID"
-	TestListenerPort    = 9000
+const (
+	TestAccessKeyId     = "MY_ACCESS_KEY_ID"
+	TestAccessKeySecret = "MY_ACCESS_KEY_SECRET"
 	TestInstanceId      = "MY_INSTANCE_ID"
-	TestRegionID        = common.Region(os.Getenv("RegionId"))
 	TestIAmRich         = false
 	TestQuick           = false
 )
@@ -38,14 +27,4 @@ func NewTestClientForDebug() *Client {
 		testDebugClient.SetDebug(true)
 	}
 	return testDebugClient
-}
-
-var testDebugNewSLBClient *Client
-
-func NewTestNewSLBClientForDebug() *Client {
-	if testDebugNewSLBClient == nil {
-		testDebugNewSLBClient = NewSLBClientWithSecurityToken(TestAccessKeyId, TestAccessKeySecret, TestSecurityToken, TestRegionID)
-		testDebugNewSLBClient.SetDebug(true)
-	}
-	return testDebugNewSLBClient
 }

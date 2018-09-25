@@ -1,14 +1,16 @@
 package ram
 
 import (
+	"strconv"
 	"testing"
+	"time"
 )
 
 var (
-	accountAliasRequest = AccountAliasRequest{AccountAlias: "hello"}
-	passwordPolicy      = PasswordPolicyRequest{
+	accountAliasName = AccountAlias(strconv.FormatInt(time.Now().Unix(), 10))
+	passwordPolicy   = PasswordPolicyRequest{
 		PasswordPolicy: PasswordPolicy{
-			MinimumPasswordLength:      10,
+			MinimumPasswordLength:      5,
 			RequireLowercaseCharacters: true,
 			RequireUppercaseCharacters: true,
 			RequireNumbers:             true,
@@ -19,7 +21,7 @@ var (
 
 func TestSetAccountAlias(t *testing.T) {
 	client := NewTestClient()
-	resp, err := client.SetAccountAlias(accountAliasRequest)
+	resp, err := client.SetAccountAlias(accountAliasName)
 	if err != nil {
 		t.Errorf("Failed to SetAccountAlias %v", err)
 	}
@@ -55,7 +57,7 @@ func TestSetPasswordPolicy(t *testing.T) {
 
 func TestGetPasswordPolicy(t *testing.T) {
 	client := NewTestClient()
-	resp, err := client.GetPasswordPolicy()
+	resp, err := client.GetPasswordPolicy(accountAliasName)
 	if err != nil {
 		t.Errorf("Failed to pass GetPasswordPolicy %v", err)
 	}

@@ -7,7 +7,7 @@ import (
 
 type DescribeDBInstancePerformanceArgs struct {
 	DBInstanceId string
-	Key          string
+	key          string
 	StartTime    string
 	EndTime      string
 }
@@ -38,7 +38,7 @@ type DescribeDBInstancePerformanceResponse struct {
 }
 
 func (client *DescribeDBInstancePerformanceArgs) Setkey(key string) {
-	client.Key = key
+	client.key = key
 }
 
 func (client *Client) DescribeDBInstancePerformance(args *DescribeDBInstancePerformanceArgs) (resp DescribeDBInstancePerformanceResponse, err error) {

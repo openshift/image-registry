@@ -28,26 +28,12 @@ const (
 	RouteEntryStatusModifying = RouteEntryStatus("Modifying")
 )
 
-type NextHopListType struct {
-	NextHopList struct {
-		NextHopItem []NextHopItemType
-	}
-}
-
-type NextHopItemType struct {
-	NextHopType string
-	NextHopId   string
-}
-
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/datatype&routeentrysettype
 type RouteEntrySetType struct {
 	RouteTableId         string
 	DestinationCidrBlock string
 	Type                 RouteTableType
-	NextHopType          string
-	NextHopId            string
-	NextHopList          NextHopListType
 	InstanceId           string
 	Status               RouteEntryStatus // enum Pending | Available | Modifying
 }
@@ -76,7 +62,11 @@ type DescribeRouteTablesResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/routertable&describeroutetables
 func (client *Client) DescribeRouteTables(args *DescribeRouteTablesArgs) (routeTables []RouteTableSetType, pagination *common.PaginationResult, err error) {
-	response, err := client.DescribeRouteTablesWithRaw(args)
+	args.Validate()
+	response := DescribeRouteTablesResponse{}
+
+	err = client.Invoke("DescribeRouteTables", args, &response)
+
 	if err == nil {
 		return response.RouteTables.RouteTable, &response.PaginationResult, nil
 	}
@@ -84,25 +74,11 @@ func (client *Client) DescribeRouteTables(args *DescribeRouteTablesArgs) (routeT
 	return nil, nil, err
 }
 
-func (client *Client) DescribeRouteTablesWithRaw(args *DescribeRouteTablesArgs) (response *DescribeRouteTablesResponse, err error) {
-	args.Validate()
-	response = &DescribeRouteTablesResponse{}
-
-	err = client.Invoke("DescribeRouteTables", args, &response)
-
-	if err == nil {
-		return response, nil
-	}
-
-	return nil, err
-}
-
 type NextHopType string
 
 const (
-	NextHopIntance               = NextHopType("Instance") //Default
-	NextHopTunnel                = NextHopType("Tunnel")
-	NextHopTunnelRouterInterface = NextHopType("RouterInterface")
+	NextHopIntance = NextHopType("Instance") //Default
+	NextHopTunnel  = NextHopType("Tunnel")
 )
 
 type CreateRouteEntryArgs struct {

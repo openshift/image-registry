@@ -2,9 +2,6 @@ package cms
 
 import (
 	"bytes"
-	"log"
-	"time"
-
 	"github.com/denverdino/aliyungo/cms/util"
 	//	"fmt"
 	"encoding/json"
@@ -68,7 +65,7 @@ func (client *Client) Sign(method string, url string, req *http.Request, querys 
 	}
 	buf.WriteString(url)
 
-	//fmt.Printf("SignString = %s ", buf.String())
+	//	fmt.Println(buf.String())
 
 	signiture := util.HmacSha1(client.GetAccessSecret(), buf.String())
 
@@ -127,13 +124,14 @@ func (client *Client) GetUrl(entity string, project string, id string) string {
  */
 func InitBaseHeader(v *http.Request) {
 
-	v.Header["Accept"] = []string{"application/json"}
+	v.Header.Set("Accept", "application/json")
 	v.Header.Set("Content-MD5", "")
-	v.Header["Content-Type"] = []string{"application/json"}
-	v.Header["Date"] = []string{util.GetRFCDate()}
-	v.Header["x-acs-signature-method"] = []string{"HMAC-SHA1"}
-	v.Header["x-acs-signature-version"] = []string{"1.0"}
-	v.Header["x-acs-version"] = []string{"2015-08-15"}
+	v.Header.Set("Content-Type", "application/json")
+	v.Header.Set("Date", util.GetRFCDate())
+	v.Header.Set("x-acs-signature-method", "HMAC-SHA1")
+	v.Header.Set("x-acs-signature-version", "1.0")
+	v.Header.Set("x-acs-version", "2015-08-15")
+
 }
 
 /**
@@ -161,10 +159,6 @@ func (c *Client) GetResponseJson(method string, requestUrl string, requestPath s
 		reqest.Header.Set("Content-MD5", BodyMd5(body))
 	}
 
-	if c.securityToken != "" {
-		reqest.Header["x-acs-security-token"] = []string{c.securityToken}
-	}
-
 	c.Sign(method, requestPath, reqest, "")
 
 	if method != "POST" {
@@ -174,17 +168,10 @@ func (c *Client) GetResponseJson(method string, requestUrl string, requestPath s
 	//reqest.Header.Del("Accept-Encoding")
 	reqest.Header.Set("Accept-Encoding", "deflate,sdch")
 
-	log.Printf("RequestUrl = %++v", reqest)
 	client := &http.Client{}
-	t0 := time.Now()
 	response, err := client.Do(reqest)
-	t1 := time.Now()
 	if err != nil {
 		return body, err
-	}
-
-	if c.debug {
-		log.Printf("Invoke %s %s %d (%v)", method, requestUrl, response.StatusCode, t1.Sub(t0))
 	}
 
 	rsBody, err := ioutil.ReadAll(response.Body)

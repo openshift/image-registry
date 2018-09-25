@@ -20,9 +20,7 @@ const (
 type Request struct {
 	Format               string
 	Version              string
-	RegionId             Region
 	AccessKeyId          string
-	SecurityToken        string
 	Signature            string
 	SignatureMethod      string
 	Timestamp            util.ISO6801Time
@@ -32,7 +30,7 @@ type Request struct {
 	Action               string
 }
 
-func (request *Request) init(version string, action string, AccessKeyId string, securityToken string, regionId Region) {
+func (request *Request) init(version string, action string, AccessKeyId string) {
 	request.Format = JSONResponseFormat
 	request.Timestamp = util.NewISO6801Time(time.Now().UTC())
 	request.Version = version
@@ -41,8 +39,6 @@ func (request *Request) init(version string, action string, AccessKeyId string, 
 	request.SignatureNonce = util.CreateRandomString()
 	request.Action = action
 	request.AccessKeyId = AccessKeyId
-	request.SecurityToken = securityToken
-	request.RegionId = regionId
 }
 
 type Response struct {

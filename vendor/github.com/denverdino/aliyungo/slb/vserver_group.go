@@ -8,7 +8,6 @@ type VBackendServerType struct {
 	ServerId string
 	Weight   int
 	Port     int
-	Type     string
 }
 
 type VServerGroup struct {
@@ -40,14 +39,14 @@ type AddVServerGroupBackendServersArgs CreateVServerGroupArgs
 type RemoveVServerGroupBackendServersArgs CreateVServerGroupArgs
 type ModifyVServerGroupBackendServersArgs struct {
 	VServerGroupId    string
-	RegionId          common.Region
+	RegionId       common.Region
 	OldBackendServers string
 	NewBackendServers string
 }
 
 type DeleteVServerGroupArgs struct {
 	VServerGroupId string
-	RegionId       common.Region
+	RegionId common.Region
 }
 
 type DescribeVServerGroupsArgs struct {
@@ -85,6 +84,7 @@ type DescribeVServerGroupsResponse struct {
 	}
 }
 type DescribeVServerGroupAttributeResponse CreateVServerGroupResponse
+
 
 func (client *Client) CreateVServerGroup(args *CreateVServerGroupArgs) (response *CreateVServerGroupResponse, err error) {
 	response = &CreateVServerGroupResponse{}

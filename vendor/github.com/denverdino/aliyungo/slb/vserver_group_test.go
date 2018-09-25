@@ -1,9 +1,8 @@
 package slb
 
 import (
-	"encoding/json"
 	"testing"
-
+	"encoding/json"
 	"github.com/denverdino/aliyungo/common"
 )
 
@@ -30,9 +29,9 @@ func TestCleanUp(t *testing.T) {
 
 func TestCreateVServerGroup(t *testing.T) {
 	vBackendServer := VBackendServerType{
-		ServerId: serverId,
-		Port:     8080,
-		Weight:   100,
+		ServerId:serverId,
+		Port:8080,
+		Weight:100,
 	}
 	vBackendServerSlice := make([]VBackendServerType, 0)
 	vBackendServerSlice = append(vBackendServerSlice, vBackendServer)
@@ -41,10 +40,10 @@ func TestCreateVServerGroup(t *testing.T) {
 		t.Error(err)
 	}
 	arg := &CreateVServerGroupArgs{
-		LoadBalancerId:   loadBalancerId,
-		VServerGroupName: "test",
-		BackendServers:   string(serversStr),
-		RegionId:         region,
+		LoadBalancerId:loadBalancerId,
+		VServerGroupName:"test",
+		BackendServers: string(serversStr),
+		RegionId:region,
 	}
 	response, err := client.CreateVServerGroup(arg)
 	if err != nil {
@@ -57,8 +56,9 @@ func TestCreateVServerGroup(t *testing.T) {
 
 func TestDescribeVServerGroups(t *testing.T) {
 	arg := &DescribeVServerGroupsArgs{
-		LoadBalancerId: loadBalancerId,
-		RegionId:       region,
+		LoadBalancerId:loadBalancerId,
+		RegionId:	region,
+
 	}
 	response, err := client.DescribeVServerGroups(arg)
 	if err != nil {
@@ -71,10 +71,11 @@ func TestDescribeVServerGroups(t *testing.T) {
 	}
 }
 
+
 func TestDescribeVServerGroupAttribute(t *testing.T) {
 	arg := &DescribeVServerGroupAttributeArgs{
-		VServerGroupId: deleteVServerGroupId,
-		RegionId:       region,
+		VServerGroupId:deleteVServerGroupId,
+		RegionId:	region,
 	}
 	response, err := client.DescribeVServerGroupAttribute(arg)
 	if err != nil {
@@ -87,9 +88,9 @@ func TestDescribeVServerGroupAttribute(t *testing.T) {
 
 func TestSetVServerGroupAttribute(t *testing.T) {
 	vBackendServer := VBackendServerType{
-		ServerId: serverId,
-		Port:     9090,
-		Weight:   100,
+		ServerId:serverId,
+		Port:9090,
+		Weight:100,
 	}
 	vBackendServerSlice := make([]VBackendServerType, 0)
 	vBackendServerSlice = append(vBackendServerSlice, vBackendServer)
@@ -98,11 +99,11 @@ func TestSetVServerGroupAttribute(t *testing.T) {
 		t.Error(err)
 	}
 	arg := &SetVServerGroupAttributeArgs{
-		LoadBalancerId:   loadBalancerId,
-		RegionId:         region,
+		LoadBalancerId:loadBalancerId,
+		RegionId:	region,
 		VServerGroupName: "test3",
-		VServerGroupId:   deleteVServerGroupId,
-		BackendServers:   string(serversStr),
+		VServerGroupId: deleteVServerGroupId,
+		BackendServers:string(serversStr),
 	}
 	response, err := client.SetVServerGroupAttribute(arg)
 	if err != nil {
@@ -114,9 +115,9 @@ func TestSetVServerGroupAttribute(t *testing.T) {
 
 func TestAddVServerGroupBackendServers(t *testing.T) {
 	vBackendServer := VBackendServerType{
-		ServerId: serverId,
-		Port:     9090,
-		Weight:   100,
+		ServerId:serverId,
+		Port:9090,
+		Weight:100,
 	}
 	vBackendServerSlice := make([]VBackendServerType, 0)
 	vBackendServerSlice = append(vBackendServerSlice, vBackendServer)
@@ -125,10 +126,10 @@ func TestAddVServerGroupBackendServers(t *testing.T) {
 		t.Error(err)
 	}
 	arg := &AddVServerGroupBackendServersArgs{
-		LoadBalancerId: loadBalancerId,
-		RegionId:       region,
+		LoadBalancerId:loadBalancerId,
+		RegionId:	region,
 		VServerGroupId: deleteVServerGroupId,
-		BackendServers: string(serversStr),
+		BackendServers:string(serversStr),
 	}
 	response, err := client.AddVServerGroupBackendServers(arg)
 	if err != nil {
@@ -140,9 +141,9 @@ func TestAddVServerGroupBackendServers(t *testing.T) {
 
 func TestModifyVServerGroupBackendServers(t *testing.T) {
 	vBackendServer := VBackendServerType{
-		ServerId: serverId,
-		Port:     9091,
-		Weight:   100,
+		ServerId:serverId,
+		Port:9091,
+		Weight:100,
 	}
 	vBackendServerSlice := make([]VBackendServerType, 0)
 	vBackendServerSlice = append(vBackendServerSlice, vBackendServer)
@@ -152,9 +153,9 @@ func TestModifyVServerGroupBackendServers(t *testing.T) {
 	}
 
 	newvBackendServer := VBackendServerType{
-		ServerId: serverId,
-		Port:     9094,
-		Weight:   100,
+		ServerId:serverId,
+		Port:9094,
+		Weight:100,
 	}
 	newvBackendServerSlice := make([]VBackendServerType, 0)
 	newvBackendServerSlice = append(newvBackendServerSlice, newvBackendServer)
@@ -164,10 +165,10 @@ func TestModifyVServerGroupBackendServers(t *testing.T) {
 	}
 
 	arg := &ModifyVServerGroupBackendServersArgs{
-		RegionId:          region,
-		VServerGroupId:    deleteVServerGroupId,
-		OldBackendServers: string(serversStr),
-		NewBackendServers: string(newserversStr),
+		RegionId:	region,
+		VServerGroupId: deleteVServerGroupId,
+		OldBackendServers:string(serversStr),
+		NewBackendServers:string(newserversStr),
 	}
 
 	response, err := client.ModifyVServerGroupBackendServers(arg)
@@ -180,9 +181,9 @@ func TestModifyVServerGroupBackendServers(t *testing.T) {
 
 func TestRemoveVServerGroupBackendServers(t *testing.T) {
 	vBackendServer := VBackendServerType{
-		ServerId: serverId,
-		Port:     80,
-		Weight:   100,
+		ServerId:serverId,
+		Port:80,
+		Weight:100,
 	}
 	vBackendServerSlice := make([]VBackendServerType, 0)
 	vBackendServerSlice = append(vBackendServerSlice, vBackendServer)
@@ -191,10 +192,10 @@ func TestRemoveVServerGroupBackendServers(t *testing.T) {
 		t.Error(err)
 	}
 	arg := &RemoveVServerGroupBackendServersArgs{
-		LoadBalancerId: loadBalancerId,
-		VServerGroupId: deleteVServerGroupId,
+		LoadBalancerId:loadBalancerId,
+		VServerGroupId:deleteVServerGroupId,
 		BackendServers: string(serversStr),
-		RegionId:       region,
+		RegionId:	region,
 	}
 
 	response, err := client.RemoveVServerGroupBackendServers(arg)
@@ -207,9 +208,9 @@ func TestRemoveVServerGroupBackendServers(t *testing.T) {
 
 func TestDescribeLoadBalancerTCPListenerAttribute(t *testing.T) {
 	arg := &CreateLoadBalancerTCPListenerArgs{
-		LoadBalancerId: loadBalancerId,
-		ListenerPort:   8080,
-		Bandwidth:      -1,
+		LoadBalancerId:    loadBalancerId,
+		ListenerPort:      8080,
+		Bandwidth:         -1,
 		VServerGroupId: deleteVServerGroupId,
 	}
 	err := client.CreateLoadBalancerTCPListener(arg)
@@ -240,7 +241,7 @@ func TestDeleteVServerGroup(t *testing.T) {
 	for _, id := range deleteVServerGroupIdList {
 		arg := &DeleteVServerGroupArgs{
 			VServerGroupId: id,
-			RegionId:       region,
+			RegionId:	region,
 		}
 		response, err := client.DeleteVServerGroup(arg)
 		if err != nil {
@@ -250,3 +251,7 @@ func TestDeleteVServerGroup(t *testing.T) {
 		}
 	}
 }
+
+
+
+

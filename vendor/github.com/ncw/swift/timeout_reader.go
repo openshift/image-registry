@@ -38,12 +38,10 @@ func (t *timeoutReader) Read(p []byte) (int, error) {
 		done <- result{n, err}
 	}()
 	// Wait for the read or the timeout
-	timer := time.NewTimer(t.timeout)
-	defer timer.Stop()
 	select {
 	case r := <-done:
 		return r.n, r.err
-	case <-timer.C:
+	case <-time.After(t.timeout):
 		t.cancel()
 		return 0, TimeoutError
 	}

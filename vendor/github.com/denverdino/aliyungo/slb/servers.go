@@ -23,6 +23,7 @@ type AddBackendServersResponse struct {
 
 type SetBackendServersResponse AddBackendServersResponse
 
+
 // SetBackendServers set weight of backend servers
 
 func (client *Client) SetBackendServers(loadBalancerId string, backendServers []BackendServerType) (result []BackendServerType, err error) {
@@ -40,6 +41,7 @@ func (client *Client) SetBackendServers(loadBalancerId string, backendServers []
 	}
 	return response.BackendServers.BackendServer, err
 }
+
 
 // AddBackendServers Add backend servers
 //
