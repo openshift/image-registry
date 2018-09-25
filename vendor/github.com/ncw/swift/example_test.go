@@ -11,7 +11,7 @@ import (
 
 func ExampleConnection() {
 	// Create a v1 auth connection
-	c := &swift.Connection{
+	c := swift.Connection{
 		// This should be your username
 		UserName: "user",
 		// This should be your api key
@@ -36,7 +36,7 @@ func ExampleConnection() {
 	// ------ or alternatively create a v2 connection ------
 
 	// Create a v2 auth connection
-	c = &swift.Connection{
+	c = swift.Connection{
 		// This is the sub user for the storage - eg "admin"
 		UserName: "user",
 		// This should be your api key
@@ -57,9 +57,6 @@ func ExampleConnection() {
 var container string
 
 func ExampleConnection_ObjectsWalk() {
-	c, rollback := makeConnection(nil)
-	defer rollback()
-
 	objects := make([]string, 0)
 	err := c.ObjectsWalk(container, nil, func(opts *swift.ObjectsOpts) (interface{}, error) {
 		newObjects, err := c.ObjectNames(container, opts)
@@ -72,9 +69,6 @@ func ExampleConnection_ObjectsWalk() {
 }
 
 func ExampleConnection_VersionContainerCreate() {
-	c, rollback := makeConnection(nil)
-	defer rollback()
-
 	// Use the helper method to create the current and versions container.
 	if err := c.VersionContainerCreate("cds", "cd-versions"); err != nil {
 		fmt.Print(err.Error())
@@ -82,9 +76,6 @@ func ExampleConnection_VersionContainerCreate() {
 }
 
 func ExampleConnection_VersionEnable() {
-	c, rollback := makeConnection(nil)
-	defer rollback()
-
 	// Build the containers manually and enable them.
 	if err := c.ContainerCreate("movie-versions", nil); err != nil {
 		fmt.Print(err.Error())
@@ -101,9 +92,6 @@ func ExampleConnection_VersionEnable() {
 }
 
 func ExampleConnection_VersionDisable() {
-	c, rollback := makeConnection(nil)
-	defer rollback()
-
 	// Disable versioning on a container.  Note that this does not delete the versioning container.
 	c.VersionDisable("movies")
 }

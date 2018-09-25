@@ -31,7 +31,7 @@ func TestGlobalProviderStat(t *testing.T) {
 	if err == nil {
 		t.Fatal("error expected")
 	}
-	if err != digest.ErrDigestInvalidFormat {
+	if err != digest.ErrDigestInvalidLength {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -156,7 +156,7 @@ func TestRepositoryScopedProviderStat(t *testing.T) {
 	if err == nil {
 		t.Fatal("error expected")
 	}
-	if err != digest.ErrDigestInvalidFormat {
+	if err != digest.ErrDigestInvalidLength {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

@@ -1,5 +1,5 @@
-hash: f11ca9519809056be16116e954f905352317e125c298f74f89db815421c12ca7
-updated: 2018-09-21T12:31:12.262029244+02:00
+hash: 2dc601de9fb8dd699ba4c0350504d818a65c79b5c706d531b8eeae0682afc9d1
+updated: 2018-09-25T11:46:26.915868436+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -58,14 +58,14 @@ imports:
 - name: github.com/certifi/gocertifi
   version: ee1a9a0726d2ae45f54118cac878c990d4016ded
 - name: github.com/cloudflare/cfssl
-  version: fca70798646c8689aeae5928d4ad1278ff8a3c17
+  version: 82fc38d1a02688de28fa4fe7cae52e03e51ae48f
   repo: https://github.com/openshift/cloudflare-cfssl
 - name: github.com/davecgh/go-spew
   version: 782f4967f2dc4564575ca782fe2d04090b5faca8
   subpackages:
   - spew
 - name: github.com/denverdino/aliyungo
-  version: 13fa8aaef6672e4fe91a95217e3253374418b9c4
+  version: afedced274aa9a7fcdd47ac97018f0f8db4e5de2
   subpackages:
   - common
   - oss
@@ -73,8 +73,7 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/docker/distribution
-  version: 6fb4f5032d59278900c9f307078211f3d680a97b
-  repo: git@github.com:openshift/docker-distribution
+  version: 16128bbac47f75050e82f7e91b04df33775e0c23
   subpackages:
   - configuration
   - context
@@ -106,7 +105,6 @@ imports:
   - registry/storage
   - registry/storage/cache
   - registry/storage/cache/memory
-  - registry/storage/cache/provider
   - registry/storage/cache/redis
   - registry/storage/driver
   - registry/storage/driver/azure
@@ -153,7 +151,7 @@ imports:
   - pkg/system
   - pkg/tlsconfig
 - name: github.com/docker/go-connections
-  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
+  version: 97c2040d34dfae1d1b1275fa3a78dbdd2f41cf7e
   subpackages:
   - nat
   - sockets
@@ -161,14 +159,14 @@ imports:
 - name: github.com/docker/go-metrics
   version: 399ea8c73916000c64c2c76e8da00ca82f8387ab
 - name: github.com/docker/go-units
-  version: 9e638d38cf6977a37a8ea0078f3ee75a7cdb2dd1
+  version: 47565b4f722fb6ceae66b95f853feed578a4a51c
 - name: github.com/docker/libtrust
-  version: 9cbd2a1374f46905c68a4eb3694a130610adc62a
+  version: fa567046d9b14f6aa788882a950d69651d230b21
 - name: github.com/emicklei/go-restful-swagger12
-  version: 5e28dc7157ebd9247a268c26dd1bee7818aa33f7
+  version: 885875a92c2ab7d6222e257e41f6ca2c1f010b4e
   repo: https://github.com/openshift/emicklei-go-restful-swagger12
 - name: github.com/garyburd/redigo
-  version: b8dc90050f24c1a73a52f107f3f575be67b21b7c
+  version: 535138d7bcd717d6531c701ef5933d98b1866257
   subpackages:
   - internal
   - redis
@@ -177,7 +175,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-ini/ini
-  version: 300e940a926eb277d3901b20bdfcc54928ad3642
+  version: fa25069db393aecc09b71267d0489b357781c860
 - name: github.com/gogo/protobuf
   version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
   subpackages:
@@ -213,9 +211,9 @@ imports:
   - compiler
   - extensions
 - name: github.com/gorilla/context
-  version: 215affda49addc4c8ef7e2534915df2c8c35c6cd
+  version: 14f550f51af52180c2eefed15e5fd18d63c0a64a
 - name: github.com/gorilla/handlers
-  version: 7e0369fae54b097612a946bc6709f3a3fbccb3de
+  version: 60c7bfde3e33c201519a200a4507a158cc03a17b
 - name: github.com/gorilla/mux
   version: bcd8bc72b08df0f70df986b97f95590779502d31
 - name: github.com/gregjones/httpcache
@@ -229,7 +227,7 @@ imports:
 - name: github.com/imdario/mergo
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/jmespath/go-jmespath
-  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+  version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
 - name: github.com/json-iterator/go
   version: f2b4162afba35581b6d4a50d3b8f34e33c144682
 - name: github.com/marstr/guid
@@ -239,19 +237,19 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/Microsoft/go-winio
-  version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
+  version: 97e4973ce50b2ff5f09635a57e2b88a037aae829
 - name: github.com/mitchellh/mapstructure
-  version: 53818660ed4955e899c0bcafa97299a388bd7c8e
+  version: 482a9fd5fa83e8c4e7817413b80f3eb8feec03ef
 - name: github.com/modern-go/concurrent
   version: bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94
 - name: github.com/modern-go/reflect2
   version: 05fbef0ca5da472bbf96c9322b84a53edc03c9fd
 - name: github.com/ncw/swift
-  version: 7854abff473c41fdde529ebe4cf7db6334dd61ce
+  version: ce444d6d47c51d4dda9202cd38f5094dd8e27e86
 - name: github.com/opencontainers/go-digest
-  version: a6d0ee40d4207ea02364bd3b9e8e77b9159ba1eb
+  version: c9281466c8b2f606084ac71339773efd177436e7
 - name: github.com/opencontainers/image-spec
-  version: 372ad780f63454fbbbbcc7cf80e5b90245c13e13
+  version: 7b1e489870acb042978a3935d2fb76f8a79aff81
   subpackages:
   - specs-go
   - specs-go/v1
@@ -261,7 +259,7 @@ imports:
   - libcontainer/system
   - libcontainer/user
 - name: github.com/openshift/api
-  version: 4507dcb6a81f6593aa336c5b47927cf0ae297b72
+  version: 739bd301126c341c6caddf2cb3e3935ae9e9fff9
   subpackages:
   - authorization/v1
   - image/docker10
@@ -288,7 +286,7 @@ imports:
   - user/clientset/versioned/scheme
   - user/clientset/versioned/typed/user/v1
 - name: github.com/openshift/library-go
-  version: c45781559e320a91f9d392579bdbb757d8ebae72
+  version: 91ddbc425e02ec6b43b523dacae4a85b4f180e6b
   subpackages:
   - pkg/crypto
   - pkg/serviceability
@@ -320,21 +318,16 @@ imports:
   subpackages:
   - xfs
 - name: github.com/RangelReale/osin
-  version: 2dc1b43167692cdc89446b99b98fa9de6bff020f
+  version: 0f3357bb07e801ea62327872d19913969001dd7a
 - name: github.com/satori/go.uuid
-  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+  version: 36e9d2ebbde5e3f13ab2e25625fd453271d6522e
 - name: github.com/sirupsen/logrus
   version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/skynetservices/skydns
-  version: 775ef406696380ce92b76e72421e86b6868905d8
+  version: 30763c4e568fe411f1663af553c063cec8879929
   repo: https://github.com/openshift/skynetservices-skydns
 - name: github.com/spf13/pflag
   version: 583c0c0531f06d5278b7d917446061adc344b5cd
-- name: github.com/stevvooe/resumable
-  version: 22b14a53ba50b6c0c575a314a13ef21142f0b466
-  subpackages:
-  - sha256
-  - sha512
 - name: golang.org/x/crypto
   version: 49796115aa4b964c318aad4f3084fdb41e9aa067
   subpackages:

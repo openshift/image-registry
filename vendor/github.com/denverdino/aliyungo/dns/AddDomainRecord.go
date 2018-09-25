@@ -14,7 +14,7 @@ type AddDomainRecordArgs struct {
 
 	//optional
 	TTL      int32
-	Priority int32
+	Priority int
 	Line     string
 }
 

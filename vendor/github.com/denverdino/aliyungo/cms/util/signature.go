@@ -6,9 +6,8 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
-	"io"
-
 	"github.com/denverdino/aliyungo/cms/bytesbuffer"
+	"io"
 )
 
 /**

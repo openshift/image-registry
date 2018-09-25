@@ -79,7 +79,6 @@ type VpcSetType struct {
 	CidrBlock    string
 	VRouterId    string
 	Description  string
-	IsDefault    bool
 	CreationTime util.ISO6801Time
 }
 
@@ -95,24 +94,16 @@ type DescribeVpcsResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/vpc&describevpcs
 func (client *Client) DescribeVpcs(args *DescribeVpcsArgs) (vpcs []VpcSetType, pagination *common.PaginationResult, err error) {
-	response, err := client.DescribeVpcsWithRaw(args)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return response.Vpcs.Vpc, &response.PaginationResult, nil
-}
-
-func (client *Client) DescribeVpcsWithRaw(args *DescribeVpcsArgs) (response *DescribeVpcsResponse, err error) {
 	args.Validate()
-	response = &DescribeVpcsResponse{}
+	response := DescribeVpcsResponse{}
 
-	err = client.Invoke("DescribeVpcs", args, response)
-	if err != nil {
-		return nil, err
+	err = client.Invoke("DescribeVpcs", args, &response)
+
+	if err == nil {
+		return response.Vpcs.Vpc, &response.PaginationResult, nil
 	}
 
-	return response, err
+	return nil, nil, err
 }
 
 type ModifyVpcAttributeArgs struct {

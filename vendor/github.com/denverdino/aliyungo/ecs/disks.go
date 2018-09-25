@@ -59,7 +59,7 @@ type DescribeDisksArgs struct {
 	Category           DiskCategory //enum for all(default) | cloud | ephemeral
 	Status             DiskStatus   //enum for In_use | Available | Attaching | Detaching | Creating | ReIniting | All(default)
 	SnapshotId         string
-	DiskName           string
+	Name               string
 	Portable           *bool //optional
 	DeleteWithInstance *bool //optional
 	DeleteAutoSnapshot *bool //optional
@@ -78,7 +78,6 @@ type DiskItemType struct {
 	DiskName           string
 	Description        string
 	Type               DiskType
-	Encrypted          bool
 	Category           DiskCategory
 	Size               int
 	ImageId            string
@@ -111,7 +110,10 @@ type DescribeDisksResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/disk&describedisks
 func (client *Client) DescribeDisks(args *DescribeDisksArgs) (disks []DiskItemType, pagination *common.PaginationResult, err error) {
-	response, err := client.DescribeDisksWithRaw(args)
+	response := DescribeDisksResponse{}
+
+	err = client.Invoke("DescribeDisks", args, &response)
+
 	if err != nil {
 		return nil, nil, err
 	}
@@ -119,24 +121,11 @@ func (client *Client) DescribeDisks(args *DescribeDisksArgs) (disks []DiskItemTy
 	return response.Disks.Disk, &response.PaginationResult, err
 }
 
-func (client *Client) DescribeDisksWithRaw(args *DescribeDisksArgs) (response *DescribeDisksResponse, err error) {
-	response = &DescribeDisksResponse{}
-
-	err = client.Invoke("DescribeDisks", args, response)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return response, err
-}
-
 type CreateDiskArgs struct {
 	RegionId     common.Region
 	ZoneId       string
 	DiskName     string
 	Description  string
-	Encrypted    bool
 	DiskCategory DiskCategory
 	Size         int
 	SnapshotId   string
@@ -242,28 +231,6 @@ func (client *Client) DetachDisk(instanceId string, diskId string) error {
 	return err
 }
 
-type ResizeDiskArgs struct {
-	DiskId  string
-	NewSize int
-}
-
-type ResizeDiskResponse struct {
-	common.Response
-}
-
-//
-// ResizeDisk can only support to enlarge disk size
-// You can read doc at https://help.aliyun.com/document_detail/25522.html
-func (client *Client) ResizeDisk(diskId string, sizeGB int) error {
-	args := ResizeDiskArgs{
-		DiskId:  diskId,
-		NewSize: sizeGB,
-	}
-	response := ResizeDiskResponse{}
-	err := client.Invoke("ResizeDisk", &args, &response)
-	return err
-}
-
 type ResetDiskArgs struct {
 	DiskId     string
 	SnapshotId string
@@ -304,7 +271,7 @@ type ModifyDiskAttributeResponse struct {
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/disk&modifydiskattribute
 func (client *Client) ModifyDiskAttribute(args *ModifyDiskAttributeArgs) error {
 	response := ModifyDiskAttributeResponse{}
-	err := client.Invoke("ModifyDiskAttribute", args, &response)
+	err := client.Invoke("ModifyDiskAttribute", &args, &response)
 	return err
 }
 

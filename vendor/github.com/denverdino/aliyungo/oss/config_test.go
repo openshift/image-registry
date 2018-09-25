@@ -1,10 +1,6 @@
 package oss_test
 
-import (
-	"os"
-
-	"github.com/denverdino/aliyungo/oss"
-)
+import "github.com/denverdino/aliyungo/oss"
 
 //
 //There are two ways to run unit tests here:
@@ -15,9 +11,8 @@ import (
 // 2. Replace "MY_ACCESS_KEY_ID" & "MY_ACCESS_KEY_SECRET" with your own access key & secret and run "go test"
 //
 
-var (
-	TestAccessKeyId     = os.Getenv("AccessKeyId")
-	TestAccessKeySecret = os.Getenv("AccessKeySecret")
-	TestSecurityToken   = os.Getenv("SecurityToken")
-	TestRegion          = oss.Region(os.Getenv("RegionId"))
+const (
+	TestAccessKeyId     = "MY_ACCESS_KEY_ID"
+	TestAccessKeySecret = "MY_ACCESS_KEY_SECRET"
+	TestRegion          = oss.Hangzhou
 )

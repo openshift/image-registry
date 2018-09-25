@@ -26,8 +26,6 @@ type SnapshotType struct {
 	SourceDiskSize int
 	SourceDiskType string //enum for System | Data
 	ProductCode    string
-	Status         string
-	Usage          string
 	CreationTime   util.ISO6801Time
 }
 
@@ -43,24 +41,15 @@ type DescribeSnapshotsResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/snapshot&describesnapshots
 func (client *Client) DescribeSnapshots(args *DescribeSnapshotsArgs) (snapshots []SnapshotType, pagination *common.PaginationResult, err error) {
-	response, err := client.DescribeSnapshotsWithRaw(args)
+	args.Validate()
+	response := DescribeSnapshotsResponse{}
+
+	err = client.Invoke("DescribeSnapshots", args, &response)
+
 	if err != nil {
 		return nil, nil, err
 	}
 	return response.Snapshots.Snapshot, &response.PaginationResult, nil
-
-}
-
-func (client *Client) DescribeSnapshotsWithRaw(args *DescribeSnapshotsArgs) (response *DescribeSnapshotsResponse, err error) {
-	args.Validate()
-	response = &DescribeSnapshotsResponse{}
-
-	err = client.Invoke("DescribeSnapshots", args, response)
-
-	if err != nil {
-		return nil, err
-	}
-	return response, nil
 
 }
 

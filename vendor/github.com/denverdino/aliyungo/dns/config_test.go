@@ -5,8 +5,6 @@ const (
 	TestAccessKeyId     = "MY_ACCESS_KEY_ID"
 	TestAccessKeySecret = "MY_ACCESS_KEY_SECRET"
 	TestDomainName      = "aisafe.win"
-	TestDomainGroupName = "testgroup"
-	TestChanegGroupName = "testchangegroup"
 )
 
 var testClient *Client
@@ -14,14 +12,6 @@ var testClient *Client
 func NewTestClient() *Client {
 	if testClient == nil {
 		testClient = NewClient(TestAccessKeyId, TestAccessKeySecret)
-	}
-	return testClient
-}
-
-// change DNSDefaultEndpoint to "http://alidns.aliyuncs.com"
-func NewTestClientNew() *Client {
-	if testClient == nil {
-		testClient = NewClientNew(TestAccessKeyId, TestAccessKeySecret)
 	}
 	return testClient
 }

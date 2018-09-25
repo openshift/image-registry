@@ -17,29 +17,15 @@ type STSClient struct {
 }
 
 func NewClient(accessKeyId string, accessKeySecret string) *STSClient {
-	return NewClientWithSecurityToken(accessKeyId, accessKeySecret, "")
-}
-
-func NewClientWithSecurityToken(accessKeyId string, accessKeySecret string, securityToken string) *STSClient {
 	endpoint := os.Getenv("STS_ENDPOINT")
 	if endpoint == "" {
 		endpoint = STSDefaultEndpoint
 	}
-
-	return NewClientWithEndpointAndSecurityToken(endpoint, accessKeyId, accessKeySecret, securityToken)
+	return NewClientWithEndpoint(endpoint, accessKeyId, accessKeySecret)
 }
 
 func NewClientWithEndpoint(endpoint string, accessKeyId string, accessKeySecret string) *STSClient {
-	return NewClientWithEndpointAndSecurityToken(endpoint, accessKeyId, accessKeySecret, "")
-}
-
-func NewClientWithEndpointAndSecurityToken(endpoint string, accessKeyId string, accessKeySecret string, securityToken string) *STSClient {
 	client := &STSClient{}
-	client.WithEndpoint(endpoint).
-		WithVersion(STSAPIVersion).
-		WithAccessKeyId(accessKeyId).
-		WithAccessKeySecret(accessKeySecret).
-		WithSecurityToken(securityToken).
-		InitClient()
+	client.Init(endpoint, STSAPIVersion, accessKeyId, accessKeySecret)
 	return client
 }
