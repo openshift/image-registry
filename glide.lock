@@ -1,5 +1,5 @@
-hash: f11ca9519809056be16116e954f905352317e125c298f74f89db815421c12ca7
-updated: 2018-09-25T11:40:55.918508903+02:00
+hash: 2dc601de9fb8dd699ba4c0350504d818a65c79b5c706d531b8eeae0682afc9d1
+updated: 2018-09-25T11:46:26.915868436+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -73,8 +73,7 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/docker/distribution
-  version: 6fb4f5032d59278900c9f307078211f3d680a97b
-  repo: git@github.com:openshift/docker-distribution
+  version: 16128bbac47f75050e82f7e91b04df33775e0c23
   subpackages:
   - configuration
   - context
@@ -106,7 +105,6 @@ imports:
   - registry/storage
   - registry/storage/cache
   - registry/storage/cache/memory
-  - registry/storage/cache/provider
   - registry/storage/cache/redis
   - registry/storage/driver
   - registry/storage/driver/azure
@@ -330,11 +328,6 @@ imports:
   repo: https://github.com/openshift/skynetservices-skydns
 - name: github.com/spf13/pflag
   version: 583c0c0531f06d5278b7d917446061adc344b5cd
-- name: github.com/stevvooe/resumable
-  version: 51ad44105773cafcbe91927f70ac68e1bf78f8b4
-  subpackages:
-  - sha256
-  - sha512
 - name: golang.org/x/crypto
   version: 49796115aa4b964c318aad4f3084fdb41e9aa067
   subpackages:
