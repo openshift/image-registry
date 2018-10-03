@@ -1,0 +1,3 @@
+compose:
+  packages:
+    - atomic-openshift-dockerregistry
