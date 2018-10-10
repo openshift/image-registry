@@ -37,15 +37,7 @@ type blobDescriptorService struct {
 func (bs *blobDescriptorService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
 	dcontext.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: starting with digest=%s", dgst.String())
 
-	// if there is a repo layer link, return its descriptor
-	desc, err := bs.BlobDescriptorService.Stat(ctx, dgst)
-	if err == nil {
-		return desc, nil
-	}
-	dcontext.GetLogger(ctx).Debugf("(*blobDescriptorService).Stat: could not stat layer link %s in repository %s: %v", dgst.String(), bs.repo.Named().Name(), err)
-
-	// we couldn't find the layer link
-	desc, err = bs.repo.app.BlobStatter().Stat(ctx, dgst)
+	desc, err := bs.repo.app.BlobStatter().Stat(ctx, dgst)
 	if err != nil {
 		return desc, err
 	}
