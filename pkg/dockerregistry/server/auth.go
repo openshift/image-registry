@@ -187,7 +187,9 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 
 	bearerToken, err := getOpenShiftAPIToken(req)
 	if err != nil {
-		return nil, ac.wrapErr(ctx, err)
+		if len(accessRecords) == 0 || err != ErrTokenRequired {
+			return nil, ac.wrapErr(ctx, err)
+		}
 	}
 
 	osClient, err := ac.registryClient.ClientFromToken(bearerToken)
@@ -249,11 +251,17 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 					continue
 				}
 				if err := verifyPruneAccess(ctx, osClient); err != nil {
+					if len(bearerToken) == 0 && err == ErrOpenShiftAccessDenied {
+						return nil, ac.wrapErr(ctx, ErrTokenRequired)
+					}
 					return nil, ac.wrapErr(ctx, err)
 				}
 				verifiedPrune = true
 			default:
 				if err := verifyImageStreamAccess(ctx, imageStreamNS, imageStreamName, verb, osClient); err != nil {
+					if len(bearerToken) == 0 && err == ErrOpenShiftAccessDenied {
+						return nil, ac.wrapErr(ctx, ErrTokenRequired)
+					}
 					if access.Action != "pull" {
 						return nil, ac.wrapErr(ctx, err)
 					}
@@ -264,15 +272,24 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 		case "signature":
 			namespace, name, err := getNamespaceName(access.Resource.Name)
 			if err != nil {
+				if len(bearerToken) == 0 && err == ErrOpenShiftAccessDenied {
+					return nil, ac.wrapErr(ctx, ErrTokenRequired)
+				}
 				return nil, ac.wrapErr(ctx, err)
 			}
 			switch access.Action {
 			case "get":
 				if err := verifyImageStreamAccess(ctx, namespace, name, access.Action, osClient); err != nil {
+					if len(bearerToken) == 0 && err == ErrOpenShiftAccessDenied {
+						return nil, ac.wrapErr(ctx, ErrTokenRequired)
+					}
 					return nil, ac.wrapErr(ctx, err)
 				}
 			case "put":
 				if err := verifyImageSignatureAccess(ctx, namespace, name, osClient); err != nil {
+					if len(bearerToken) == 0 && err == ErrOpenShiftAccessDenied {
+						return nil, ac.wrapErr(ctx, ErrTokenRequired)
+					}
 					return nil, ac.wrapErr(ctx, err)
 				}
 			default:
@@ -283,6 +300,9 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 			switch access.Action {
 			case "get":
 				if err := verifyMetricsAccess(ctx, ac.metricsConfig, bearerToken, osClient); err != nil {
+					if len(bearerToken) == 0 && err == ErrOpenShiftAccessDenied {
+						return nil, ac.wrapErr(ctx, ErrTokenRequired)
+					}
 					return nil, ac.wrapErr(ctx, err)
 				}
 			default:
@@ -296,6 +316,9 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 					continue
 				}
 				if err := verifyPruneAccess(ctx, osClient); err != nil {
+					if len(bearerToken) == 0 && err == ErrOpenShiftAccessDenied {
+						return nil, ac.wrapErr(ctx, ErrTokenRequired)
+					}
 					return nil, ac.wrapErr(ctx, err)
 				}
 				verifiedPrune = true
@@ -310,6 +333,9 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 					return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
 				}
 				if err := verifyCatalogAccess(ctx, osClient); err != nil {
+					if len(bearerToken) == 0 && err == ErrOpenShiftAccessDenied {
+						return nil, ac.wrapErr(ctx, ErrTokenRequired)
+					}
 					return nil, ac.wrapErr(ctx, err)
 				}
 			default:
@@ -317,6 +343,9 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 			}
 
 		default:
+			if len(bearerToken) == 0 {
+				return nil, ac.wrapErr(ctx, ErrTokenRequired)
+			}
 			return nil, ac.wrapErr(ctx, ErrUnsupportedResource)
 		}
 	}
@@ -347,9 +376,13 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 func getOpenShiftAPIToken(req *http.Request) (string, error) {
 	token := ""
 
+	if _, ok := req.Header["Authorization"]; !ok {
+		return "", ErrTokenRequired
+	}
+
 	authParts := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
 	if len(authParts) != 2 {
-		return "", ErrTokenRequired
+		return "", ErrTokenInvalid
 	}
 
 	switch strings.ToLower(authParts[0]) {
@@ -369,7 +402,7 @@ func getOpenShiftAPIToken(req *http.Request) (string, error) {
 		token = password
 
 	default:
-		return "", ErrTokenRequired
+		return "", ErrTokenInvalid
 	}
 
 	return token, nil
