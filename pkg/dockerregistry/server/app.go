@@ -17,6 +17,7 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/linklessdriver"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/supermiddleware"
@@ -72,7 +73,7 @@ type App struct {
 }
 
 func (app *App) Storage(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
-	app.driver = app.metrics.StorageDriver(driver)
+	app.driver = app.metrics.StorageDriver(linklessdriver.StorageDriver(driver))
 	return app.driver, nil
 }
 
