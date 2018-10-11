@@ -16,6 +16,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/api"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 )
 
 func (app *App) registerBlobHandler(dockerApp *handlers.App) {
@@ -51,6 +52,7 @@ func (app *App) blobDispatcher(ctx *handlers.Context, r *http.Request) http.Hand
 	dgst, _ := digest.Parse(reference)
 
 	blobHandler := &blobHandler{
+		Cache:   app.cache,
 		Context: ctx,
 		driver:  app.driver,
 		Digest:  dgst,
@@ -67,6 +69,7 @@ type blobHandler struct {
 
 	driver storagedriver.StorageDriver
 	Digest digest.Digest
+	Cache  cache.DigestCache
 }
 
 // Delete deletes the blob from the storage backend.
@@ -81,9 +84,14 @@ func (bh *blobHandler) Delete(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	err := bh.Cache.Remove(bh.Digest)
+	if err != nil {
+		dcontext.GetLogger(bh).Errorf("blobHandler: ignore error: unable to remove %q from cache: %v", bh.Digest, err)
+	}
+
 	vacuum := storage.NewVacuum(bh.Context, bh.driver)
 
-	err := vacuum.RemoveBlob(bh.Digest.String())
+	err = vacuum.RemoveBlob(bh.Digest.String())
 	if err != nil {
 		// ignore not found error
 		switch t := err.(type) {
