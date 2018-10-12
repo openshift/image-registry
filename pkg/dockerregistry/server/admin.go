@@ -2,7 +2,12 @@ package server
 
 import (
 	"fmt"
+	"net"
 	"net/http"
+	"net/url"
+	"os"
+
+	restclient "k8s.io/client-go/rest"
 
 	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
@@ -17,6 +22,10 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/api"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
+)
+
+var (
+	pruneService string = "image-registry-hardprune"
 )
 
 func (app *App) registerBlobHandler(dockerApp *handlers.App) {
@@ -112,5 +121,81 @@ func (bh *blobHandler) Delete(w http.ResponseWriter, req *http.Request) {
 		dcontext.GetLogger(bh).Infof("blobHandler: ignoring %T error: %v", err, err)
 	}
 
+	query := req.URL.Query()
+
+	if len(query.Get("forwarded")) == 0 {
+		go bh.propagateRequest(*req.URL)
+	}
+
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (bh *blobHandler) propagateRequest(rurl url.URL) {
+	registryClient := &http.Client{
+		Transport: http.DefaultTransport,
+	}
+
+	if rurl.Scheme == "https" {
+		registryClient.Transport, _ = restclient.TransportFor(&restclient.Config{
+			TLSClientConfig: restclient.TLSClientConfig{Insecure: true},
+		})
+	}
+
+	var err error
+
+	hostname := os.Getenv("HOSTNAME")
+	if len(hostname) == 0 {
+		hostname, err = os.Hostname()
+		if err != nil {
+			dcontext.GetLogger(bh).Errorf("propagateRequest: hostname error: %s", err)
+			return
+		}
+	}
+
+	hostAddrs, err := net.LookupHost(hostname)
+	if err != nil {
+		dcontext.GetLogger(bh).Errorf("propagateRequest: lookup hostname error: %s", err)
+		return
+	}
+
+	addrs, err := net.LookupHost(pruneService)
+	if err != nil {
+		dcontext.GetLogger(bh).Errorf("propagateRequest: lookup error: %s", err)
+		return
+	}
+
+	q := rurl.Query()
+	q.Set("forwarded", "1")
+
+	rurl.RawQuery = q.Encode()
+
+	for _, addr := range addrs {
+		if inSlice(addr, hostAddrs) {
+			continue
+		}
+
+		rurl.Host = addr
+
+		req, err := http.NewRequest("DELETE", rurl.String(), nil)
+		if err != nil {
+			dcontext.GetLogger(bh).Errorf("propagateRequest: unable to make request: %s", err)
+			return
+		}
+
+		resp, err := registryClient.Do(req)
+		if err != nil {
+			dcontext.GetLogger(bh).Errorf("propagateRequest: unable to send request: %s", err)
+			return
+		}
+		_ = resp.Body.Close()
+	}
+}
+
+func inSlice(s string, arr []string) bool {
+	for _, elem := range arr {
+		if s == elem {
+			return true
+		}
+	}
+	return false
 }
