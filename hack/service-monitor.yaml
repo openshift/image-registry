@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: image-registry
+  name: image-registry
+  namespace: openshift-monitoring
+spec:
+  endpoints:
+  - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    interval: 30s
+    port: "5000-tcp"
+    path: /extensions/v2/metrics
+    scheme: https
+    targetPort: 5000
+    tlsConfig:
+      caFile: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+      serverName: docker-registry.default.svc
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      docker-registry: default
