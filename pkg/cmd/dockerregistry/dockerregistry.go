@@ -179,7 +179,10 @@ func Execute(configFile io.Reader) {
 func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) (*http.Server, error) {
 	setDefaultLogParameters(dockerConfig)
 
-	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig))
+	clientConfig := clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig)
+	clientConfig.CommonConfig.AcceptContentTypes = "application/vnd.kubernetes.protobuf,application/json"
+	clientConfig.CommonConfig.ContentType = "application/vnd.kubernetes.protobuf"
+	registryClient := client.NewRegistryClient(clientConfig)
 
 	readLimiter := newLimiter(extraConfig.Requests.Read)
 	writeLimiter := newLimiter(extraConfig.Requests.Write)
