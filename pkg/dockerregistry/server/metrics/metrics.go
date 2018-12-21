@@ -28,7 +28,7 @@ type Counter interface {
 
 // Sink provides an interface for exposing metrics.
 type Sink interface {
-	RequestDuration(funcname, reponame string) Observer
+	RequestDuration(funcname string) Observer
 	PullthroughBlobstoreCacheRequests(resultType string) Counter
 	PullthroughRepositoryDuration(registry, funcname string) Observer
 	PullthroughRepositoryErrors(registry, funcname, errcode string) Counter
@@ -150,7 +150,7 @@ func NewMetrics(sink Sink) Metrics {
 
 func (m *metrics) Repository(r distribution.Repository, reponame string) distribution.Repository {
 	return wrapped.NewRepository(r, func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
-		defer NewTimer(m.sink.RequestDuration(funcname, reponame)).Stop()
+		defer NewTimer(m.sink.RequestDuration(funcname)).Stop()
 		return f(ctx)
 	})
 }
