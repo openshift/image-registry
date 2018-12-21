@@ -122,7 +122,7 @@ func TestPullthroughBlob(t *testing.T) {
 		values []string
 	}{
 		{
-			name:   "imageregistry_storage_duration_seconds_bucket",
+			name:   "imageregistry_storage_duration_seconds",
 			values: []string{`operation="StorageDriver.Stat"`},
 		},
 		{
@@ -138,7 +138,7 @@ func TestPullthroughBlob(t *testing.T) {
 			values: []string{`type="Miss"`},
 		},
 		{
-			name:   "imageregistry_pullthrough_repository_duration_seconds_bucket",
+			name:   "imageregistry_pullthrough_repository_duration_seconds",
 			values: []string{`operation="Init"`},
 		},
 	}
