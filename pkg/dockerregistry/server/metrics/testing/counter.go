@@ -25,9 +25,9 @@ type counterSink struct {
 
 var _ metrics.Sink = &counterSink{}
 
-func (s counterSink) RequestDuration(funcname, reponame string) metrics.Observer {
+func (s counterSink) RequestDuration(funcname string) metrics.Observer {
 	return callbackObserver(func(float64) {
-		s.c.Add(fmt.Sprintf("request:%s:%s", funcname, reponame), 1)
+		s.c.Add(fmt.Sprintf("request:%s", funcname), 1)
 	})
 }
 
