@@ -17,10 +17,13 @@ LABEL io.k8s.display-name="OpenShift Container Platform Image Registry" \
       io.k8s.description="This is a component of OpenShift Container Platform and exposes a Docker registry that is integrated with the cluster for authentication and management." \
       io.openshift.tags="openshift,docker,registry"
 
+RUN chmod a+w -R /etc/pki/ca-trust/extracted
+
 # The registry doesn't require a root user.
 USER 1001
 EXPOSE 5000
 VOLUME /registry
 ENV REGISTRY_CONFIGURATION_PATH=/config.yml
 
-CMD /usr/bin/dockerregistry ${REGISTRY_CONFIGURATION_PATH}
+ENTRYPOINT ["sh", "-c", "update-ca-trust && \"$@\"", "arg0"]
+CMD ["/usr/bin/dockerregistry"]
