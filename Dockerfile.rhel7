@@ -4,6 +4,7 @@ COPY . .
 RUN hack/build-go.sh
 
 FROM registry.svc.ci.openshift.org/ocp/4.0:base
+RUN yum install -y rsync
 COPY --from=builder /go/src/github.com/openshift/image-registry/_output/local/bin/linux/amd64/dockerregistry /usr/bin/
 COPY images/dockerregistry/config.yml /
 USER 1001
