@@ -6,7 +6,7 @@
 #
 FROM openshift/origin-base
 
-RUN INSTALL_PKGS="origin-dockerregistry" && \
+RUN INSTALL_PKGS="origin-dockerregistry rsync" && \
     yum --enablerepo=origin-local-release install -y ${INSTALL_PKGS} && \
     rpm -V ${INSTALL_PKGS} && \
     yum clean all
