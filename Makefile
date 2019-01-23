@@ -75,6 +75,7 @@ verify-gometalinter:
 	gometalinter \
 		--deadline=180s \
 		--linter='vet:go tool vet -printfuncs $(subst $(space),$(comma),$(foreach fn,$(LOGFUNCS),$(fn) $(fn)f $(fn)ln)),Fatalln:PATH:LINE:MESSAGE' \
+		--exclude="^vendor/golang\.org/x/net/http2/go19\.go:" \
 		--disable-all -E errcheck -E ineffassign -E unconvert -E varcheck -E vet \
 		./cmd/... ./pkg/... ./test/...
 .PHONY: verify-gometalinter
