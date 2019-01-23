@@ -238,27 +238,26 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 			case "pull":
 				verb = "get"
 			case "delete":
-				verb = "prune"
+				if strings.Contains(req.URL.Path, "/blobs/uploads/") {
+					verb = "update"
+				} else {
+					if !verifiedPrune {
+						if err := verifyPruneAccess(ctx, osClient); err != nil {
+							return nil, ac.wrapErr(ctx, err)
+						}
+						verifiedPrune = true
+					}
+					continue
+				}
 			default:
 				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
 			}
 
-			switch verb {
-			case "prune":
-				if verifiedPrune {
-					continue
-				}
-				if err := verifyPruneAccess(ctx, osClient); err != nil {
+			if err := verifyImageStreamAccess(ctx, imageStreamNS, imageStreamName, verb, osClient); err != nil {
+				if access.Action != "pull" {
 					return nil, ac.wrapErr(ctx, err)
 				}
-				verifiedPrune = true
-			default:
-				if err := verifyImageStreamAccess(ctx, imageStreamNS, imageStreamName, verb, osClient); err != nil {
-					if access.Action != "pull" {
-						return nil, ac.wrapErr(ctx, err)
-					}
-					possibleCrossMountErrors.Add(imageStreamNS+"/"+imageStreamName, ac.wrapErr(ctx, err))
-				}
+				possibleCrossMountErrors.Add(imageStreamNS+"/"+imageStreamName, ac.wrapErr(ctx, err))
 			}
 
 		case "signature":
