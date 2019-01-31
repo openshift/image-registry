@@ -219,7 +219,8 @@ os::build::internal::build_binaries() {
 
       # output directly to the desired location
       if [[ $platform == $host_platform ]]; then
-        export GOBIN="${OS_OUTPUT_BINPATH}/${platform}"
+        #export GOBIN="${OS_OUTPUT_BINPATH}/${platform}"
+        export GOBIN="${OS_OUTPUT_BINPATH}"
       else
         unset GOBIN
       fi
