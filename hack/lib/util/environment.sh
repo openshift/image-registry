@@ -105,6 +105,7 @@ function os::util::environment::update_path_var() {
     local prefix
     if os::util::find::system_binary 'go' >/dev/null 2>&1; then
         prefix+="${OS_OUTPUT_BINPATH}/$(os::build::host_platform):"
+        prefix+="${OS_OUTPUT_BINPATH}:"
     fi
     if [[ -n "${GOPATH:-}" ]]; then
         prefix+="${GOPATH}/bin:"
