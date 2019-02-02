@@ -53,7 +53,7 @@ func (is *imageStream) HasBlob(ctx context.Context, dgst digest.Digest) (bool, *
 	// perform the older, O(N) check for a layer in an image stream by scanning over all images
 
 	// TODO: drop this code path after 3.11
-	context.GetLogger(ctx).Debugf("API server was unable to fetch layers for the requested image stream: %v", err)
+	context.GetLogger(ctx).Warnf("API server was unable to fetch layers for the requested image stream: %v", err)
 
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
