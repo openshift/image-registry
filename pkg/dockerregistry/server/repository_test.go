@@ -99,7 +99,6 @@ func TestRepositoryBlobStat(t *testing.T) {
 		stat               string
 		images             []imageapiv1.Image
 		imageStreams       []imageapiv1.ImageStream
-		imageStreamLayers  []imageapiv1.ImageStreamLayers
 		skipAuth           bool
 		deferredErrors     deferredErrors
 		expectedDescriptor distribution.Descriptor
@@ -138,11 +137,11 @@ func TestRepositoryBlobStat(t *testing.T) {
 				},
 			},
 			expectedDescriptor: testNewDescriptorForLayer(testImages["nm/repo:missing-layer-links"][0].DockerImageLayers[1]),
-			expectedActions:    []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "images"}},
+			expectedActions:    []clientAction{{"get", "imagestreams/layers"}},
 		},
 
 		{
-			name:   "blob referenced only by unmanaged image with pullthrough on and server doesn't support layers subresource",
+			name:   "blob referenced only by unmanaged image with pullthrough",
 			stat:   "nm/unmanaged@" + testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
 			images: []imageapiv1.Image{*testImages["nm/unmanaged:missing-layer-links"][0]},
 			imageStreams: []imageapiv1.ImageStream{
@@ -166,11 +165,11 @@ func TestRepositoryBlobStat(t *testing.T) {
 				},
 			},
 			expectedDescriptor: testNewDescriptorForLayer(testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1]),
-			expectedActions:    []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "images"}},
+			expectedActions:    []clientAction{{"get", "imagestreams/layers"}},
 		},
 
 		{
-			name: "blob not referenced and server supports layers subresource",
+			name: "blob not referenced",
 			stat: "nm/unmanaged@" + testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
 			imageStreams: []imageapiv1.ImageStream{
 				{
@@ -192,62 +191,8 @@ func TestRepositoryBlobStat(t *testing.T) {
 					},
 				},
 			},
-			imageStreamLayers: []imageapiv1.ImageStreamLayers{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "nm",
-						Name:      "unmanaged",
-					},
-					Blobs: map[string]imageapiv1.ImageLayerData{
-						testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].Name: {
-							LayerSize: &testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].LayerSize,
-							MediaType: testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].MediaType,
-						},
-					},
-					Images: map[string]imageapiv1.ImageBlobReferences{
-						testImages["nm/unmanaged:missing-layer-links"][0].Name: {
-							Layers: []string{
-								testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].Name,
-							},
-						},
-					},
-				},
-			},
 			expectedError:   distribution.ErrBlobUnknown,
 			expectedActions: []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "imagestreams/secrets"}},
-		},
-
-		{
-			name: "blob referenced only by unmanaged image with pullthrough on and server supports layers subresource",
-			stat: "nm/unmanaged@" + testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
-			imageStreamLayers: []imageapiv1.ImageStreamLayers{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "nm",
-						Name:      "unmanaged",
-					},
-					Blobs: map[string]imageapiv1.ImageLayerData{
-						testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].Name: {
-							LayerSize: &testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].LayerSize,
-							MediaType: testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].MediaType,
-						},
-						testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name: {
-							LayerSize: &testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].LayerSize,
-							MediaType: testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].MediaType,
-						},
-					},
-					Images: map[string]imageapiv1.ImageBlobReferences{
-						testImages["nm/unmanaged:missing-layer-links"][0].Name: {
-							Layers: []string{
-								testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[0].Name,
-								testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
-							},
-						},
-					},
-				},
-			},
-			expectedDescriptor: testNewDescriptorForLayer(testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1]),
-			expectedActions:    []clientAction{{"get", "imagestreams/layers"}},
 		},
 
 		{
@@ -258,34 +203,6 @@ func TestRepositoryBlobStat(t *testing.T) {
 			stat:               "nm/is@" + testImages["nm/is:latest"][0].DockerImageLayers[0].Name,
 			images:             []imageapiv1.Image{*testImages["nm/is:latest"][0]},
 			expectedDescriptor: testNewDescriptorForLayer(testImages["nm/is:latest"][0].DockerImageLayers[0]),
-		},
-
-		{
-			name:   "blob only tagged by unmanaged image with pullthrough off",
-			stat:   "nm/repo@" + testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
-			images: []imageapiv1.Image{*testImages["nm/unmanaged:missing-layer-links"][0]},
-			imageStreams: []imageapiv1.ImageStream{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "nm",
-						Name:      "repo",
-					},
-					Status: imageapiv1.ImageStreamStatus{
-						Tags: []imageapiv1.NamedTagEventList{
-							{
-								Tag: "latest",
-								Items: []imageapiv1.TagEvent{
-									{
-										Image: testImages["nm/unmanaged:missing-layer-links"][0].DockerImageLayers[1].Name,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			expectedError:   distribution.ErrBlobUnknown,
-			expectedActions: []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "images"}, {"get", "imagestreams/secrets"}},
 		},
 
 		{
@@ -389,13 +306,6 @@ func TestRepositoryBlobStat(t *testing.T) {
 
 			for _, image := range tc.images {
 				_, err = fos.CreateImage(&image)
-				if err != nil {
-					t.Fatal(err)
-				}
-			}
-
-			for _, image := range tc.imageStreamLayers {
-				_, err = fos.CreateImageStreamLayers(image.Namespace, &image)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -508,7 +418,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 		t.Fatalf("got unexpected descriptor: %#+v != %#+v", desc, blob1Desc)
 	}
 
-	expectedActions := []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "images"}}
+	expectedActions := []clientAction{{"get", "imagestreams/layers"}}
 	compareActions(t, "1st roundtrip to etcd", imageClient.Actions(), expectedActions)
 
 	// remove the underlying blob
@@ -577,7 +487,7 @@ func TestRepositoryBlobStatCacheEviction(t *testing.T) {
 		t.Fatalf("got unexpected descriptor: %#+v != %#+v", desc, blob2Desc)
 	}
 
-	expectedActions = append(expectedActions, []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "images"}}...)
+	expectedActions = append(expectedActions, []clientAction{{"get", "imagestreams/layers"}}...)
 	compareActions(t, "2nd roundtrip to etcd", imageClient.Actions(), expectedActions)
 
 	err = vacuum.RemoveBlob(blob2Dgst.String())
@@ -790,14 +700,14 @@ func compareActions(t *testing.T, testCaseName string, actions []clientgotesting
 		expected := expectedActions[i]
 		parts := strings.Split(expected.resource, "/")
 		if !action.Matches(expected.verb, parts[0]) {
-			t.Errorf("expected client action %s[%s] at index %d, got instead: %#+v", expected.verb, expected.resource, i, action)
+			t.Errorf("expected client action %#+v at index %d, got instead: %#+v", expected, i, action)
 		}
 		if (len(parts) > 1 && action.GetSubresource() != parts[1]) || (len(parts) == 1 && len(action.GetSubresource()) > 0) {
-			t.Errorf("expected client action %s[%s] at index %d, got instead: %#+v", expected.verb, expected.resource, i, action)
+			t.Errorf("expected client action %#+v at index %d, got instead: %#+v", expected, i, action)
 		}
 	}
 	for i := len(actions); i < len(expectedActions); i++ {
 		expected := expectedActions[i]
-		t.Errorf("expected action %s[%s] did not happen (%#v)", expected.verb, expected.resource, actions)
+		t.Errorf("expected action %#v did not happen (%#v)", expected, actions)
 	}
 }
