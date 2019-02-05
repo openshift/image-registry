@@ -40,14 +40,18 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
+	_, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+
+	osclient, err := registryclient.NewFakeRegistryClient(imageClient).Client()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	m := NewTestBlobDescriptorManager()
 	ctx = withAppMiddleware(ctx, &appMiddlewareChain{
-		&fakeAccessControllerMiddleware{t: t},
+		&fakeAccessControllerMiddleware{t: t, userClient: osclient},
 		&fakeBlobDescriptorServiceMiddleware{t: t, m: m},
 	})
-
-	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
-	testImage := testutil.AddRandomImage(t, fos, "user", "app", "latest")
 
 	dockercfg := &configuration.Configuration{
 		Loglevel: "debug",
@@ -97,6 +101,25 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	repoName := "user/app"
+	transport, err := testutil.NewTransport(server.URL, repoName, nil)
+	if err != nil {
+		t.Fatalf("failed to get transport for %s: %v", repoName, err)
+	}
+	repo, err := testutil.NewRepository(repoName, server.URL, transport)
+	if err != nil {
+		t.Fatalf("failed to get repository %s: %v", repoName, err)
+	}
+	manifest, err := testutil.UploadSchema2Image(ctx, repo, "latest")
+	if err != nil {
+		t.Fatalf("unable to upload random image: %s", err)
+	}
+	_, manifestPayload, err := manifest.Payload()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifestDigest := digest.FromBytes(manifestPayload)
 
 	type testCase struct {
 		name                      string
@@ -220,7 +243,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 			endpoint: v2.RouteNameManifest,
 			vars: []string{
 				"name", "user/app",
-				"reference", testImage.Name,
+				"reference", string(manifestDigest),
 			},
 			// we don't allow to delete layer links when they have references
 			// from the image stream (though, in this case there is no layer
@@ -236,9 +259,8 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 				"name", "user/app",
 				"reference", "latest",
 			},
-			expectedStatus: http.StatusOK,
-			// manifest is retrieved from etcd
-			expectedMethodInvocations: map[string]int{"Stat": 1},
+			expectedStatus:            http.StatusOK,
+			expectedMethodInvocations: map[string]int{"Stat": 3}, // TODO(dmage): why 3? manifest, config, ...?
 		},
 	} {
 		doTest(tc)

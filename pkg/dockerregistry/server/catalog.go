@@ -98,6 +98,7 @@ func (r *cachingRepositoryEnumerator) enumerateImageStreams(
 
 	client, ok := userClientFrom(ctx)
 	if !ok {
+		// TODO(dmage): this smells bad. Need review.
 		dcontext.GetLogger(ctx).Warnf("user token not set, falling back to registry client")
 		osClient, err := r.client.Client()
 		if err != nil {
