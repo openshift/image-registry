@@ -51,7 +51,6 @@ type ImageStream interface {
 
 	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *rerrors.Error)
 	CreateImageStreamMapping(ctx context.Context, userClient client.Interface, tag string, image *imageapiv1.Image) *rerrors.Error
-	ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) *rerrors.Error
 	ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, *rerrors.Error)
 
 	HasBlob(ctx context.Context, dgst digest.Digest) (bool, *imageapiv1.ImageStreamLayers, *imageapiv1.Image)
@@ -188,32 +187,6 @@ func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Di
 	img.DockerImageReference = tagEvent.DockerImageReference
 
 	return &img, nil
-}
-
-// ImageManifestBlobStored adds the imageapi.ImageManifestBlobStoredAnnotation annotation to image.
-func (is *imageStream) ImageManifestBlobStored(ctx context.Context, image *imageapiv1.Image) *rerrors.Error {
-	image, err := is.getImage(ctx, digest.Digest(image.Name)) // ensure that we have the image object from master API
-	if err != nil {
-		return err
-	}
-
-	if len(image.DockerImageManifest) == 0 || image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] == "true" {
-		return nil
-	}
-
-	if image.Annotations == nil {
-		image.Annotations = make(map[string]string)
-	}
-	image.Annotations[imageapi.ImageManifestBlobStoredAnnotation] = "true"
-
-	if _, err := is.registryOSClient.Images().Update(image); err != nil {
-		return rerrors.NewError(
-			ErrImageStreamUnknownErrorCode,
-			fmt.Sprintf("ImageManifestBlobStored: error updating image %s", image.Name),
-			err,
-		)
-	}
-	return nil
 }
 
 func (is *imageStream) GetSecrets() ([]corev1.Secret, *rerrors.Error) {

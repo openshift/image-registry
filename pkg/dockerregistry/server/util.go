@@ -14,7 +14,6 @@ import (
 	imageapiv1 "github.com/openshift/api/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
@@ -54,29 +53,17 @@ func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metric
 
 // RememberLayersOfImage caches the layer digests of given image.
 func RememberLayersOfImage(ctx context.Context, cache cache.RepositoryDigest, image *imageapiv1.Image, cacheName string) {
-	if len(image.DockerImageLayers) > 0 {
-		for _, layer := range image.DockerImageLayers {
-			_ = cache.AddDigest(digest.Digest(layer.Name), cacheName)
-		}
-		meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
-		if !ok {
-			dcontext.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
-			return
-		}
-		// remember reference to manifest config as well for schema 2
-		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
-			_ = cache.AddDigest(digest.Digest(meta.ID), cacheName)
-		}
+	for _, layer := range image.DockerImageLayers {
+		_ = cache.AddDigest(digest.Digest(layer.Name), cacheName)
+	}
+	meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
+	if !ok {
+		dcontext.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
 		return
 	}
-
-	manifest, err := registrymanifest.NewFromImage(image)
-	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("cannot remember layers of image %s: %v", image.Name, err)
-		return
-	}
-	for _, ref := range manifest.References() {
-		_ = cache.AddDigest(ref.Digest, cacheName)
+	// remember reference to manifest config as well for schema 2
+	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
+		_ = cache.AddDigest(digest.Digest(meta.ID), cacheName)
 	}
 }
 

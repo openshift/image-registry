@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"sync"
 
 	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
@@ -17,7 +16,6 @@ import (
 	imageapiv1 "github.com/openshift/api/image/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
-	registrymanifest "github.com/openshift/image-registry/pkg/dockerregistry/server/manifest"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/manifesthandler"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
@@ -85,28 +83,13 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	}
 
 	manifest, err := m.manifests.Get(ctx, dgst, options...)
-	if err == nil {
-		RememberLayersOfImage(ctx, m.cache, image, ref)
-		m.migrateManifest(ctx, image, dgst, manifest, true)
-		return manifest, nil
-	} else if _, ok := err.(distribution.ErrManifestUnknownRevision); !ok {
-		dcontext.GetLogger(ctx).Errorf("unable to get manifest from storage: %v", err)
+	if err != nil {
 		return nil, err
 	}
 
-	manifest, err = registrymanifest.NewFromImage(image)
-	if err == nil {
-		RememberLayersOfImage(ctx, m.cache, image, ref)
-		m.migrateManifest(ctx, image, dgst, manifest, false)
-		return manifest, nil
-	} else {
-		dcontext.GetLogger(ctx).Errorf("unable to get manifest from image object: %v", err)
-	}
+	RememberLayersOfImage(ctx, m.cache, image, ref)
 
-	return nil, distribution.ErrManifestUnknownRevision{
-		Name:     m.imageStream.Reference(),
-		Revision: dgst,
-	}
+	return manifest, nil
 }
 
 // Put creates or updates the named manifest.
@@ -230,45 +213,4 @@ func (m *manifestService) Delete(ctx context.Context, dgst digest.Digest) error 
 	}
 
 	return m.manifests.Delete(ctx, dgst)
-}
-
-// manifestInflight tracks currently downloading manifests
-var manifestInflight = make(map[digest.Digest]struct{})
-
-// manifestInflightSync protects manifestInflight
-var manifestInflightSync sync.Mutex
-
-func (m *manifestService) migrateManifest(ctx context.Context, image *imageapiv1.Image, dgst digest.Digest, manifest distribution.Manifest, isLocalStored bool) {
-	// Everything in its place and nothing to do.
-	if isLocalStored && len(image.DockerImageManifest) == 0 {
-		return
-	}
-	manifestInflightSync.Lock()
-	if _, ok := manifestInflight[dgst]; ok {
-		manifestInflightSync.Unlock()
-		return
-	}
-	manifestInflight[dgst] = struct{}{}
-	manifestInflightSync.Unlock()
-
-	go m.storeManifestLocally(ctx, image, dgst, manifest, isLocalStored)
-}
-
-func (m *manifestService) storeManifestLocally(ctx context.Context, image *imageapiv1.Image, dgst digest.Digest, manifest distribution.Manifest, isLocalStored bool) {
-	defer func() {
-		manifestInflightSync.Lock()
-		delete(manifestInflight, dgst)
-		manifestInflightSync.Unlock()
-	}()
-
-	if !isLocalStored {
-		if _, err := m.manifests.Put(ctx, manifest); err != nil {
-			dcontext.GetLogger(ctx).Errorf("unable to put manifest to storage: %v", err)
-			return
-		}
-	}
-
-	if err := m.imageStream.ImageManifestBlobStored(ctx, image); err != nil {
-		dcontext.GetLogger(ctx).Errorf("unable to update image: %v", err)
-	}
 }
