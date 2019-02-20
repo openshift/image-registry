@@ -37,12 +37,21 @@ func (by *byInsecureFlag) Less(i, j int) bool {
 	return !by.specs[i].Insecure
 }
 
+func stringListContains(list []string, val string) bool {
+	for _, x := range list {
+		if x == val {
+			return true
+		}
+	}
+	return false
+}
+
 // identifyCandidateRepositories returns a list of remote repository names sorted from the best candidate to
 // the worst and a map of remote repositories referenced by this image stream. The best candidate is a secure
 // one. The worst allows for insecure transport.
 func identifyCandidateRepositories(
 	is *imageapiv1.ImageStream,
-	localRegistry string,
+	localRegistry []string,
 	primary bool,
 ) ([]string, map[string]ImagePullthroughSpec) {
 	insecureByDefault := false
@@ -76,7 +85,7 @@ func identifyCandidateRepositories(
 			}
 			// skip anything that matches the innate registry
 			// TODO: there may be a better way to make this determination
-			if len(localRegistry) != 0 && localRegistry == ref.Registry {
+			if stringListContains(localRegistry, ref.Registry) {
 				continue
 			}
 			ref = ref.DockerClientDefaults()
