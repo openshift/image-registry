@@ -12,6 +12,7 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/configuration"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/handlers"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 	"github.com/opencontainers/go-digest"
@@ -61,6 +62,13 @@ func TestPullthroughManifests(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
+
+	req, err := http.NewRequest("GET", "https://not.used.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = dcontext.WithRequest(ctx, req)
+
 	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
 	remoteRegistryServer := createTestRegistryServer(t, ctx)
@@ -223,6 +231,13 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
+
+	req, err := http.NewRequest("GET", "https://not.used.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = dcontext.WithRequest(ctx, req)
+
 	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
 	remoteRegistryServer := createTestRegistryServer(t, ctx)
@@ -507,6 +522,12 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
+	req, err := http.NewRequest("GET", "https://not.used.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = dcontext.WithRequest(ctx, req)
+
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo1, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
@@ -681,6 +702,12 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
+	req, err := http.NewRequest("GET", tsURL.String(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = dcontext.WithRequest(ctx, req)
+
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
@@ -752,6 +779,12 @@ func TestPullthroughManifestMetrics(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
+
+	req, err := http.NewRequest("GET", tsURL.String(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = dcontext.WithRequest(ctx, req)
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{

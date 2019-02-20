@@ -16,6 +16,7 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
+	"github.com/openshift/image-registry/pkg/requesttrace"
 )
 
 func getNamespaceName(resourceName string) (string, string, error) {
@@ -40,13 +41,18 @@ func getNamespaceName(resourceName string) (string, string, error) {
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
 func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metrics.Pullthrough) (registryclient.RepositoryRetriever, error) {
+	req, err := dcontext.GetRequest(ctx)
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("unable to get request from context: %v", err)
+		return nil, err
+	}
 	secrets, err := secretsGetter()
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
 	credentials := registryclient.NewCredentialsForSecrets(secrets)
 	var retriever registryclient.RepositoryRetriever
-	retriever = registryclient.NewContext(secureTransport, insecureTransport).WithCredentials(credentials)
+	retriever = registryclient.NewContext(secureTransport, insecureTransport, requesttrace.New(ctx, req)).WithCredentials(credentials)
 	retriever = m.RepositoryRetriever(retriever)
 	return retriever, nil
 }
