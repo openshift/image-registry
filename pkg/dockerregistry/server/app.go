@@ -24,7 +24,7 @@ import (
 
 const (
 	// Default values
-	defaultDescriptorCacheSize         = 4096
+	defaultDescriptorCacheSize         = 6 * 4096 // total cache size ends up ~16mb
 	defaultDigestToRepositoryCacheSize = 2048
 	defaultPaginationCacheSize         = 1024
 )
