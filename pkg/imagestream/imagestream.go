@@ -241,21 +241,31 @@ func (is *imageStream) Exists(ctx context.Context) (bool, *rerrors.Error) {
 	return true, nil
 }
 
-func (is *imageStream) localRegistry(ctx context.Context) (string, *rerrors.Error) {
+func (is *imageStream) localRegistry(ctx context.Context) ([]string, *rerrors.Error) {
 	stream, rErr := is.imageStreamGetter.get()
 	if rErr != nil {
-		return "", convertImageStreamGetterError(rErr, fmt.Sprintf("localRegistry: failed to get image stream %s", is.Reference()))
+		return nil, convertImageStreamGetterError(rErr, fmt.Sprintf("localRegistry: failed to get image stream %s", is.Reference()))
 	}
+
+	var localNames []string
 
 	local, err := imageapi.ParseDockerImageReference(stream.Status.DockerImageRepository)
 	if err != nil {
-		return "", rerrors.NewError(
-			ErrImageStreamUnknownErrorCode,
-			fmt.Sprintf("localRegistry: unable to parse reference %q", stream.Status.DockerImageRepository),
-			err,
-		)
+		dcontext.GetLogger(ctx).Warnf("localRegistry: unable to parse dockerImageRepository %q", stream.Status.DockerImageRepository)
 	}
-	return local.Registry, nil
+	if len(local.Registry) != 0 {
+		localNames = append(localNames, local.Registry)
+	}
+
+	public, err := imageapi.ParseDockerImageReference(stream.Status.PublicDockerImageRepository)
+	if err != nil {
+		dcontext.GetLogger(ctx).Warnf("localRegistry: unable to parse publicDockerImageRepository %q", stream.Status.DockerImageRepository)
+	}
+	if len(public.Registry) != 0 {
+		localNames = append(localNames, public.Registry)
+	}
+
+	return localNames, nil
 }
 
 func (is *imageStream) IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, *rerrors.Error) {
