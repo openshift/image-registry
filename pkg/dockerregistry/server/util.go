@@ -39,7 +39,7 @@ func getNamespaceName(resourceName string) (string, string, error) {
 
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
-func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metrics.Pullthrough) registryclient.RepositoryRetriever {
+func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metrics.Pullthrough) (registryclient.RepositoryRetriever, error) {
 	secrets, err := secretsGetter()
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
@@ -48,7 +48,7 @@ func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metric
 	var retriever registryclient.RepositoryRetriever
 	retriever = registryclient.NewContext(secureTransport, insecureTransport).WithCredentials(credentials)
 	retriever = m.RepositoryRetriever(retriever)
-	return retriever
+	return retriever, nil
 }
 
 // RememberLayersOfImage caches the layer digests of given image.
