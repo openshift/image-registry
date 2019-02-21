@@ -22,7 +22,8 @@ const (
 	//    have any common name servers. You tried to create a hosted zone that has
 	//    the same name as an existing hosted zone or that's the parent or child
 	//    of an existing hosted zone, and you specified a delegation set that shares
-	//    one or more name servers with the existing hosted zone.
+	//    one or more name servers with the existing hosted zone. For more information,
+	//    see CreateReusableDelegationSet.
 	//
 	//    * Private hosted zone: You specified an Amazon VPC that you're already
 	//    using for another hosted zone, and the domain that you specified for one
@@ -65,8 +66,8 @@ const (
 	// You can create a hosted zone that has the same name as an existing hosted
 	// zone (example.com is common), but there is a limit to the number of hosted
 	// zones that have the same name. If you get this error, Amazon Route 53 has
-	// reached that limit. If you own the domain name and Amazon Route 53 generates
-	// this error, contact Customer Support.
+	// reached that limit. If you own the domain name and Route 53 generates this
+	// error, contact Customer Support.
 	ErrCodeDelegationSetNotAvailable = "DelegationSetNotAvailable"
 
 	// ErrCodeDelegationSetNotReusable for service response error code
@@ -238,14 +239,13 @@ const (
 	// ErrCodeNoSuchGeoLocation for service response error code
 	// "NoSuchGeoLocation".
 	//
-	// Amazon Route 53 doesn't support the specified geolocation.
+	// Amazon Route 53 doesn't support the specified geographic location.
 	ErrCodeNoSuchGeoLocation = "NoSuchGeoLocation"
 
 	// ErrCodeNoSuchHealthCheck for service response error code
 	// "NoSuchHealthCheck".
 	//
-	// No health check exists with the ID that you specified in the DeleteHealthCheck
-	// request.
+	// No health check exists with the specified ID.
 	ErrCodeNoSuchHealthCheck = "NoSuchHealthCheck"
 
 	// ErrCodeNoSuchHostedZone for service response error code
@@ -284,8 +284,8 @@ const (
 	//
 	// If Amazon Route 53 can't process a request before the next request arrives,
 	// it will reject subsequent requests for the same hosted zone and return an
-	// HTTP 400 error (Bad request). If Amazon Route 53 returns this error repeatedly
-	// for the same request, we recommend that you wait, in intervals of increasing
+	// HTTP 400 error (Bad request). If Route 53 returns this error repeatedly for
+	// the same request, we recommend that you wait, in intervals of increasing
 	// duration, before you try the request again.
 	ErrCodePriorRequestNotComplete = "PriorRequestNotComplete"
 
@@ -377,6 +377,19 @@ const (
 	// To request a higher limit, create a case (http://aws.amazon.com/route53-request)
 	// with the AWS Support Center.
 	ErrCodeTooManyTrafficPolicyInstances = "TooManyTrafficPolicyInstances"
+
+	// ErrCodeTooManyTrafficPolicyVersionsForCurrentPolicy for service response error code
+	// "TooManyTrafficPolicyVersionsForCurrentPolicy".
+	//
+	// This traffic policy version can't be created because you've reached the limit
+	// of 1000 on the number of versions that you can create for the current traffic
+	// policy.
+	//
+	// To create more traffic policy versions, you can use GetTrafficPolicy to get
+	// the traffic policy document for a specified traffic policy version, and then
+	// use CreateTrafficPolicy to create a new traffic policy using the traffic
+	// policy document.
+	ErrCodeTooManyTrafficPolicyVersionsForCurrentPolicy = "TooManyTrafficPolicyVersionsForCurrentPolicy"
 
 	// ErrCodeTooManyVPCAssociationAuthorizations for service response error code
 	// "TooManyVPCAssociationAuthorizations".

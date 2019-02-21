@@ -1,5 +1,5 @@
-hash: f8c05ec05b764c56334afc0fbd7cb309f1f642bcaf575b7ade17094d3fa30396
-updated: 2019-03-04T16:40:25.294345363+01:00
+hash: abfb3ea76dd6125e9995f1cdea7b14061451c5b20a4329bd57e728b7fe2531c3
+updated: 2019-03-04T16:41:47.776212106+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -9,7 +9,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 5bcc0a238d880469f949fc7cd24e35f32ab80cbd
+  version: e71d307a067ee20dbda259de3fd73a86161c339c
   subpackages:
   - aws
   - aws/awserr
@@ -20,15 +20,24 @@ imports:
   - aws/credentials
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
+  - aws/credentials/processcreds
   - aws/credentials/stscreds
+  - aws/csm
   - aws/defaults
   - aws/ec2metadata
   - aws/endpoints
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/ini
+  - internal/s3err
+  - internal/sdkio
+  - internal/sdkrand
+  - internal/sdkuri
   - internal/shareddefaults
   - private/protocol
+  - private/protocol/eventstream
+  - private/protocol/eventstream/eventstreamapi
   - private/protocol/query
   - private/protocol/query/queryutil
   - private/protocol/rest
