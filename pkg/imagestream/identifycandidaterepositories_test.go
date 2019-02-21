@@ -218,7 +218,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 			},
 		},
 	} {
-		repositories, search := identifyCandidateRepositories(tc.is, tc.localRegistry, tc.primary)
+		repositories, search := identifyCandidateRepositories(tc.is, []string{tc.localRegistry}, tc.primary)
 
 		if !reflect.DeepEqual(repositories, tc.expectedRepositories) {
 			if len(repositories) != 0 || len(tc.expectedRepositories) != 0 {
