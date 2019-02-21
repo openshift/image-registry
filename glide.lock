@@ -1,5 +1,5 @@
 hash: f8c05ec05b764c56334afc0fbd7cb309f1f642bcaf575b7ade17094d3fa30396
-updated: 2019-02-26T17:56:44.700411099+01:00
+updated: 2019-03-04T16:40:25.294345363+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -154,7 +154,7 @@ imports:
   - pkg/system
   - pkg/tlsconfig
 - name: github.com/docker/go-connections
-  version: 97c2040d34dfae1d1b1275fa3a78dbdd2f41cf7e
+  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
   subpackages:
   - nat
   - sockets
@@ -230,7 +230,7 @@ imports:
 - name: github.com/imdario/mergo
   version: 9316a62528ac99aaecb4e47eadd6dc8aa6533d58
 - name: github.com/jmespath/go-jmespath
-  version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
+  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
 - name: github.com/json-iterator/go
   version: f2b4162afba35581b6d4a50d3b8f34e33c144682
 - name: github.com/marstr/guid
@@ -262,7 +262,7 @@ imports:
   - libcontainer/system
   - libcontainer/user
 - name: github.com/openshift/api
-  version: c58918e29f89383d2e1467bad7156e2b0c49497f
+  version: ad60feaa9147fd1ba910f6cbbf3fccee48ac9f17
   subpackages:
   - authorization/v1
   - image/docker10
@@ -273,7 +273,7 @@ imports:
   - project/v1
   - user/v1
 - name: github.com/openshift/client-go
-  version: 31ef839c86359881d2c312c4f0131febc6662400
+  version: 2d89985ca24a8307e4b5db2574a62d3e6c2444b4
   subpackages:
   - authorization/clientset/versioned/scheme
   - authorization/clientset/versioned/typed/authorization/v1
@@ -289,7 +289,7 @@ imports:
   - user/clientset/versioned/scheme
   - user/clientset/versioned/typed/user/v1
 - name: github.com/openshift/library-go
-  version: 23ffddb2eeab32431fc585be3012b54616bf10b6
+  version: 67ba562464684b95438c9dc80acedf74c701ced6
   subpackages:
   - pkg/crypto
   - pkg/serviceability
@@ -321,7 +321,7 @@ imports:
   subpackages:
   - xfs
 - name: github.com/RangelReale/osin
-  version: 0f3357bb07e801ea62327872d19913969001dd7a
+  version: 2dc1b43167692cdc89446b99b98fa9de6bff020f
 - name: github.com/satori/go.uuid
   version: 36e9d2ebbde5e3f13ab2e25625fd453271d6522e
 - name: github.com/sirupsen/logrus
@@ -470,7 +470,7 @@ imports:
   - storage/v1alpha1
   - storage/v1beta1
 - name: k8s.io/apiextensions-apiserver
-  version: 9e3845ba0343a149a643806730595c92f5bdb679
+  version: 684f50c293c49f591b3f966b7b2231a777947c9b
   repo: git@github.com:openshift/kubernetes-apiextensions-apiserver
 - name: k8s.io/apimachinery
   version: a86a798d1cebbc89d0ab74c63ad7dee3191e5251
@@ -519,13 +519,13 @@ imports:
   - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 63ce65cca01f1edcbfb82dfb21a9948fbfb9deae
+  version: fb61ca9f746c84bef22547224c412434db480a0d
   repo: git@github.com:openshift/kubernetes-apiserver
   subpackages:
   - pkg/authentication/user
   - pkg/util/logs
 - name: k8s.io/client-go
-  version: c43ca1ccdbf97c87929fdc4612eaf3738d1a835f
+  version: 287ba817609cfd4079cdbb7fb36c4659c2c74341
   repo: git@github.com:openshift/kubernetes-client-go
   subpackages:
   - discovery
