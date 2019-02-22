@@ -109,7 +109,10 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 
 	cached := rbgs.cache.Repositories(dgst)
 
-	retriever := getImportContext(ctx, rbgs.getSecrets, rbgs.metrics)
+	retriever, impErr := getImportContext(ctx, rbgs.getSecrets, rbgs.metrics)
+	if impErr != nil {
+		return distribution.Descriptor{}, nil, impErr
+	}
 
 	// look at the first level of tagged repositories first
 	repositoryCandidates, search, err := rbgs.imageStream.IdentifyCandidateRepositories(ctx, true)

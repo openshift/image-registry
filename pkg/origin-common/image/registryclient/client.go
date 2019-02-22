@@ -39,10 +39,11 @@ func (e *ErrNotV2Registry) Error() string {
 type AuthHandlersFunc func(transport http.RoundTripper, registry *url.URL, repoName string) []auth.AuthenticationHandler
 
 // NewContext is capable of creating RepositoryRetrievers.
-func NewContext(transport, insecureTransport http.RoundTripper) *Context {
+func NewContext(transport, insecureTransport http.RoundTripper, modifiers ...transport.RequestModifier) *Context {
 	return &Context{
 		Transport:         transport,
 		InsecureTransport: insecureTransport,
+		RequestModifiers:  modifiers,
 		Challenges:        challenge.NewSimpleManager(),
 		Actions:           []string{"pull"},
 		Retries:           2,
@@ -61,6 +62,7 @@ type Context struct {
 	Actions           []string
 	Retries           int
 	Credentials       auth.CredentialStore
+	RequestModifiers  []transport.RequestModifier
 
 	authFn   AuthHandlersFunc
 	pings    map[url.URL]error
@@ -105,15 +107,17 @@ func (c *Context) wrapTransport(t http.RoundTripper, registry *url.URL, repoName
 			}
 		}
 	}
-	return transport.NewTransport(
-		t,
+	modifiers := []transport.RequestModifier{
 		// TODO: slightly smarter authorizer that retries unauthenticated requests
 		// TODO: make multiple attempts if the first credential fails
 		auth.NewAuthorizer(
 			c.Challenges,
 			c.authFn(t, registry, repoName)...,
 		),
-	)
+	}
+	modifiers = append(modifiers, c.RequestModifiers...)
+
+	return transport.NewTransport(t, modifiers...)
 }
 
 func (c *Context) Repository(ctx context.Context, registry *url.URL, repoName string, insecure bool) (distribution.Repository, error) {

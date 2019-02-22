@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/docker/distribution"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema1"
 	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 	"github.com/opencontainers/go-digest"
@@ -34,6 +35,12 @@ import (
 func TestPullthroughServeBlob(t *testing.T) {
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
+
+	req, err := http.NewRequest("GET", "https://not.used.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = dcontext.WithRequest(ctx, req)
 
 	namespace, name := "user", "app"
 	repoName := fmt.Sprintf("%s/%s", namespace, name)
@@ -607,6 +614,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 			if err != nil {
 				t.Fatalf("[%s] failed to create http request: %v", tc.name, err)
 			}
+			ctx = dcontext.WithRequest(ctx, req)
 			w := httptest.NewRecorder()
 
 			dgst := digest.Digest(tc.blobDigest)
@@ -663,6 +671,12 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 func TestPullthroughMetrics(t *testing.T) {
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
+
+	req, err := http.NewRequest("GET", "https://not.used.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = dcontext.WithRequest(ctx, req)
 
 	namespace, name := "user", "app"
 	repoName := fmt.Sprintf("%s/%s", namespace, name)

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"reflect"
 	"strings"
 	"testing"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/docker/distribution"
 	dockercfg "github.com/docker/distribution/configuration"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/reference"
@@ -42,6 +44,12 @@ const (
 func TestRepositoryBlobStat(t *testing.T) {
 	backgroundCtx := context.Background()
 	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
+
+	req, err := http.NewRequest("GET", "https://localhost:5000/nm/is", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	backgroundCtx = dcontext.WithRequest(backgroundCtx, req)
 
 	backgroundCtx = withAppMiddleware(backgroundCtx, &fakeAccessControllerMiddleware{t: t})
 
