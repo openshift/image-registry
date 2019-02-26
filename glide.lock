@@ -1,5 +1,5 @@
-hash: 53b67d48288814b7bd09d5bf9e3e35adddc8f7d80ef04c9f493e7d0bb38197be
-updated: 2018-08-14T17:30:01.233166297-04:00
+hash: 9587876c7d42c828a1bab1d830d2362a44f5302df43ed3aa26c663070cd8eaf6
+updated: 2019-02-26T22:04:55.920937+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -46,7 +46,7 @@ imports:
   version: deb3ae2ef2610fde3330947281941c562861188b
 - name: github.com/cloudflare/cfssl
   version: 82fc38d1a02688de28fa4fe7cae52e03e51ae48f
-  repo: https://github.com/openshift/cloudflare-cfssl
+  repo: git@github.com:openshift/cloudflare-cfssl
 - name: github.com/davecgh/go-spew
   version: 782f4967f2dc4564575ca782fe2d04090b5faca8
   subpackages:
@@ -58,7 +58,7 @@ imports:
   - oss
   - util
 - name: github.com/docker/distribution
-  version: e32ea477d62e6ae4e931cd6e584acbc405cbd540
+  version: d3a7682bca42919bcaa099a1f4372300e17890c7
   repo: git@github.com:openshift/docker-distribution
   subpackages:
   - configuration
@@ -148,7 +148,7 @@ imports:
   - log
 - name: github.com/emicklei/go-restful-swagger12
   version: 5e28dc7157ebd9247a268c26dd1bee7818aa33f7
-  repo: https://github.com/openshift/emicklei-go-restful-swagger12
+  repo: git@github.com:openshift/emicklei-go-restful-swagger12
 - name: github.com/garyburd/redigo
   version: 535138d7bcd717d6531c701ef5933d98b1866257
   subpackages:
@@ -247,7 +247,7 @@ imports:
   - libcontainer/system
   - libcontainer/user
 - name: github.com/openshift/api
-  version: 072d1972d82ada59b68aed5e7c6ba93685edeb78
+  version: 5ad8479f64f1b60ee9c62ce8ef1fe6638838725e
   subpackages:
   - authorization/v1
   - image/docker10
@@ -258,7 +258,7 @@ imports:
   - project/v1
   - user/v1
 - name: github.com/openshift/client-go
-  version: 5b198a036f098f34fbf0c42768382d80708cd2a9
+  version: 431ec9a26e5021f35fa41ee9a89842db9bfdb370
   subpackages:
   - authorization/clientset/versioned/scheme
   - authorization/clientset/versioned/typed/authorization/v1
@@ -285,7 +285,7 @@ imports:
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pkg/profile
-  version: 057bc52a47ec3c79498dda63f4a6f8298725e976
+  version: 22592cc4bae3572d59be8852c6980023e4c9dec5
 - name: github.com/prometheus/client_golang
   version: e7e903064f5e9eb5da98208bae10b475d4db0f8c
   subpackages:
@@ -316,7 +316,7 @@ imports:
   repo: https://github.com/sirupsen/logrus
 - name: github.com/skynetservices/skydns
   version: 775ef406696380ce92b76e72421e86b6868905d8
-  repo: https://github.com/openshift/skynetservices-skydns
+  repo: git@github.com:openshift/skynetservices-skydns
 - name: github.com/spf13/pflag
   version: 583c0c0531f06d5278b7d917446061adc344b5cd
 - name: github.com/stevvooe/resumable
@@ -429,7 +429,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
-  version: 4a80308ab64deb462259d3d96a1d7825f0bb875e
+  version: b31eb08de4e8d98cf75dc3b31f75afee5b5243e9
   repo: git@github.com:openshift/kubernetes-api
   subpackages:
   - admissionregistration/v1alpha1
@@ -461,10 +461,10 @@ imports:
   - storage/v1alpha1
   - storage/v1beta1
 - name: k8s.io/apiextensions-apiserver
-  version: 8cdd78b7e067060cf564be740dd58e77f0e861c3
+  version: 3420cf9ba4b83258558ce3236b7898a955ab02fd
   repo: git@github.com:openshift/kubernetes-apiextensions-apiserver
 - name: k8s.io/apimachinery
-  version: b6fcf44e3f3db22881a94b089a171fad73b30b19
+  version: eb698cb3066e71ea02d0dc86173d0f8f16cc0f76
   repo: git@github.com:openshift/kubernetes-apimachinery
   subpackages:
   - pkg/api/errors
@@ -506,13 +506,13 @@ imports:
   - pkg/watch
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: fbcb407558281c12d3f4eca5cb3b2819de1000d0
+  version: 74254c49e33253692e377a2200981e7d51bae0ed
   repo: git@github.com:openshift/kubernetes-apiserver
   subpackages:
   - pkg/authentication/user
   - pkg/util/logs
 - name: k8s.io/client-go
-  version: 2ef70d1cd65223642ac2963c201823e01fc725b9
+  version: d63f93b713e1f52651c8d4c263f1bb761e29b921
   repo: git@github.com:openshift/kubernetes-client-go
   subpackages:
   - discovery
@@ -575,6 +575,6 @@ imports:
   - pkg/util
   - pkg/util/proto
 - name: k8s.io/metrics
-  version: ff454b3dae7059eae17d532cc35bfc478e20a88e
+  version: fb62c3f1f0e680446a29f26b2002b2dd63fe0370
   repo: git@github.com:openshift/kubernetes-metrics
 testImports: []

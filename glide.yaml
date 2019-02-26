@@ -3,7 +3,7 @@ import:
 
 # docker first
 - package: github.com/docker/distribution
-  version: image-registry-3.11
+  version: image-registry-3.11-distribution-48294d9
   repo: git@github.com:openshift/docker-distribution
 
 # kube second
@@ -28,27 +28,26 @@ import:
 
 # openshift third
 - package: github.com/openshift/api
-  version: master
+  version: release-3.11
 - package: github.com/openshift/client-go
-  version: master
+  version: release-3.11
 # lock library-go before the sirupsen/logrus case change
 - package: github.com/openshift/library-go
   version: 077f461517a8617b5bdb5088afa7b451dd612b15
 
-
 # everything else last
-#
 - package: github.com/google/certificate-transparency
   repo: git@github.com:openshift/google-certificate-transparency
 - package: github.com/google/cadvisor
   repo: git@github.com:openshift/google-cadvisor
 - package: github.com/emicklei/go-restful-swagger12
-  repo: https://github.com/openshift/emicklei-go-restful-swagger12
+  repo: git@github.com:openshift/emicklei-go-restful-swagger12
+  version: 5e28dc7157ebd9247a268c26dd1bee7818aa33f7
 - package: github.com/cloudflare/cfssl
-  repo: https://github.com/openshift/cloudflare-cfssl
+  repo: git@github.com:openshift/cloudflare-cfssl
 - package: github.com/skynetservices/skydns
-  repo: https://github.com/openshift/skynetservices-skydns
-- package: github.com/RangelReale/osin
+  repo: git@github.com:openshift/skynetservices-skydns
+  version: 775ef406696380ce92b76e72421e86b6868905d8
 - package: github.com/Sirupsen/logrus
   repo: https://github.com/sirupsen/logrus
   version: 1.0.2
@@ -64,3 +63,23 @@ import:
   version: 0e6d502573042a6563419fbcce4f284600bfe929
 - package: github.com/aws/aws-sdk-go
   version: 1.6.10
+
+# pin the latest tested version so you can `glide up -v` to bump only one package
+- package: github.com/certifi/gocertifi
+  version: deb3ae2ef2610fde3330947281941c562861188b
+- package: github.com/docker/go-connections
+  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
+- package: github.com/docker/go-units
+  version: 9e638d38cf6977a37a8ea0078f3ee75a7cdb2dd1
+- package: github.com/go-ini/ini
+  version: 300e940a926eb277d3901b20bdfcc54928ad3642
+- package: github.com/jmespath/go-jmespath
+  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+- package: github.com/Microsoft/go-winio
+  version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
+- package: github.com/opencontainers/runc
+  version: 4056a41f58e35fd428d517de1326bc465aa6a461
+- package: github.com/RangelReale/osin
+  version: 2dc1b43167692cdc89446b99b98fa9de6bff020f
+- package: github.com/golang/glog
+  version: 44145f04b68cf362d9c4df2182967c2275eaefed
