@@ -3,7 +3,7 @@ import:
 
 # docker first
 - package: github.com/docker/distribution
-  version: image-registry-3.11
+  version: image-registry-4.0-distribution-16128bb
   repo: git@github.com:openshift/docker-distribution
 
 # kube second
