@@ -1,12 +1,26 @@
 package configdefaults
 
 import (
+	"time"
+
 	configv1 "github.com/openshift/api/config/v1"
 	"github.com/openshift/library-go/pkg/crypto"
 )
 
 func DefaultString(target *string, defaultVal string) {
 	if len(*target) == 0 {
+		*target = defaultVal
+	}
+}
+
+func DefaultInt(target *int, defaultVal int) {
+	if *target == 0 {
+		*target = defaultVal
+	}
+}
+
+func DefaultMetaDuration(target *time.Duration, defaultVal time.Duration) {
+	if *target == 0 {
 		*target = defaultVal
 	}
 }
@@ -48,7 +62,7 @@ func SetRecommendedGenericAPIServerConfigDefaults(config *configv1.GenericAPISer
 }
 
 func SetRecommendedEtcdConnectionInfoDefaults(config *configv1.EtcdConnectionInfo) {
-	DefaultStringSlice(&config.URLs, []string{"https://etcd.kube-system.svc:4001"})
+	DefaultStringSlice(&config.URLs, []string{"https://etcd.kube-system.svc:2379"})
 	DefaultString(&config.CertInfo.KeyFile, "/var/run/secrets/etcd-client/tls.key")
 	DefaultString(&config.CertInfo.CertFile, "/var/run/secrets/etcd-client/tls.crt")
 	DefaultString(&config.CA, "/var/run/configmaps/etcd-serving-ca/ca-bundle.crt")
