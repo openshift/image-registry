@@ -24,6 +24,8 @@ import (
 	"time"
 
 	systemd "github.com/coreos/go-systemd/daemon"
+	"github.com/go-openapi/spec"
+
 	"github.com/emicklei/go-restful"
 	"github.com/emicklei/go-restful-swagger12"
 	"github.com/golang/glog"
@@ -37,6 +39,7 @@ import (
 	utilwaitgroup "k8s.io/apimachinery/pkg/util/waitgroup"
 	"k8s.io/apiserver/pkg/admission"
 	"k8s.io/apiserver/pkg/audit"
+	"k8s.io/apiserver/pkg/authorization/authorizer"
 	genericapi "k8s.io/apiserver/pkg/endpoints"
 	"k8s.io/apiserver/pkg/endpoints/discovery"
 	"k8s.io/apiserver/pkg/registry/rest"
@@ -44,6 +47,7 @@ import (
 	"k8s.io/apiserver/pkg/server/routes"
 	restclient "k8s.io/client-go/rest"
 	openapicommon "k8s.io/kube-openapi/pkg/common"
+	"k8s.io/kube-openapi/pkg/handler"
 )
 
 // Info about an API group.
@@ -119,6 +123,14 @@ type GenericAPIServer struct {
 	swaggerConfig *swagger.Config
 	openAPIConfig *openapicommon.Config
 
+	// OpenAPIVersionedService controls the /openapi/v2 endpoint, and can be used to update the served spec.
+	// It is set during PrepareRun.
+	OpenAPIVersionedService *handler.OpenAPIService
+
+	// StaticOpenAPISpec is the spec derived from the restful container endpoints.
+	// It is set during PrepareRun.
+	StaticOpenAPISpec *spec.Swagger
+
 	// PostStartHooks are each called after the server has started listening, in a separate go func for each
 	// with no guarantee of ordering between them.  The map key is a name used for error reporting.
 	// It may kill the process with a panic if it wishes to by returning an error.
@@ -139,6 +151,11 @@ type GenericAPIServer struct {
 	// auditing. The backend is started after the server starts listening.
 	AuditBackend audit.Backend
 
+	// Authorizer determines whether a user is allowed to make a certain request. The Handler does a preliminary
+	// authorization check using the request URI but it may be necessary to make additional checks, such as in
+	// the create-on-update case
+	Authorizer authorizer.Authorizer
+
 	// enableAPIResponseCompression indicates whether API Responses should support compression
 	// if the client requests it via Accept-Encoding
 	enableAPIResponseCompression bool
@@ -148,6 +165,10 @@ type GenericAPIServer struct {
 
 	// HandlerChainWaitGroup allows you to wait for all chain handlers finish after the server shutdown.
 	HandlerChainWaitGroup *utilwaitgroup.SafeWaitGroup
+
+	// MinimalShutdownDuration allows to block shutdown for some time, e.g. until endpoints pointing to this API server
+	// have converged on all node. During this time, the API server keeps serving.
+	MinimalShutdownDuration time.Duration
 
 	// delegationTarget only exists
 	openAPIDelegationTarget OpenAPIDelegationTarget
@@ -252,7 +273,7 @@ func (s *GenericAPIServer) PrepareRun() preparedGenericAPIServer {
 		routes.Swagger{Config: s.swaggerConfig}.Install(s.SwaggerAPIContainers(), s.Handler.GoRestfulContainer)
 	}
 	if s.openAPIConfig != nil {
-		routes.OpenAPI{
+		s.OpenAPIVersionedService, s.StaticOpenAPISpec = routes.OpenAPI{
 			Config: s.openAPIConfig,
 		}.Install(s.Handler.GoRestfulContainer, s.Handler.NonGoRestfulMux)
 	}
@@ -321,6 +342,10 @@ func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
 	// ensure cleanup.
 	go func() {
 		<-stopCh
+
+		// keep serving for some time
+		time.Sleep(s.GenericAPIServer.MinimalShutdownDuration)
+
 		close(internalStopCh)
 		s.HandlerChainWaitGroup.Wait()
 		close(auditStopCh)
@@ -369,6 +394,11 @@ func (s *GenericAPIServer) InstallLegacyAPIGroup(apiPrefix string, apiGroupInfo 
 	s.Handler.GoRestfulContainer.Add(discovery.NewLegacyRootAPIHandler(s.discoveryAddresses, s.Serializer, apiPrefix).WebService())
 
 	return nil
+}
+
+func (s *GenericAPIServer) RemoveOpenAPIData() {
+	s.openAPIConfig = nil
+	s.swaggerConfig = nil
 }
 
 // Exposes the given api group in the API.
@@ -445,6 +475,7 @@ func (s *GenericAPIServer) newAPIGroupVersion(apiGroupInfo *APIGroupInfo, groupV
 		MinRequestTimeout:            s.minRequestTimeout,
 		EnableAPIResponseCompression: s.enableAPIResponseCompression,
 		OpenAPIConfig:                s.openAPIConfig,
+		Authorizer:                   s.Authorizer,
 	}
 }
 

@@ -83,15 +83,22 @@ func (d *CachedDiscoveryClient) ServerResourcesForGroupVersion(groupVersion stri
 	}
 
 	if err := d.writeCachedFile(filename, liveResources); err != nil {
-		glog.V(3).Infof("failed to write cache to %v due to %v", filename, err)
+		glog.V(1).Infof("failed to write cache to %v due to %v", filename, err)
 	}
 
 	return liveResources, nil
 }
 
 // ServerResources returns the supported resources for all groups and versions.
+// Deprecated: use ServerGroupsAndResources instead.
 func (d *CachedDiscoveryClient) ServerResources() ([]*metav1.APIResourceList, error) {
-	return ServerResources(d)
+	_, rs, err := ServerGroupsAndResources(d)
+	return rs, err
+}
+
+// ServerGroupsAndResources returns the supported groups and resources for all groups and versions.
+func (d *CachedDiscoveryClient) ServerGroupsAndResources() ([]*metav1.APIGroup, []*metav1.APIResourceList, error) {
+	return ServerGroupsAndResources(d)
 }
 
 func (d *CachedDiscoveryClient) ServerGroups() (*metav1.APIGroupList, error) {
@@ -117,7 +124,7 @@ func (d *CachedDiscoveryClient) ServerGroups() (*metav1.APIGroupList, error) {
 	}
 
 	if err := d.writeCachedFile(filename, liveGroups); err != nil {
-		glog.V(3).Infof("failed to write cache to %v due to %v", filename, err)
+		glog.V(1).Infof("failed to write cache to %v due to %v", filename, err)
 	}
 
 	return liveGroups, nil

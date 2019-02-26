@@ -41,6 +41,8 @@ import (
 	genericfilters "k8s.io/apiserver/pkg/server/filters"
 	utilopenapi "k8s.io/apiserver/pkg/util/openapi"
 	openapibuilder "k8s.io/kube-openapi/pkg/builder"
+	openapiutil "k8s.io/kube-openapi/pkg/util"
+	openapiproto "k8s.io/kube-openapi/pkg/util/proto"
 )
 
 const (
@@ -260,6 +262,14 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 	if err != nil {
 		return nil, err
 	}
+	versionedCreateOptions, err := a.group.Creater.New(optionsExternalVersion.WithKind("CreateOptions"))
+	if err != nil {
+		return nil, err
+	}
+	versionedUpdateOptions, err := a.group.Creater.New(optionsExternalVersion.WithKind("UpdateOptions"))
+	if err != nil {
+		return nil, err
+	}
 
 	var versionedDeleteOptions runtime.Object
 	var versionedDeleterObject interface{}
@@ -367,6 +377,8 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 			resourcePath = itemPath
 			resourceParams = nameParams
 		}
+		apiResource.Group = a.group.GroupVersion.Group
+		apiResource.Version = a.group.GroupVersion.Version
 		apiResource.Name = path
 		apiResource.Namespaced = false
 		apiResource.Kind = resourceKind
@@ -382,7 +394,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		actions = appendIf(actions, action{"LIST", resourcePath, resourceParams, namer, false}, isLister)
 		actions = appendIf(actions, action{"POST", resourcePath, resourceParams, namer, false}, isCreater)
 		actions = appendIf(actions, action{"DELETECOLLECTION", resourcePath, resourceParams, namer, false}, isCollectionDeleter)
-		// DEPRECATED
+		// DEPRECATED in 1.11
 		actions = appendIf(actions, action{"WATCHLIST", "watch/" + resourcePath, resourceParams, namer, false}, allowWatchList)
 
 		// Add actions at the item path: /api/apiVersion/resource/{name}
@@ -393,6 +405,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		actions = appendIf(actions, action{"PUT", itemPath, nameParams, namer, false}, isUpdater)
 		actions = appendIf(actions, action{"PATCH", itemPath, nameParams, namer, false}, isPatcher)
 		actions = appendIf(actions, action{"DELETE", itemPath, nameParams, namer, false}, isGracefulDeleter)
+		// DEPRECATED in 1.11
 		actions = appendIf(actions, action{"WATCH", "watch/" + itemPath, nameParams, namer, false}, isWatcher)
 		actions = appendIf(actions, action{"CONNECT", itemPath, nameParams, namer, false}, isConnecter)
 		actions = appendIf(actions, action{"CONNECT", itemPath + "/{path:*}", proxyParams, namer, false}, isConnecter && connectSubpath)
@@ -416,6 +429,8 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 			resourcePath = itemPath
 			resourceParams = nameParams
 		}
+		apiResource.Group = a.group.GroupVersion.Group
+		apiResource.Version = a.group.GroupVersion.Version
 		apiResource.Name = path
 		apiResource.Namespaced = true
 		apiResource.Kind = resourceKind
@@ -429,7 +444,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		actions = appendIf(actions, action{"LIST", resourcePath, resourceParams, namer, false}, isLister)
 		actions = appendIf(actions, action{"POST", resourcePath, resourceParams, namer, false}, isCreater)
 		actions = appendIf(actions, action{"DELETECOLLECTION", resourcePath, resourceParams, namer, false}, isCollectionDeleter)
-		// DEPRECATED
+		// DEPRECATED in 1.11
 		actions = appendIf(actions, action{"WATCHLIST", "watch/" + resourcePath, resourceParams, namer, false}, allowWatchList)
 
 		actions = appendIf(actions, action{"GET", itemPath, nameParams, namer, false}, isGetter)
@@ -439,6 +454,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		actions = appendIf(actions, action{"PUT", itemPath, nameParams, namer, false}, isUpdater)
 		actions = appendIf(actions, action{"PATCH", itemPath, nameParams, namer, false}, isPatcher)
 		actions = appendIf(actions, action{"DELETE", itemPath, nameParams, namer, false}, isGracefulDeleter)
+		// DEPRECATED in 1.11
 		actions = appendIf(actions, action{"WATCH", "watch/" + itemPath, nameParams, namer, false}, isWatcher)
 		actions = appendIf(actions, action{"CONNECT", itemPath, nameParams, namer, false}, isConnecter)
 		actions = appendIf(actions, action{"CONNECT", itemPath + "/{path:*}", proxyParams, namer, false}, isConnecter && connectSubpath)
@@ -448,6 +464,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		// TODO: more strongly type whether a resource allows these actions on "all namespaces" (bulk delete)
 		if !isSubresource {
 			actions = appendIf(actions, action{"LIST", resource, params, namer, true}, isLister)
+			// DEPRECATED in 1.11
 			actions = appendIf(actions, action{"WATCHLIST", "watch/" + resource, params, namer, true}, allowWatchList)
 		}
 		break
@@ -483,6 +500,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		Defaulter:       a.group.Defaulter,
 		Typer:           a.group.Typer,
 		UnsafeConvertor: a.group.UnsafeConvertor,
+		Authorizer:      a.group.Authorizer,
 
 		// TODO: Check for the interface on storage
 		TableConvertor: tableProvider,
@@ -497,15 +515,9 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 	if a.group.MetaGroupVersion != nil {
 		reqScope.MetaGroupVersion = *a.group.MetaGroupVersion
 	}
-	if a.group.OpenAPIConfig != nil {
-		openAPIDefinitions, err := openapibuilder.BuildOpenAPIDefinitionsForResource(defaultVersionedObject, a.group.OpenAPIConfig)
-		if err != nil {
-			return nil, fmt.Errorf("unable to build openapi definitions for %v: %v", fqKindToRegister, err)
-		}
-		reqScope.OpenAPISchema, err = utilopenapi.ToProtoSchema(openAPIDefinitions, fqKindToRegister)
-		if err != nil {
-			return nil, fmt.Errorf("unable to get openapi schema for %v: %v", fqKindToRegister, err)
-		}
+	reqScope.OpenAPISchema, err = a.getOpenAPISchema(ws.RootPath(), resource, fqKindToRegister, defaultVersionedObject)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get openapi schema for %v: %v", fqKindToRegister, err)
 	}
 	for _, action := range actions {
 		producedObject := storageMeta.ProducesObject(action.Verb)
@@ -588,12 +600,12 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusOK, "OK", producedObject).
 				Writes(producedObject)
 			if isGetterWithOptions {
-				if err := addObjectParams(ws, route, versionedGetOptions); err != nil {
+				if err := AddObjectParams(ws, route, versionedGetOptions); err != nil {
 					return nil, err
 				}
 			}
 			if isExporter {
-				if err := addObjectParams(ws, route, versionedExportOptions); err != nil {
+				if err := AddObjectParams(ws, route, versionedExportOptions); err != nil {
 					return nil, err
 				}
 			}
@@ -615,7 +627,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Produces(append(storageMeta.ProducesMIMETypes(action.Verb), allMediaTypes...)...).
 				Returns(http.StatusOK, "OK", versionedList).
 				Writes(versionedList)
-			if err := addObjectParams(ws, route, versionedListOptions); err != nil {
+			if err := AddObjectParams(ws, route, versionedListOptions); err != nil {
 				return nil, err
 			}
 			switch {
@@ -651,6 +663,9 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusCreated, "Created", producedObject).
 				Reads(defaultVersionedObject).
 				Writes(producedObject)
+			if err := AddObjectParams(ws, route, versionedUpdateOptions); err != nil {
+				return nil, err
+			}
 			addParams(route, action.Params)
 			routes = append(routes, route)
 		case "PATCH": // Partially update a resource
@@ -673,6 +688,9 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusOK, "OK", producedObject).
 				Reads(metav1.Patch{}).
 				Writes(producedObject)
+			if err := AddObjectParams(ws, route, versionedUpdateOptions); err != nil {
+				return nil, err
+			}
 			addParams(route, action.Params)
 			routes = append(routes, route)
 		case "POST": // Create a resource.
@@ -683,7 +701,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				handler = restfulCreateResource(creater, reqScope, admit)
 			}
 			handler = metrics.InstrumentRouteFunc(action.Verb, resource, subresource, requestScope, handler)
-			article := getArticleForNoun(kind, " ")
+			article := GetArticleForNoun(kind, " ")
 			doc := "create" + article + kind
 			if isSubresource {
 				doc = "create " + subresource + " of" + article + kind
@@ -700,10 +718,13 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusAccepted, "Accepted", producedObject).
 				Reads(defaultVersionedObject).
 				Writes(producedObject)
+			if err := AddObjectParams(ws, route, versionedCreateOptions); err != nil {
+				return nil, err
+			}
 			addParams(route, action.Params)
 			routes = append(routes, route)
 		case "DELETE": // Delete a resource.
-			article := getArticleForNoun(kind, " ")
+			article := GetArticleForNoun(kind, " ")
 			doc := "delete" + article + kind
 			if isSubresource {
 				doc = "delete " + subresource + " of" + article + kind
@@ -715,10 +736,11 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Operation("delete"+namespaced+kind+strings.Title(subresource)+operationSuffix).
 				Produces(append(storageMeta.ProducesMIMETypes(action.Verb), mediaTypes...)...).
 				Writes(versionedStatus).
-				Returns(http.StatusOK, "OK", versionedStatus)
+				Returns(http.StatusOK, "OK", versionedStatus).
+				Returns(http.StatusAccepted, "Accepted", versionedStatus)
 			if isGracefulDeleter {
 				route.Reads(versionedDeleterObject)
-				if err := addObjectParams(ws, route, versionedDeleteOptions); err != nil {
+				if err := AddObjectParams(ws, route, versionedDeleteOptions); err != nil {
 					return nil, err
 				}
 			}
@@ -737,17 +759,18 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Produces(append(storageMeta.ProducesMIMETypes(action.Verb), mediaTypes...)...).
 				Writes(versionedStatus).
 				Returns(http.StatusOK, "OK", versionedStatus)
-			if err := addObjectParams(ws, route, versionedListOptions); err != nil {
+			if err := AddObjectParams(ws, route, versionedListOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
 			routes = append(routes, route)
-		// TODO: deprecated
+		// deprecated in 1.11
 		case "WATCH": // Watch a resource.
 			doc := "watch changes to an object of kind " + kind
 			if isSubresource {
 				doc = "watch changes to " + subresource + " of an object of kind " + kind
 			}
+			doc += ". deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter."
 			handler := metrics.InstrumentRouteFunc(action.Verb, resource, subresource, requestScope, restfulListResource(lister, watcher, reqScope, true, a.minRequestTimeout))
 			route := ws.GET(action.Path).To(handler).
 				Doc(doc).
@@ -756,17 +779,18 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Produces(allMediaTypes...).
 				Returns(http.StatusOK, "OK", versionedWatchEvent).
 				Writes(versionedWatchEvent)
-			if err := addObjectParams(ws, route, versionedListOptions); err != nil {
+			if err := AddObjectParams(ws, route, versionedListOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
 			routes = append(routes, route)
-		// TODO: deprecated
+		// deprecated in 1.11
 		case "WATCHLIST": // Watch all resources of a kind.
 			doc := "watch individual changes to a list of " + kind
 			if isSubresource {
 				doc = "watch individual changes to a list of " + subresource + " of " + kind
 			}
+			doc += ". deprecated: use the 'watch' parameter with a list operation instead."
 			handler := metrics.InstrumentRouteFunc(action.Verb, resource, subresource, requestScope, restfulListResource(lister, watcher, reqScope, true, a.minRequestTimeout))
 			route := ws.GET(action.Path).To(handler).
 				Doc(doc).
@@ -775,7 +799,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Produces(allMediaTypes...).
 				Returns(http.StatusOK, "OK", versionedWatchEvent).
 				Writes(versionedWatchEvent)
-			if err := addObjectParams(ws, route, versionedListOptions); err != nil {
+			if err := AddObjectParams(ws, route, versionedListOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
@@ -799,12 +823,19 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 					Consumes("*/*").
 					Writes(connectProducedObject)
 				if versionedConnectOptions != nil {
-					if err := addObjectParams(ws, route, versionedConnectOptions); err != nil {
+					if err := AddObjectParams(ws, route, versionedConnectOptions); err != nil {
 						return nil, err
 					}
 				}
 				addParams(route, action.Params)
 				routes = append(routes, route)
+
+				// transform ConnectMethods to kube verbs
+				if kubeVerb, found := toDiscoveryKubeVerb[method]; found {
+					if len(kubeVerb) != 0 {
+						kubeVerbs[kubeVerb] = struct{}{}
+					}
+				}
 			}
 		default:
 			return nil, fmt.Errorf("unrecognized action verb: %s", action.Verb)
@@ -843,6 +874,24 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 	return &apiResource, nil
 }
 
+// getOpenAPISchema builds the openapi schema for a single resource model to be given to each handler. It will
+// return nil if the apiserver doesn't have openapi enabled, or if the specific path should be ignored by openapi.
+func (a *APIInstaller) getOpenAPISchema(rootPath, resource string, kind schema.GroupVersionKind, sampleObject interface{}) (openapiproto.Schema, error) {
+	path := gpath.Join(rootPath, resource)
+	if a.group.OpenAPIConfig == nil {
+		return nil, nil
+	}
+	pathsToIgnore := openapiutil.NewTrie(a.group.OpenAPIConfig.IgnorePrefixes)
+	if pathsToIgnore.HasPrefix(path) {
+		return nil, nil
+	}
+	openAPIDefinitions, err := openapibuilder.BuildOpenAPIDefinitionsForResource(sampleObject, a.group.OpenAPIConfig)
+	if err != nil {
+		return nil, err
+	}
+	return utilopenapi.ToProtoSchema(openAPIDefinitions, kind)
+}
+
 // indirectArbitraryPointer returns *ptrToObject for an arbitrary pointer
 func indirectArbitraryPointer(ptrToObject interface{}) interface{} {
 	return reflect.Indirect(reflect.ValueOf(ptrToObject)).Interface()
@@ -855,26 +904,19 @@ func appendIf(actions []action, a action, shouldAppend bool) []action {
 	return actions
 }
 
-// Wraps a http.Handler function inside a restful.RouteFunction
-func routeFunction(handler http.Handler) restful.RouteFunction {
-	return func(restReq *restful.Request, restResp *restful.Response) {
-		handler.ServeHTTP(restResp.ResponseWriter, restReq.Request)
-	}
-}
-
 func addParams(route *restful.RouteBuilder, params []*restful.Parameter) {
 	for _, param := range params {
 		route.Param(param)
 	}
 }
 
-// addObjectParams converts a runtime.Object into a set of go-restful Param() definitions on the route.
+// AddObjectParams converts a runtime.Object into a set of go-restful Param() definitions on the route.
 // The object must be a pointer to a struct; only fields at the top level of the struct that are not
 // themselves interfaces or structs are used; only fields with a json tag that is non empty (the standard
 // Go JSON behavior for omitting a field) become query parameters. The name of the query parameter is
 // the JSON field name. If a description struct tag is set on the field, that description is used on the
 // query parameter. In essence, it converts a standard JSON top level object into a query param schema.
-func addObjectParams(ws *restful.WebService, route *restful.RouteBuilder, obj interface{}) error {
+func AddObjectParams(ws *restful.WebService, route *restful.RouteBuilder, obj interface{}) error {
 	sv, err := conversion.EnforcePtr(obj)
 	if err != nil {
 		return err
@@ -976,8 +1018,8 @@ func splitSubresource(path string) (string, string, error) {
 	return resource, subresource, nil
 }
 
-// getArticleForNoun returns the article needed for the given noun.
-func getArticleForNoun(noun string, padding string) string {
+// GetArticleForNoun returns the article needed for the given noun.
+func GetArticleForNoun(noun string, padding string) string {
 	if noun[len(noun)-2:] != "ss" && noun[len(noun)-1:] == "s" {
 		// Plurals don't have an article.
 		// Don't catch words like class

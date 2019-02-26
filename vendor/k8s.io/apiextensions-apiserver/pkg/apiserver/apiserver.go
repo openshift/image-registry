@@ -21,16 +21,23 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/golang/glog"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/apiserver/pkg/endpoints/discovery"
 	genericregistry "k8s.io/apiserver/pkg/registry/generic"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	serverstorage "k8s.io/apiserver/pkg/server/storage"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	"k8s.io/client-go/tools/cache"
 
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/install"
@@ -39,7 +46,9 @@ import (
 	internalinformers "k8s.io/apiextensions-apiserver/pkg/client/informers/internalversion"
 	"k8s.io/apiextensions-apiserver/pkg/controller/establish"
 	"k8s.io/apiextensions-apiserver/pkg/controller/finalizer"
+	openapicontroller "k8s.io/apiextensions-apiserver/pkg/controller/openapi"
 	"k8s.io/apiextensions-apiserver/pkg/controller/status"
+	apiextensionsfeatures "k8s.io/apiextensions-apiserver/pkg/features"
 	"k8s.io/apiextensions-apiserver/pkg/registry/customresourcedefinition"
 
 	_ "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -187,18 +196,81 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		crdClient.Apiextensions(),
 		crdHandler,
 	)
+	openapiController := openapicontroller.NewController(s.Informers.Apiextensions().InternalVersion().CustomResourceDefinitions())
 
 	s.GenericAPIServer.AddPostStartHook("start-apiextensions-informers", func(context genericapiserver.PostStartHookContext) error {
 		s.Informers.Start(context.StopCh)
 		return nil
 	})
 	s.GenericAPIServer.AddPostStartHook("start-apiextensions-controllers", func(context genericapiserver.PostStartHookContext) error {
+		if utilfeature.DefaultFeatureGate.Enabled(apiextensionsfeatures.CustomResourcePublishOpenAPI) {
+			go openapiController.Run(s.GenericAPIServer.StaticOpenAPISpec, s.GenericAPIServer.OpenAPIVersionedService, context.StopCh)
+		}
+
 		go crdController.Run(context.StopCh)
 		go namingController.Run(context.StopCh)
 		go establishingController.Run(context.StopCh)
 		go finalizingController.Run(5, context.StopCh)
 		return nil
 	})
+	s.GenericAPIServer.AddPostStartHookOrDie("crd-discovery-available", func(context genericapiserver.PostStartHookContext) error {
+		return wait.PollImmediateUntil(100*time.Millisecond, func() (bool, error) {
+			// only check if we have a valid list for a given resourceversion
+			if !s.Informers.Apiextensions().InternalVersion().CustomResourceDefinitions().Informer().HasSynced() {
+				return false, nil
+			}
+
+			_, serverGroupsAndResources, err := crdClient.Discovery().ServerGroupsAndResources()
+			if err != nil {
+				return false, err
+			}
+			
+			serverCRDs, err := s.Informers.Apiextensions().InternalVersion().CustomResourceDefinitions().Lister().List(labels.Everything())
+			if err != nil {
+				return false, err
+			}
+			
+			crdGroupsAndResources := sets.NewString()
+			for _, crd := range serverCRDs {
+				// Skip not active CRD
+				if !apiextensions.IsCRDConditionTrue(crd, apiextensions.Established) {
+					continue
+				}
+				for _, version := range crd.Spec.Versions {
+					// Skip versions that are not served
+					if !version.Served {
+						continue
+					}
+					crdGroupsAndResources.Insert(fmt.Sprintf("%s.%s.%s", crd.Spec.Names.Plural, version.Name, crd.Spec.Group))
+				}
+			}
+			
+			discoveryGroupsAndResources := sets.NewString()
+			for _, resource := range serverGroupsAndResources {
+				for _, apiResource := range resource.APIResources {
+					discoveryGroupsAndResources.Insert(fmt.Sprintf("%s.%s.%s", apiResource.Name, apiResource.Version, apiResource.Group))
+				}
+			}
+			
+			if !discoveryGroupsAndResources.HasAll(crdGroupsAndResources.List()...) {
+				glog.Infof("waiting for CRD resources in discovery: %#v", discoveryGroupsAndResources.Difference(crdGroupsAndResources))	
+				return false, nil
+			}
+			return true, nil
+		}, context.StopCh)
+	})
+
+	// we don't want to report healthy until we can handle all CRDs that have already been registered.  Waiting for the informer
+	// to sync makes sure that the lister will be valid before we begin.  There may still be races for CRDs added after startup,
+	// but we won't go healthy until we can handle the ones already present.
+	if err := s.GenericAPIServer.AddHealthzChecks(
+		&informerSyncedHealthCheck{
+			name:   "crd-informer-synced",
+			synced: s.Informers.Apiextensions().InternalVersion().CustomResourceDefinitions().Informer().HasSynced,
+		},
+	); err != nil {
+		return nil, err
+	}
 
 	return s, nil
 }
@@ -211,4 +283,20 @@ func DefaultAPIResourceConfigSource() *serverstorage.ResourceConfig {
 	)
 
 	return ret
+}
+
+type informerSyncedHealthCheck struct {
+	name   string
+	synced cache.InformerSynced
+}
+
+func (h *informerSyncedHealthCheck) Name() string {
+	return h.name
+}
+
+func (h *informerSyncedHealthCheck) Check(req *http.Request) error {
+	if h.synced() {
+		return nil
+	}
+	return fmt.Errorf("informer not yet synced")
 }
