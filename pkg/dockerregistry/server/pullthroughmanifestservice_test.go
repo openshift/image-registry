@@ -179,7 +179,12 @@ func TestPullthroughManifests(t *testing.T) {
 			metrics:         metrics.NewNoopMetrics(),
 		}
 
-		manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
+		req, err := http.NewRequest("GET", "https://not.used.com", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		manifestResult, err := ptms.Get(context.WithRequest(ctx, req), tc.manifestDigest)
 		switch err.(type) {
 		case distribution.ErrManifestUnknownRevision:
 			if !tc.expectedNotFoundError {
@@ -413,7 +418,12 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 				metrics:         metrics.NewNoopMetrics(),
 			}
 
-			manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
+			req, err := http.NewRequest("GET", "https://not.used.com", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			manifestResult, err := ptms.Get(context.WithRequest(ctx, req), tc.manifestDigest)
 			switch err.(type) {
 			case nil:
 				if len(tc.expectedErrorString) > 0 {
@@ -504,6 +514,12 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
+
+	req, err := http.NewRequest("GET", "https://not.used.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = context.WithRequest(ctx, req)
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo1, map[string]string{
@@ -679,6 +695,12 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
+	req, err := http.NewRequest("GET", tsURL.String(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = context.WithRequest(ctx, req)
+
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
 		imageapi.InsecureRepositoryAnnotation: "true",
@@ -750,6 +772,12 @@ func TestPullthroughManifestMetrics(t *testing.T) {
 
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
+
+	req, err := http.NewRequest("GET", tsURL.String(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = context.WithRequest(ctx, req)
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{

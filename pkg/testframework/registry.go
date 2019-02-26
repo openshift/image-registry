@@ -127,6 +127,10 @@ func (r *Registry) Close() {
 	}
 }
 
+func (r *Registry) Addr() string {
+	return r.listener.Addr().String()
+}
+
 func (r *Registry) BaseURL() string {
 	return "http://" + r.listener.Addr().String()
 }

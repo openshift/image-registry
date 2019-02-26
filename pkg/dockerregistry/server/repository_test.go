@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"net/http"
 	"reflect"
 	"strings"
 	"testing"
@@ -42,6 +43,12 @@ const (
 func TestRepositoryBlobStat(t *testing.T) {
 	backgroundCtx := context.Background()
 	backgroundCtx = testutil.WithTestLogger(backgroundCtx, t)
+
+	req, err := http.NewRequest("GET", "https://localhost:5000/nm/is", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	backgroundCtx = context.WithRequest(backgroundCtx, req)
 
 	backgroundCtx = withAppMiddleware(backgroundCtx, &fakeAccessControllerMiddleware{t: t})
 

@@ -172,18 +172,19 @@ func TestPullthroughServeBlob(t *testing.T) {
 		if err != nil {
 			t.Fatalf("[%s] failed to create http request: %v", tc.name, err)
 		}
+		reqCtx := context.WithRequest(ctx, req)
 		w := httptest.NewRecorder()
 
 		dgst := digest.Digest(tc.blobDigest)
 
-		_, err = ptbs.Stat(ctx, dgst)
+		_, err = ptbs.Stat(reqCtx, dgst)
 		if err != tc.expectedStatError {
 			t.Errorf("[%s] Stat returned unexpected error: %#+v != %#+v", tc.name, err, tc.expectedStatError)
 		}
 		if err != nil || tc.expectedStatError != nil {
 			continue
 		}
-		err = ptbs.ServeBlob(ctx, w, req, dgst)
+		err = ptbs.ServeBlob(reqCtx, w, req, dgst)
 		if err != nil {
 			t.Errorf("[%s] unexpected ServeBlob error: %v", tc.name, err)
 			continue
@@ -607,6 +608,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 			if err != nil {
 				t.Fatalf("[%s] failed to create http request: %v", tc.name, err)
 			}
+			ctx = context.WithRequest(ctx, req)
 			w := httptest.NewRecorder()
 
 			dgst := digest.Digest(tc.blobDigest)
@@ -722,6 +724,12 @@ func TestPullthroughMetrics(t *testing.T) {
 	}
 
 	dgst := digest.Digest(blobDesc.Digest)
+
+	req, err := http.NewRequest("GET", "https://not.used.com", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx = context.WithRequest(ctx, req)
 
 	_, err = ptbs.Stat(ctx, dgst)
 	if err != nil {
