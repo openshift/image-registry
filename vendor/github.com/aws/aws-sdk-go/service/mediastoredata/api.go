@@ -10,14 +10,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
+	"github.com/aws/aws-sdk-go/private/protocol"
+	"github.com/aws/aws-sdk-go/private/protocol/restjson"
 )
 
 const opDeleteObject = "DeleteObject"
 
 // DeleteObjectRequest generates a "aws/request.Request" representing the
 // client's request for the DeleteObject operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -37,7 +39,7 @@ const opDeleteObject = "DeleteObject"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DeleteObject
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DeleteObject
 func (c *MediaStoreData) DeleteObjectRequest(input *DeleteObjectInput) (req *request.Request, output *DeleteObjectOutput) {
 	op := &request.Operation{
 		Name:       opDeleteObject,
@@ -51,6 +53,7 @@ func (c *MediaStoreData) DeleteObjectRequest(input *DeleteObjectInput) (req *req
 
 	output = &DeleteObjectOutput{}
 	req = c.newRequest(op, input, output)
+	req.Handlers.Unmarshal.Swap(restjson.UnmarshalHandler.Name, protocol.UnmarshalDiscardBodyHandler)
 	return
 }
 
@@ -75,7 +78,7 @@ func (c *MediaStoreData) DeleteObjectRequest(input *DeleteObjectInput) (req *req
 //   * ErrCodeInternalServerError "InternalServerError"
 //   The service is temporarily unavailable.
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DeleteObject
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DeleteObject
 func (c *MediaStoreData) DeleteObject(input *DeleteObjectInput) (*DeleteObjectOutput, error) {
 	req, out := c.DeleteObjectRequest(input)
 	return out, req.Send()
@@ -101,8 +104,8 @@ const opDescribeObject = "DescribeObject"
 
 // DescribeObjectRequest generates a "aws/request.Request" representing the
 // client's request for the DescribeObject operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -122,7 +125,7 @@ const opDescribeObject = "DescribeObject"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DescribeObject
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DescribeObject
 func (c *MediaStoreData) DescribeObjectRequest(input *DescribeObjectInput) (req *request.Request, output *DescribeObjectOutput) {
 	op := &request.Operation{
 		Name:       opDescribeObject,
@@ -141,7 +144,7 @@ func (c *MediaStoreData) DescribeObjectRequest(input *DescribeObjectInput) (req 
 
 // DescribeObject API operation for AWS Elemental MediaStore Data Plane.
 //
-// Gets the header for an object at the specified path.
+// Gets the headers for an object at the specified path.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -160,7 +163,7 @@ func (c *MediaStoreData) DescribeObjectRequest(input *DescribeObjectInput) (req 
 //   * ErrCodeInternalServerError "InternalServerError"
 //   The service is temporarily unavailable.
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DescribeObject
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DescribeObject
 func (c *MediaStoreData) DescribeObject(input *DescribeObjectInput) (*DescribeObjectOutput, error) {
 	req, out := c.DescribeObjectRequest(input)
 	return out, req.Send()
@@ -186,8 +189,8 @@ const opGetObject = "GetObject"
 
 // GetObjectRequest generates a "aws/request.Request" representing the
 // client's request for the GetObject operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -207,7 +210,7 @@ const opGetObject = "GetObject"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/GetObject
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/GetObject
 func (c *MediaStoreData) GetObjectRequest(input *GetObjectInput) (req *request.Request, output *GetObjectOutput) {
 	op := &request.Operation{
 		Name:       opGetObject,
@@ -248,7 +251,7 @@ func (c *MediaStoreData) GetObjectRequest(input *GetObjectInput) (req *request.R
 //   * ErrCodeInternalServerError "InternalServerError"
 //   The service is temporarily unavailable.
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/GetObject
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/GetObject
 func (c *MediaStoreData) GetObject(input *GetObjectInput) (*GetObjectOutput, error) {
 	req, out := c.GetObjectRequest(input)
 	return out, req.Send()
@@ -274,8 +277,8 @@ const opListItems = "ListItems"
 
 // ListItemsRequest generates a "aws/request.Request" representing the
 // client's request for the ListItems operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -295,7 +298,7 @@ const opListItems = "ListItems"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/ListItems
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/ListItems
 func (c *MediaStoreData) ListItemsRequest(input *ListItemsInput) (req *request.Request, output *ListItemsOutput) {
 	op := &request.Operation{
 		Name:       opListItems,
@@ -331,7 +334,7 @@ func (c *MediaStoreData) ListItemsRequest(input *ListItemsInput) (req *request.R
 //   * ErrCodeInternalServerError "InternalServerError"
 //   The service is temporarily unavailable.
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/ListItems
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/ListItems
 func (c *MediaStoreData) ListItems(input *ListItemsInput) (*ListItemsOutput, error) {
 	req, out := c.ListItemsRequest(input)
 	return out, req.Send()
@@ -357,8 +360,8 @@ const opPutObject = "PutObject"
 
 // PutObjectRequest generates a "aws/request.Request" representing the
 // client's request for the PutObject operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -378,7 +381,7 @@ const opPutObject = "PutObject"
 //        fmt.Println(resp)
 //    }
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/PutObject
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/PutObject
 func (c *MediaStoreData) PutObjectRequest(input *PutObjectInput) (req *request.Request, output *PutObjectOutput) {
 	op := &request.Operation{
 		Name:       opPutObject,
@@ -400,7 +403,7 @@ func (c *MediaStoreData) PutObjectRequest(input *PutObjectInput) (req *request.R
 
 // PutObject API operation for AWS Elemental MediaStore Data Plane.
 //
-// Uploads an object to the specified path. Object sizes are limited to 10 MB.
+// Uploads an object to the specified path. Object sizes are limited to 25 MB.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -416,7 +419,7 @@ func (c *MediaStoreData) PutObjectRequest(input *PutObjectInput) (req *request.R
 //   * ErrCodeInternalServerError "InternalServerError"
 //   The service is temporarily unavailable.
 //
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/PutObject
+// See also, https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/PutObject
 func (c *MediaStoreData) PutObject(input *PutObjectInput) (*PutObjectOutput, error) {
 	req, out := c.PutObjectRequest(input)
 	return out, req.Send()
@@ -438,7 +441,6 @@ func (c *MediaStoreData) PutObjectWithContext(ctx aws.Context, input *PutObjectI
 	return out, req.Send()
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DeleteObjectRequest
 type DeleteObjectInput struct {
 	_ struct{} `type:"structure"`
 
@@ -481,7 +483,6 @@ func (s *DeleteObjectInput) SetPath(v string) *DeleteObjectInput {
 	return s
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DeleteObjectResponse
 type DeleteObjectOutput struct {
 	_ struct{} `type:"structure"`
 }
@@ -496,7 +497,6 @@ func (s DeleteObjectOutput) GoString() string {
 	return s.String()
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DescribeObjectRequest
 type DescribeObjectInput struct {
 	_ struct{} `type:"structure"`
 
@@ -539,7 +539,6 @@ func (s *DescribeObjectInput) SetPath(v string) *DescribeObjectInput {
 	return s
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/DescribeObjectResponse
 type DescribeObjectOutput struct {
 	_ struct{} `type:"structure"`
 
@@ -560,7 +559,7 @@ type DescribeObjectOutput struct {
 	ETag *string `location:"header" locationName:"ETag" min:"1" type:"string"`
 
 	// The date and time that the object was last modified.
-	LastModified *time.Time `location:"header" locationName:"Last-Modified" type:"timestamp" timestampFormat:"rfc822"`
+	LastModified *time.Time `location:"header" locationName:"Last-Modified" type:"timestamp"`
 }
 
 // String returns the string representation
@@ -603,7 +602,6 @@ func (s *DescribeObjectOutput) SetLastModified(v time.Time) *DescribeObjectOutpu
 	return s
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/GetObjectRequest
 type GetObjectInput struct {
 	_ struct{} `type:"structure"`
 
@@ -678,19 +676,10 @@ func (s *GetObjectInput) SetRange(v string) *GetObjectInput {
 	return s
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/GetObjectResponse
 type GetObjectOutput struct {
 	_ struct{} `type:"structure" payload:"Body"`
 
-	// The path to the file outside of the container. The file name can include
-	// or omit an extension.
-	//
-	// Example 1: If the file is stored on a remote server that has been mounted
-	// to the workstation on which the REST API command is being run, the path could
-	// be the absolute path  \mount\assets\mlaw.avi or the relative path ..\..\mount\assets\movies\premium\mlaw.avi.
-	//
-	// Example 2: If the file is stored on a remote server that is not mounted,
-	// the path could be https:\\192.0.2.15\movies\premium\mlaw.avi.
+	// The bytes of the object.
 	Body io.ReadCloser `type:"blob"`
 
 	// An optional CacheControl header that allows the caller to control the object's
@@ -713,7 +702,7 @@ type GetObjectOutput struct {
 	ETag *string `location:"header" locationName:"ETag" min:"1" type:"string"`
 
 	// The date and time that the object was last modified.
-	LastModified *time.Time `location:"header" locationName:"Last-Modified" type:"timestamp" timestampFormat:"rfc822"`
+	LastModified *time.Time `location:"header" locationName:"Last-Modified" type:"timestamp"`
 
 	// The HTML status code of the request. Status codes ranging from 200 to 299
 	// indicate success. All other status codes indicate the type of error that
@@ -782,7 +771,6 @@ func (s *GetObjectOutput) SetStatusCode(v int64) *GetObjectOutput {
 }
 
 // A metadata entry for a folder or object.
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/Item
 type Item struct {
 	_ struct{} `type:"structure"`
 
@@ -796,7 +784,7 @@ type Item struct {
 	ETag *string `min:"1" type:"string"`
 
 	// The date and time that the item was last modified.
-	LastModified *time.Time `type:"timestamp" timestampFormat:"unix"`
+	LastModified *time.Time `type:"timestamp"`
 
 	// The name of the item.
 	Name *string `type:"string"`
@@ -851,15 +839,27 @@ func (s *Item) SetType(v string) *Item {
 	return s
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/ListItemsRequest
 type ListItemsInput struct {
 	_ struct{} `type:"structure"`
 
-	// The maximum results to return. The service might return fewer results.
+	// The maximum number of results to return per API request. For example, you
+	// submit a ListItems request with MaxResults set at 500. Although 2,000 items
+	// match your request, the service returns no more than the first 500 items.
+	// (The service also returns a NextToken value that you can use to fetch the
+	// next batch of results.) The service might return fewer results than the MaxResults
+	// value.
+	//
+	// If MaxResults is not included in the request, the service defaults to pagination
+	// with a maximum of 1,000 results per page.
 	MaxResults *int64 `location:"querystring" locationName:"MaxResults" min:"1" type:"integer"`
 
-	// The NextToken received in the ListItemsResponse for the same container and
-	// path. Tokens expire after 15 minutes.
+	// The token that identifies which batch of results that you want to see. For
+	// example, you submit a ListItems request with MaxResults set at 500. The service
+	// returns the first batch of results (up to 500) and a NextToken value. To
+	// see the next batch of results, you can submit the ListItems request a second
+	// time and specify the NextToken value.
+	//
+	// Tokens expire after 15 minutes.
 	NextToken *string `location:"querystring" locationName:"NextToken" type:"string"`
 
 	// The path in the container from which to retrieve items. Format: <folder name>/<folder
@@ -908,14 +908,17 @@ func (s *ListItemsInput) SetPath(v string) *ListItemsInput {
 	return s
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/ListItemsResponse
 type ListItemsOutput struct {
 	_ struct{} `type:"structure"`
 
-	// Metadata entries for the folders and objects at the requested path.
+	// The metadata entries for the folders and objects at the requested path.
 	Items []*Item `type:"list"`
 
-	// The NextToken used to request the next page of results using ListItems.
+	// The token that can be used in a request to view the next set of results.
+	// For example, you submit a ListItems request that matches 2,000 items with
+	// MaxResults set at 500. The service returns the first batch of results (up
+	// to 500) and a NextToken value that can be used to fetch the next batch of
+	// results.
 	NextToken *string `type:"string"`
 }
 
@@ -941,19 +944,10 @@ func (s *ListItemsOutput) SetNextToken(v string) *ListItemsOutput {
 	return s
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/PutObjectRequest
 type PutObjectInput struct {
 	_ struct{} `type:"structure" payload:"Body"`
 
-	// The path to the file outside of the container. The file name can include
-	// or omit an extension.
-	//
-	// Example 1: If the file is stored on a remote server that has been mounted
-	// to the workstation on which the REST API command is being run, the path could
-	// be the absolute path  \mount\assets\mlaw.avi or the relative path ..\..\mount\assets\movies\premium\mlaw.avi.
-	//
-	// Example 2: If the file is stored on a remote server that is not mounted,
-	// the path could be https:\\192.0.2.15\movies\premium\mlaw.avi.
+	// The bytes to be stored.
 	//
 	// Body is a required field
 	Body io.ReadSeeker `type:"blob" required:"true"`
@@ -1063,7 +1057,6 @@ func (s *PutObjectInput) SetStorageClass(v string) *PutObjectInput {
 	return s
 }
 
-// Please also see https://docs.aws.amazon.com/goto/WebAPI/mediastore-data-2017-09-01/PutObjectResponse
 type PutObjectOutput struct {
 	_ struct{} `type:"structure"`
 
@@ -1073,7 +1066,7 @@ type PutObjectOutput struct {
 	// Unique identifier of the object in the container.
 	ETag *string `min:"1" type:"string"`
 
-	// The storage class where the object was persisted. Should be “Temporal”.
+	// The storage class where the object was persisted. The class should be “Temporal”.
 	StorageClass *string `min:"1" type:"string" enum:"StorageClass"`
 }
 

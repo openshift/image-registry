@@ -34,6 +34,12 @@ func ExampleEFS_CreateFileSystem_shared00() {
 	input := &efs.CreateFileSystemInput{
 		CreationToken:   aws.String("tokenstring"),
 		PerformanceMode: aws.String("generalPurpose"),
+		Tags: []*efs.Tag{
+			{
+				Key:   aws.String("Name"),
+				Value: aws.String("MyFileSystem"),
+			},
+		},
 	}
 
 	result, err := svc.CreateFileSystem(input)
@@ -48,6 +54,10 @@ func ExampleEFS_CreateFileSystem_shared00() {
 				fmt.Println(efs.ErrCodeFileSystemAlreadyExists, aerr.Error())
 			case efs.ErrCodeFileSystemLimitExceeded:
 				fmt.Println(efs.ErrCodeFileSystemLimitExceeded, aerr.Error())
+			case efs.ErrCodeInsufficientThroughputCapacity:
+				fmt.Println(efs.ErrCodeInsufficientThroughputCapacity, aerr.Error())
+			case efs.ErrCodeThroughputLimitExceeded:
+				fmt.Println(efs.ErrCodeThroughputLimitExceeded, aerr.Error())
 			default:
 				fmt.Println(aerr.Error())
 			}

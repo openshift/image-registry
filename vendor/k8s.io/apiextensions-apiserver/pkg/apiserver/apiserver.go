@@ -19,6 +19,7 @@ package apiserver
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang/glog"
@@ -220,16 +221,18 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 				return false, nil
 			}
 
-			_, serverGroupsAndResources, err := crdClient.Discovery().ServerGroupsAndResources()
-			if err != nil {
-				return false, err
+			// The returned group and resource lists might be non-nil with partial results even in the
+			// case of non-nil error.  If API aggregation fails, we still want our other discovery information because the CRDs
+			// may all be present.
+			_, serverGroupsAndResources, discoveryErr := crdClient.Discovery().ServerGroupsAndResources()
+			if discoveryErr != nil {
+				glog.V(2).Info(discoveryErr)
 			}
-			
+
 			serverCRDs, err := s.Informers.Apiextensions().InternalVersion().CustomResourceDefinitions().Lister().List(labels.Everything())
 			if err != nil {
 				return false, err
 			}
-			
 			crdGroupsAndResources := sets.NewString()
 			for _, crd := range serverCRDs {
 				// Skip not active CRD
@@ -244,16 +247,16 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 					crdGroupsAndResources.Insert(fmt.Sprintf("%s.%s.%s", crd.Spec.Names.Plural, version.Name, crd.Spec.Group))
 				}
 			}
-			
+
 			discoveryGroupsAndResources := sets.NewString()
-			for _, resource := range serverGroupsAndResources {
-				for _, apiResource := range resource.APIResources {
-					discoveryGroupsAndResources.Insert(fmt.Sprintf("%s.%s.%s", apiResource.Name, apiResource.Version, apiResource.Group))
+			for _, resourceList := range serverGroupsAndResources {
+				for _, apiResource := range resourceList.APIResources {
+					group, version := splitGroupVersion(resourceList.GroupVersion)
+					discoveryGroupsAndResources.Insert(fmt.Sprintf("%s.%s.%s", apiResource.Name, version, group))
 				}
 			}
-			
 			if !discoveryGroupsAndResources.HasAll(crdGroupsAndResources.List()...) {
-				glog.Infof("waiting for CRD resources in discovery: %#v", discoveryGroupsAndResources.Difference(crdGroupsAndResources))	
+				glog.Infof("waiting for CRD resources in discovery: %#v", crdGroupsAndResources.Difference(discoveryGroupsAndResources))
 				return false, nil
 			}
 			return true, nil
@@ -273,6 +276,16 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 	}
 
 	return s, nil
+}
+
+func splitGroupVersion(gv string) (group string, version string) {
+	ss := strings.SplitN(gv, "/", 2)
+	if len(ss) == 1 {
+		version = ss[0]
+	} else {
+		group, version = ss[0], ss[1]
+	}
+	return
 }
 
 func DefaultAPIResourceConfigSource() *serverstorage.ResourceConfig {
