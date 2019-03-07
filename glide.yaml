@@ -8,23 +8,17 @@ import:
 
 # kube second
 - package: k8s.io/apimachinery
-  version: origin-4.0-kubernetes-1.12.4
-  repo: git@github.com:openshift/kubernetes-apimachinery
+  version: kubernetes-1.12.6
 - package: k8s.io/client-go
-  version: origin-4.0-kubernetes-1.12.4
-  repo: git@github.com:openshift/kubernetes-client-go
+  version: kubernetes-1.12.6
 - package: k8s.io/metrics
-  version: origin-4.0-kubernetes-1.12.4
-  repo: git@github.com:openshift/kubernetes-metrics
+  version: kubernetes-1.12.6
 - package: k8s.io/apiserver
-  version: origin-4.0-kubernetes-1.12.4
-  repo: git@github.com:openshift/kubernetes-apiserver
+  version: kubernetes-1.12.6
 - package: k8s.io/api
-  version: origin-4.0-kubernetes-1.12.4
-  repo: git@github.com:openshift/kubernetes-api
+  version: kubernetes-1.12.6
 - package: k8s.io/apiextensions-apiserver
-  version: origin-4.0-kubernetes-1.12.4
-  repo: git@github.com:openshift/kubernetes-apiextensions-apiserver
+  version: kubernetes-1.12.6
 
 # openshift third
 - package: github.com/openshift/api

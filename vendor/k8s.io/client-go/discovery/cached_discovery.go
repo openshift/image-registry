@@ -90,15 +90,8 @@ func (d *CachedDiscoveryClient) ServerResourcesForGroupVersion(groupVersion stri
 }
 
 // ServerResources returns the supported resources for all groups and versions.
-// Deprecated: use ServerGroupsAndResources instead.
 func (d *CachedDiscoveryClient) ServerResources() ([]*metav1.APIResourceList, error) {
-	_, rs, err := ServerGroupsAndResources(d)
-	return rs, err
-}
-
-// ServerGroupsAndResources returns the supported groups and resources for all groups and versions.
-func (d *CachedDiscoveryClient) ServerGroupsAndResources() ([]*metav1.APIGroup, []*metav1.APIResourceList, error) {
-	return ServerGroupsAndResources(d)
+	return ServerResources(d)
 }
 
 func (d *CachedDiscoveryClient) ServerGroups() (*metav1.APIGroupList, error) {

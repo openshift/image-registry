@@ -24,9 +24,6 @@ import (
 	"time"
 
 	systemd "github.com/coreos/go-systemd/daemon"
-	"github.com/go-openapi/spec"
-
-	"github.com/emicklei/go-restful"
 	"github.com/emicklei/go-restful-swagger12"
 	"github.com/golang/glog"
 
@@ -47,7 +44,6 @@ import (
 	"k8s.io/apiserver/pkg/server/routes"
 	restclient "k8s.io/client-go/rest"
 	openapicommon "k8s.io/kube-openapi/pkg/common"
-	"k8s.io/kube-openapi/pkg/handler"
 )
 
 // Info about an API group.
@@ -123,14 +119,6 @@ type GenericAPIServer struct {
 	swaggerConfig *swagger.Config
 	openAPIConfig *openapicommon.Config
 
-	// OpenAPIVersionedService controls the /openapi/v2 endpoint, and can be used to update the served spec.
-	// It is set during PrepareRun.
-	OpenAPIVersionedService *handler.OpenAPIService
-
-	// StaticOpenAPISpec is the spec derived from the restful container endpoints.
-	// It is set during PrepareRun.
-	StaticOpenAPISpec *spec.Swagger
-
 	// PostStartHooks are each called after the server has started listening, in a separate go func for each
 	// with no guarantee of ordering between them.  The map key is a name used for error reporting.
 	// It may kill the process with a panic if it wishes to by returning an error.
@@ -166,19 +154,14 @@ type GenericAPIServer struct {
 	// HandlerChainWaitGroup allows you to wait for all chain handlers finish after the server shutdown.
 	HandlerChainWaitGroup *utilwaitgroup.SafeWaitGroup
 
-	// MinimalShutdownDuration allows to block shutdown for some time, e.g. until endpoints pointing to this API server
-	// have converged on all node. During this time, the API server keeps serving.
-	MinimalShutdownDuration time.Duration
-
-	// delegationTarget only exists
-	openAPIDelegationTarget OpenAPIDelegationTarget
+	// The limit on the request body size that would be accepted and decoded in a write request.
+	// 0 means no limit.
+	maxRequestBodyBytes int64
 }
 
 // DelegationTarget is an interface which allows for composition of API servers with top level handling that works
 // as expected.
 type DelegationTarget interface {
-	OpenAPIDelegationTarget
-
 	// UnprotectedHandler returns a handler that is NOT protected by a normal chain
 	UnprotectedHandler() http.Handler
 
@@ -193,15 +176,6 @@ type DelegationTarget interface {
 
 	// ListedPaths returns the paths for supporting an index
 	ListedPaths() []string
-}
-
-// OpenAPIDelegationTarget provides methods for access the openapi and swagger bits of the delegate server
-// so that they can be later unioned.  This is the only post-construction side-effect we know of
-type OpenAPIDelegationTarget interface {
-	// SwaggerAPIContainer gives all the restful containers involved in this API server to be used to aggregate swagger
-	// It must include all containers it delegates to as well.  Individual entries may be nil an order must be most recent to
-	// least recent.
-	SwaggerAPIContainers() []*restful.Container
 
 	// NextDelegate returns the next delegationTarget in the chain of delegations
 	NextDelegate() DelegationTarget
@@ -211,11 +185,6 @@ func (s *GenericAPIServer) UnprotectedHandler() http.Handler {
 	// when we delegate, we need the server we're delegating to choose whether or not to use gorestful
 	return s.Handler.Director
 }
-
-func (s *GenericAPIServer) SwaggerAPIContainers() []*restful.Container {
-	return append([]*restful.Container{s.Handler.GoRestfulContainer}, s.openAPIDelegationTarget.SwaggerAPIContainers()...)
-}
-
 func (s *GenericAPIServer) PostStartHooks() map[string]postStartHookEntry {
 	return s.postStartHooks
 }
@@ -243,9 +212,6 @@ func NewEmptyDelegate() DelegationTarget {
 func (s emptyDelegate) UnprotectedHandler() http.Handler {
 	return nil
 }
-func (s emptyDelegate) SwaggerAPIContainers() []*restful.Container {
-	return []*restful.Container{}
-}
 func (s emptyDelegate) PostStartHooks() map[string]postStartHookEntry {
 	return map[string]postStartHookEntry{}
 }
@@ -270,10 +236,10 @@ type preparedGenericAPIServer struct {
 // PrepareRun does post API installation setup steps.
 func (s *GenericAPIServer) PrepareRun() preparedGenericAPIServer {
 	if s.swaggerConfig != nil {
-		routes.Swagger{Config: s.swaggerConfig}.Install(s.SwaggerAPIContainers(), s.Handler.GoRestfulContainer)
+		routes.Swagger{Config: s.swaggerConfig}.Install(s.Handler.GoRestfulContainer)
 	}
 	if s.openAPIConfig != nil {
-		s.OpenAPIVersionedService, s.StaticOpenAPISpec = routes.OpenAPI{
+		routes.OpenAPI{
 			Config: s.openAPIConfig,
 		}.Install(s.Handler.GoRestfulContainer, s.Handler.NonGoRestfulMux)
 	}
@@ -294,31 +260,17 @@ func (s *GenericAPIServer) PrepareRun() preparedGenericAPIServer {
 // Run spawns the secure http server. It only returns if stopCh is closed
 // or the secure port cannot be listened on initially.
 func (s preparedGenericAPIServer) Run(stopCh <-chan struct{}) error {
-	delayedStopCh := make(chan struct{})
-
-	go func() {
-		defer close(delayedStopCh)
-		<-stopCh
-
-		time.Sleep(s.MinimalShutdownDuration)
-	}()
-
-	// close socker after delayed stopCh
-	err := s.NonBlockingRun(delayedStopCh)
+	err := s.NonBlockingRun(stopCh)
 	if err != nil {
 		return err
 	}
 
 	<-stopCh
 
-	// run shutdown hooks directly. This includes deregistering from the kubernetes endpoint in case of kube-apiserver.
 	err = s.RunPreShutdownHooks()
 	if err != nil {
 		return err
 	}
-
-	// wait for the delayed stopCh before closing the handler chain (it rejects everything after Wait has been called).
-	<-delayedStopCh
 
 	// Wait for all requests to finish, which are bounded by the RequestTimeout variable.
 	s.HandlerChainWaitGroup.Wait()
@@ -356,7 +308,6 @@ func (s preparedGenericAPIServer) NonBlockingRun(stopCh <-chan struct{}) error {
 	// ensure cleanup.
 	go func() {
 		<-stopCh
-
 		close(internalStopCh)
 		s.HandlerChainWaitGroup.Wait()
 		close(auditStopCh)
@@ -383,6 +334,7 @@ func (s *GenericAPIServer) installAPIResources(apiPrefix string, apiGroupInfo *A
 		if apiGroupInfo.OptionsExternalVersion != nil {
 			apiGroupVersion.OptionsExternalVersion = apiGroupInfo.OptionsExternalVersion
 		}
+		apiGroupVersion.MaxRequestBodyBytes = s.maxRequestBodyBytes
 
 		if err := apiGroupVersion.InstallREST(s.Handler.GoRestfulContainer); err != nil {
 			return fmt.Errorf("unable to setup API %v: %v", apiGroupInfo, err)
@@ -405,11 +357,6 @@ func (s *GenericAPIServer) InstallLegacyAPIGroup(apiPrefix string, apiGroupInfo 
 	s.Handler.GoRestfulContainer.Add(discovery.NewLegacyRootAPIHandler(s.discoveryAddresses, s.Serializer, apiPrefix).WebService())
 
 	return nil
-}
-
-func (s *GenericAPIServer) RemoveOpenAPIData() {
-	s.openAPIConfig = nil
-	s.swaggerConfig = nil
 }
 
 // Exposes the given api group in the API.

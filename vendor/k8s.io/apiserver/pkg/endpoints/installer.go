@@ -507,6 +507,8 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 		Kind:        fqKindToRegister,
 
 		MetaGroupVersion: metav1.SchemeGroupVersion,
+
+		MaxRequestBodyBytes: a.group.MaxRequestBodyBytes,
 	}
 	if a.group.MetaGroupVersion != nil {
 		reqScope.MetaGroupVersion = *a.group.MetaGroupVersion
@@ -596,12 +598,12 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusOK, "OK", producedObject).
 				Writes(producedObject)
 			if isGetterWithOptions {
-				if err := AddObjectParams(ws, route, versionedGetOptions); err != nil {
+				if err := addObjectParams(ws, route, versionedGetOptions); err != nil {
 					return nil, err
 				}
 			}
 			if isExporter {
-				if err := AddObjectParams(ws, route, versionedExportOptions); err != nil {
+				if err := addObjectParams(ws, route, versionedExportOptions); err != nil {
 					return nil, err
 				}
 			}
@@ -623,7 +625,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Produces(append(storageMeta.ProducesMIMETypes(action.Verb), allMediaTypes...)...).
 				Returns(http.StatusOK, "OK", versionedList).
 				Writes(versionedList)
-			if err := AddObjectParams(ws, route, versionedListOptions); err != nil {
+			if err := addObjectParams(ws, route, versionedListOptions); err != nil {
 				return nil, err
 			}
 			switch {
@@ -659,7 +661,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusCreated, "Created", producedObject).
 				Reads(defaultVersionedObject).
 				Writes(producedObject)
-			if err := AddObjectParams(ws, route, versionedUpdateOptions); err != nil {
+			if err := addObjectParams(ws, route, versionedUpdateOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
@@ -684,7 +686,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusOK, "OK", producedObject).
 				Reads(metav1.Patch{}).
 				Writes(producedObject)
-			if err := AddObjectParams(ws, route, versionedUpdateOptions); err != nil {
+			if err := addObjectParams(ws, route, versionedUpdateOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
@@ -697,7 +699,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				handler = restfulCreateResource(creater, reqScope, admit)
 			}
 			handler = metrics.InstrumentRouteFunc(action.Verb, resource, subresource, requestScope, handler)
-			article := GetArticleForNoun(kind, " ")
+			article := getArticleForNoun(kind, " ")
 			doc := "create" + article + kind
 			if isSubresource {
 				doc = "create " + subresource + " of" + article + kind
@@ -714,13 +716,13 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusAccepted, "Accepted", producedObject).
 				Reads(defaultVersionedObject).
 				Writes(producedObject)
-			if err := AddObjectParams(ws, route, versionedCreateOptions); err != nil {
+			if err := addObjectParams(ws, route, versionedCreateOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
 			routes = append(routes, route)
 		case "DELETE": // Delete a resource.
-			article := GetArticleForNoun(kind, " ")
+			article := getArticleForNoun(kind, " ")
 			doc := "delete" + article + kind
 			if isSubresource {
 				doc = "delete " + subresource + " of" + article + kind
@@ -736,7 +738,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Returns(http.StatusAccepted, "Accepted", versionedStatus)
 			if isGracefulDeleter {
 				route.Reads(versionedDeleterObject)
-				if err := AddObjectParams(ws, route, versionedDeleteOptions); err != nil {
+				if err := addObjectParams(ws, route, versionedDeleteOptions); err != nil {
 					return nil, err
 				}
 			}
@@ -755,7 +757,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Produces(append(storageMeta.ProducesMIMETypes(action.Verb), mediaTypes...)...).
 				Writes(versionedStatus).
 				Returns(http.StatusOK, "OK", versionedStatus)
-			if err := AddObjectParams(ws, route, versionedListOptions); err != nil {
+			if err := addObjectParams(ws, route, versionedListOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
@@ -775,7 +777,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Produces(allMediaTypes...).
 				Returns(http.StatusOK, "OK", versionedWatchEvent).
 				Writes(versionedWatchEvent)
-			if err := AddObjectParams(ws, route, versionedListOptions); err != nil {
+			if err := addObjectParams(ws, route, versionedListOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
@@ -795,7 +797,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 				Produces(allMediaTypes...).
 				Returns(http.StatusOK, "OK", versionedWatchEvent).
 				Writes(versionedWatchEvent)
-			if err := AddObjectParams(ws, route, versionedListOptions); err != nil {
+			if err := addObjectParams(ws, route, versionedListOptions); err != nil {
 				return nil, err
 			}
 			addParams(route, action.Params)
@@ -819,7 +821,7 @@ func (a *APIInstaller) registerResourceHandlers(path string, storage rest.Storag
 					Consumes("*/*").
 					Writes(connectProducedObject)
 				if versionedConnectOptions != nil {
-					if err := AddObjectParams(ws, route, versionedConnectOptions); err != nil {
+					if err := addObjectParams(ws, route, versionedConnectOptions); err != nil {
 						return nil, err
 					}
 				}
@@ -906,13 +908,13 @@ func addParams(route *restful.RouteBuilder, params []*restful.Parameter) {
 	}
 }
 
-// AddObjectParams converts a runtime.Object into a set of go-restful Param() definitions on the route.
+// addObjectParams converts a runtime.Object into a set of go-restful Param() definitions on the route.
 // The object must be a pointer to a struct; only fields at the top level of the struct that are not
 // themselves interfaces or structs are used; only fields with a json tag that is non empty (the standard
 // Go JSON behavior for omitting a field) become query parameters. The name of the query parameter is
 // the JSON field name. If a description struct tag is set on the field, that description is used on the
 // query parameter. In essence, it converts a standard JSON top level object into a query param schema.
-func AddObjectParams(ws *restful.WebService, route *restful.RouteBuilder, obj interface{}) error {
+func addObjectParams(ws *restful.WebService, route *restful.RouteBuilder, obj interface{}) error {
 	sv, err := conversion.EnforcePtr(obj)
 	if err != nil {
 		return err
@@ -1014,8 +1016,8 @@ func splitSubresource(path string) (string, string, error) {
 	return resource, subresource, nil
 }
 
-// GetArticleForNoun returns the article needed for the given noun.
-func GetArticleForNoun(noun string, padding string) string {
+// getArticleForNoun returns the article needed for the given noun.
+func getArticleForNoun(noun string, padding string) string {
 	if noun[len(noun)-2:] != "ss" && noun[len(noun)-1:] == "s" {
 		// Plurals don't have an article.
 		// Don't catch words like class
