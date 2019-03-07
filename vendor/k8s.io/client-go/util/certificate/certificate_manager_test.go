@@ -223,8 +223,8 @@ func TestRotateCertCreateCSRError(t *testing.T) {
 		},
 		getTemplate: func() *x509.CertificateRequest { return &x509.CertificateRequest{} },
 		usages:      []certificates.KeyUsage{},
-		clientFn: func(_ *tls.Certificate) (certificatesclient.CertificateSigningRequestInterface, error) {
-			return fakeClient{failureType: createError}, nil
+		certSigningRequestClient: fakeClient{
+			failureType: createError,
 		},
 	}
 
@@ -246,8 +246,8 @@ func TestRotateCertWaitingForResultError(t *testing.T) {
 		},
 		getTemplate: func() *x509.CertificateRequest { return &x509.CertificateRequest{} },
 		usages:      []certificates.KeyUsage{},
-		clientFn: func(_ *tls.Certificate) (certificatesclient.CertificateSigningRequestInterface, error) {
-			return fakeClient{failureType: watchError}, nil
+		certSigningRequestClient: fakeClient{
+			failureType: watchError,
 		},
 	}
 
@@ -456,11 +456,6 @@ func TestInitializeCertificateSigningRequestClient(t *testing.T) {
 				CertificateStore:        certificateStore,
 				BootstrapCertificatePEM: tc.bootstrapCert.certificatePEM,
 				BootstrapKeyPEM:         tc.bootstrapCert.keyPEM,
-				ClientFn: func(_ *tls.Certificate) (certificatesclient.CertificateSigningRequestInterface, error) {
-					return &fakeClient{
-						certificatePEM: tc.apiCert.certificatePEM,
-					}, nil
-				},
 			})
 			if err != nil {
 				t.Errorf("Got %v, wanted no error.", err)
@@ -469,6 +464,11 @@ func TestInitializeCertificateSigningRequestClient(t *testing.T) {
 			certificate := certificateManager.Current()
 			if !certificatesEqual(certificate, tc.expectedCertBeforeStart.certificate) {
 				t.Errorf("Got %v, wanted %v", certificateString(certificate), certificateString(tc.expectedCertBeforeStart.certificate))
+			}
+			if err := certificateManager.SetCertificateSigningRequestClient(&fakeClient{
+				certificatePEM: tc.apiCert.certificatePEM,
+			}); err != nil {
+				t.Errorf("Got error %v, expected none.", err)
 			}
 
 			if m, ok := certificateManager.(*manager); !ok {
@@ -556,10 +556,8 @@ func TestInitializeOtherRESTClients(t *testing.T) {
 				CertificateStore:        certificateStore,
 				BootstrapCertificatePEM: tc.bootstrapCert.certificatePEM,
 				BootstrapKeyPEM:         tc.bootstrapCert.keyPEM,
-				ClientFn: func(_ *tls.Certificate) (certificatesclient.CertificateSigningRequestInterface, error) {
-					return &fakeClient{
-						certificatePEM: tc.apiCert.certificatePEM,
-					}, nil
+				CertificateSigningRequestClient: &fakeClient{
+					certificatePEM: tc.apiCert.certificatePEM,
 				},
 			})
 			if err != nil {
@@ -710,12 +708,10 @@ func TestServerHealth(t *testing.T) {
 				CertificateStore:        certificateStore,
 				BootstrapCertificatePEM: tc.bootstrapCert.certificatePEM,
 				BootstrapKeyPEM:         tc.bootstrapCert.keyPEM,
-				ClientFn: func(_ *tls.Certificate) (certificatesclient.CertificateSigningRequestInterface, error) {
-					return &fakeClient{
-						certificatePEM: tc.apiCert.certificatePEM,
-						failureType:    tc.failureType,
-						err:            tc.clientErr,
-					}, nil
+				CertificateSigningRequestClient: &fakeClient{
+					certificatePEM: tc.apiCert.certificatePEM,
+					failureType:    tc.failureType,
+					err:            tc.clientErr,
 				},
 			})
 			if err != nil {

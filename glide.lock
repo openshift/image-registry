@@ -1,5 +1,5 @@
-hash: abfb3ea76dd6125e9995f1cdea7b14061451c5b20a4329bd57e728b7fe2531c3
-updated: 2019-03-04T16:41:47.776212106+01:00
+hash: da48da512368bf6d03a43aeb8158e51cda7723f1dd3f33050667be771381fa89
+updated: 2019-03-07T15:13:15.190675616+01:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -271,7 +271,7 @@ imports:
   - libcontainer/system
   - libcontainer/user
 - name: github.com/openshift/api
-  version: ad60feaa9147fd1ba910f6cbbf3fccee48ac9f17
+  version: f044dc43cf333120bf29c5ece86f872555f1a8d5
   subpackages:
   - authorization/v1
   - image/docker10
@@ -298,7 +298,7 @@ imports:
   - user/clientset/versioned/scheme
   - user/clientset/versioned/typed/user/v1
 - name: github.com/openshift/library-go
-  version: 67ba562464684b95438c9dc80acedf74c701ced6
+  version: 10585fdc9322d30d622279729036a07f1ff7bbe1
   subpackages:
   - pkg/crypto
   - pkg/serviceability
@@ -444,8 +444,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 670d4cfef0544295bc27a114dbac37980d83185a
 - name: k8s.io/api
-  version: 6db15a15d2d3874a6c3ddb2140ac9f3bc7058428
-  repo: git@github.com:openshift/kubernetes-api
+  version: 145d52631d00cbfe68490d19ae4f0f501fd31a95
   subpackages:
   - admissionregistration/v1alpha1
   - admissionregistration/v1beta1
@@ -479,11 +478,9 @@ imports:
   - storage/v1alpha1
   - storage/v1beta1
 - name: k8s.io/apiextensions-apiserver
-  version: 684f50c293c49f591b3f966b7b2231a777947c9b
-  repo: git@github.com:openshift/kubernetes-apiextensions-apiserver
+  version: bd0469a053ff88529a61145790499fe78a09a49d
 - name: k8s.io/apimachinery
-  version: a86a798d1cebbc89d0ab74c63ad7dee3191e5251
-  repo: git@github.com:openshift/kubernetes-apimachinery
+  version: 01f179d85dbce0f2e0e4351a92394b38694b7cae
   subpackages:
   - pkg/api/errors
   - pkg/api/meta
@@ -528,14 +525,12 @@ imports:
   - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: fb61ca9f746c84bef22547224c412434db480a0d
-  repo: git@github.com:openshift/kubernetes-apiserver
+  version: cf2f1d68202d872417a0a0af0589f40e1bb04458
   subpackages:
   - pkg/authentication/user
   - pkg/util/logs
 - name: k8s.io/client-go
-  version: 287ba817609cfd4079cdbb7fb36c4659c2c74341
-  repo: git@github.com:openshift/kubernetes-client-go
+  version: 78295b709ec6fa5be12e35892477a326dea2b5d3
   subpackages:
   - discovery
   - kubernetes
@@ -605,6 +600,5 @@ imports:
   - pkg/util
   - pkg/util/proto
 - name: k8s.io/metrics
-  version: 83acca0c921faad71cebec66a5b8beda83218ebf
-  repo: git@github.com:openshift/kubernetes-metrics
+  version: f3f09b9076d11765ebf1ce6e6b92b79d003bcb15
 testImports: []
