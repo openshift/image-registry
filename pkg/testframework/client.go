@@ -39,7 +39,8 @@ func GetClientForUser(clusterAdminConfig *restclient.Config, username string) (k
 	}
 
 	oauthClientObj := &oauthapi.OAuthClient{
-		ObjectMeta: metav1.ObjectMeta{Name: "test-integration-client"},
+		ObjectMeta:  metav1.ObjectMeta{Name: "test-integration-client"},
+		GrantMethod: oauthapi.GrantHandlerAuto,
 	}
 	if _, err := oauthClient.Oauth().OAuthClients().Create(oauthClientObj); err != nil && !kerrs.IsAlreadyExists(err) {
 		return nil, nil, err
