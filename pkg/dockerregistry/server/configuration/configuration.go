@@ -13,7 +13,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 
 	//"github.com/docker/distribution/registry/auth"
 	"github.com/docker/distribution/configuration"
@@ -539,8 +539,38 @@ func migrateMiddleware(dockercfg *configuration.Configuration, cfg *Configuratio
 	return nil
 }
 
+// staticTrustKey is provided to ensure all registries serve stable schema1
+// manifests when importing / proxying from schema1 registries. Since signing
+// keys in schema1 are unused and unverified, the static key here provides only
+// a guarantee that the manifests pulled from this registry have a consistent
+// digest when pulled sequentially.
+const staticTrustKey = `
+-----BEGIN EC PRIVATE KEY-----
+keyID: OINE:XXVG:BLJ2:JKW4:ALVV:KV6F:IJ57:TY52:EB6U:LIKI:OVKO:YNJV
+
+MHcCAQEEIGJWv3rS/x/w4cyuD6AfKJieuxASO/QGrZ4RqjjABkbXoAoGCCqGSM49
+AwEHoUQDQgAEgwrze6IvnYZRIoVmw7Q9M/AdVZLHsL/YhmyAtEqnzJukzUDEBI50
+HXY6ZXIX48v7SztCB37hHET/Vwfewi5xhA==
+-----END EC PRIVATE KEY-----
+`
+
 func InitExtraConfig(dockercfg *configuration.Configuration, cfg *Configuration) error {
 	setDefaultMiddleware(dockercfg)
 	dockercfg.Compatibility.Schema1.Enabled = true
+
+	// provide a stable private key to the registry to ensure content verification
+	// is consistent
+	f, err := ioutil.TempFile("", "static-schema1-key")
+	if err != nil {
+		return fmt.Errorf("unable to write static schema1 key to disk: %v", err)
+	}
+	if _, err := io.Copy(f, bytes.NewBufferString(staticTrustKey)); err != nil {
+		return fmt.Errorf("unable to write static schema1 key to disk: %v", err)
+	}
+	if err := f.Close(); err != nil {
+		return fmt.Errorf("unable to write static schema1 key to disk: %v", err)
+	}
+	dockercfg.Compatibility.Schema1.TrustKey = f.Name()
+
 	return migrateMiddleware(dockercfg, cfg)
 }
