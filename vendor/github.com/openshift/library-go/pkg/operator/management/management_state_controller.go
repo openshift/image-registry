@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang/glog"
+	"k8s.io/klog"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -27,27 +27,28 @@ var workQueueKey = "instance"
 type ManagementStateController struct {
 	operatorName   string
 	operatorClient operatorv1helpers.OperatorClient
-	eventRecorder  events.Recorder
 
-	// queue only ever has one item, but it has nice error handling backoff/retry semantics
-	queue workqueue.RateLimitingInterface
+	cachesToSync  []cache.InformerSynced
+	queue         workqueue.RateLimitingInterface
+	eventRecorder events.Recorder
 }
 
 func NewOperatorManagementStateController(
 	name string,
-	operatorStatusProvider operatorv1helpers.OperatorClient,
+	operatorClient operatorv1helpers.OperatorClient,
 	recorder events.Recorder,
 ) *ManagementStateController {
 	c := &ManagementStateController{
 		operatorName:   name,
-		operatorClient: operatorStatusProvider,
+		operatorClient: operatorClient,
 		eventRecorder:  recorder,
 
 		queue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "ManagementStateController-"+name),
 	}
 
-	operatorStatusProvider.Informer().AddEventHandler(c.eventHandler())
-	// TODO watch clusterOperator.status changes when it moves to openshift/api
+	operatorClient.Informer().AddEventHandler(c.eventHandler())
+
+	c.cachesToSync = append(c.cachesToSync, operatorClient.Informer().HasSynced)
 
 	return c
 }
@@ -60,7 +61,7 @@ func (c ManagementStateController) sync() error {
 	}
 
 	cond := operatorv1.OperatorCondition{
-		Type:   "ManagementStateFailing",
+		Type:   "ManagementStateDegraded",
 		Status: operatorv1.ConditionFalse,
 	}
 
@@ -95,8 +96,11 @@ func (c *ManagementStateController) Run(workers int, stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()
 
-	glog.Infof("Starting management-state-controller-" + c.operatorName)
-	defer glog.Infof("Shutting down management-state-controller-" + c.operatorName)
+	klog.Infof("Starting management-state-controller-" + c.operatorName)
+	defer klog.Infof("Shutting down management-state-controller-" + c.operatorName)
+	if !cache.WaitForCacheSync(stopCh, c.cachesToSync...) {
+		return
+	}
 
 	// doesn't matter what workers say, only start one.
 	go wait.Until(c.runWorker, time.Second, stopCh)

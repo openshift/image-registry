@@ -8,17 +8,17 @@ import:
 
 # kube second
 - package: k8s.io/apimachinery
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/client-go
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/metrics
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/apiserver
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/api
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/apiextensions-apiserver
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 
 # openshift third
 - package: github.com/openshift/api

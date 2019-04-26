@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/glog"
+	"k8s.io/klog"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,20 +34,21 @@ type PruneController struct {
 	targetNamespace, podResourcePrefix string
 	// command is the string to use for the pruning pod command
 	command []string
-	// queue only ever has one item, but it has nice error handling backoff/retry semantics
-	queue workqueue.RateLimitingInterface
 
 	// prunerPodImageFn returns the image name for the pruning pod
 	prunerPodImageFn func() string
 	// ownerRefsFn sets the ownerrefs on the pruner pod
 	ownerRefsFn func(revision int32) ([]metav1.OwnerReference, error)
 
-	operatorConfigClient v1helpers.StaticPodOperatorClient
+	operatorClient v1helpers.StaticPodOperatorClient
 
 	configMapGetter corev1client.ConfigMapsGetter
 	secretGetter    corev1client.SecretsGetter
 	podGetter       corev1client.PodsGetter
-	eventRecorder   events.Recorder
+
+	cachesToSync  []cache.InformerSynced
+	queue         workqueue.RateLimitingInterface
+	eventRecorder events.Recorder
 }
 
 const (
@@ -64,7 +65,7 @@ func NewPruneController(
 	configMapGetter corev1client.ConfigMapsGetter,
 	secretGetter corev1client.SecretsGetter,
 	podGetter corev1client.PodsGetter,
-	operatorConfigClient v1helpers.StaticPodOperatorClient,
+	operatorClient v1helpers.StaticPodOperatorClient,
 	eventRecorder events.Recorder,
 ) *PruneController {
 	c := &PruneController{
@@ -72,7 +73,7 @@ func NewPruneController(
 		podResourcePrefix: podResourcePrefix,
 		command:           command,
 
-		operatorConfigClient: operatorConfigClient,
+		operatorClient: operatorClient,
 
 		configMapGetter: configMapGetter,
 		secretGetter:    secretGetter,
@@ -84,7 +85,10 @@ func NewPruneController(
 	}
 
 	c.ownerRefsFn = c.setOwnerRefs
-	operatorConfigClient.Informer().AddEventHandler(c.eventHandler())
+
+	operatorClient.Informer().AddEventHandler(c.eventHandler())
+
+	c.cachesToSync = append(c.cachesToSync, operatorClient.Informer().HasSynced)
 
 	return c
 }
@@ -138,7 +142,7 @@ func (c *PruneController) excludedRevisionHistory(operatorStatus *operatorv1.Sta
 
 	// Return early if nothing to prune
 	if len(succeededRevisions)+len(failedRevisions) == 0 {
-		glog.V(2).Info("no revision IDs currently eligible to prune")
+		klog.V(2).Info("no revision IDs currently eligible to prune")
 		return []int{}, nil
 	}
 
@@ -215,6 +219,9 @@ func protectedRevisions(revisions []int, revisionLimit int) []int {
 }
 
 func (c *PruneController) ensurePrunePod(nodeName string, maxEligibleRevision int, protectedRevisions []int, revision int32) error {
+	if revision == 0 {
+		return nil
+	}
 	pod := resourceread.ReadPodV1OrDie(bindata.MustAsset(filepath.Join("pkg/operator/staticpod/controller/prune", "manifests/pruner-pod.yaml")))
 
 	pod.Name = getPrunerPodName(nodeName, revision)
@@ -275,8 +282,11 @@ func (c *PruneController) Run(workers int, stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()
 
-	glog.Infof("Starting PruneController")
-	defer glog.Infof("Shutting down PruneController")
+	klog.Infof("Starting PruneController")
+	defer klog.Infof("Shutting down PruneController")
+	if !cache.WaitForCacheSync(stopCh, c.cachesToSync...) {
+		return
+	}
 
 	// doesn't matter what workers say, only start one.
 	go wait.Until(c.runWorker, time.Second, stopCh)
@@ -309,8 +319,8 @@ func (c *PruneController) processNextWorkItem() bool {
 }
 
 func (c *PruneController) sync() error {
-	glog.V(5).Info("Syncing revision pruner")
-	operatorSpec, operatorStatus, _, err := c.operatorConfigClient.GetStaticPodOperatorState()
+	klog.V(5).Info("Syncing revision pruner")
+	operatorSpec, operatorStatus, _, err := c.operatorClient.GetStaticPodOperatorState()
 	if err != nil {
 		return err
 	}
@@ -322,7 +332,7 @@ func (c *PruneController) sync() error {
 	}
 	// if no IDs are excluded, then there is nothing to prune
 	if len(excludedRevisions) == 0 {
-		glog.Info("No excluded revisions to prune, skipping")
+		klog.Info("No excluded revisions to prune, skipping")
 		return nil
 	}
 
