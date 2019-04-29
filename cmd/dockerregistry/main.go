@@ -26,6 +26,19 @@ func init() {
 	klog.InitFlags(klogFlags)
 }
 
+func klogLogLevel() string {
+	if klog.V(4) {
+		return "debug"
+	}
+	if klog.V(2) {
+		return "info"
+	}
+	if klog.V(1) {
+		return "warn"
+	}
+	return "error"
+}
+
 func main() {
 	_ = flag.Set("logtostderr", "true")
 	flag.Parse()
@@ -36,6 +49,14 @@ func main() {
 		if f2 != nil {
 			value := f1.Value.String()
 			_ = f2.Value.Set(value)
+		}
+	})
+
+	flag.CommandLine.Visit(func(f1 *flag.Flag) {
+		if f1.Name == "v" {
+			if err := os.Setenv("REGISTRY_LOG_LEVEL", klogLogLevel()); err != nil {
+				log.Fatalf("Unable to set REGISTRY_LOG_LEVEL: %v", err)
+			}
 		}
 	})
 
