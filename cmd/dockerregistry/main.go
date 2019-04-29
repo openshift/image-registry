@@ -11,7 +11,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"k8s.io/apiserver/pkg/util/logs"
+	"k8s.io/klog"
 
 	"github.com/openshift/library-go/pkg/serviceability"
 
@@ -19,16 +19,32 @@ import (
 	"github.com/openshift/image-registry/pkg/version"
 )
 
+var klogFlags *flag.FlagSet
+
+func init() {
+	klogFlags = flag.NewFlagSet("klog", flag.ExitOnError)
+	klog.InitFlags(klogFlags)
+}
+
 func main() {
-	logs.InitLogs()
-	defer logs.FlushLogs()
+	_ = flag.Set("logtostderr", "true")
+	flag.Parse()
+
+	// Sync the glog and klog flags.
+	flag.CommandLine.VisitAll(func(f1 *flag.Flag) {
+		f2 := klogFlags.Lookup(f1.Name)
+		if f2 != nil {
+			value := f1.Value.String()
+			_ = f2.Value.Set(value)
+		}
+	})
+
 	defer serviceability.BehaviorOnPanic(os.Getenv("OPENSHIFT_ON_PANIC"), version.Get())()
 	defer serviceability.Profile(os.Getenv("OPENSHIFT_PROFILE")).Stop()
 	startProfiler()
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	flag.Parse()
 
 	// TODO convert to flags instead of a config file?
 	configurationPath := ""
