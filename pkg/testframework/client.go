@@ -48,14 +48,17 @@ func GetClientForUser(clusterAdminConfig *restclient.Config, username string) (k
 
 	randomToken := uuid.NewRandom()
 	accesstoken := base64.RawURLEncoding.EncodeToString([]byte(randomToken))
+	// make sure the token is long enough to pass validation
 	for i := len(accesstoken); i < 32; i++ {
-		accesstoken = accesstoken + "A"
+		accesstoken += "A"
 	}
 	token := &oauthapi.OAuthAccessToken{
-		ObjectMeta: metav1.ObjectMeta{Name: accesstoken},
-		ClientName: oauthClientObj.Name,
-		UserName:   username,
-		UserUID:    string(user.UID),
+		ObjectMeta:  metav1.ObjectMeta{Name: accesstoken},
+		ClientName:  oauthClientObj.Name,
+		UserName:    username,
+		UserUID:     string(user.UID),
+		Scopes:      []string{"user:full"},
+		RedirectURI: "https://localhost:8443/oauth/token/implicit",
 	}
 	if _, err := oauthClient.Oauth().OAuthAccessTokens().Create(token); err != nil {
 		return nil, nil, err
