@@ -8,17 +8,15 @@ import:
 
 # kube second
 - package: k8s.io/apimachinery
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/client-go
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/metrics
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/apiserver
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 - package: k8s.io/api
-  version: kubernetes-1.12.6
-- package: k8s.io/apiextensions-apiserver
-  version: kubernetes-1.12.6
+  version: kubernetes-1.13.5
 
 # openshift third
 - package: github.com/openshift/api
@@ -29,17 +27,8 @@ import:
   version: master
 
 # everything else last
-- package: github.com/google/certificate-transparency
-  repo: git@github.com:openshift/google-certificate-transparency
-- package: github.com/google/cadvisor
-  repo: git@github.com:openshift/google-cadvisor
 - package: github.com/emicklei/go-restful-swagger12
   repo: https://github.com/openshift/emicklei-go-restful-swagger12
-- package: github.com/cloudflare/cfssl
-  repo: https://github.com/openshift/cloudflare-cfssl
-- package: github.com/skynetservices/skydns
-  repo: https://github.com/openshift/skynetservices-skydns
-- package: github.com/RangelReale/osin
 - package: google.golang.org/cloud
   version: 975617b05ea8a58727e6c1a06b6161ff4185a9f2
 - package: google.golang.org/api
@@ -62,8 +51,6 @@ import:
   version: 399ea8c73916000c64c2c76e8da00ca82f8387ab
 - package: github.com/docker/go-units
   version: 47565b4f722fb6ceae66b95f853feed578a4a51c
-- package: github.com/go-ini/ini
-  version: fa25069db393aecc09b71267d0489b357781c860
 - package: github.com/Microsoft/go-winio
   version: 97e4973ce50b2ff5f09635a57e2b88a037aae829
 - package: github.com/opencontainers/go-digest
