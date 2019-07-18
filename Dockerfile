@@ -12,7 +12,7 @@ USER 1001
 EXPOSE 5000
 VOLUME /registry
 ENV REGISTRY_CONFIGURATION_PATH=/config.yml
-ENTRYPOINT ["sh", "-c", "update-ca-trust && \"$@\"", "arg0"]
+ENTRYPOINT ["sh", "-c", "update-ca-trust && exec \"$@\"", "arg0"]
 CMD ["/usr/bin/dockerregistry"]
 LABEL io.k8s.display-name="OpenShift Image Registry" \
       io.k8s.description="This is a component of OpenShift and exposes a container image registry that is integrated with the cluster for authentication and management." \
