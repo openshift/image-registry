@@ -285,6 +285,8 @@ func (tcs *testCredentialStore) SetRefreshToken(u *url.URL, service string, toke
 // ping pings the provided endpoint to determine its required authorization challenges.
 // If a version header is provided, the versions will be returned.
 func ping(manager challenge.Manager, endpoint, versionHeader string) ([]auth.APIVersion, error) {
+	// #nosec
+	// Only used for testing.
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		return nil, err

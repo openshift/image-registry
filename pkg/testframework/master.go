@@ -70,6 +70,8 @@ func (p *MasterProcess) WaitHealthz(configDir string) error {
 	if err != nil {
 		return err
 	}
+	// #nosec
+	// This is art of the test framework; so no need to verify.
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}
