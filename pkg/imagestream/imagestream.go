@@ -259,7 +259,7 @@ func (is *imageStream) localRegistry(ctx context.Context) ([]string, *rerrors.Er
 
 	public, err := imageapi.ParseDockerImageReference(stream.Status.PublicDockerImageRepository)
 	if err != nil {
-		dcontext.GetLogger(ctx).Warnf("localRegistry: unable to parse publicDockerImageRepository %q", stream.Status.DockerImageRepository)
+		dcontext.GetLogger(ctx).Warnf("localRegistry: unable to parse publicDockerImageRepository %q", stream.Status.PublicDockerImageRepository)
 	}
 	if len(public.Registry) != 0 {
 		localNames = append(localNames, public.Registry)
