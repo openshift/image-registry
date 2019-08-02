@@ -319,6 +319,8 @@ func loadImportRestrictions(configFile string) ([]ImportRestriction, error) {
 func resolvePackage(targetPackage string) ([]Package, error) {
 	cmd := "go"
 	args := []string{"list", "-json", targetPackage}
+	// #nosec
+	// This merely calls go list; It's not a security issue.
 	stdout, err := exec.Command(cmd, args...).Output()
 	if err != nil {
 		return nil, fmt.Errorf("Failed to run `%s %s`: %v\n", cmd, strings.Join(args, " "), err)

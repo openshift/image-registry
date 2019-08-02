@@ -44,6 +44,9 @@ func DefaultLocalIP4() (net.IP, error) {
 //
 // k8s.io/kubernetes/test/integration/framework.FindFreeLocalPort
 func FindFreeLocalPort() (int, error) {
+	// #nosec
+	// This is part of the test framework; so it's fine it listens on all
+	// interfaces.
 	l, err := net.Listen("tcp", ":0")
 	if err != nil {
 		return 0, err

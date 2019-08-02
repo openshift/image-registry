@@ -22,6 +22,9 @@ func NewHTTPServer(t *testing.T, handler http.Handler) *HTTPServer {
 		t.Fatal(err)
 	}
 
+	// #nosec
+	// This is part of the test framework; so it's fine it listens on all
+	// interfaces.
 	l, err := net.Listen("tcp", ":0")
 	if err != nil {
 		t.Fatal(err)
