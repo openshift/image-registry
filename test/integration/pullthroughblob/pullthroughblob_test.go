@@ -83,8 +83,8 @@ func TestPullthroughBlob(t *testing.T) {
 	}
 
 	if diff := requestCounter.Diff(counter.M{
-		"GET /v2/":                                                     1,
-		"GET /v2/remoteimage/manifests/latest":                         1,
+		"GET /v2/":                             1,
+		"GET /v2/remoteimage/manifests/latest": 1,
 		"GET /v2/remoteimage/blobs/" + imageData.ConfigDigest.String(): 1,
 	}); diff != nil {
 		t.Fatalf("unexpected number of requests: %q", diff)
