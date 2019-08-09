@@ -52,7 +52,7 @@ check: verify test-unit test-integration
 #
 # Example:
 #   make verify
-verify: verify-fmt verify-govet verify-imports verify-gometalinter verify-sec
+verify: verify-fmt verify-govet verify-imports verify-sec
 .PHONY: verify
 
 verify-fmt:
@@ -76,13 +76,6 @@ LOGFUNCS=Debug Info Warn Warning Error
 null  :=
 space := $(null) #
 comma := ,
-verify-gometalinter:
-	gometalinter \
-		--deadline=180s \
-		--linter='vet:go tool vet -printfuncs $(subst $(space),$(comma),$(foreach fn,$(LOGFUNCS),$(fn) $(fn)f $(fn)ln)),Fatalln:PATH:LINE:MESSAGE' \
-		--disable-all -E errcheck -E ineffassign -E unconvert -E varcheck -E vet \
-		./cmd/... ./pkg/... ./test/...
-.PHONY: verify-gometalinter
 
 # Verify commit comments.
 #
