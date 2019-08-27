@@ -10,7 +10,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	logrus_logstash "github.com/bshuster-repo/logrus-logstash-hook"
@@ -164,16 +166,37 @@ func Execute(configFile io.Reader) {
 		log.Fatal(err)
 	}
 
-	if dockerConfig.HTTP.TLS.Certificate == "" {
-		dcontext.GetLogger(ctx).Infof("listening on %s", srv.Addr)
-		err = srv.ListenAndServe()
-	} else {
+	errc := make(chan error, 1)
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if dockerConfig.HTTP.TLS.Certificate == "" {
+			dcontext.GetLogger(ctx).Infof("listening on %s", srv.Addr)
+			errc <- srv.ListenAndServe()
+			return
+		}
+
 		dcontext.GetLogger(ctx).Infof("listening on %s, tls", srv.Addr)
-		err = srv.ListenAndServeTLS(dockerConfig.HTTP.TLS.Certificate, dockerConfig.HTTP.TLS.Key)
-	}
-	if err != nil {
+		errc <- srv.ListenAndServeTLS(dockerConfig.HTTP.TLS.Certificate, dockerConfig.HTTP.TLS.Key)
+	}()
+
+	select {
+	case <-sigs:
+	case err := <-errc:
 		log.Fatal(err)
 	}
+
+	// signal has been received. we will attempt to stop our http server
+	// using a timeout slightly lower than the default k8s grace period
+	// of 30 seconds.
+	ctx, cancel := context.WithTimeout(ctx, 29*time.Second)
+	defer cancel()
+	dcontext.GetLogger(ctx).Infof("shutting down image registry server")
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal(err)
+	}
+	dcontext.GetLogger(ctx).Infof("server shutdown, bye.")
 }
 
 func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) (*http.Server, error) {
