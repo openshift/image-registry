@@ -13,6 +13,7 @@ import (
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
 
 	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
@@ -230,6 +231,16 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 		ref, err := imageapi.ParseDockerImageReference(repoName)
 		if err != nil {
 			return fmt.Errorf("failed to parse the image reference %s: %v", repoName, err)
+		}
+
+		// XXX Due to an old bug we may have some images stored  with
+		// with invalid names. If we try to GET these images through
+		// API an error will be thrown back. Here we pre-check if the
+		// image contains an invalid name, if true then we add the repo
+		// to be pruned.
+		if ers := rest.IsValidPathSegmentName(ref.Name); len(ers) > 0 {
+			logger.Printf("Invalid image name %s, removing whole repository", repoName)
+			return gc.AddRepository(repoName)
 		}
 
 		is, err := oc.ImageStreams(ref.Namespace).Get(ref.Name, metav1.GetOptions{})
