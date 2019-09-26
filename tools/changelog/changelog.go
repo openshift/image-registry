@@ -85,6 +85,7 @@ func main() {
 	from := os.Args[1]
 	to := os.Args[2]
 
+	// #nosec
 	out, err := exec.Command("git", "log", "--topo-order", "--pretty=tformat:%h %p|%s", "--reverse", fmt.Sprintf("%s..%s", from, to)).CombinedOutput()
 	if err != nil {
 		log.Fatal(err)
@@ -148,6 +149,7 @@ func main() {
 		}
 
 		// try to find either the PR title or the first commit title from the merge commit
+		// #nosec
 		out, err := exec.Command("git", "show", "--pretty=tformat:%b", c.short).CombinedOutput()
 		if err != nil {
 			log.Fatal(err)
@@ -255,6 +257,7 @@ func findPrefixFor(message string, commits []commit) (string, bool) {
 }
 
 func hasFileChanges(commit string, prefixes ...string) bool {
+	// #nosec
 	out, err := exec.Command("git", "diff", "--name-only", fmt.Sprintf("%s^..%s", commit, commit)).CombinedOutput()
 	if err != nil {
 		log.Fatal(err)
