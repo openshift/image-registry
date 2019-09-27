@@ -52,7 +52,7 @@ check: verify test-unit test-integration
 #
 # Example:
 #   make verify
-verify: verify-fmt verify-govet verify-imports verify-sec
+verify: verify-fmt verify-govet verify-imports
 .PHONY: verify
 
 verify-fmt:
@@ -66,11 +66,6 @@ verify-govet:
 verify-imports:
 	hack/verify-imports.sh
 .PHONY: verify-imports
-
-verify-sec:
-	go get -u github.com/securego/gosec/cmd/gosec
-	gosec -severity medium -confidence medium -exclude G304 -quiet ./...
-.PHONY: verify-sec
 
 LOGFUNCS=Debug Info Warn Warning Error
 null  :=
