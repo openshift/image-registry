@@ -11,9 +11,11 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"io/ioutil"
 	"mime"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -31,6 +33,17 @@ const (
 	allContainersLimit  = 10000                 // Number of containers to fetch at once
 	allObjectsLimit     = 10000                 // Number objects to fetch at once
 	allObjectsChanLimit = 1000                  // ...when fetching to a channel
+)
+
+// ObjectType is the type of the swift object, regular, static large,
+// or dynamic large.
+type ObjectType int
+
+// Values that ObjectType can take
+const (
+	RegularObjectType ObjectType = iota
+	StaticLargeObjectType
+	DynamicLargeObjectType
 )
 
 // Connection holds the details of the connection to the swift server.
@@ -83,31 +96,175 @@ const (
 type Connection struct {
 	// Parameters - fill these in before calling Authenticate
 	// They are all optional except UserName, ApiKey and AuthUrl
-	Domain         string            // User's domain name
-	DomainId       string            // User's domain Id
-	UserName       string            // UserName for api
-	ApiKey         string            // Key for api access
-	AuthUrl        string            // Auth URL
-	Retries        int               // Retries on error (default is 3)
-	UserAgent      string            // Http User agent (default goswift/1.0)
-	ConnectTimeout time.Duration     // Connect channel timeout (default 10s)
-	Timeout        time.Duration     // Data channel timeout (default 60s)
-	Region         string            // Region to use eg "LON", "ORD" - default is use first region (v2,v3 auth only)
-	AuthVersion    int               // Set to 1, 2 or 3 or leave at 0 for autodetect
-	Internal       bool              // Set this to true to use the the internal / service network
-	Tenant         string            // Name of the tenant (v2,v3 auth only)
-	TenantId       string            // Id of the tenant (v2,v3 auth only)
-	EndpointType   EndpointType      // Endpoint type (v2,v3 auth only) (default is public URL unless Internal is set)
-	TenantDomain   string            // Name of the tenant's domain (v3 auth only), only needed if it differs from the user domain
-	TenantDomainId string            // Id of the tenant's domain (v3 auth only), only needed if it differs the from user domain
-	TrustId        string            // Id of the trust (v3 auth only)
-	Transport      http.RoundTripper `json:"-" xml:"-"` // Optional specialised http.Transport (eg. for Google Appengine)
+	Domain                      string            // User's domain name
+	DomainId                    string            // User's domain Id
+	UserName                    string            // UserName for api
+	UserId                      string            // User Id
+	ApiKey                      string            // Key for api access
+	ApplicationCredentialId     string            // Application Credential ID
+	ApplicationCredentialName   string            // Application Credential Name
+	ApplicationCredentialSecret string            // Application Credential Secret
+	AuthUrl                     string            // Auth URL
+	Retries                     int               // Retries on error (default is 3)
+	UserAgent                   string            // Http User agent (default goswift/1.0)
+	ConnectTimeout              time.Duration     // Connect channel timeout (default 10s)
+	Timeout                     time.Duration     // Data channel timeout (default 60s)
+	Region                      string            // Region to use eg "LON", "ORD" - default is use first region (v2,v3 auth only)
+	AuthVersion                 int               // Set to 1, 2 or 3 or leave at 0 for autodetect
+	Internal                    bool              // Set this to true to use the the internal / service network
+	Tenant                      string            // Name of the tenant (v2,v3 auth only)
+	TenantId                    string            // Id of the tenant (v2,v3 auth only)
+	EndpointType                EndpointType      // Endpoint type (v2,v3 auth only) (default is public URL unless Internal is set)
+	TenantDomain                string            // Name of the tenant's domain (v3 auth only), only needed if it differs from the user domain
+	TenantDomainId              string            // Id of the tenant's domain (v3 auth only), only needed if it differs the from user domain
+	TrustId                     string            // Id of the trust (v3 auth only)
+	Transport                   http.RoundTripper `json:"-" xml:"-"` // Optional specialised http.Transport (eg. for Google Appengine)
 	// These are filled in after Authenticate is called as are the defaults for above
 	StorageUrl string
 	AuthToken  string
+	Expires    time.Time // time the token expires, may be Zero if unknown
 	client     *http.Client
 	Auth       Authenticator `json:"-" xml:"-"` // the current authenticator
 	authLock   sync.Mutex    // lock when R/W StorageUrl, AuthToken, Auth
+	// swiftInfo is filled after QueryInfo is called
+	swiftInfo SwiftInfo
+}
+
+// setFromEnv reads the value that param points to (it must be a
+// pointer), if it isn't the zero value then it reads the environment
+// variable name passed in, parses it according to the type and writes
+// it to the pointer.
+func setFromEnv(param interface{}, name string) (err error) {
+	val := os.Getenv(name)
+	if val == "" {
+		return
+	}
+	switch result := param.(type) {
+	case *string:
+		if *result == "" {
+			*result = val
+		}
+	case *int:
+		if *result == 0 {
+			*result, err = strconv.Atoi(val)
+		}
+	case *bool:
+		if *result == false {
+			*result, err = strconv.ParseBool(val)
+		}
+	case *time.Duration:
+		if *result == 0 {
+			*result, err = time.ParseDuration(val)
+		}
+	case *EndpointType:
+		if *result == EndpointType("") {
+			*result = EndpointType(val)
+		}
+	default:
+		return newErrorf(0, "can't set var of type %T", param)
+	}
+	return err
+}
+
+// ApplyEnvironment reads environment variables and applies them to
+// the Connection structure.  It won't overwrite any parameters which
+// are already set in the Connection struct.
+//
+// To make a new Connection object entirely from the environment you
+// would do:
+//
+//    c := new(Connection)
+//    err := c.ApplyEnvironment()
+//    if err != nil { log.Fatal(err) }
+//
+// The naming of these variables follows the official Openstack naming
+// scheme so it should be compatible with OpenStack rc files.
+//
+// For v1 authentication (obsolete)
+//     ST_AUTH - Auth URL
+//     ST_USER - UserName for api
+//     ST_KEY - Key for api access
+//
+// For v2 authentication
+//     OS_AUTH_URL - Auth URL
+//     OS_USERNAME - UserName for api
+//     OS_PASSWORD - Key for api access
+//     OS_TENANT_NAME - Name of the tenant
+//     OS_TENANT_ID   - Id of the tenant
+//     OS_REGION_NAME - Region to use - default is use first region
+//
+// For v3 authentication
+//     OS_AUTH_URL - Auth URL
+//     OS_USERNAME - UserName for api
+//     OS_USER_ID - User Id
+//     OS_PASSWORD - Key for api access
+//     OS_APPLICATION_CREDENTIAL_ID - Application Credential ID
+//     OS_APPLICATION_CREDENTIAL_NAME - Application Credential Name
+//     OS_APPLICATION_CREDENTIAL_SECRET - Application Credential Secret
+//     OS_USER_DOMAIN_NAME - User's domain name
+//     OS_USER_DOMAIN_ID - User's domain Id
+//     OS_PROJECT_NAME - Name of the project
+//     OS_PROJECT_DOMAIN_NAME - Name of the tenant's domain, only needed if it differs from the user domain
+//     OS_PROJECT_DOMAIN_ID - Id of the tenant's domain, only needed if it differs the from user domain
+//     OS_TRUST_ID - If of the trust
+//     OS_REGION_NAME - Region to use - default is use first region
+//
+// Other
+//     OS_ENDPOINT_TYPE - Endpoint type public, internal or admin
+//     ST_AUTH_VERSION - Choose auth version - 1, 2 or 3 or leave at 0 for autodetect
+//
+// For manual authentication
+//     OS_STORAGE_URL - storage URL from alternate authentication
+//     OS_AUTH_TOKEN - Auth Token from alternate authentication
+//
+// Library specific
+//     GOSWIFT_RETRIES - Retries on error (default is 3)
+//     GOSWIFT_USER_AGENT - HTTP User agent (default goswift/1.0)
+//     GOSWIFT_CONNECT_TIMEOUT - Connect channel timeout with unit, eg "10s", "100ms" (default "10s")
+//     GOSWIFT_TIMEOUT - Data channel timeout with unit, eg "10s", "100ms" (default "60s")
+//     GOSWIFT_INTERNAL - Set this to "true" to use the the internal network (obsolete - use OS_ENDPOINT_TYPE)
+func (c *Connection) ApplyEnvironment() (err error) {
+	for _, item := range []struct {
+		result interface{}
+		name   string
+	}{
+		// Environment variables - keep in same order as Connection
+		{&c.Domain, "OS_USER_DOMAIN_NAME"},
+		{&c.DomainId, "OS_USER_DOMAIN_ID"},
+		{&c.UserName, "OS_USERNAME"},
+		{&c.UserId, "OS_USER_ID"},
+		{&c.ApiKey, "OS_PASSWORD"},
+		{&c.ApplicationCredentialId, "OS_APPLICATION_CREDENTIAL_ID"},
+		{&c.ApplicationCredentialName, "OS_APPLICATION_CREDENTIAL_NAME"},
+		{&c.ApplicationCredentialSecret, "OS_APPLICATION_CREDENTIAL_SECRET"},
+		{&c.AuthUrl, "OS_AUTH_URL"},
+		{&c.Retries, "GOSWIFT_RETRIES"},
+		{&c.UserAgent, "GOSWIFT_USER_AGENT"},
+		{&c.ConnectTimeout, "GOSWIFT_CONNECT_TIMEOUT"},
+		{&c.Timeout, "GOSWIFT_TIMEOUT"},
+		{&c.Region, "OS_REGION_NAME"},
+		{&c.AuthVersion, "ST_AUTH_VERSION"},
+		{&c.Internal, "GOSWIFT_INTERNAL"},
+		{&c.Tenant, "OS_TENANT_NAME"},  //v2
+		{&c.Tenant, "OS_PROJECT_NAME"}, // v3
+		{&c.TenantId, "OS_TENANT_ID"},
+		{&c.EndpointType, "OS_ENDPOINT_TYPE"},
+		{&c.TenantDomain, "OS_PROJECT_DOMAIN_NAME"},
+		{&c.TenantDomainId, "OS_PROJECT_DOMAIN_ID"},
+		{&c.TrustId, "OS_TRUST_ID"},
+		{&c.StorageUrl, "OS_STORAGE_URL"},
+		{&c.AuthToken, "OS_AUTH_TOKEN"},
+		// v1 auth alternatives
+		{&c.ApiKey, "ST_KEY"},
+		{&c.UserName, "ST_USER"},
+		{&c.AuthUrl, "ST_AUTH"},
+	} {
+		err = setFromEnv(item.result, item.name)
+		if err != nil {
+			return newErrorf(0, "failed to read env var %q: %v", item.name, err)
+		}
+	}
+	return nil
 }
 
 // Error - all errors generated by this package are of this type.  Other error
@@ -140,6 +297,7 @@ type errorMap map[int]error
 
 var (
 	// Specific Errors you might want to check for equality
+	NotModified         = newError(304, "Not Modified")
 	BadRequest          = newError(400, "Bad Request")
 	AuthorizationFailed = newError(401, "Authorization Failed")
 	ContainerNotFound   = newError(404, "Container Not Found")
@@ -149,6 +307,8 @@ var (
 	TimeoutError        = newError(408, "Timeout when reading or writing data")
 	Forbidden           = newError(403, "Operation forbidden")
 	TooLargeObject      = newError(413, "Too Large Object")
+	RateLimit           = newError(498, "Rate Limit")
+	TooManyRequests     = newError(429, "TooManyRequests")
 
 	// Mappings for authentication errors
 	authErrorMap = errorMap{
@@ -163,15 +323,19 @@ var (
 		403: Forbidden,
 		404: ContainerNotFound,
 		409: ContainerNotEmpty,
+		498: RateLimit,
 	}
 
 	// Mappings for object errors
 	objectErrorMap = errorMap{
+		304: NotModified,
 		400: BadRequest,
 		403: Forbidden,
 		404: ObjectNotFound,
 		413: TooLargeObject,
 		422: ObjectCorrupted,
+		429: TooManyRequests,
+		498: RateLimit,
 	}
 )
 
@@ -184,15 +348,32 @@ func checkClose(c io.Closer, err *error) {
 	}
 }
 
+// drainAndClose discards all data from rd and closes it.
+// If an error occurs during Read, it is discarded.
+func drainAndClose(rd io.ReadCloser, err *error) {
+	if rd == nil {
+		return
+	}
+
+	_, _ = io.Copy(ioutil.Discard, rd)
+	cerr := rd.Close()
+	if err != nil && *err == nil {
+		*err = cerr
+	}
+}
+
 // parseHeaders checks a response for errors and translates into
-// standard errors if necessary.
+// standard errors if necessary. If an error is returned, resp.Body
+// has been drained and closed.
 func (c *Connection) parseHeaders(resp *http.Response, errorMap errorMap) error {
 	if errorMap != nil {
 		if err, ok := errorMap[resp.StatusCode]; ok {
+			drainAndClose(resp.Body, nil)
 			return err
 		}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		drainAndClose(resp.Body, nil)
 		return newErrorf(resp.StatusCode, "HTTP Error: %d: %s", resp.StatusCode, resp.Status)
 	}
 	return nil
@@ -254,12 +435,15 @@ func (c *Connection) setDefaults() {
 		c.Timeout = 60 * time.Second
 	}
 	if c.Transport == nil {
-		c.Transport = &http.Transport{
+		t := &http.Transport{
 			//		TLSClientConfig:    &tls.Config{RootCAs: pool},
 			//		DisableCompression: true,
-			Proxy:               http.ProxyFromEnvironment,
-			MaxIdleConnsPerHost: 2048,
+			Proxy: http.ProxyFromEnvironment,
+			// Half of linux's default open files limit (1024).
+			MaxIdleConnsPerHost: 512,
 		}
+		SetExpectContinueTimeout(t, 5*time.Second)
+		c.Transport = t
 	}
 	if c.client == nil {
 		c.client = &http.Client{
@@ -305,13 +489,14 @@ again:
 	}
 	if req != nil {
 		timer := time.NewTimer(c.ConnectTimeout)
+		defer timer.Stop()
 		var resp *http.Response
 		resp, err = c.doTimeoutRequest(timer, req)
 		if err != nil {
 			return
 		}
 		defer func() {
-			checkClose(resp.Body, &err)
+			drainAndClose(resp.Body, &err)
 			// Flush the auth connection - we don't want to keep
 			// it open if keepalives were enabled
 			flushKeepaliveConnections(c.Transport)
@@ -337,6 +522,12 @@ again:
 		c.StorageUrl = c.Auth.StorageUrl(c.Internal)
 	}
 	c.AuthToken = c.Auth.Token()
+	if do, ok := c.Auth.(Expireser); ok {
+		c.Expires = do.Expires()
+	} else {
+		c.Expires = time.Time{}
+	}
+
 	if !c.authenticated() {
 		err = newError(0, "Response didn't have storage url and auth token")
 		return
@@ -398,13 +589,38 @@ func (c *Connection) Authenticated() bool {
 //
 // Call with authLock held
 func (c *Connection) authenticated() bool {
-	return c.StorageUrl != "" && c.AuthToken != ""
+	if c.StorageUrl == "" || c.AuthToken == "" {
+		return false
+	}
+	if c.Expires.IsZero() {
+		return true
+	}
+	timeUntilExpiry := c.Expires.Sub(time.Now())
+	return timeUntilExpiry >= 60*time.Second
 }
 
 // SwiftInfo contains the JSON object returned by Swift when the /info
 // route is queried. The object contains, among others, the Swift version,
 // the enabled middlewares and their configuration
 type SwiftInfo map[string]interface{}
+
+func (i SwiftInfo) SupportsBulkDelete() bool {
+	_, val := i["bulk_delete"]
+	return val
+}
+
+func (i SwiftInfo) SupportsSLO() bool {
+	_, val := i["slo"]
+	return val
+}
+
+func (i SwiftInfo) SLOMinSegmentSize() int64 {
+	if slo, ok := i["slo"].(map[string]interface{}); ok {
+		val, _ := slo["min_segment_size"].(float64)
+		return int64(val)
+	}
+	return 1
+}
 
 // Discover Swift configuration by doing a request against /info
 func (c *Connection) QueryInfo() (infos SwiftInfo, err error) {
@@ -413,12 +629,34 @@ func (c *Connection) QueryInfo() (infos SwiftInfo, err error) {
 		return nil, err
 	}
 	infoUrl.Path = path.Join(infoUrl.Path, "..", "..", "info")
-	resp, err := http.Get(infoUrl.String())
+	resp, err := c.client.Get(infoUrl.String())
 	if err == nil {
+		if resp.StatusCode != http.StatusOK {
+			drainAndClose(resp.Body, nil)
+			return nil, fmt.Errorf("Invalid status code for info request: %d", resp.StatusCode)
+		}
 		err = readJson(resp, &infos)
+		if err == nil {
+			c.authLock.Lock()
+			c.swiftInfo = infos
+			c.authLock.Unlock()
+		}
 		return infos, err
 	}
 	return nil, err
+}
+
+func (c *Connection) cachedQueryInfo() (infos SwiftInfo, err error) {
+	c.authLock.Lock()
+	infos = c.swiftInfo
+	c.authLock.Unlock()
+	if infos == nil {
+		infos, err = c.QueryInfo()
+		if err != nil {
+			return
+		}
+	}
+	return infos, nil
 }
 
 // RequestOpts contains parameters for Connection.storage.
@@ -444,6 +682,7 @@ type RequestOpts struct {
 // Any other parameters (if not None) are added to the targetUrl
 //
 // Returns a response or an error.  If response is returned then
+// the resp.Body must be read completely and
 // resp.Body.Close() must be called on it, unless noResponse is set in
 // which case the body will be closed in this function
 //
@@ -484,6 +723,7 @@ func (c *Connection) Call(targetUrl string, p RequestOpts) (resp *http.Response,
 			URL.RawQuery = p.Parameters.Encode()
 		}
 		timer := time.NewTimer(c.ConnectTimeout)
+		defer timer.Stop()
 		reader := p.Body
 		if reader != nil {
 			reader = newWatchdogReader(reader, c.Timeout, timer)
@@ -496,11 +736,11 @@ func (c *Connection) Call(targetUrl string, p RequestOpts) (resp *http.Response,
 			for k, v := range p.Headers {
 				// Set ContentLength in req if the user passed it in in the headers
 				if k == "Content-Length" {
-					contentLength, err := strconv.ParseInt(v, 10, 64)
+					req.ContentLength, err = strconv.ParseInt(v, 10, 64)
 					if err != nil {
-						return nil, nil, fmt.Errorf("Invalid %q header %q: %v", k, v, err)
+						err = fmt.Errorf("Invalid %q header %q: %v", k, v, err)
+						return
 					}
-					req.ContentLength = contentLength
 				} else {
 					req.Header.Add(k, v)
 				}
@@ -508,17 +748,21 @@ func (c *Connection) Call(targetUrl string, p RequestOpts) (resp *http.Response,
 		}
 		req.Header.Add("User-Agent", c.UserAgent)
 		req.Header.Add("X-Auth-Token", authToken)
+
+		_, hasCL := p.Headers["Content-Length"]
+		AddExpectAndTransferEncoding(req, hasCL)
+
 		resp, err = c.doTimeoutRequest(timer, req)
 		if err != nil {
 			if (p.Operation == "HEAD" || p.Operation == "GET") && retries > 0 {
 				retries--
 				continue
 			}
-			return nil, nil, err
+			return
 		}
 		// Check to see if token has expired
 		if resp.StatusCode == 401 && retries > 0 {
-			_ = resp.Body.Close()
+			drainAndClose(resp.Body, nil)
 			c.UnAuthenticate()
 			retries--
 		} else {
@@ -526,15 +770,14 @@ func (c *Connection) Call(targetUrl string, p RequestOpts) (resp *http.Response,
 		}
 	}
 
-	if err = c.parseHeaders(resp, p.ErrorMap); err != nil {
-		_ = resp.Body.Close()
-		return nil, nil, err
-	}
 	headers = readHeaders(resp)
+	if err = c.parseHeaders(resp, p.ErrorMap); err != nil {
+		return
+	}
 	if p.NoResponse {
-		err = resp.Body.Close()
+		drainAndClose(resp.Body, &err)
 		if err != nil {
-			return nil, nil, err
+			return
 		}
 	} else {
 		// Cancel the request on timeout
@@ -574,7 +817,7 @@ func (c *Connection) storage(p RequestOpts) (resp *http.Response, headers Header
 //
 // Closes the response when done
 func readLines(resp *http.Response) (lines []string, err error) {
-	defer checkClose(resp.Body, &err)
+	defer drainAndClose(resp.Body, &err)
 	reader := bufio.NewReader(resp.Body)
 	buffer := bytes.NewBuffer(make([]byte, 0, 128))
 	var part []byte
@@ -599,7 +842,7 @@ func readLines(resp *http.Response) (lines []string, err error) {
 //
 // Closes the response when done
 func readJson(resp *http.Response, result interface{}) (err error) {
-	defer checkClose(resp.Body, &err)
+	defer drainAndClose(resp.Body, &err)
 	decoder := json.NewDecoder(resp.Body)
 	return decoder.Decode(result)
 }
@@ -741,13 +984,14 @@ func (c *Connection) ContainerNamesAll(opts *ContainersOpts) ([]string, error) {
 
 // ObjectOpts is options for Objects() and ObjectNames()
 type ObjectsOpts struct {
-	Limit     int     // For an integer value n, limits the number of results to at most n values.
-	Marker    string  // Given a string value x, return object names greater in value than the  specified marker.
-	EndMarker string  // Given a string value x, return object names less in value than the specified marker
-	Prefix    string  // For a string value x, causes the results to be limited to object names beginning with the substring x.
-	Path      string  // For a string value x, return the object names nested in the pseudo path
-	Delimiter rune    // For a character c, return all the object names nested in the container
-	Headers   Headers // Any additional HTTP headers - can be nil
+	Limit      int     // For an integer value n, limits the number of results to at most n values.
+	Marker     string  // Given a string value x, return object names greater in value than the  specified marker.
+	EndMarker  string  // Given a string value x, return object names less in value than the specified marker
+	Prefix     string  // For a string value x, causes the results to be limited to object names beginning with the substring x.
+	Path       string  // For a string value x, return the object names nested in the pseudo path
+	Delimiter  rune    // For a character c, return all the object names nested in the container
+	Headers    Headers // Any additional HTTP headers - can be nil
+	KeepMarker bool    // Do not reset Marker when using ObjectsAll or ObjectNamesAll
 }
 
 // parse reads values out of ObjectsOpts
@@ -796,14 +1040,16 @@ func (c *Connection) ObjectNames(container string, opts *ObjectsOpts) ([]string,
 
 // Object contains information about an object
 type Object struct {
-	Name               string    `json:"name"`          // object name
-	ContentType        string    `json:"content_type"`  // eg application/directory
-	Bytes              int64     `json:"bytes"`         // size in bytes
-	ServerLastModified string    `json:"last_modified"` // Last modified time, eg '2011-06-30T08:20:47.736680' as a string supplied by the server
-	LastModified       time.Time // Last modified time converted to a time.Time
-	Hash               string    `json:"hash"` // MD5 hash, eg "d41d8cd98f00b204e9800998ecf8427e"
-	PseudoDirectory    bool      // Set when using delimiter to show that this directory object does not really exist
-	SubDir             string    `json:"subdir"` // returned only when using delimiter to mark "pseudo directories"
+	Name               string     `json:"name"`          // object name
+	ContentType        string     `json:"content_type"`  // eg application/directory
+	Bytes              int64      `json:"bytes"`         // size in bytes
+	ServerLastModified string     `json:"last_modified"` // Last modified time, eg '2011-06-30T08:20:47.736680' as a string supplied by the server
+	LastModified       time.Time  // Last modified time converted to a time.Time
+	Hash               string     `json:"hash"`     // MD5 hash, eg "d41d8cd98f00b204e9800998ecf8427e"
+	SLOHash            string     `json:"slo_etag"` // MD5 hash of all segments' MD5 hash, eg "d41d8cd98f00b204e9800998ecf8427e"
+	PseudoDirectory    bool       // Set when using delimiter to show that this directory object does not really exist
+	SubDir             string     `json:"subdir"` // returned only when using delimiter to mark "pseudo directories"
+	ObjectType         ObjectType // type of this object
 }
 
 // Objects returns a slice of Object with information about each
@@ -852,12 +1098,16 @@ func (c *Connection) Objects(container string, opts *ObjectsOpts) ([]Object, err
 				return nil, err
 			}
 		}
+		if object.SLOHash != "" {
+			object.ObjectType = StaticLargeObjectType
+		}
 	}
 	return objects, err
 }
 
 // objectsAllOpts makes a copy of opts if set or makes a new one and
 // overrides Limit and Marker
+// Marker is not overriden if KeepMarker is set
 func objectsAllOpts(opts *ObjectsOpts, Limit int) *ObjectsOpts {
 	var newOpts ObjectsOpts
 	if opts != nil {
@@ -866,7 +1116,9 @@ func objectsAllOpts(opts *ObjectsOpts, Limit int) *ObjectsOpts {
 	if newOpts.Limit == 0 {
 		newOpts.Limit = Limit
 	}
-	newOpts.Marker = ""
+	if !newOpts.KeepMarker {
+		newOpts.Marker = ""
+	}
 	return &newOpts
 }
 
@@ -935,7 +1187,8 @@ func (c *Connection) ObjectsAll(container string, opts *ObjectsOpts) ([]Object, 
 
 // ObjectNamesAll is like ObjectNames but it returns all the Objects
 //
-// It calls ObjectNames multiple times using the Marker parameter
+// It calls ObjectNames multiple times using the Marker parameter. Marker is
+// reset unless KeepMarker is set
 //
 // It has a default Limit parameter but you may pass in your own
 func (c *Connection) ObjectNamesAll(container string, opts *ObjectsOpts) ([]string, error) {
@@ -1141,6 +1394,19 @@ func (file *ObjectCreateFile) Close() error {
 	return nil
 }
 
+// Headers returns the response headers from the created object if the upload
+// has been completed. The Close() method must be called on an ObjectCreateFile
+// before this method.
+func (file *ObjectCreateFile) Headers() (Headers, error) {
+	// error out if upload is not complete.
+	select {
+	case <-file.done:
+	default:
+		return nil, fmt.Errorf("Cannot get metadata, object upload failed or has not yet completed.")
+	}
+	return file.headers, nil
+}
+
 // Check it satisfies the interface
 var _ io.WriteCloser = &ObjectCreateFile{}
 
@@ -1202,7 +1468,7 @@ func (c *Connection) ObjectCreate(container string, objectName string, checkHash
 	}
 	// Run the PUT in the background piping it data
 	go func() {
-		file.resp, file.headers, file.err = c.storage(RequestOpts{
+		opts := RequestOpts{
 			Container:  container,
 			ObjectName: objectName,
 			Operation:  "PUT",
@@ -1210,11 +1476,43 @@ func (c *Connection) ObjectCreate(container string, objectName string, checkHash
 			Body:       pipeReader,
 			NoResponse: true,
 			ErrorMap:   objectErrorMap,
-		})
+		}
+		file.resp, file.headers, file.err = c.storage(opts)
 		// Signal finished
 		pipeReader.Close()
 		close(file.done)
 	}()
+	return
+}
+
+func (c *Connection) objectPut(container string, objectName string, contents io.Reader, checkHash bool, Hash string, contentType string, h Headers, parameters url.Values) (headers Headers, err error) {
+	extraHeaders := objectPutHeaders(objectName, &checkHash, Hash, contentType, h)
+	hash := md5.New()
+	var body io.Reader = contents
+	if checkHash {
+		body = io.TeeReader(contents, hash)
+	}
+	_, headers, err = c.storage(RequestOpts{
+		Container:  container,
+		ObjectName: objectName,
+		Operation:  "PUT",
+		Headers:    extraHeaders,
+		Body:       body,
+		NoResponse: true,
+		ErrorMap:   objectErrorMap,
+		Parameters: parameters,
+	})
+	if err != nil {
+		return
+	}
+	if checkHash {
+		receivedMd5 := strings.ToLower(headers["Etag"])
+		calculatedMd5 := fmt.Sprintf("%x", hash.Sum(nil))
+		if receivedMd5 != calculatedMd5 {
+			err = ObjectCorrupted
+			return
+		}
+	}
 	return
 }
 
@@ -1240,33 +1538,7 @@ func (c *Connection) ObjectCreate(container string, objectName string, checkHash
 // If contentType is set it will be used, otherwise one will be
 // guessed from objectName using mime.TypeByExtension
 func (c *Connection) ObjectPut(container string, objectName string, contents io.Reader, checkHash bool, Hash string, contentType string, h Headers) (headers Headers, err error) {
-	extraHeaders := objectPutHeaders(objectName, &checkHash, Hash, contentType, h)
-	hash := md5.New()
-	var body io.Reader = contents
-	if checkHash {
-		body = io.TeeReader(contents, hash)
-	}
-	_, headers, err = c.storage(RequestOpts{
-		Container:  container,
-		ObjectName: objectName,
-		Operation:  "PUT",
-		Headers:    extraHeaders,
-		Body:       body,
-		NoResponse: true,
-		ErrorMap:   objectErrorMap,
-	})
-	if err != nil {
-		return
-	}
-	if checkHash {
-		receivedMd5 := strings.ToLower(headers["Etag"])
-		calculatedMd5 := fmt.Sprintf("%x", hash.Sum(nil))
-		if receivedMd5 != calculatedMd5 {
-			err = ObjectCorrupted
-			return
-		}
-	}
-	return
+	return c.objectPut(container, objectName, contents, checkHash, Hash, contentType, h, nil)
 }
 
 // ObjectPutBytes creates an object from a []byte in a container.
@@ -1274,7 +1546,8 @@ func (c *Connection) ObjectPut(container string, objectName string, contents io.
 // This is a simplified interface which checks the MD5.
 func (c *Connection) ObjectPutBytes(container string, objectName string, contents []byte, contentType string) (err error) {
 	buf := bytes.NewBuffer(contents)
-	_, err = c.ObjectPut(container, objectName, buf, true, "", contentType, nil)
+	h := Headers{"Content-Length": strconv.Itoa(len(contents))}
+	_, err = c.ObjectPut(container, objectName, buf, true, "", contentType, h)
 	return
 }
 
@@ -1283,7 +1556,8 @@ func (c *Connection) ObjectPutBytes(container string, objectName string, content
 // This is a simplified interface which checks the MD5
 func (c *Connection) ObjectPutString(container string, objectName string, contents string, contentType string) (err error) {
 	buf := strings.NewReader(contents)
-	_, err = c.ObjectPut(container, objectName, buf, true, "", contentType, nil)
+	h := Headers{"Content-Length": strconv.Itoa(len(contents))}
+	_, err = c.ObjectPut(container, objectName, buf, true, "", contentType, h)
 	return
 }
 
@@ -1303,10 +1577,14 @@ type ObjectOpenFile struct {
 	lengthOk   bool           // whether length is valid
 	length     int64          // length of the object if read
 	seeked     bool           // whether we have seeked this file or not
+	overSeeked bool           // set if we have seeked to the end or beyond
 }
 
 // Read bytes from the object - see io.Reader
 func (file *ObjectOpenFile) Read(p []byte) (n int, err error) {
+	if file.overSeeked {
+		return 0, io.EOF
+	}
 	n, err = file.body.Read(p)
 	file.bytes += int64(n)
 	file.pos += int64(n)
@@ -1330,6 +1608,7 @@ func (file *ObjectOpenFile) Read(p []byte) (n int, err error) {
 //
 // Seek(0, 1) will return the current file pointer.
 func (file *ObjectOpenFile) Seek(offset int64, whence int) (newPos int64, err error) {
+	file.overSeeked = false
 	switch whence {
 	case 0: // relative to start
 		newPos = offset
@@ -1340,6 +1619,10 @@ func (file *ObjectOpenFile) Seek(offset int64, whence int) (newPos int64, err er
 			return file.pos, newError(0, "Length of file unknown so can't seek from end")
 		}
 		newPos = file.length + offset
+		if offset >= 0 {
+			file.overSeeked = true
+			return
+		}
 	default:
 		panic("Unknown whence in ObjectOpenFile.Seek")
 	}
@@ -1419,6 +1702,57 @@ func (file *ObjectOpenFile) Close() (err error) {
 var _ io.ReadCloser = &ObjectOpenFile{}
 var _ io.Seeker = &ObjectOpenFile{}
 
+func (c *Connection) objectOpenBase(container string, objectName string, checkHash bool, h Headers, parameters url.Values) (file *ObjectOpenFile, headers Headers, err error) {
+	var resp *http.Response
+	opts := RequestOpts{
+		Container:  container,
+		ObjectName: objectName,
+		Operation:  "GET",
+		ErrorMap:   objectErrorMap,
+		Headers:    h,
+		Parameters: parameters,
+	}
+	resp, headers, err = c.storage(opts)
+	if err != nil {
+		return
+	}
+	// Can't check MD5 on an object with X-Object-Manifest or X-Static-Large-Object set
+	if checkHash && headers.IsLargeObject() {
+		// log.Printf("swift: turning off md5 checking on object with manifest %v", objectName)
+		checkHash = false
+	}
+	file = &ObjectOpenFile{
+		connection: c,
+		container:  container,
+		objectName: objectName,
+		headers:    h,
+		resp:       resp,
+		checkHash:  checkHash,
+		body:       resp.Body,
+	}
+	if checkHash {
+		file.hash = md5.New()
+		file.body = io.TeeReader(resp.Body, file.hash)
+	}
+	// Read Content-Length
+	if resp.Header.Get("Content-Length") != "" {
+		file.length, err = getInt64FromHeader(resp, "Content-Length")
+		file.lengthOk = (err == nil)
+	}
+	return
+}
+
+func (c *Connection) objectOpen(container string, objectName string, checkHash bool, h Headers, parameters url.Values) (file *ObjectOpenFile, headers Headers, err error) {
+	err = withLORetry(0, func() (Headers, int64, error) {
+		file, headers, err = c.objectOpenBase(container, objectName, checkHash, h, parameters)
+		if err != nil {
+			return headers, 0, err
+		}
+		return headers, file.length, nil
+	})
+	return
+}
+
 // ObjectOpen returns an ObjectOpenFile for reading the contents of
 // the object.  This satisfies the io.ReadCloser and the io.Seeker
 // interfaces.
@@ -1443,41 +1777,7 @@ var _ io.Seeker = &ObjectOpenFile{}
 //
 // headers["Content-Type"] will give the content type if desired.
 func (c *Connection) ObjectOpen(container string, objectName string, checkHash bool, h Headers) (file *ObjectOpenFile, headers Headers, err error) {
-	var resp *http.Response
-	resp, headers, err = c.storage(RequestOpts{
-		Container:  container,
-		ObjectName: objectName,
-		Operation:  "GET",
-		ErrorMap:   objectErrorMap,
-		Headers:    h,
-	})
-	if err != nil {
-		return
-	}
-	// Can't check MD5 on an object with X-Object-Manifest or X-Static-Large-Object set
-	if checkHash && (headers["X-Object-Manifest"] != "" || headers["X-Static-Large-Object"] != "") {
-		// log.Printf("swift: turning off md5 checking on object with manifest %v", objectName)
-		checkHash = false
-	}
-	file = &ObjectOpenFile{
-		connection: c,
-		container:  container,
-		objectName: objectName,
-		headers:    h,
-		resp:       resp,
-		checkHash:  checkHash,
-		body:       resp.Body,
-	}
-	if checkHash {
-		file.hash = md5.New()
-		file.body = io.TeeReader(resp.Body, file.hash)
-	}
-	// Read Content-Length
-	if resp.Header.Get("Content-Length") != "" {
-		file.length, err = getInt64FromHeader(resp, "Content-Length")
-		file.lengthOk = (err == nil)
-	}
-	return
+	return c.objectOpen(container, objectName, checkHash, h, nil)
 }
 
 // ObjectGet gets the object into the io.Writer contents.
@@ -1580,26 +1880,19 @@ type BulkDeleteResult struct {
 	Headers        Headers          // Response HTTP headers.
 }
 
-// BulkDelete deletes multiple objectNames from container in one operation.
-//
-// Some servers may not accept bulk-delete requests since bulk-delete is
-// an optional feature of swift - these will return the Forbidden error.
-//
-// See also:
-// * http://docs.openstack.org/trunk/openstack-object-storage/admin/content/object-storage-bulk-delete.html
-// * http://docs.rackspace.com/files/api/v1/cf-devguide/content/Bulk_Delete-d1e2338.html
-func (c *Connection) BulkDelete(container string, objectNames []string) (result BulkDeleteResult, err error) {
+func (c *Connection) doBulkDelete(objects []string) (result BulkDeleteResult, err error) {
 	var buffer bytes.Buffer
-	for _, s := range objectNames {
-		buffer.WriteString(fmt.Sprintf("/%s/%s\n", container,
-			url.QueryEscape(s)))
+	for _, s := range objects {
+		u := url.URL{Path: s}
+		buffer.WriteString(u.String() + "\n")
 	}
 	resp, headers, err := c.storage(RequestOpts{
 		Operation:  "DELETE",
 		Parameters: url.Values{"bulk-delete": []string{"1"}},
 		Headers: Headers{
-			"Accept":       "application/json",
-			"Content-Type": "text/plain",
+			"Accept":         "application/json",
+			"Content-Type":   "text/plain",
+			"Content-Length": strconv.Itoa(buffer.Len()),
 		},
 		ErrorMap: ContainerErrorMap,
 		Body:     &buffer,
@@ -1631,6 +1924,26 @@ func (c *Connection) BulkDelete(container string, objectNames []string) (result 
 	}
 	result.Errors = el
 	return
+}
+
+// BulkDelete deletes multiple objectNames from container in one operation.
+//
+// Some servers may not accept bulk-delete requests since bulk-delete is
+// an optional feature of swift - these will return the Forbidden error.
+//
+// See also:
+// * http://docs.openstack.org/trunk/openstack-object-storage/admin/content/object-storage-bulk-delete.html
+// * http://docs.rackspace.com/files/api/v1/cf-devguide/content/Bulk_Delete-d1e2338.html
+func (c *Connection) BulkDelete(container string, objectNames []string) (result BulkDeleteResult, err error) {
+	if len(objectNames) == 0 {
+		result.Errors = make(map[string]error)
+		return
+	}
+	fullPaths := make([]string, len(objectNames))
+	for i, name := range objectNames {
+		fullPaths[i] = fmt.Sprintf("/%s/%s", container, name)
+	}
+	return c.doBulkDelete(fullPaths)
 }
 
 // BulkUploadResult stores results of BulkUpload().
@@ -1716,6 +2029,17 @@ func (c *Connection) BulkUpload(uploadPath string, dataStream io.Reader, format 
 //
 // Use headers.ObjectMetadata() to read the metadata in the Headers.
 func (c *Connection) Object(container string, objectName string) (info Object, headers Headers, err error) {
+	err = withLORetry(0, func() (Headers, int64, error) {
+		info, headers, err = c.objectBase(container, objectName)
+		if err != nil {
+			return headers, 0, err
+		}
+		return headers, info.Bytes, nil
+	})
+	return
+}
+
+func (c *Connection) objectBase(container string, objectName string) (info Object, headers Headers, err error) {
 	var resp *http.Response
 	resp, headers, err = c.storage(RequestOpts{
 		Container:  container,
@@ -1746,11 +2070,22 @@ func (c *Connection) Object(container string, objectName string) (info Object, h
 			return
 		}
 	}
-	info.ServerLastModified = resp.Header.Get("Last-Modified")
-	if info.LastModified, err = time.Parse(http.TimeFormat, info.ServerLastModified); err != nil {
-		return
+	// Currently ceph doesn't return a Last-Modified header for DLO manifests without any segments
+	// See ceph http://tracker.ceph.com/issues/15812
+	if resp.Header.Get("Last-Modified") != "" {
+		info.ServerLastModified = resp.Header.Get("Last-Modified")
+		if info.LastModified, err = time.Parse(http.TimeFormat, info.ServerLastModified); err != nil {
+			return
+		}
 	}
+
 	info.Hash = resp.Header.Get("Etag")
+	if resp.Header.Get("X-Object-Manifest") != "" {
+		info.ObjectType = DynamicLargeObjectType
+	} else if resp.Header.Get("X-Static-Large-Object") != "" {
+		info.ObjectType = StaticLargeObjectType
+	}
+
 	return
 }
 
@@ -1788,6 +2123,15 @@ func (c *Connection) ObjectUpdate(container string, objectName string, h Headers
 	return err
 }
 
+// urlPathEscape escapes URL path the in string using URL escaping rules
+//
+// This mimics url.PathEscape which only available from go 1.8
+func urlPathEscape(in string) string {
+	var u url.URL
+	u.Path = in
+	return u.String()
+}
+
 // ObjectCopy does a server side copy of an object to a new position
 //
 // All metadata is preserved.  If metadata is set in the headers then
@@ -1800,7 +2144,7 @@ func (c *Connection) ObjectUpdate(container string, objectName string, h Headers
 func (c *Connection) ObjectCopy(srcContainer string, srcObjectName string, dstContainer string, dstObjectName string, h Headers) (headers Headers, err error) {
 	// Meta stuff
 	extraHeaders := map[string]string{
-		"Destination": dstContainer + "/" + dstObjectName,
+		"Destination": urlPathEscape(dstContainer + "/" + dstObjectName),
 	}
 	for key, value := range h {
 		extraHeaders[key] = value
