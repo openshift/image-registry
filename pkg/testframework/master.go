@@ -354,7 +354,7 @@ func (m *Master) WaitForRoles() error {
 func (m *Master) Close() {
 	if kubeClient, err := kubeclient.NewForConfig(m.AdminKubeConfig()); err == nil {
 		for _, ns := range m.namespaces {
-			if err := kubeClient.Core().Namespaces().Delete(ns, nil); err != nil {
+			if err := kubeClient.CoreV1().Namespaces().Delete(ns, nil); err != nil {
 				m.t.Logf("failed to cleanup namespace %s: %v", ns, err)
 			}
 		}

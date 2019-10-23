@@ -6,7 +6,7 @@ require (
 	bitbucket.org/ww/goautoneg v0.0.0-20120707110453-75cd24fc2f2c
 	cloud.google.com/go v0.1.1-0.20160913182117-3b1ae45394a2 // indirect
 	github.com/Azure/azure-sdk-for-go v16.2.1+incompatible // indirect
-	github.com/Azure/go-autorest v11.1.2+incompatible // indirect
+	github.com/Azure/go-autorest v13.2.0 // indirect
 	github.com/Microsoft/go-winio v0.4.14 // indirect
 	github.com/aws/aws-sdk-go v1.17.14 // indirect
 	github.com/beorn7/perks v0.0.0-20160229213445-3ac7bf7a47d1 // indirect
@@ -83,3 +83,5 @@ require (
 )
 
 replace github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20190226150947-f975179b0b58+incompatible
+
+replace google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
