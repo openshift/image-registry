@@ -98,7 +98,7 @@ test-unit:
 
 test-integration:
 	# TODO(dmage): remove DOCKER_API_VERSION when our CI will upgrade Docker
-	GOTEST_FLAGS="$(TESTFLAGS)" DOCKER_API_VERSION=1.24 hack/test-go.sh test/integration/*
+	GOTEST_FLAGS="-p 1 $(TESTFLAGS)" DOCKER_API_VERSION=1.24 hack/test-go.sh test/integration/*
 .PHONY: test-integration
 
 # Remove all build artifacts.
