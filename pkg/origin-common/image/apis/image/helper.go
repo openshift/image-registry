@@ -74,7 +74,7 @@ func (r DockerImageReference) DockerClientDefaults() DockerImageReference {
 	if len(r.Namespace) == 0 && IsRegistryDockerHub(r.Registry) {
 		r.Namespace = DockerDefaultNamespace
 	}
-	if len(r.Tag) == 0 {
+	if len(r.Tag) == 0 && len(r.ID) == 0 {
 		r.Tag = DefaultImageTag
 	}
 	return r
