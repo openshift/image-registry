@@ -138,13 +138,13 @@ build-images: build-rpms
 .PHONY: build-images
 
 update-deps:
-	go get -d -u k8s.io/api@kubernetes-1.13.5 \
-		k8s.io/apimachinery@kubernetes-1.13.5 \
-		k8s.io/apiserver@kubernetes-1.13.5 \
-		k8s.io/client-go@kubernetes-1.13.5 \
-		github.com/openshift/api@release-4.1 \
-		github.com/openshift/client-go@release-4.1 \
-		github.com/openshift/library-go@release-4.1
+	go get -d -u k8s.io/api@kubernetes-1.16.2 \
+		k8s.io/apimachinery@kubernetes-1.16.2 \
+		k8s.io/apiserver@kubernetes-1.16.2 \
+		k8s.io/client-go@kubernetes-1.16.2 \
+		github.com/openshift/api@release-4.3 \
+		github.com/openshift/client-go@release-4.3 \
+		github.com/openshift/library-go@release-4.3
 	go get -u=patch ./cmd/... ./pkg/... ./test/... 'github.com/docker/go-metrics@v0.0.0-20180209012529-399ea8c73916'
 	go mod edit -replace=github.com/docker/distribution=github.com/openshift/docker-distribution@image-registry-4.0-distribution-16128bb
 	go mod tidy
