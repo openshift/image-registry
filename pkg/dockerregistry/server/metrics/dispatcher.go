@@ -3,7 +3,7 @@ package metrics
 import (
 	"net/http"
 
-	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/docker/distribution/registry/handlers"
 
@@ -13,6 +13,6 @@ import (
 // Dispatcher handles the GET requests for metrics endpoint.
 func Dispatcher(ctx *handlers.Context, r *http.Request) http.Handler {
 	return gorillahandlers.MethodHandler{
-		"GET": prometheus.Handler(),
+		"GET": promhttp.Handler(),
 	}
 }
