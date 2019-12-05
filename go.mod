@@ -55,10 +55,10 @@ require (
 	google.golang.org/grpc v1.23.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.2.4
-	k8s.io/api v0.0.0-20191016110408-35e52d86657a
-	k8s.io/apimachinery v0.0.0-20191004115801-a2eda9f80ab8
+	k8s.io/api v0.17.0
+	k8s.io/apimachinery v0.17.0
 	k8s.io/apiserver v0.0.0-20191016112112-5190913f932d // indirect
-	k8s.io/client-go v0.0.0-20191016111102-bec269661e48
+	k8s.io/client-go v0.17.0
 	k8s.io/klog v1.0.0
 )
 
