@@ -46,7 +46,7 @@
 # Customize from here.
 #
 
-%global golang_version 1.8.1
+%global golang_version 1.10
 %{!?version: %global version 0.0.1}
 %{!?release: %global release 1}
 %global package_name origin-dockerregistry
