@@ -331,7 +331,8 @@ func (m *Master) WaitForRoles() error {
 				return false, nil
 			}
 			if err != nil {
-				return false, err
+				m.t.Logf("wait for roles: unable to check cluster role %s: %v", roleName, err)
+				return false, nil
 			}
 			if len(role.Rules) == 0 {
 				return false, nil
