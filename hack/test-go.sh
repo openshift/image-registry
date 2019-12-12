@@ -128,7 +128,7 @@ if [[ -n "${junit_report}" ]]; then
     set +o pipefail
 
     os::util::ensure::built_binary_exists 'gotest2junit'
-    report_file="$( mktemp "${ARTIFACT_DIR}/unit_report_XXXXX" ).xml"
+    report_file="$( mktemp "${ARTIFACT_DIR}/junit_XXXXX" ).xml"
 
     go test -json ${gotest_flags} ${test_packages} 2>"${test_error_file}" | tee "${JUNIT_REPORT_OUTPUT}" | gotest2junit > "${report_file}"
     test_return_code="${PIPESTATUS[0]}"
