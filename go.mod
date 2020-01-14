@@ -8,7 +8,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.9.3 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.8.1 // indirect
 	github.com/Microsoft/go-winio v0.4.14 // indirect
-	github.com/aws/aws-sdk-go v1.17.14 // indirect
+	github.com/aws/aws-sdk-go v1.28.2 // indirect
 	github.com/bshuster-repo/logrus-logstash-hook v0.4.1
 	github.com/denverdino/aliyungo v0.0.0-20161108032828-afedced274aa // indirect
 	github.com/dnaeon/go-vcr v1.0.1 // indirect
