@@ -3,11 +3,13 @@ package manifesthandler
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/opencontainers/go-digest"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
@@ -80,8 +82,33 @@ func (h *manifestSchema2Handler) verifyLayer(ctx context.Context, fsLayer distri
 		return errUnexpectedURL
 	}
 
-	desc, err := h.blobStore.Stat(ctx, fsLayer.Digest)
-	if err != nil {
+	// https://bugzilla.redhat.com/show_bug.cgi?id=1745743
+	// AWS S3 (and potentially other object stores) only have eventual
+	// consistency guarantees. Stat can fail here if an image layer was
+	// recently pushed. In the event Stat returns `ErrBlobUnknown`, retry
+	// up to 3 seconds.
+	var desc distribution.Descriptor
+	if err := wait.ExponentialBackoff(
+		wait.Backoff{
+			Duration: 100 * time.Millisecond,
+			Factor:   2,
+			Steps:    6,
+		},
+		func() (done bool, err error) {
+			desc, err = h.blobStore.Stat(ctx, fsLayer.Digest)
+			switch {
+			case err == nil:
+				return true, nil
+			case err == distribution.ErrBlobUnknown:
+				return false, nil
+			default:
+				return true, err
+			}
+		},
+	); err != nil {
+		if err == wait.ErrWaitTimeout {
+			return distribution.ErrBlobUnknown
+		}
 		return err
 	}
 
