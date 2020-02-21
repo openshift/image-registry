@@ -4,7 +4,7 @@ COPY . .
 RUN hack/build-go.sh
 
 FROM registry.svc.ci.openshift.org/openshift/origin-v4.0:base
-RUN yum install -y rsync
+RUN yum install -y rsync && yum clean all && rm -rf /var/cache/yum
 COPY --from=builder /go/src/github.com/openshift/image-registry/_output/local/bin/dockerregistry /usr/bin/
 COPY images/dockerregistry/config.yml /
 RUN chmod a+w -R /etc/pki/ca-trust/extracted
