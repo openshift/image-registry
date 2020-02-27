@@ -1,0 +1,13 @@
+{
+	"auths": {
+		"registry0.redhat.io": {
+			"auth": "cmVnaXN0cnkwOnJlZ2lzdHJ5MA=="
+		},
+		"registry1.redhat.io": {
+			"auth": "cmVnaXN0cnkxOnJlZ2lzdHJ5MQ=="
+		}
+	},
+	"HttpHeaders": {
+		"User-Agent": "Docker-Client/19.03.5 (linux)"
+	}
+}
