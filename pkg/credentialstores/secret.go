@@ -4,11 +4,13 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/openshift/image-registry/pkg/kubernetes-common/credentialprovider"
-
 	"github.com/golang/glog"
-	"github.com/openshift/library-go/pkg/image/registryclient"
+
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/openshift/library-go/pkg/image/registryclient"
+
+	"github.com/openshift/image-registry/pkg/kubernetes-common/credentialprovider"
 )
 
 var (

@@ -15,7 +15,7 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	rerrors "github.com/openshift/image-registry/pkg/errors"
 	"github.com/openshift/image-registry/pkg/imagestream"
-	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
+	"github.com/openshift/library-go/pkg/image/registryclient"
 )
 
 // BlobGetterService combines the operations to access and read blobs.

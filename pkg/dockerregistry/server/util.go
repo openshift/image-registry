@@ -13,10 +13,11 @@ import (
 	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
 
+	"github.com/openshift/image-registry/pkg/credentialstores"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
-	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 	"github.com/openshift/image-registry/pkg/requesttrace"
+	"github.com/openshift/library-go/pkg/image/registryclient"
 )
 
 func getNamespaceName(resourceName string) (string, string, error) {
@@ -50,9 +51,19 @@ func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metric
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
-	credentials := registryclient.NewCredentialsForSecrets(secrets)
+
+	credentials := credentialstores.NewUnionCredentialStore(
+		credentialstores.NewForSecrets(secrets),
+		credentialstores.NewNodeCredentialStore(),
+	)
+
 	var retriever registryclient.RepositoryRetriever
-	retriever = registryclient.NewContext(secureTransport, insecureTransport, requesttrace.New(ctx, req)).WithCredentials(credentials)
+	retriever = registryclient.NewContext(
+		secureTransport, insecureTransport,
+	).WithRequestModifiers(
+		requesttrace.New(ctx, req),
+	).WithCredentials(credentials)
+
 	retriever = m.RepositoryRetriever(retriever)
 	return retriever, nil
 }

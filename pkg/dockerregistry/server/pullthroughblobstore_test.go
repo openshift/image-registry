@@ -27,9 +27,9 @@ import (
 	metricstesting "github.com/openshift/image-registry/pkg/dockerregistry/server/metrics/testing"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-	originregistryclient "github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 	"github.com/openshift/image-registry/pkg/testutil"
 	"github.com/openshift/image-registry/pkg/testutil/counter"
+	originregistryclient "github.com/openshift/library-go/pkg/image/registryclient"
 )
 
 func TestPullthroughServeBlob(t *testing.T) {

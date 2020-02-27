@@ -3,6 +3,8 @@ package credentialstores
 import (
 	"net/url"
 
+	"k8s.io/apimachinery/pkg/util/errors"
+
 	"github.com/openshift/library-go/pkg/image/registryclient"
 )
 
@@ -47,14 +49,14 @@ func (u *UnionCredentialStore) Basic(target *url.URL) (string, string) {
 
 // Err returns all errors reported by internal credential stores.
 func (u *UnionCredentialStore) Err() error {
-	multierr := &MultiError{}
+	var errs []error
 	for _, s := range u.stores {
 		if err := s.Err(); err != nil {
-			multierr.Append(err)
+			errs = append(errs, err)
 		}
 	}
-	if len(multierr.errors) == 0 {
+	if len(errs) == 0 {
 		return nil
 	}
-	return multierr
+	return errors.NewAggregate(errs)
 }

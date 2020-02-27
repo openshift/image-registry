@@ -1,22 +1,24 @@
 package credentialstores
 
 import (
-	"io/ioutil"
 	"net/url"
+	"os"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/json"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 func TestCredentialsForSecrets(t *testing.T) {
-	data, err := ioutil.ReadFile("test/image-secrets.json")
+	fp, err := os.Open("test/image-secrets.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer fp.Close()
 
 	var secrets corev1.SecretList
-	if err := json.Unmarshal(data, &secrets); err != nil {
+	decoder := yaml.NewYAMLToJSONDecoder(fp)
+	if err := decoder.Decode(&secrets); err != nil {
 		t.Fatal(err)
 	}
 

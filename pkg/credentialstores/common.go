@@ -4,25 +4,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/openshift/image-registry/pkg/kubernetes-common/credentialprovider"
-
 	"github.com/golang/glog"
+
+	"github.com/openshift/image-registry/pkg/kubernetes-common/credentialprovider"
 )
-
-// MultiError is a wrap for multiple errors.
-type MultiError struct {
-	errors []string
-}
-
-// Append adds a new error.
-func (m *MultiError) Append(e error) {
-	m.errors = append(m.errors, e.Error())
-}
-
-// Error exists to comply with golang's error interface.
-func (m *MultiError) Error() string {
-	return strings.Join(m.errors, " ")
-}
 
 // basicCredentialsFromKeyring extract basicAuth information from provided
 // keyring. If keyring does not contain information for the provided URL, empty
