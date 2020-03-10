@@ -20,6 +20,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
+	"github.com/openshift/library-go/pkg/image/registryclient"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	dockerregistryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
@@ -27,7 +28,6 @@ import (
 	metricstesting "github.com/openshift/image-registry/pkg/dockerregistry/server/metrics/testing"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-	originregistryclient "github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 	"github.com/openshift/image-registry/pkg/testutil"
 	"github.com/openshift/image-registry/pkg/testutil/counter"
 )
@@ -279,7 +279,7 @@ func TestPullthroughServeNotSeekableBlob(t *testing.T) {
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
-	retriever := originregistryclient.NewContext(http.DefaultTransport, http.DefaultTransport).WithCredentials(originregistryclient.NoCredentials)
+	retriever := registryclient.NewContext(http.DefaultTransport, http.DefaultTransport).WithCredentials(registryclient.NoCredentials)
 	repo, err := retriever.Repository(ctx, externalRegistryURL, repoName, true)
 	if err != nil {
 		t.Fatal(err)
