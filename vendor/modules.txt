@@ -5,6 +5,9 @@ cloud.google.com/go/compute/metadata
 # github.com/Azure/azure-sdk-for-go v16.2.1+incompatible
 github.com/Azure/azure-sdk-for-go/storage
 github.com/Azure/azure-sdk-for-go/version
+# github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
+github.com/Azure/go-ansiterm
+github.com/Azure/go-ansiterm/winterm
 # github.com/Azure/go-autorest/autorest v0.9.3
 github.com/Azure/go-autorest/autorest
 github.com/Azure/go-autorest/autorest/azure
@@ -16,9 +19,11 @@ github.com/Azure/go-autorest/autorest/date
 github.com/Azure/go-autorest/logger
 # github.com/Azure/go-autorest/tracing v0.5.0
 github.com/Azure/go-autorest/tracing
-# github.com/Microsoft/go-winio v0.4.14
+# github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5
 github.com/Microsoft/go-winio
 github.com/Microsoft/go-winio/pkg/guid
+# github.com/Microsoft/hcsshim v0.8.7
+github.com/Microsoft/hcsshim/osversion
 # github.com/aws/aws-sdk-go v1.28.2
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
@@ -67,6 +72,13 @@ github.com/beorn7/perks/quantile
 github.com/bshuster-repo/logrus-logstash-hook
 # github.com/certifi/gocertifi v0.0.0-20180905225744-ee1a9a0726d2
 github.com/certifi/gocertifi
+# github.com/containerd/containerd v1.3.3
+github.com/containerd/containerd/errdefs
+# github.com/containerd/continuity v0.0.0-20190827140505-75bee3e2ccb6
+github.com/containerd/continuity/fs
+github.com/containerd/continuity/pathdriver
+github.com/containerd/continuity/syscallx
+github.com/containerd/continuity/sysx
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/denverdino/aliyungo v0.0.0-20161108032828-afedced274aa
@@ -123,7 +135,7 @@ github.com/docker/distribution/registry/storage/driver/s3-aws
 github.com/docker/distribution/registry/storage/driver/swift
 github.com/docker/distribution/uuid
 github.com/docker/distribution/version
-# github.com/docker/docker v1.4.2-0.20170731201646-1009e6a40b29
+# github.com/docker/docker v1.4.2-0.20200229013735-71373c6105e3
 github.com/docker/docker/api
 github.com/docker/docker/api/types
 github.com/docker/docker/api/types/blkiodev
@@ -141,16 +153,24 @@ github.com/docker/docker/api/types/time
 github.com/docker/docker/api/types/versions
 github.com/docker/docker/api/types/volume
 github.com/docker/docker/client
+github.com/docker/docker/errdefs
 github.com/docker/docker/pkg/archive
 github.com/docker/docker/pkg/fileutils
+github.com/docker/docker/pkg/homedir
 github.com/docker/docker/pkg/idtools
 github.com/docker/docker/pkg/ioutils
+github.com/docker/docker/pkg/jsonmessage
 github.com/docker/docker/pkg/longpath
 github.com/docker/docker/pkg/mount
 github.com/docker/docker/pkg/pools
-github.com/docker/docker/pkg/promise
+github.com/docker/docker/pkg/stringid
 github.com/docker/docker/pkg/system
-github.com/docker/docker/pkg/tlsconfig
+github.com/docker/docker/pkg/tarsum
+github.com/docker/docker/pkg/term
+github.com/docker/docker/pkg/term/windows
+github.com/docker/docker/registry
+github.com/docker/docker/registry/resumable
+github.com/docker/docker/rootless
 # github.com/docker/go-connections v0.3.0
 github.com/docker/go-connections/nat
 github.com/docker/go-connections/sockets
@@ -185,7 +205,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/gofuzz v1.0.0
+# github.com/google/gofuzz v1.1.0
 github.com/google/gofuzz
 # github.com/google/uuid v1.1.1
 github.com/google/uuid
@@ -220,6 +240,8 @@ github.com/mitchellh/mapstructure
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.1
 github.com/modern-go/reflect2
+# github.com/morikuni/aec v1.0.0
+github.com/morikuni/aec
 # github.com/ncw/swift v1.0.49
 github.com/ncw/swift
 # github.com/opencontainers/go-digest v1.0.0-rc1.0.20180430190053-c9281466c8b2
@@ -230,7 +252,7 @@ github.com/opencontainers/image-spec/specs-go/v1
 # github.com/opencontainers/runc v1.0.0-rc5.0.20180920170208-00dc70017d22
 github.com/opencontainers/runc/libcontainer/system
 github.com/opencontainers/runc/libcontainer/user
-# github.com/openshift/api v0.0.0-20200109182645-c3cf38ec5571
+# github.com/openshift/api v0.0.0-20200210091934-a0e53e94816b
 github.com/openshift/api/authorization/v1
 github.com/openshift/api/image/docker10
 github.com/openshift/api/image/dockerpre012
@@ -239,7 +261,7 @@ github.com/openshift/api/oauth/v1
 github.com/openshift/api/pkg/serialization
 github.com/openshift/api/project/v1
 github.com/openshift/api/user/v1
-# github.com/openshift/client-go v0.0.0-20200109173103-2763c6378941
+# github.com/openshift/client-go v0.0.0-20200116152001-92a2713fa240
 github.com/openshift/client-go/authorization/clientset/versioned/scheme
 github.com/openshift/client-go/authorization/clientset/versioned/typed/authorization/v1
 github.com/openshift/client-go/image/clientset/versioned/scheme
@@ -253,8 +275,9 @@ github.com/openshift/client-go/project/clientset/versioned/typed/project/v1
 github.com/openshift/client-go/user/clientset/versioned
 github.com/openshift/client-go/user/clientset/versioned/scheme
 github.com/openshift/client-go/user/clientset/versioned/typed/user/v1
-# github.com/openshift/library-go v0.0.0-20200110080616-97e47564adf6
+# github.com/openshift/library-go v0.0.0-20200309152735-d18a5ca14d82
 github.com/openshift/library-go/pkg/crypto
+github.com/openshift/library-go/pkg/image/registryclient
 github.com/openshift/library-go/pkg/serviceability
 # github.com/pborman/uuid v1.2.0
 github.com/pborman/uuid
@@ -286,7 +309,7 @@ github.com/spf13/pflag
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
+# golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/http/httpguts
@@ -303,7 +326,9 @@ golang.org/x/oauth2/google
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456
+# golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+golang.org/x/sync/errgroup
+# golang.org/x/sys v0.0.0-20190916202348-b4ddaad3f8a3
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.2
@@ -374,7 +399,7 @@ google.golang.org/grpc/tap
 gopkg.in/inf.v0
 # gopkg.in/yaml.v2 v2.2.7
 gopkg.in/yaml.v2
-# k8s.io/api v0.17.0
+# k8s.io/api v0.17.2
 k8s.io/api/admissionregistration/v1
 k8s.io/api/admissionregistration/v1beta1
 k8s.io/api/apps/v1
@@ -415,7 +440,7 @@ k8s.io/api/settings/v1alpha1
 k8s.io/api/storage/v1
 k8s.io/api/storage/v1alpha1
 k8s.io/api/storage/v1beta1
-# k8s.io/apimachinery v0.17.0
+# k8s.io/apimachinery v0.17.2
 k8s.io/apimachinery/pkg/api/errors
 k8s.io/apimachinery/pkg/api/meta
 k8s.io/apimachinery/pkg/api/resource
@@ -458,9 +483,9 @@ k8s.io/apimachinery/pkg/version
 k8s.io/apimachinery/pkg/watch
 k8s.io/apimachinery/third_party/forked/golang/json
 k8s.io/apimachinery/third_party/forked/golang/reflect
-# k8s.io/apiserver v0.17.0
+# k8s.io/apiserver v0.17.1
 k8s.io/apiserver/pkg/authentication/user
-# k8s.io/client-go v0.17.0
+# k8s.io/client-go v0.17.1
 k8s.io/client-go/discovery
 k8s.io/client-go/kubernetes
 k8s.io/client-go/kubernetes/scheme
