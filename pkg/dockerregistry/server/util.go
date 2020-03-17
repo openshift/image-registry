@@ -8,15 +8,25 @@ import (
 	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
+	"github.com/docker/distribution/registry/client/auth"
+	dockerregistry "github.com/docker/docker/registry"
 	"github.com/opencontainers/go-digest"
+
+	corev1 "k8s.io/api/core/v1"
 
 	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
+	"github.com/openshift/library-go/pkg/image/registryclient"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
-	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
+	"github.com/openshift/image-registry/pkg/kubernetes-common/credentialprovider"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/requesttrace"
+)
+
+var (
+	installCredentialsDir = "/var/lib/kubelet/"
 )
 
 func getNamespaceName(resourceName string) (string, string, error) {
@@ -40,19 +50,40 @@ func getNamespaceName(resourceName string) (string, string, error) {
 
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
-func getImportContext(ctx context.Context, secretsGetter secretsGetter, m metrics.Pullthrough) (registryclient.RepositoryRetriever, error) {
+func getImportContext(ctx context.Context, ref *imageapi.DockerImageReference, secrets []corev1.Secret, m metrics.Pullthrough) (registryclient.RepositoryRetriever, error) {
 	req, err := dcontext.GetRequest(ctx)
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("unable to get request from context: %v", err)
 		return nil, err
 	}
-	secrets, err := secretsGetter()
-	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
+
+	installKeyring := &credentialprovider.BasicDockerKeyring{}
+	if config, err := credentialprovider.ReadDockerConfigJSONFile(
+		[]string{installCredentialsDir},
+	); err != nil {
+		dcontext.GetLogger(ctx).Infof("proceeding without installation credentials: %v", err)
+	} else {
+		installKeyring.Add(config)
 	}
-	credentials := registryclient.NewCredentialsForSecrets(secrets)
+
+	keyring, err := credentialprovider.MakeDockerKeyring(secrets, installKeyring)
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("error creating keyring: %v", err)
+		return nil, err
+	}
+
+	var cred auth.CredentialStore = registryclient.NoCredentials
+	if auths, _ := keyring.Lookup(ref.String()); len(auths) > 0 {
+		cred = dockerregistry.NewStaticCredentialStore(&auths[0].AuthConfig)
+	}
+
 	var retriever registryclient.RepositoryRetriever
-	retriever = registryclient.NewContext(secureTransport, insecureTransport, requesttrace.New(ctx, req)).WithCredentials(credentials)
+	retriever = registryclient.NewContext(
+		secureTransport, insecureTransport,
+	).WithRequestModifiers(
+		requesttrace.New(ctx, req),
+	).WithCredentials(cred)
+
 	retriever = m.RepositoryRetriever(retriever)
 	return retriever, nil
 }

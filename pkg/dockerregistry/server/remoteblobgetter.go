@@ -11,11 +11,12 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/openshift/library-go/pkg/image/registryclient"
+
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	rerrors "github.com/openshift/image-registry/pkg/errors"
 	"github.com/openshift/image-registry/pkg/imagestream"
-	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
 
 // BlobGetterService combines the operations to access and read blobs.
@@ -109,9 +110,9 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 
 	cached := rbgs.cache.Repositories(dgst)
 
-	retriever, impErr := getImportContext(ctx, rbgs.getSecrets, rbgs.metrics)
-	if impErr != nil {
-		return distribution.Descriptor{}, nil, impErr
+	secrets, err := rbgs.getSecrets()
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
 
 	// look at the first level of tagged repositories first
@@ -119,7 +120,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
-	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, search, cached, dgst, retriever); err == nil {
+	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, search, cached, dgst, secrets); err == nil {
 		return desc, bs, nil
 	}
 
@@ -131,7 +132,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	for k := range search {
 		delete(secondary, k)
 	}
-	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, secondary, cached, dgst, retriever); err == nil {
+	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, secondary, cached, dgst, secrets); err == nil {
 		return desc, bs, nil
 	}
 
@@ -256,7 +257,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 	search map[string]imagestream.ImagePullthroughSpec,
 	cachedRepos []string,
 	dgst digest.Digest,
-	retriever registryclient.RepositoryRetriever,
+	secrets []corev1.Secret,
 ) (distribution.Descriptor, distribution.BlobStore, error) {
 	// no possible remote locations to search, exit early
 	if len(search) == 0 {
@@ -270,6 +271,12 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 		if !ok {
 			continue
 		}
+
+		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics)
+		if impErr != nil {
+			return distribution.Descriptor{}, nil, impErr
+		}
+
 		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
 		if err != nil {
 			delete(search, repo)
@@ -285,6 +292,12 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 		if !ok {
 			continue
 		}
+
+		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics)
+		if impErr != nil {
+			return distribution.Descriptor{}, nil, impErr
+		}
+
 		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
 		if err != nil {
 			continue

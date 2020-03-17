@@ -10,8 +10,9 @@ import (
 	"github.com/docker/distribution/registry/api/errcode"
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 
+	"github.com/openshift/library-go/pkg/image/registryclient"
+
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
-	"github.com/openshift/image-registry/pkg/origin-common/image/registryclient"
 )
 
 // Observer captures individual observations.

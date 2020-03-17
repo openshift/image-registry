@@ -112,7 +112,12 @@ func (m *pullthroughManifestService) mirrorManifest(ctx context.Context, manifes
 }
 
 func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
-	retriever, impErr := getImportContext(ctx, m.imageStream.GetSecrets, m.metrics)
+	secrets, err := m.imageStream.GetSecrets()
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
+	}
+
+	retriever, impErr := getImportContext(ctx, ref, secrets, m.metrics)
 	if impErr != nil {
 		return nil, impErr
 	}
