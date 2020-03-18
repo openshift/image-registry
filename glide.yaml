@@ -83,3 +83,9 @@ import:
   version: 2dc1b43167692cdc89446b99b98fa9de6bff020f
 - package: github.com/golang/glog
   version: 44145f04b68cf362d9c4df2182967c2275eaefed
+- package: github.com/docker/libtrust
+  version: fa567046d9b14f6aa788882a950d69651d230b21
+- package: github.com/gorilla/handlers
+  version: 60c7bfde3e33c201519a200a4507a158cc03a17b
+- package: github.com/pkg/profile
+  version: 057bc52a47ec3c79498dda63f4a6f8298725e976
