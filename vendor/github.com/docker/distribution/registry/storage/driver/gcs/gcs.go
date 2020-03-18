@@ -375,8 +375,7 @@ func putContentsClose(wc *storage.Writer, contents []byte) error {
 	var nn int
 	var err error
 	for nn < size {
-		var n int
-		n, err = wc.Write(contents[nn:size])
+		n, err := wc.Write(contents[nn:size])
 		nn += n
 		if err != nil {
 			break
