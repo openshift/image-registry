@@ -87,11 +87,7 @@ const (
 	// StatusReasonOutOfMemoryKilled indicates that the build pod was killed for its memory consumption
 	StatusReasonOutOfMemoryKilled StatusReason = "OutOfMemoryKilled"
 
-	// StatusReasonCannotRetrieveServiceAccount is the reason associated with a failure
+	// StatusCannotRetrieveServiceAccount is the reason associated with a failure
 	// to look up the service account associated with the BuildConfig.
 	StatusReasonCannotRetrieveServiceAccount StatusReason = "CannotRetrieveServiceAccount"
-
-	// StatusReasonBuildPodEvicted is the reason a build fails due to the build pod being evicted
-	// from its node
-	StatusReasonBuildPodEvicted StatusReason = "BuildPodEvicted"
 )

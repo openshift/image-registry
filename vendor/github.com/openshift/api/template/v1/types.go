@@ -113,7 +113,6 @@ type TemplateInstance struct {
 	Spec TemplateInstanceSpec `json:"spec" protobuf:"bytes,2,opt,name=spec"`
 
 	// status describes the current state of this TemplateInstance.
-	// +optional
 	Status TemplateInstanceStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
 }
 
@@ -124,12 +123,10 @@ type TemplateInstanceSpec struct {
 
 	// secret is a reference to a Secret object containing the necessary
 	// template parameters.
-	// +optional
 	Secret *corev1.LocalObjectReference `json:"secret,omitempty" protobuf:"bytes,2,opt,name=secret"`
 
 	// requester holds the identity of the agent requesting the template
 	// instantiation.
-	// +optional
 	Requester *TemplateInstanceRequester `json:"requester" protobuf:"bytes,3,opt,name=requester"`
 }
 

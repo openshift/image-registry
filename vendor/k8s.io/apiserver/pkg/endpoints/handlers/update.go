@@ -50,7 +50,7 @@ func UpdateResource(r rest.Updater, scope RequestScope, typer runtime.ObjectType
 		ctx := scope.ContextFunc(req)
 		ctx = request.WithNamespace(ctx, namespace)
 
-		body, err := limitedReadBody(req, scope.MaxRequestBodyBytes)
+		body, err := readBody(req)
 		if err != nil {
 			scope.err(err, w, req)
 			return
