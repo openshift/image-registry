@@ -87,7 +87,7 @@ github.com/denverdino/aliyungo/oss
 github.com/denverdino/aliyungo/util
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/docker/distribution v0.0.0-20180920194744-16128bbac47f => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200110114316-95666ed3a0e2+incompatible
+# github.com/docker/distribution v0.0.0-20180920194744-16128bbac47f => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200318134246-ca1b46953d76+incompatible
 github.com/docker/distribution
 github.com/docker/distribution/configuration
 github.com/docker/distribution/context

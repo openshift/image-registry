@@ -40,7 +40,6 @@ require (
 	github.com/prometheus/procfs v0.0.8 // indirect
 	github.com/satori/go.uuid v1.2.1-0.20180103174451-36e9d2ebbde5 // indirect
 	github.com/sirupsen/logrus v1.4.2
-	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
 	gopkg.in/yaml.v2 v2.2.7
 	k8s.io/api v0.17.2
@@ -50,6 +49,6 @@ require (
 )
 
 replace (
-	github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200110114316-95666ed3a0e2+incompatible
+	github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200318134246-ca1b46953d76+incompatible
 	google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
 )
