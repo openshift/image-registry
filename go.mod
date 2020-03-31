@@ -29,11 +29,10 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/marstr/guid v1.1.1-0.20170427235115-8bdf7d1a087c // indirect
 	github.com/ncw/swift v1.0.49 // indirect
-	github.com/onsi/ginkgo v1.10.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1.0.20180430190053-c9281466c8b2
 	github.com/opencontainers/runc v1.0.0-rc5.0.20180920170208-00dc70017d22 // indirect
-	github.com/openshift/api v0.0.0-20200210091934-a0e53e94816b
-	github.com/openshift/client-go v0.0.0-20200116152001-92a2713fa240
+	github.com/openshift/api v0.0.0-20200331101224-075d5bc995b6
+	github.com/openshift/client-go v0.0.0-20200326155132-2a6cd50aedd0
 	github.com/openshift/library-go v0.0.0-20200309152735-d18a5ca14d82
 	github.com/pborman/uuid v1.2.0
 	github.com/prometheus/client_golang v1.1.0
@@ -42,10 +41,10 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
-	gopkg.in/yaml.v2 v2.2.7
-	k8s.io/api v0.17.2
-	k8s.io/apimachinery v0.17.2
-	k8s.io/client-go v0.17.1
+	gopkg.in/yaml.v2 v2.2.8
+	k8s.io/api v0.18.0
+	k8s.io/apimachinery v0.18.0
+	k8s.io/client-go v0.18.0
 	k8s.io/klog v1.0.0
 )
 
