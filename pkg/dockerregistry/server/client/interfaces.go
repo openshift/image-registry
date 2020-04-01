@@ -1,6 +1,8 @@
 package client
 
 import (
+	"context"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreclientv1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -62,70 +64,70 @@ type SelfSubjectAccessReviewsNamespacer interface {
 var _ ImageSignatureInterface = imageclientv1.ImageSignatureInterface(nil)
 
 type ImageSignatureInterface interface {
-	Create(signature *imageapiv1.ImageSignature) (*imageapiv1.ImageSignature, error)
+	Create(ctx context.Context, imageSignature *imageapiv1.ImageSignature, opts metav1.CreateOptions) (*imageapiv1.ImageSignature, error)
 }
 
 var _ ImageStreamImageInterface = imageclientv1.ImageStreamImageInterface(nil)
 
 type ImageStreamImageInterface interface {
-	Get(name string, options metav1.GetOptions) (*imageapiv1.ImageStreamImage, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions) (*imageapiv1.ImageStreamImage, error)
 }
 
 var _ UserInterface = userclientv1.UserInterface(nil)
 
 type UserInterface interface {
-	Get(name string, options metav1.GetOptions) (*userapiv1.User, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions) (*userapiv1.User, error)
 }
 
 var _ ImageInterface = imageclientv1.ImageInterface(nil)
 
 type ImageInterface interface {
-	Get(name string, options metav1.GetOptions) (*imageapiv1.Image, error)
-	Update(image *imageapiv1.Image) (*imageapiv1.Image, error)
-	List(opts metav1.ListOptions) (*imageapiv1.ImageList, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions) (*imageapiv1.Image, error)
+	Update(ctx context.Context, image *imageapiv1.Image, opts metav1.UpdateOptions) (*imageapiv1.Image, error)
+	List(ctx context.Context, opts metav1.ListOptions) (*imageapiv1.ImageList, error)
 }
 
 var _ ImageStreamInterface = imageclientv1.ImageStreamInterface(nil)
 
 type ImageStreamInterface interface {
-	Get(name string, options metav1.GetOptions) (*imageapiv1.ImageStream, error)
-	Create(stream *imageapiv1.ImageStream) (*imageapiv1.ImageStream, error)
-	List(opts metav1.ListOptions) (*imageapiv1.ImageStreamList, error)
-	Layers(name string, options metav1.GetOptions) (*imageapiv1.ImageStreamLayers, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions) (*imageapiv1.ImageStream, error)
+	Create(ctx context.Context, imageStream *imageapiv1.ImageStream, opts metav1.CreateOptions) (*imageapiv1.ImageStream, error)
+	List(ctx context.Context, opts metav1.ListOptions) (*imageapiv1.ImageStreamList, error)
+	Layers(ctx context.Context, imageStreamName string, options metav1.GetOptions) (*imageapiv1.ImageStreamLayers, error)
 }
 
 var _ ImageStreamMappingInterface = imageclientv1.ImageStreamMappingInterface(nil)
 
 type ImageStreamMappingInterface interface {
-	Create(mapping *imageapiv1.ImageStreamMapping) (*metav1.Status, error)
+	Create(ctx context.Context, imageStreamMapping *imageapiv1.ImageStreamMapping, opts metav1.CreateOptions) (*metav1.Status, error)
 }
 
 var _ ImageStreamTagInterface = imageclientv1.ImageStreamTagInterface(nil)
 
 type ImageStreamTagInterface interface {
-	Delete(name string, options *metav1.DeleteOptions) error
+	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error
 }
 
 var _ ImageStreamSecretInterface = imageclientv1.ImageStreamInterface(nil)
 
 type ImageStreamSecretInterface interface {
-	Secrets(name string, options metav1.GetOptions) (*corev1.SecretList, error)
+	Secrets(ctx context.Context, imageStreamName string, options metav1.GetOptions) (*corev1.SecretList, error)
 }
 
 var _ LimitRangeInterface = coreclientv1.LimitRangeInterface(nil)
 
 type LimitRangeInterface interface {
-	List(opts metav1.ListOptions) (*corev1.LimitRangeList, error)
+	List(ctx context.Context, opts metav1.ListOptions) (*corev1.LimitRangeList, error)
 }
 
 var _ LocalSubjectAccessReviewInterface = authclientv1.LocalSubjectAccessReviewInterface(nil)
 
 type LocalSubjectAccessReviewInterface interface {
-	Create(policy *authapiv1.LocalSubjectAccessReview) (*authapiv1.LocalSubjectAccessReview, error)
+	Create(ctx context.Context, localSubjectAccessReview *authapiv1.LocalSubjectAccessReview, opts metav1.CreateOptions) (*authapiv1.LocalSubjectAccessReview, error)
 }
 
 var _ SelfSubjectAccessReviewInterface = authclientv1.SelfSubjectAccessReviewInterface(nil)
 
 type SelfSubjectAccessReviewInterface interface {
-	Create(policy *authapiv1.SelfSubjectAccessReview) (*authapiv1.SelfSubjectAccessReview, error)
+	Create(ctx context.Context, selfSubjectAccessReview *authapiv1.SelfSubjectAccessReview, opts metav1.CreateOptions) (*authapiv1.SelfSubjectAccessReview, error)
 }

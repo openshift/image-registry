@@ -1,6 +1,7 @@
 package imagestream
 
 import (
+	"context"
 	"fmt"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -33,7 +34,7 @@ func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, *rerrors.Error
 	if g.cachedImageStream != nil {
 		return g.cachedImageStream, nil
 	}
-	is, err := g.isNamespacer.ImageStreams(g.namespace).Get(g.name, metav1.GetOptions{})
+	is, err := g.isNamespacer.ImageStreams(g.namespace).Get(context.TODO(), g.name, metav1.GetOptions{})
 	if err != nil {
 		switch {
 		case kerrors.IsNotFound(err):
@@ -53,7 +54,7 @@ func (g *cachedImageStreamGetter) layers() (*imageapiv1.ImageStreamLayers, *rerr
 	if g.cachedImageStreamLayers != nil {
 		return g.cachedImageStreamLayers, nil
 	}
-	is, err := g.isNamespacer.ImageStreams(g.namespace).Layers(g.name, metav1.GetOptions{})
+	is, err := g.isNamespacer.ImageStreams(g.namespace).Layers(context.TODO(), g.name, metav1.GetOptions{})
 	if err != nil {
 		switch {
 		case kerrors.IsNotFound(err):

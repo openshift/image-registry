@@ -1,6 +1,7 @@
 package testframework
 
 import (
+	"context"
 	"encoding/base64"
 
 	"github.com/pborman/uuid"
@@ -22,12 +23,12 @@ func GetClientForUser(clusterAdminConfig *restclient.Config, username string) (k
 		return nil, nil, err
 	}
 
-	user, err := userClient.UserV1().Users().Get(username, metav1.GetOptions{})
+	user, err := userClient.UserV1().Users().Get(context.Background(), username, metav1.GetOptions{})
 	if err != nil {
 		user = &userapi.User{
 			ObjectMeta: metav1.ObjectMeta{Name: username},
 		}
-		user, err = userClient.UserV1().Users().Create(user)
+		user, err = userClient.UserV1().Users().Create(context.Background(), user, metav1.CreateOptions{})
 		if err != nil {
 			return nil, nil, err
 		}
@@ -42,7 +43,7 @@ func GetClientForUser(clusterAdminConfig *restclient.Config, username string) (k
 		ObjectMeta:  metav1.ObjectMeta{Name: "test-integration-client"},
 		GrantMethod: oauthapi.GrantHandlerAuto,
 	}
-	if _, err := oauthClient.OauthV1().OAuthClients().Create(oauthClientObj); err != nil && !kerrs.IsAlreadyExists(err) {
+	if _, err := oauthClient.OauthV1().OAuthClients().Create(context.Background(), oauthClientObj, metav1.CreateOptions{}); err != nil && !kerrs.IsAlreadyExists(err) {
 		return nil, nil, err
 	}
 
@@ -60,7 +61,7 @@ func GetClientForUser(clusterAdminConfig *restclient.Config, username string) (k
 		Scopes:      []string{"user:full"},
 		RedirectURI: "https://localhost:8443/oauth/token/implicit",
 	}
-	if _, err := oauthClient.OauthV1().OAuthAccessTokens().Create(token); err != nil {
+	if _, err := oauthClient.OauthV1().OAuthAccessTokens().Create(context.Background(), token, metav1.CreateOptions{}); err != nil {
 		return nil, nil, err
 	}
 

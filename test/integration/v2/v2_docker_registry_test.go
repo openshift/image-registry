@@ -104,7 +104,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 			Name:      "test",
 		},
 	}
-	if _, err := adminImageClient.ImageStreams(namespace).Create(&stream); err != nil {
+	if _, err := adminImageClient.ImageStreams(namespace).Create(context.Background(), &stream, metav1.CreateOptions{}); err != nil {
 		t.Fatalf("error creating image stream: %s", err)
 	}
 
@@ -201,7 +201,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 		t.Fatalf("unexpected manifest tag: %s", retrievedManifest.Tag)
 	}
 
-	image, err := adminImageClient.ImageStreamImages(namespace).Get(imageapi.JoinImageStreamImage(stream.Name, dgst.String()), metav1.GetOptions{})
+	image, err := adminImageClient.ImageStreamImages(namespace).Get(context.Background(), imageapi.JoinImageStreamImage(stream.Name, dgst.String()), metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("error getting imageStreamImage: %s", err)
 	}
@@ -225,7 +225,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 	}
 
 	// test auto provisioning
-	otherStream, err := adminImageClient.ImageStreams(namespace).Get("otherrepo", metav1.GetOptions{})
+	otherStream, err := adminImageClient.ImageStreams(namespace).Get(context.Background(), "otherrepo", metav1.GetOptions{})
 	t.Logf("otherStream=%#v, err=%v", otherStream, err)
 	if err == nil {
 		t.Fatalf("expected error getting otherrepo")
@@ -241,7 +241,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	otherStream, err = adminImageClient.ImageStreams(namespace).Get("otherrepo", metav1.GetOptions{})
+	otherStream, err = adminImageClient.ImageStreams(namespace).Get(context.Background(), "otherrepo", metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("unexpected error getting otherrepo: %s", err)
 	}

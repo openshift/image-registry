@@ -73,7 +73,7 @@ func (t *tokenHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if _, err := osClient.Users().Get("~", metav1.GetOptions{}); err != nil {
+	if _, err := osClient.Users().Get(ctx, "~", metav1.GetOptions{}); err != nil {
 		dcontext.GetRequestLogger(ctx).Errorf("invalid token: %v", err)
 		if kerrors.IsUnauthorized(err) {
 			t.writeUnauthorized(w, req)

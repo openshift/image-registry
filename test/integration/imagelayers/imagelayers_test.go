@@ -83,12 +83,12 @@ func TestImageLayers(t *testing.T) {
 
 	imageClient := imageclientv1.NewForConfigOrDie(testuser.KubeConfig())
 
-	schema1ISTag, err := imageClient.ImageStreamTags(testproject.Name).Get(imageStreamName+":"+schema1Tag, metav1.GetOptions{})
+	schema1ISTag, err := imageClient.ImageStreamTags(testproject.Name).Get(ctx, imageStreamName+":"+schema1Tag, metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("get image stream tag %s:%s: %v", imageStreamName, schema1Tag, err)
 	}
 
-	schema2ISTag, err := imageClient.ImageStreamTags(testproject.Name).Get(imageStreamName+":"+schema2Tag, metav1.GetOptions{})
+	schema2ISTag, err := imageClient.ImageStreamTags(testproject.Name).Get(ctx, imageStreamName+":"+schema2Tag, metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("get image stream tag %s:%s: %v", imageStreamName, schema1Tag, err)
 	}

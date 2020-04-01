@@ -375,7 +375,7 @@ func getOpenShiftAPIToken(req *http.Request) (string, error) {
 }
 
 func verifyOpenShiftUser(ctx context.Context, c client.UsersInterfacer) (string, string, error) {
-	userInfo, err := c.Users().Get("~", metav1.GetOptions{})
+	userInfo, err := c.Users().Get(ctx, "~", metav1.GetOptions{})
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("Get user failed with error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
@@ -399,7 +399,7 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 			},
 		},
 	}
-	response, err := c.SelfSubjectAccessReviews().Create(&sar)
+	response, err := c.SelfSubjectAccessReviews().Create(ctx, &sar, metav1.CreateOptions{})
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
@@ -427,7 +427,7 @@ func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string
 			},
 		},
 	}
-	response, err := c.SelfSubjectAccessReviews().Create(&sar)
+	response, err := c.SelfSubjectAccessReviews().Create(ctx, &sar, metav1.CreateOptions{})
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {

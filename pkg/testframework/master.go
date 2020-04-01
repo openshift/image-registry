@@ -332,7 +332,7 @@ func (m *Master) WaitForRoles() error {
 			return false, err
 		}
 		for _, roleName := range []string{"admin", "edit", "view"} {
-			role, err := kubeClient.RbacV1().ClusterRoles().Get(roleName, metav1.GetOptions{})
+			role, err := kubeClient.RbacV1().ClusterRoles().Get(context.Background(), roleName, metav1.GetOptions{})
 			if kerrors.IsNotFound(err) {
 				return false, nil
 			}
@@ -354,7 +354,7 @@ func (m *Master) WaitForRoles() error {
 func (m *Master) Close() {
 	if kubeClient, err := kubeclient.NewForConfig(m.AdminKubeConfig()); err == nil {
 		for _, ns := range m.namespaces {
-			if err := kubeClient.CoreV1().Namespaces().Delete(ns, nil); err != nil {
+			if err := kubeClient.CoreV1().Namespaces().Delete(context.Background(), ns, metav1.DeleteOptions{}); err != nil {
 				m.t.Logf("failed to cleanup namespace %s: %v", ns, err)
 			}
 		}
@@ -407,7 +407,7 @@ func (m *Master) CreateUser(username string, password string) *User {
 
 func (m *Master) GrantPrunerRole(user *User) {
 	authorizationClient := authorizationv1.NewForConfigOrDie(m.AdminKubeConfig())
-	_, err := authorizationClient.ClusterRoleBindings().Create(&authorizationapiv1.ClusterRoleBinding{
+	_, err := authorizationClient.ClusterRoleBindings().Create(context.Background(), &authorizationapiv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "image-registry-test-pruner-" + uuid.NewRandom().String(),
 		},
@@ -415,7 +415,7 @@ func (m *Master) GrantPrunerRole(user *User) {
 		RoleRef: corev1.ObjectReference{
 			Name: "system:image-pruner",
 		},
-	})
+	}, metav1.CreateOptions{})
 	if err != nil {
 		m.t.Fatalf("failed to grant the system:image-pruner role to the user %s: %v", user.Name, err)
 	}

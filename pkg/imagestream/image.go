@@ -53,7 +53,7 @@ func (ig *cachedImageGetter) Get(ctx context.Context, dgst digest.Digest) (*imag
 		return image, nil
 	}
 
-	image, err := ig.client.Images().Get(dgst.String(), metav1.GetOptions{})
+	image, err := ig.client.Images().Get(ctx, dgst.String(), metav1.GetOptions{})
 	if err != nil {
 		switch {
 		case kerrors.IsNotFound(err):
