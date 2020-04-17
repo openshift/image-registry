@@ -30,6 +30,7 @@ type Interface interface {
 	ImageStreamTagsNamespacer
 	LimitRangesGetter
 	LocalSubjectAccessReviewsNamespacer
+	NamespaceGetter
 	SelfSubjectAccessReviewsNamespacer
 	UsersInterfacer
 }
@@ -57,6 +58,10 @@ func newAPIClient(
 
 func (c *apiClient) Users() UserInterface {
 	return c.user.Users()
+}
+
+func (c *apiClient) Namespaces() NamespaceInterface {
+	return c.kube.Namespaces()
 }
 
 func (c *apiClient) Images() ImageInterface {

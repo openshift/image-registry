@@ -25,6 +25,10 @@ type ImagesInterfacer interface {
 	Images() ImageInterface
 }
 
+type NamespaceGetter interface {
+	Namespaces() NamespaceInterface
+}
+
 type ImageSignaturesInterfacer interface {
 	ImageSignatures() ImageSignatureInterface
 }
@@ -80,6 +84,10 @@ type UserInterface interface {
 }
 
 var _ ImageInterface = imageclientv1.ImageInterface(nil)
+
+type NamespaceInterface interface {
+	Get(ctx context.Context, name string, opts metav1.GetOptions) (*corev1.Namespace, error)
+}
 
 type ImageInterface interface {
 	Get(ctx context.Context, name string, opts metav1.GetOptions) (*imageapiv1.Image, error)

@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
 	registryauth "github.com/docker/distribution/registry/auth"
 
@@ -233,6 +234,12 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 			verb := ""
 			switch access.Action {
 			case "push":
+				if _, err := osClient.Namespaces().Get(ctx, imageStreamNS, metav1.GetOptions{}); err != nil {
+					if kerrors.IsNotFound(err) {
+						return nil, ac.wrapErr(ctx, distribution.ErrRepositoryUnknown{Name: imageStreamNS})
+					}
+					return nil, ac.wrapErr(ctx, err)
+				}
 				verb = "update"
 				pushChecks[imageStreamNS+"/"+imageStreamName] = true
 			case "pull":
