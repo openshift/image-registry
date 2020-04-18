@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -174,7 +175,7 @@ func TestPullThroughInsecure(t *testing.T) {
 
 	adminImageClient := imageclientv1.NewForConfigOrDie(testuser.KubeConfig())
 
-	isi, err := adminImageClient.ImageStreamImports(namespace).Create(&stream)
+	isi, err := adminImageClient.ImageStreamImports(namespace).Create(context.Background(), &stream, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +198,7 @@ func TestPullThroughInsecure(t *testing.T) {
 		}
 	}
 
-	istream, err := adminImageClient.ImageStreams(stream.Namespace).Get(stream.Name, metav1.GetOptions{})
+	istream, err := adminImageClient.ImageStreams(stream.Namespace).Get(context.Background(), stream.Name, metav1.GetOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +208,7 @@ func TestPullThroughInsecure(t *testing.T) {
 	}
 	istream.Annotations[imageapi.InsecureRepositoryAnnotation] = "true"
 
-	_, err = adminImageClient.ImageStreams(istream.Namespace).Update(istream)
+	_, err = adminImageClient.ImageStreams(istream.Namespace).Update(context.Background(), istream, metav1.UpdateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,13 +234,13 @@ func TestPullThroughInsecure(t *testing.T) {
 		}
 	}
 
-	istream, err = adminImageClient.ImageStreams(stream.Namespace).Get(stream.Name, metav1.GetOptions{})
+	istream, err = adminImageClient.ImageStreams(stream.Namespace).Get(context.Background(), stream.Name, metav1.GetOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	istream.Annotations[imageapi.InsecureRepositoryAnnotation] = "false"
 
-	_, err = adminImageClient.ImageStreams(istream.Namespace).Update(istream)
+	_, err = adminImageClient.ImageStreams(istream.Namespace).Update(context.Background(), istream, metav1.UpdateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -251,7 +252,7 @@ func TestPullThroughInsecure(t *testing.T) {
 		}
 	}
 
-	istream, err = adminImageClient.ImageStreams(stream.Namespace).Get(stream.Name, metav1.GetOptions{})
+	istream, err = adminImageClient.ImageStreams(stream.Namespace).Get(context.Background(), stream.Name, metav1.GetOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,7 +262,7 @@ func TestPullThroughInsecure(t *testing.T) {
 			break
 		}
 	}
-	_, err = adminImageClient.ImageStreams(istream.Namespace).Update(istream)
+	_, err = adminImageClient.ImageStreams(istream.Namespace).Update(context.Background(), istream, metav1.UpdateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}

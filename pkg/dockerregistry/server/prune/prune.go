@@ -183,7 +183,7 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 		return Summary{}, fmt.Errorf("error getting clients: %v", err)
 	}
 
-	imageList, err := oc.Images().List(metav1.ListOptions{})
+	imageList, err := oc.Images().List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return Summary{}, fmt.Errorf("error listing images: %v", err)
 	}
@@ -244,7 +244,7 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 			return gc.AddRepository(repoName)
 		}
 
-		is, err := oc.ImageStreams(ref.Namespace).Get(ref.Name, metav1.GetOptions{})
+		is, err := oc.ImageStreams(ref.Namespace).Get(ctx, ref.Name, metav1.GetOptions{})
 		if kerrors.IsNotFound(err) {
 			logger.Printf("The image stream %s/%s is not found, will remove the whole repository", ref.Namespace, ref.Name)
 			return gc.AddRepository(repoName)

@@ -193,7 +193,7 @@ func (r *Fsck) checkImage(image *imageapiv1.Image, blobStatter *statter) error {
 
 // Database checks metadata in the database
 func (r *Fsck) Database(namespace string) error {
-	listIS, err := r.Client.ImageStreams(namespace).List(metav1.ListOptions{})
+	listIS, err := r.Client.ImageStreams(namespace).List(r.Ctx, metav1.ListOptions{})
 	if err != nil {
 		if namespace == metav1.NamespaceAll {
 			namespace = "all"
@@ -218,7 +218,7 @@ func (r *Fsck) Database(namespace string) error {
 
 				imageDigest, err := digest.Parse(tagEvent.Image)
 				if err == nil {
-					image, err = r.Client.Images().Get(imageDigest.String(), metav1.GetOptions{})
+					image, err = r.Client.Images().Get(r.Ctx, imageDigest.String(), metav1.GetOptions{})
 					switch {
 					case kerrors.IsNotFound(err):
 						image := imageapiv1.Image{}
@@ -248,7 +248,7 @@ func (r *Fsck) Database(namespace string) error {
 		}
 	}
 
-	listImages, err := r.Client.Images().List(metav1.ListOptions{})
+	listImages, err := r.Client.Images().List(r.Ctx, metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list all images: %s", err)
 	}

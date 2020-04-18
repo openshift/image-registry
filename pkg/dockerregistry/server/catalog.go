@@ -117,13 +117,13 @@ func (r *cachingRepositoryEnumerator) enumerateImageStreams(
 		}
 	}
 
-	iss, err := client.ImageStreams("").List(metav1.ListOptions{
+	iss, err := client.ImageStreams("").List(ctx, metav1.ListOptions{
 		Limit:    limit,
 		Continue: start,
 	})
 	if apierrors.IsResourceExpired(err) {
 		dcontext.GetLogger(ctx).Warnf("continuation token expired (%v) -> requesting the full image stream list", err)
-		iss, err = client.ImageStreams("").List(metav1.ListOptions{})
+		iss, err = client.ImageStreams("").List(ctx, metav1.ListOptions{})
 		warned = true
 	}
 

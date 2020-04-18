@@ -61,7 +61,10 @@ func TestOffline(t *testing.T) {
 
 	imageClient := imageclientv1.NewForConfigOrDie(master.AdminKubeConfig())
 
-	isi, err := imageClient.ImageStreamImports(testproject.Name).Create(&imageapiv1.ImageStreamImport{
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+
+	isi, err := imageClient.ImageStreamImports(testproject.Name).Create(ctx, &imageapiv1.ImageStreamImport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: teststreamName,
 		},
@@ -79,12 +82,12 @@ func TestOffline(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	teststream, err := imageClient.ImageStreams(testproject.Name).Get(teststreamName, metav1.GetOptions{})
+	teststream, err := imageClient.ImageStreams(testproject.Name).Get(ctx, teststreamName, metav1.GetOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,9 +103,6 @@ func TestOffline(t *testing.T) {
 	defer registry.Close()
 
 	repo := registry.Repository(testproject.Name, teststream.Name, testuser)
-
-	ctx := context.Background()
-	ctx = testutil.WithTestLogger(ctx, t)
 
 	/* Pull the image to start mirroring */
 	mediatype, dgst, err := testutil.VerifyRemoteImage(ctx, repo, "latest")

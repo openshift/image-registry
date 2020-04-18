@@ -52,7 +52,7 @@ func TestRequestLoop(t *testing.T) {
 
 	dockerjson := fmt.Sprintf("{\"auths\": {\"%s.nip.io:%s\": {\"auth\": \"%s\"}}}", registryIP, registryPort, base64.StdEncoding.EncodeToString([]byte(testuser.Name+":"+testuser.Token)))
 
-	_, err = coreClient.Secrets(testproject.Name).Create(&corev1.Secret{
+	_, err = coreClient.Secrets(testproject.Name).Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: teststreamName,
 		},
@@ -60,12 +60,12 @@ func TestRequestLoop(t *testing.T) {
 		Data: map[string][]byte{
 			corev1.DockerConfigJsonKey: []byte(dockerjson),
 		},
-	})
+	}, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = imageClient.ImageStreamImports(testproject.Name).Create(&imageapiv1.ImageStreamImport{
+	_, err = imageClient.ImageStreamImports(testproject.Name).Create(ctx, &imageapiv1.ImageStreamImport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: teststreamName,
 		},
@@ -86,7 +86,7 @@ func TestRequestLoop(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}

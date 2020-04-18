@@ -120,7 +120,7 @@ func (s *signatureHandler) Put(w http.ResponseWriter, r *http.Request) {
 	newSig := &imageapiv1.ImageSignature{Content: sig.Content, Type: sig.Type}
 	newSig.Name = sig.Name
 
-	_, err = client.ImageSignatures().Create(newSig)
+	_, err = client.ImageSignatures().Create(s.ctx, newSig, metav1.CreateOptions{})
 	switch {
 	case err == nil:
 	case kapierrors.IsUnauthorized(err):
@@ -159,7 +159,7 @@ func (s *signatureHandler) Get(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	image, err := s.isImageClient.ImageStreamImages(s.reference.Namespace).Get(imageapi.JoinImageStreamImage(s.reference.Name, s.reference.ID), metav1.GetOptions{})
+	image, err := s.isImageClient.ImageStreamImages(s.reference.Namespace).Get(s.ctx, imageapi.JoinImageStreamImage(s.reference.Name, s.reference.ID), metav1.GetOptions{})
 	switch {
 	case err == nil:
 	case kapierrors.IsUnauthorized(err):

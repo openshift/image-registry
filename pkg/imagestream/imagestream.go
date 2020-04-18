@@ -190,7 +190,7 @@ func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Di
 }
 
 func (is *imageStream) GetSecrets() ([]corev1.Secret, *rerrors.Error) {
-	secrets, err := is.registryOSClient.ImageStreamSecrets(is.namespace).Secrets(is.name, metav1.GetOptions{})
+	secrets, err := is.registryOSClient.ImageStreamSecrets(is.namespace).Secrets(context.TODO(), is.name, metav1.GetOptions{})
 	if err != nil {
 		return nil, rerrors.NewError(
 			ErrImageStreamUnknownErrorCode,
@@ -317,7 +317,7 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 		Tag:   tag,
 	}
 
-	_, err := is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism)
+	_, err := is.registryOSClient.ImageStreamMappings(is.namespace).Create(ctx, &ism, metav1.CreateOptions{})
 
 	if err == nil {
 		return nil
@@ -363,7 +363,7 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 	stream := &imageapiv1.ImageStream{}
 	stream.Name = is.name
 
-	_, err = userClient.ImageStreams(is.namespace).Create(stream)
+	_, err = userClient.ImageStreams(is.namespace).Create(ctx, stream, metav1.CreateOptions{})
 
 	switch {
 	case kerrors.IsAlreadyExists(err), kerrors.IsConflict(err):
@@ -386,7 +386,7 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 	is.imageStreamGetter.cacheImageStream(stream)
 
 	// try to create the ISM again
-	_, err = is.registryOSClient.ImageStreamMappings(is.namespace).Create(&ism)
+	_, err = is.registryOSClient.ImageStreamMappings(is.namespace).Create(ctx, &ism, metav1.CreateOptions{})
 
 	if err == nil {
 		return nil
@@ -418,7 +418,7 @@ func (is *imageStream) GetLimitRangeList(ctx context.Context, cache ProjectObjec
 
 	dcontext.GetLogger(ctx).Debugf("listing limit ranges in namespace %s", is.namespace)
 
-	lrs, err := is.registryOSClient.LimitRanges(is.namespace).List(metav1.ListOptions{})
+	lrs, err := is.registryOSClient.LimitRanges(is.namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, rerrors.NewError(
 			ErrImageStreamUnknownErrorCode,

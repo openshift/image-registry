@@ -43,7 +43,7 @@ func TestDeleteManifest(t *testing.T) {
 
 	imageClient := imageclientv1.NewForConfigOrDie(testuser.KubeConfig())
 
-	err = imageClient.ImageStreamTags(testproject.Name).Delete(imageStreamName+":"+tag, &metav1.DeleteOptions{})
+	err = imageClient.ImageStreamTags(testproject.Name).Delete(ctx, imageStreamName+":"+tag, metav1.DeleteOptions{})
 	if err != nil {
 		t.Fatalf("delete image stream tag %s:%s: %v", imageStreamName, tag, err)
 	}

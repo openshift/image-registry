@@ -66,7 +66,7 @@ func copyISTag(t *testing.T, imageClient imageclientv1.ImageV1Interface, destNam
 			},
 		},
 	}
-	_, err := imageClient.ImageStreamTags(destNamespace).Create(istag)
+	_, err := imageClient.ImageStreamTags(destNamespace).Create(context.Background(), istag, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("copy istag %s/%s to %s/%s: %v", sourceNamespace, sourceISTag, destNamespace, destISTag, err)
 	}
