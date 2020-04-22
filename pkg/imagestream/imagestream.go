@@ -344,6 +344,14 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 	status := statusErr.ErrStatus
 	isValidKind := false
 
+	if kerrors.IsNotFound(statusErr) && strings.ToLower(status.Details.Kind) == "namespaces" {
+		return rerrors.NewError(
+			ErrImageStreamForbiddenCode,
+			fmt.Sprintf("CreateImageStreamMapping: error creating %s ImageStreamMapping", is.Reference()),
+			err,
+		)
+	}
+
 	if status.Details != nil {
 		switch strings.ToLower(status.Details.Kind) {
 		case "imagestream", /*pre-1.2*/
