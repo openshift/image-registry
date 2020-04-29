@@ -18,13 +18,14 @@ const (
 )
 
 var (
-	requestDurationSeconds = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: namespace,
-			Name:      "request_duration_seconds",
-			Help:      "Request latency in seconds for each operation.",
+	requestDurationSeconds = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Name:       "request_duration_seconds",
+			Help:       "Request latency in seconds for each operation.",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
-		[]string{"operation", "name"},
+		[]string{"operation"},
 	)
 
 	HTTPInFlightRequests = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -42,43 +43,43 @@ var (
 		},
 		[]string{"code", "method"},
 	)
-	HTTPRequestDurationSeconds = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: namespace,
-			Subsystem: httpSubsystem,
-			Name:      "request_duration_seconds",
-			Help:      "A histogram of latencies for requests to the registry.",
-			Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+	HTTPRequestDurationSeconds = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Subsystem:  httpSubsystem,
+			Name:       "request_duration_seconds",
+			Help:       "A histogram of latencies for requests to the registry.",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{"method"},
 	)
-	HTTPRequestSizeBytes = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: namespace,
-			Subsystem: httpSubsystem,
-			Name:      "request_size_bytes",
-			Help:      "A histogram of sizes of requests to the registry.",
-			Buckets:   []float64{100, 200, 500, 1300, 3400, 8900},
+	HTTPRequestSizeBytes = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Subsystem:  httpSubsystem,
+			Name:       "request_size_bytes",
+			Help:       "A histogram of sizes of requests to the registry.",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{},
 	)
-	HTTPResponseSizeBytes = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: namespace,
-			Subsystem: httpSubsystem,
-			Name:      "response_size_bytes",
-			Help:      "A histogram of response sizes for requests to the registry.",
-			Buckets:   []float64{100, 200, 500, 1300, 3400, 8900},
+	HTTPResponseSizeBytes = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Subsystem:  httpSubsystem,
+			Name:       "response_size_bytes",
+			Help:       "A histogram of response sizes for requests to the registry.",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{},
 	)
-	HTTPTimeToWriteHeaderSeconds = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: namespace,
-			Subsystem: httpSubsystem,
-			Name:      "time_to_write_header_seconds",
-			Help:      "A histogram of request durations until the response headers are written.",
-			Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+	HTTPTimeToWriteHeaderSeconds = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Subsystem:  httpSubsystem,
+			Name:       "time_to_write_header_seconds",
+			Help:       "A histogram of request durations until the response headers are written.",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{},
 	)
@@ -92,13 +93,13 @@ var (
 		},
 		[]string{"type"},
 	)
-	pullthroughRepositoryDurationSeconds = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: namespace,
-			Subsystem: pullthroughSubsystem,
-			Name:      "repository_duration_seconds",
-			Help:      "Latency of operations with remote registries in seconds.",
-			Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+	pullthroughRepositoryDurationSeconds = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Subsystem:  pullthroughSubsystem,
+			Name:       "repository_duration_seconds",
+			Help:       "Latency of operations with remote registries in seconds.",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{"registry", "operation"},
 	)
@@ -112,13 +113,13 @@ var (
 		[]string{"registry", "operation", "code"},
 	)
 
-	storageDurationSeconds = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: namespace,
-			Subsystem: storageSubsystem,
-			Name:      "duration_seconds",
-			Help:      "Latency of operations with the storage.",
-			Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+	storageDurationSeconds = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Subsystem:  storageSubsystem,
+			Name:       "duration_seconds",
+			Help:       "Latency of operations with the storage.",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{"operation"},
 	)
@@ -179,8 +180,8 @@ func NewPrometheusSink() Sink {
 	return prometheusSink{}
 }
 
-func (s prometheusSink) RequestDuration(funcname, reponame string) Observer {
-	return requestDurationSeconds.WithLabelValues(funcname, reponame)
+func (s prometheusSink) RequestDuration(funcname string) Observer {
+	return requestDurationSeconds.WithLabelValues(funcname)
 }
 
 func (s prometheusSink) PullthroughBlobstoreCacheRequests(resultType string) Counter {
