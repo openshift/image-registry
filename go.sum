@@ -325,6 +325,8 @@ github.com/openshift/client-go v0.0.0-20200109173103-2763c6378941 h1:r9oaIRvM0JR
 github.com/openshift/client-go v0.0.0-20200109173103-2763c6378941/go.mod h1:zMqD3jZrS8UB+n7ZBz/PtyFvkbKExD8i/Dfye5wgFqE=
 github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200110114316-95666ed3a0e2+incompatible h1:NjGiPwya+q/yfOmMJ+CsFco8luWOQWrFnpwsIrWQx4Y=
 github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200110114316-95666ed3a0e2+incompatible/go.mod h1:XmfFzbwryblvZ29NebonirM7RBuNEO7+yVCOapaouAk=
+github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200318134246-ca1b46953d76+incompatible h1:rXmQ429EmUS0g+9UUQvL+QvP4BMlxSL02PCkRBz396k=
+github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200318134246-ca1b46953d76+incompatible/go.mod h1:XmfFzbwryblvZ29NebonirM7RBuNEO7+yVCOapaouAk=
 github.com/openshift/library-go v0.0.0-20200110080616-97e47564adf6 h1:9XW41N+UR/MExhtVzHenFiFhPhawuPnGA/AvPqdvhj0=
 github.com/openshift/library-go v0.0.0-20200110080616-97e47564adf6/go.mod h1:+EzNb8oA3fnhC613pNcAU0DJ9s3m6WaIMECIVQm2ork=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
