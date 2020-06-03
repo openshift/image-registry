@@ -48,6 +48,6 @@ require (
 	k8s.io/klog v1.0.0
 )
 
-replace github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200110114316-95666ed3a0e2+incompatible
+replace github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20200318134246-ca1b46953d76+incompatible
 
 replace google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
