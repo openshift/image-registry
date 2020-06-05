@@ -354,13 +354,8 @@ func (is *imageStream) CreateImageStreamMapping(ctx context.Context, userClient 
 		)
 	}
 
-	if status.Details != nil {
-		switch strings.ToLower(status.Details.Kind) {
-		case "imagestream", /*pre-1.2*/
-			"imagestreams", /*1.2 to 1.6*/
-			"imagestreammappings" /*1.7+*/ :
-			isValidKind = true
-		}
+	if status.Details != nil && status.Details.Kind == "imagestreammappings" {
+		isValidKind = true
 	}
 	if !isValidKind || status.Code != http.StatusNotFound || status.Details.Name != is.name {
 		return rerrors.NewError(
