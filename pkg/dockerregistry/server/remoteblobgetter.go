@@ -26,7 +26,7 @@ type BlobGetterService interface {
 	distribution.BlobServer
 }
 
-type secretsGetter func() ([]corev1.Secret, *rerrors.Error)
+type secretsGetter func() ([]corev1.Secret, rerrors.Error)
 
 // digestBlobStoreCache caches BlobStores by digests. It is safe to use it
 // concurrently from different goroutines (from an HTTP handler and background
@@ -94,7 +94,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	// we don't know which image in the image stream surfaced the content).
 	ok, err := rbgs.imageStream.Exists(ctx)
 	if err != nil {
-		switch err.Code {
+		switch err.Code() {
 		case imagestream.ErrImageStreamNotFoundCode:
 			dcontext.GetLogger(ctx).Errorf("findBlobStore: imagestream %s not found: %v", rbgs.imageStream.Reference(), err)
 			return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown

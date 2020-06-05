@@ -31,7 +31,7 @@ func IsImageManaged(image *imageapiv1.Image) bool {
 }
 
 type imageGetter interface {
-	Get(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *rerrors.Error)
+	Get(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, rerrors.Error)
 }
 
 type cachedImageGetter struct {
@@ -47,7 +47,7 @@ func newCachedImageGetter(client client.Interface) imageGetter {
 }
 
 // Get retrieves the Image resource with the digest dgst. No authorization check is made.
-func (ig *cachedImageGetter) Get(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, *rerrors.Error) {
+func (ig *cachedImageGetter) Get(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, rerrors.Error) {
 	if image, ok := ig.cache[dgst]; ok {
 		dcontext.GetLogger(ctx).Debugf("(*cachedImageGetter).Get: found image %s in cache", image.Name)
 		return image, nil
