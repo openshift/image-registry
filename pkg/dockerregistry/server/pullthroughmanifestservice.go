@@ -46,7 +46,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 	dcontext.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
 	image, rErr := m.imageStream.GetImageOfImageStream(ctx, dgst)
 	if rErr != nil {
-		switch rErr.Code {
+		switch rErr.Code() {
 		case imagestream.ErrImageStreamNotFoundCode, imagestream.ErrImageStreamImageNotFoundCode:
 			dcontext.GetLogger(ctx).Errorf("remoteGet: unable to get image %s in imagestream %s: %v", dgst.String(), m.imageStream.Reference(), rErr)
 			return nil, distribution.ErrManifestUnknownRevision{

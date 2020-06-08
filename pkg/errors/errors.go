@@ -20,22 +20,44 @@ var (
 )
 
 // Error provides a wrapper around error.
-type Error struct {
-	Code    string
-	Message string
-	Err     error
+type Error interface {
+	error
+	Code() string
+	Message() string
+	Unwrap() error
+
+	// internal is an unexported method to prevent external implementations.
+	internal()
 }
 
-var _ error = Error{}
-
-func (e Error) Error() string {
-	return fmt.Sprintf("%s: %s: %s", e.Code, e.Message, e.Err.Error())
+type registryError struct {
+	code    string
+	message string
+	err     error
 }
 
-func NewError(code, msg string, err error) *Error {
-	return &Error{
-		Code:    code,
-		Message: msg,
-		Err:     err,
+func NewError(code, msg string, err error) Error {
+	return &registryError{
+		code:    code,
+		message: msg,
+		err:     err,
 	}
 }
+
+func (e registryError) Error() string {
+	return fmt.Sprintf("%s: %s: %s", e.code, e.message, e.err.Error())
+}
+
+func (e registryError) Code() string {
+	return e.code
+}
+
+func (e registryError) Message() string {
+	return e.message
+}
+
+func (e registryError) Unwrap() error {
+	return e.err
+}
+
+func (registryError) internal() {}

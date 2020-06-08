@@ -168,7 +168,9 @@ func (fos *FakeOpenShift) ListImageStreams(namespace string) (*imageapiv1.ImageS
 
 func (fos *FakeOpenShift) CreateImageStreamMapping(namespace string, ism *imageapiv1.ImageStreamMapping) (*imageapiv1.ImageStreamMapping, error) {
 	is, err := fos.GetImageStream(namespace, ism.Name)
-	if err != nil {
+	if errors.IsNotFound(err) {
+		return nil, errors.NewNotFound(imageapiv1.Resource("imagestreammappings"), ism.Name)
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -197,7 +199,9 @@ func (fos *FakeOpenShift) CreateImageStreamMapping(namespace string, ism *imagea
 	})
 
 	_, err = fos.UpdateImageStream(namespace, is)
-	if err != nil {
+	if errors.IsNotFound(err) {
+		return nil, errors.NewNotFound(imageapiv1.Resource("imagestreammappings"), is.Name)
+	} else if err != nil {
 		return nil, err
 	}
 

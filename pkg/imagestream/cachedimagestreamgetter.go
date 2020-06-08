@@ -30,7 +30,7 @@ type cachedImageStreamGetter struct {
 	cachedImageStreamLayers *imageapiv1.ImageStreamLayers
 }
 
-func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, *rerrors.Error) {
+func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, rerrors.Error) {
 	if g.cachedImageStream != nil {
 		return g.cachedImageStream, nil
 	}
@@ -50,7 +50,7 @@ func (g *cachedImageStreamGetter) get() (*imageapiv1.ImageStream, *rerrors.Error
 	return is, nil
 }
 
-func (g *cachedImageStreamGetter) layers() (*imageapiv1.ImageStreamLayers, *rerrors.Error) {
+func (g *cachedImageStreamGetter) layers() (*imageapiv1.ImageStreamLayers, rerrors.Error) {
 	if g.cachedImageStreamLayers != nil {
 		return g.cachedImageStreamLayers, nil
 	}
