@@ -261,12 +261,12 @@ func AssertManifestsEqual(t *testing.T, description string, ma distribution.Mani
 func NewImageForManifest(repoName string, rawManifest string, manifestConfig string, managedByOpenShift bool) (*imageapiv1.Image, error) {
 	var versioned manifest.Versioned
 	if err := json.Unmarshal([]byte(rawManifest), &versioned); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to unmarshal json: %v", err)
 	}
 
 	_, desc, err := distribution.UnmarshalManifest(versioned.MediaType, []byte(rawManifest))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to unmarshal manifest: %v", err)
 	}
 
 	annotations := make(map[string]string)
@@ -284,7 +284,7 @@ func NewImageForManifest(repoName string, rawManifest string, manifestConfig str
 		DockerImageConfig:    manifestConfig,
 	}
 	if err := util.InternalImageWithMetadata(image); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("internal image with metadata: %v", err)
 	}
 
 	newImage, err := ConvertImage(image)

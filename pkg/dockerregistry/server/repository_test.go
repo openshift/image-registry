@@ -200,7 +200,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 				},
 			},
 			expectedError:   distribution.ErrBlobUnknown,
-			expectedActions: []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}, {"get", "imagestreams/secrets"}},
+			expectedActions: []clientAction{{"get", "imagestreams/layers"}, {"get", "imagestreams"}},
 		},
 
 		{
@@ -238,7 +238,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 				},
 			},
 			expectedError:   distribution.ErrBlobUnknown,
-			expectedActions: []clientAction{{"get", "imagestreams"}, {"get", "imagestreams/secrets"}},
+			expectedActions: []clientAction{{"get", "imagestreams"}, {"get", "imagestreams/layers"}},
 		},
 
 		{
@@ -266,7 +266,7 @@ func TestRepositoryBlobStat(t *testing.T) {
 				},
 			},
 			expectedError:   distribution.ErrBlobUnknown,
-			expectedActions: []clientAction{{"get", "imagestreams"}, {"get", "imagestreams/secrets"}},
+			expectedActions: []clientAction{{"get", "imagestreams"}, {"get", "imagestreams/layers"}},
 		},
 
 		{

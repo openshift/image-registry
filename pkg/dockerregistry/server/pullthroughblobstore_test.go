@@ -46,17 +46,52 @@ func TestPullthroughServeBlob(t *testing.T) {
 	repoName := fmt.Sprintf("%s/%s", namespace, name)
 	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
-	testImage, err := testutil.NewImageForManifest(repoName, testutil.SampleImageManifestSchema1, "", false)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	remoteRegistryServer := createTestRegistryServer(t, ctx)
 	defer remoteRegistryServer.Close()
 
 	serverURL, err := url.Parse(remoteRegistryServer.URL)
 	if err != nil {
 		t.Fatalf("error parsing server url: %v", err)
+	}
+
+	rt, err := testutil.NewTransport(serverURL.String(), repoName, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repo, err := testutil.NewRepository(repoName, serverURL.String(), rt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	blob1Desc, blob1Content, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	blob2Desc, blob2Content, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	manifest, err := testutil.MakeSchema1Manifest(repoName, "foo", []distribution.Descriptor{blob1Desc, blob2Desc})
+	if err != nil {
+		t.Fatalf("failed to make manifest of schema 1: %v", err)
+	}
+
+	err = testutil.UploadManifest(ctx, repo, "foo", manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, manifestBytes, err := manifest.Payload()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testImage, err := testutil.NewImageForManifest(repoName, string(manifestBytes), "", false)
+	if err != nil {
+		t.Fatal(err)
 	}
 	testImage.DockerImageReference = fmt.Sprintf("%s/%s@%s", serverURL.Host, repoName, testImage.Name)
 
@@ -65,15 +100,6 @@ func TestPullthroughServeBlob(t *testing.T) {
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, testImage, namespace, name, "latest")
-
-	blob1Desc, blob1Content, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
-	if err != nil {
-		t.Fatal(err)
-	}
-	blob2Desc, blob2Content, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	blob1Storage := map[digest.Digest][]byte{blob1Desc.Digest: blob1Content}
 	blob2Storage := map[digest.Digest][]byte{blob2Desc.Digest: blob2Content}
@@ -682,17 +708,47 @@ func TestPullthroughMetrics(t *testing.T) {
 	repoName := fmt.Sprintf("%s/%s", namespace, name)
 	ctx = withAppMiddleware(ctx, &fakeAccessControllerMiddleware{t: t})
 
-	testImage, err := testutil.NewImageForManifest(repoName, testutil.SampleImageManifestSchema1, "", false)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	remoteRegistryServer := createTestRegistryServer(t, ctx)
 	defer remoteRegistryServer.Close()
 
 	serverURL, err := url.Parse(remoteRegistryServer.URL)
 	if err != nil {
 		t.Fatalf("error parsing server url: %v", err)
+	}
+
+	rt, err := testutil.NewTransport(serverURL.String(), repoName, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repo, err := testutil.NewRepository(repoName, serverURL.String(), rt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	blobDesc, _, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	manifest, err := testutil.MakeSchema1Manifest(repoName, "foo", []distribution.Descriptor{blobDesc})
+	if err != nil {
+		t.Fatalf("failed to make manifest of schema 1: %v", err)
+	}
+
+	err = testutil.UploadManifest(ctx, repo, "foo", manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, manifestBytes, err := manifest.Payload()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testImage, err := testutil.NewImageForManifest(repoName, string(manifestBytes), "", false)
+	if err != nil {
+		t.Fatal(err)
 	}
 	testImage.DockerImageReference = fmt.Sprintf("%s/%s@%s", serverURL.Host, repoName, testImage.Name)
 
@@ -701,11 +757,6 @@ func TestPullthroughMetrics(t *testing.T) {
 		imageapi.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, testImage, namespace, name, "latest")
-
-	blobDesc, _, err := testutil.UploadRandomTestBlob(ctx, serverURL.String(), nil, repoName)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	localBlobStore := newTestBlobStore(nil, nil)
 

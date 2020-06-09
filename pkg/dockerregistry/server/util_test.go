@@ -13,6 +13,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 type mockMetricsPullThrough struct{}
@@ -119,6 +120,7 @@ func Test_getImportContext(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
+			ctx = testutil.WithTestLogger(ctx, t)
 			if tt.req {
 				ctx = context.WithValue(ctx, "http.request", &http.Request{})
 			}

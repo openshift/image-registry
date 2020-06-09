@@ -38,13 +38,6 @@ type ProjectObjectListStore interface {
 	Get(namespace string) (obj runtime.Object, exists bool, err error)
 }
 
-// ImagePullthroughSpec contains a reference of remote image to pull associated with an insecure flag for the
-// corresponding registry.
-type ImagePullthroughSpec struct {
-	DockerImageReference *imageapi.DockerImageReference
-	Insecure             bool
-}
-
 type ImageStream interface {
 	Reference() string
 	Exists(ctx context.Context) (bool, rerrors.Error)
@@ -54,7 +47,7 @@ type ImageStream interface {
 	ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, rerrors.Error)
 
 	HasBlob(ctx context.Context, dgst digest.Digest) (bool, *imageapiv1.ImageStreamLayers, *imageapiv1.Image)
-	IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, rerrors.Error)
+	RemoteRepositoriesForBlob(ctx context.Context, dgst digest.Digest) ([]RemoteRepository, rerrors.Error)
 	GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, rerrors.Error)
 	GetSecrets() ([]corev1.Secret, rerrors.Error)
 
@@ -241,45 +234,109 @@ func (is *imageStream) Exists(ctx context.Context) (bool, rerrors.Error) {
 	return true, nil
 }
 
-func (is *imageStream) localRegistry(ctx context.Context) ([]string, rerrors.Error) {
-	stream, rErr := is.imageStreamGetter.get()
-	if rErr != nil {
-		return nil, convertImageStreamGetterError(rErr, fmt.Sprintf("localRegistry: failed to get image stream %s", is.Reference()))
-	}
-
+func getLocalRegistryNames(ctx context.Context, stream *imageapiv1.ImageStream) []string {
 	var localNames []string
 
 	local, err := imageapi.ParseDockerImageReference(stream.Status.DockerImageRepository)
 	if err != nil {
-		dcontext.GetLogger(ctx).Warnf("localRegistry: unable to parse dockerImageRepository %q", stream.Status.DockerImageRepository)
+		dcontext.GetLogger(ctx).Warnf("getLocalRegistryNames: unable to parse dockerImageRepository %q: %v", stream.Status.DockerImageRepository, err)
 	}
 	if len(local.Registry) != 0 {
 		localNames = append(localNames, local.Registry)
 	}
 
-	if len(stream.Status.PublicDockerImageRepository) > 0 {
+	if len(stream.Status.PublicDockerImageRepository) != 0 {
 		public, err := imageapi.ParseDockerImageReference(stream.Status.PublicDockerImageRepository)
 		if err != nil {
-			dcontext.GetLogger(ctx).Warnf("localRegistry: unable to parse publicDockerImageRepository %q", stream.Status.PublicDockerImageRepository)
+			dcontext.GetLogger(ctx).Warnf("getLocalRegistryNames: unable to parse publicDockerImageRepository %q: %v", stream.Status.PublicDockerImageRepository, err)
 		}
 		if len(public.Registry) != 0 {
 			localNames = append(localNames, public.Registry)
 		}
 	}
 
-	return localNames, nil
+	return localNames
 }
 
-func (is *imageStream) IdentifyCandidateRepositories(ctx context.Context, primary bool) ([]string, map[string]ImagePullthroughSpec, rerrors.Error) {
-	stream, err := is.imageStreamGetter.get()
-	if err != nil {
-		return nil, nil, convertImageStreamGetterError(err, fmt.Sprintf("IdentifyCandidateRepositories: failed to get image stream %s", is.Reference()))
+func imageStreamHasExternalReferences(ctx context.Context, stream *imageapiv1.ImageStream) bool {
+	localRegistry := getLocalRegistryNames(ctx, stream)
+	var localPrefixes []string
+	for _, registry := range localRegistry {
+		localPrefixes = append(localPrefixes, fmt.Sprintf("%s/%s/%s@", registry, stream.Namespace, stream.Name))
 	}
 
-	localRegistry, _ := is.localRegistry(ctx)
+	for _, tag := range stream.Status.Tags {
+		for _, item := range tag.Items {
+			local := false
+			for _, p := range localPrefixes {
+				if strings.HasPrefix(item.DockerImageReference, p) {
+					local = true
+					break
+				}
+			}
+			if !local {
+				return true
+			}
+		}
+	}
+	return false
+}
 
-	repositoryCandidates, search := identifyCandidateRepositories(stream, localRegistry, primary)
-	return repositoryCandidates, search, nil
+func imageBlobReferencesHasBlob(info imageapiv1.ImageBlobReferences, dgst digest.Digest) bool {
+	if info.Config != nil && *info.Config == dgst.String() {
+		return true
+	}
+	for _, layer := range info.Layers {
+		if layer == dgst.String() {
+			return true
+		}
+	}
+	return false
+}
+
+// RemoteRepositoriesForBlob returns a list of repositories that are imported
+// into the image stream and may have the blob dgst. For the repositories that
+// are hosted by the local registry, image stream references will be returned
+// instead. The repository is assumed to have the blob if its manifests use the
+// blob.
+func (is *imageStream) RemoteRepositoriesForBlob(ctx context.Context, dgst digest.Digest) ([]RemoteRepository, rerrors.Error) {
+	stream, err := is.imageStreamGetter.get()
+	if err != nil {
+		return nil, convertImageStreamGetterError(err, fmt.Sprintf("RemoteRepositoriesForBlob: failed to get image stream %s", is.Reference()))
+	}
+
+	if !imageStreamHasExternalReferences(ctx, stream) {
+		// We don't need to check layers as the image stream doesn't have
+		// external references anyway.
+		return nil, nil
+	}
+
+	layers, err := is.imageStreamGetter.layers()
+	if err != nil {
+		return nil, convertImageStreamGetterError(err, fmt.Sprintf("RemoteRepositoriesForBlob: failed to get image stream layers %s", is.Reference()))
+	}
+
+	dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: got %s layers: %#+v", is.Reference(), layers)
+
+	var images []string
+	for image, info := range layers.Images {
+		if imageBlobReferencesHasBlob(info, dgst) {
+			images = append(images, image)
+		}
+	}
+
+	if len(images) == 0 {
+		dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: no images found in %s with blob %s", is.Reference(), dgst)
+		return nil, nil
+	}
+
+	dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: found images in %s with blob %s: %v", is.Reference(), dgst, images)
+
+	repos := remoteRepositoriesForImages(ctx, stream, images)
+
+	dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: repositories from imagestream %s for blob %s: repos=%+v", is.Reference(), dgst, repos)
+
+	return repos, nil
 }
 
 func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, rerrors.Error) {

@@ -17,6 +17,7 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	rerrors "github.com/openshift/image-registry/pkg/errors"
 	"github.com/openshift/image-registry/pkg/imagestream"
+	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 // BlobGetterService combines the operations to access and read blobs.
@@ -108,32 +109,20 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 		return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
 	}
 
-	cached := rbgs.cache.Repositories(dgst)
-
-	secrets, err := rbgs.getSecrets()
-	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
-	}
-
-	// look at the first level of tagged repositories first
-	repositoryCandidates, search, err := rbgs.imageStream.IdentifyCandidateRepositories(ctx, true)
+	remoteRepositories, err := rbgs.imageStream.RemoteRepositoriesForBlob(ctx, dgst)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
-	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, search, cached, dgst, secrets); err == nil {
-		return desc, bs, nil
-	}
 
-	// look at all other repositories tagged by the server
-	repositoryCandidates, secondary, err := rbgs.imageStream.IdentifyCandidateRepositories(ctx, false)
-	if err != nil {
-		return distribution.Descriptor{}, nil, err
-	}
-	for k := range search {
-		delete(secondary, k)
-	}
-	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, secondary, cached, dgst, secrets); err == nil {
-		return desc, bs, nil
+	if len(remoteRepositories) != 0 {
+		secrets, err := rbgs.imageStream.GetSecrets()
+		if err != nil {
+			return distribution.Descriptor{}, nil, err
+		}
+
+		if desc, bs, err := rbgs.findCandidateRepository(ctx, remoteRepositories, secrets, dgst); err == nil {
+			return desc, bs, nil
+		}
 	}
 
 	return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
@@ -207,16 +196,16 @@ func (rbgs *remoteBlobGetterService) ServeBlob(ctx context.Context, w http.Respo
 func (rbgs *remoteBlobGetterService) proxyStat(
 	ctx context.Context,
 	retriever registryclient.RepositoryRetriever,
-	spec *imagestream.ImagePullthroughSpec,
+	ref *imageapi.DockerImageReference,
+	insecure bool,
 	dgst digest.Digest,
 ) (distribution.Descriptor, distribution.BlobStore, error) {
-	ref := spec.DockerImageReference
 	insecureNote := ""
-	if spec.Insecure {
+	if insecure {
 		insecureNote = " with a fall-back to insecure transport"
 	}
 	dcontext.GetLogger(ctx).Infof("Trying to stat %q from %q%s", dgst, ref.AsRepository().Exact(), insecureNote)
-	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), spec.Insecure)
+	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), insecure)
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("Error getting remote repository for image %q: %v", ref.AsRepository().Exact(), err)
 		return distribution.Descriptor{}, nil, err
@@ -250,60 +239,34 @@ func (rbgs *remoteBlobGetterService) Get(ctx context.Context, dgst digest.Digest
 	return bs.Get(ctx, dgst)
 }
 
-// findCandidateRepository looks in search for a particular blob, referring to previously cached items
+// findCandidateRepository looks for a particular blob
 func (rbgs *remoteBlobGetterService) findCandidateRepository(
 	ctx context.Context,
-	repositoryCandidates []string,
-	search map[string]imagestream.ImagePullthroughSpec,
-	cachedRepos []string,
-	dgst digest.Digest,
+	remoteRepositories []imagestream.RemoteRepository,
 	secrets []corev1.Secret,
+	dgst digest.Digest,
 ) (distribution.Descriptor, distribution.BlobStore, error) {
-	// no possible remote locations to search, exit early
-	if len(search) == 0 {
-		return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
-	}
-
-	// see if any of the previously located repositories containing this digest are in this
-	// image stream
-	for _, repo := range cachedRepos {
-		spec, ok := search[repo]
-		if !ok {
+	for _, repo := range remoteRepositories {
+		ref, err := imageapi.ParseDockerImageReference(repo.DockerImageReference)
+		if err != nil {
+			dcontext.GetLogger(ctx).Infof("Unable to parse image reference %q: %v", repo.DockerImageReference, err)
 			continue
 		}
+		ref = ref.DockerClientDefaults()
 
-		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics)
+		retriever, impErr := getImportContext(ctx, &ref, secrets, rbgs.metrics)
 		if impErr != nil {
 			return distribution.Descriptor{}, nil, impErr
 		}
 
-		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
+		desc, bs, err := rbgs.proxyStat(ctx, retriever, &ref, repo.Insecure, dgst)
 		if err != nil {
-			delete(search, repo)
-			continue
-		}
-		dcontext.GetLogger(ctx).Infof("Found digest location from cache %q in %q", dgst, repo)
-		return desc, bs, nil
-	}
-
-	// search the remaining registries for this digest
-	for _, repo := range repositoryCandidates {
-		spec, ok := search[repo]
-		if !ok {
+			dcontext.GetLogger(ctx).Infof("Unable to stat blob %s in %s: %v", dgst, ref.Exact(), err)
 			continue
 		}
 
-		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics)
-		if impErr != nil {
-			return distribution.Descriptor{}, nil, impErr
-		}
+		dcontext.GetLogger(ctx).Infof("Found digest location %q in %q", dgst, ref.Exact())
 
-		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
-		if err != nil {
-			continue
-		}
-		_ = rbgs.cache.AddDigest(dgst, repo)
-		dcontext.GetLogger(ctx).Infof("Found digest location by search %q in %q", dgst, repo)
 		return desc, bs, nil
 	}
 
