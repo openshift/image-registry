@@ -13,6 +13,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/imagestream"
 )
 
@@ -43,7 +44,8 @@ type repository struct {
 	app        *App
 	crossmount bool
 
-	imageStream imagestream.ImageStream
+	imageStream    imagestream.ImageStream
+	registryClient client.Interface
 
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
@@ -69,8 +71,9 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		app:        app,
 		crossmount: crossmount,
 
-		imageStream: imagestream.New(ctx, namespace, name, registryOSClient),
-		cache:       cache.NewRepositoryDigest(app.cache),
+		imageStream:    imagestream.New(namespace, name, registryOSClient),
+		registryClient: registryOSClient,
+		cache:          cache.NewRepositoryDigest(app.cache),
 	}
 
 	r.remoteBlobGetter = NewBlobGetterService(

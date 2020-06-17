@@ -12,6 +12,12 @@ import (
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
+// ImageStreamReference is a name and a namespace of an image stream.
+type ImageStreamReference struct {
+	Namespace string
+	Name      string
+}
+
 // RemoteRepository contains information about a remote repository.
 type RemoteRepository struct {
 	DockerImageReference string
@@ -75,12 +81,32 @@ func (s remoteRepositoriesByPreference) Swap(i, j int) {
 	s.Weights[i], s.Weights[j] = s.Weights[j], s.Weights[i]
 }
 
+// imageStreamReferencesByPreference implements sort.Interface to sort
+// repositories by preference. The first repository is the most preferred.
+type imageStreamReferencesByPreference struct {
+	ImageStreamReferences []ImageStreamReference
+	Weights               []weight
+}
+
+func (s imageStreamReferencesByPreference) Len() int {
+	return len(s.ImageStreamReferences)
+}
+
+func (s imageStreamReferencesByPreference) Less(i, j int) bool {
+	return s.Weights[i].Less(s.Weights[j])
+}
+
+func (s imageStreamReferencesByPreference) Swap(i, j int) {
+	s.ImageStreamReferences[i], s.ImageStreamReferences[j] = s.ImageStreamReferences[j], s.ImageStreamReferences[i]
+	s.Weights[i], s.Weights[j] = s.Weights[j], s.Weights[i]
+}
+
 // remoteRepositoriesForImages returns a list of repositories from which one of
 // images was imported into imagestream. For the repositories that are hosted
 // by the local registry, image stream references will be returned instead.
-func remoteRepositoriesForImages(ctx context.Context, imagestream *imagev1.ImageStream, images []string) []RemoteRepository {
+func remoteRepositoriesForImages(ctx context.Context, imagestream *imagev1.ImageStream, images []string) ([]RemoteRepository, []ImageStreamReference) {
 	if len(images) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	imagesSet := map[string]bool{}
@@ -104,6 +130,7 @@ func remoteRepositoriesForImages(ctx context.Context, imagestream *imagev1.Image
 		registry string
 	}{}
 	insecureRegistries := map[string]bool{}
+	uniqueISRefs := map[ImageStreamReference]weight{}
 	for _, tag := range imagestream.Status.Tags {
 		insecure := insecureByDefault
 		for _, t := range imagestream.Spec.Tags {
@@ -128,18 +155,28 @@ func remoteRepositoriesForImages(ctx context.Context, imagestream *imagev1.Image
 			}
 
 			if imagesSet[item.Image] {
-				repo := ref.AsRepository().Exact()
 				w := weight{
 					Index:   idx,
 					Created: item.Created.Time,
 				}
-				if r, ok := uniqueRepos[repo]; !ok || w.Less(r.weight) {
-					uniqueRepos[repo] = struct {
-						weight
-						registry string
-					}{
-						weight:   w,
-						registry: ref.Registry,
+				if localRegistrySet[ref.Registry] {
+					isref := ImageStreamReference{
+						Namespace: ref.Namespace,
+						Name:      ref.Name,
+					}
+					if oldw, ok := uniqueISRefs[isref]; !ok || w.Less(oldw) {
+						uniqueISRefs[isref] = w
+					}
+				} else {
+					repo := ref.AsRepository().Exact()
+					if r, ok := uniqueRepos[repo]; !ok || w.Less(r.weight) {
+						uniqueRepos[repo] = struct {
+							weight
+							registry string
+						}{
+							weight:   w,
+							registry: ref.Registry,
+						}
 					}
 				}
 			}
@@ -165,5 +202,17 @@ func remoteRepositoriesForImages(ctx context.Context, imagestream *imagev1.Image
 		Weights:            weights,
 	})
 
-	return repos
+	var isrefs []ImageStreamReference
+	weights = nil
+	for isref, w := range uniqueISRefs {
+		isrefs = append(isrefs, isref)
+		weights = append(weights, w)
+	}
+
+	sort.Sort(imageStreamReferencesByPreference{
+		ImageStreamReferences: isrefs,
+		Weights:               weights,
+	})
+
+	return repos, isrefs
 }

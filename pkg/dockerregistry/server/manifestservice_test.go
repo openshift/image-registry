@@ -25,7 +25,7 @@ func TestManifestServiceExists(t *testing.T) {
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testImage := testutil.AddRandomImage(t, fos, namespace, repo, tag)
 
-	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &manifestService{
 		imageStream:   imageStream,
@@ -61,7 +61,7 @@ func TestManifestServicePut(t *testing.T) {
 
 	tms := newTestManifestService(repoName, nil)
 
-	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &manifestService{
 		manifests:     tms,
@@ -92,7 +92,7 @@ func TestManifestServicePut(t *testing.T) {
 	}
 
 	// recreate objects to reset cached image streams
-	imageStream = imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream = imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms = &manifestService{
 		manifests:     tms,

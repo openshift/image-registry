@@ -48,7 +48,7 @@ func TestTagGet(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		imageStream := imagestream.New(backgroundCtx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
 			TagService:  newTestTagService(nil),
@@ -89,7 +89,7 @@ func TestTagGetWithoutImageStream(t *testing.T) {
 
 	_, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 
-	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ts := &tagService{
 		TagService:  newTestTagService(nil),
@@ -130,7 +130,7 @@ func TestTagGetAll(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
 			TagService:  newTestTagService(nil),
@@ -158,7 +158,7 @@ func TestTagGetAllWithoutImageStream(t *testing.T) {
 
 	_, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 
-	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ts := &tagService{
 		TagService:  newTestTagService(nil),
@@ -206,7 +206,7 @@ func TestTagLookup(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ts := &tagService{
 			TagService:  newTestTagService(nil),
@@ -243,7 +243,7 @@ func TestTagLookupWithoutImageStream(t *testing.T) {
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	anotherImage := testutil.AddRandomImage(t, fos, namespace, repo+"-another", tag)
 
-	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ts := &tagService{
 		TagService:  newTestTagService(nil),

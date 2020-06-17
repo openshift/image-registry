@@ -175,7 +175,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 	} {
 		localBlobStore := newTestBlobStore(nil, tc.localBlobs)
 
-		imageStream := imagestream.New(ctx, namespace, name, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(namespace, name, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		digestCache, err := cache.NewBlobDigest(
 			defaultDescriptorCacheSize,
@@ -610,7 +610,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 
 			localBlobStore := newTestBlobStore(nil, tc.localBlobs)
 
-			imageStream := imagestream.New(ctx, namespace, repo1, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
+			imageStream := imagestream.New(namespace, repo1, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 			digestCache, err := cache.NewBlobDigest(
 				defaultDescriptorCacheSize,
@@ -760,7 +760,7 @@ func TestPullthroughMetrics(t *testing.T) {
 
 	localBlobStore := newTestBlobStore(nil, nil)
 
-	imageStream := imagestream.New(ctx, namespace, name, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(namespace, name, dockerregistryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	digestCache, err := cache.NewBlobDigest(
 		defaultDescriptorCacheSize,

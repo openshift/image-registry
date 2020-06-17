@@ -310,7 +310,7 @@ func (r *Fsck) Storage(namespace string) error {
 
 		blobStore := repository.Blobs(r.Ctx)
 
-		imageStream := imagestream.New(r.Ctx, ref.Namespace, ref.Name, r.Client)
+		imageStream := imagestream.New(ref.Namespace, ref.Name, r.Client)
 
 		err = enumStorage.Manifests(r.Ctx, repoName, func(dgst digest.Digest) error {
 			if _, err := imageStream.ResolveImageID(r.Ctx, dgst); err == nil {

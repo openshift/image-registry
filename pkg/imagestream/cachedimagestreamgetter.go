@@ -21,6 +21,12 @@ const (
 	ErrImageStreamGetterForbiddenCode = ErrImageStreamGetterCode + "Forbidden"
 )
 
+type ImageStreamGetter interface {
+	Get(namespace string, name string) (*imageapiv1.ImageStream, rerrors.Error)
+	Layers(namespace string, name string) (*imageapiv1.ImageStreamLayers, rerrors.Error)
+	Update(imagestream *imageapiv1.ImageStream)
+}
+
 // cachedImageStreamGetter wraps a master API client for getting image streams with a cache.
 type cachedImageStreamGetter struct {
 	namespace               string

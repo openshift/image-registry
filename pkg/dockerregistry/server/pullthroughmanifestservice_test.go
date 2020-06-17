@@ -167,7 +167,7 @@ func TestPullthroughManifests(t *testing.T) {
 	} {
 		localManifestService := newTestManifestService(repoName, tc.localData)
 
-		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		digestCache, err := cache.NewBlobDigest(
 			defaultDescriptorCacheSize,
@@ -409,7 +409,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 
 			localManifestService := newTestManifestService(repoName, tc.localData)
 
-			imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+			imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 			digestCache, err := cache.NewBlobDigest(
 				defaultDescriptorCacheSize,
@@ -561,7 +561,7 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 			s.touched = false
 		}
 
-		imageStream := imagestream.New(ctx, namespace, tc.repoName, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+		imageStream := imagestream.New(namespace, tc.repoName, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 		ptms := &pullthroughManifestService{
 			ManifestService: newTestManifestService(tc.repoName, nil),
@@ -714,7 +714,7 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 	})
 	testutil.AddImage(t, fos, img, namespace, repo, "latest")
 
-	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	ms := &putWaiterManifestService{
 		done: make(chan struct{}),
@@ -792,7 +792,7 @@ func TestPullthroughManifestMetrics(t *testing.T) {
 	})
 	testutil.AddImage(t, fos, img, namespace, repo, "latest")
 
-	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+	imageStream := imagestream.New(namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
 
 	c, sink := metricstesting.NewCounterSink()
 	ms := newTestManifestService(repoName, nil)

@@ -44,61 +44,84 @@ func (m *pullthroughManifestService) Get(ctx context.Context, dgst digest.Digest
 
 func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Manifest, error) {
 	dcontext.GetLogger(ctx).Debugf("(*pullthroughManifestService).remoteGet: starting with dgst=%s", dgst.String())
-	image, rErr := m.imageStream.GetImageOfImageStream(ctx, dgst)
-	if rErr != nil {
-		switch rErr.Code() {
-		case imagestream.ErrImageStreamNotFoundCode, imagestream.ErrImageStreamImageNotFoundCode:
-			dcontext.GetLogger(ctx).Errorf("remoteGet: unable to get image %s in imagestream %s: %v", dgst.String(), m.imageStream.Reference(), rErr)
-			return nil, distribution.ErrManifestUnknownRevision{
-				Name:     m.imageStream.Reference(),
-				Revision: dgst,
+
+	var firstPullthroughError error
+	isQueue := []imagestream.ImageStream{m.imageStream}
+	visited := map[string]bool{}
+	for len(isQueue) > 0 {
+		is := isQueue[0]
+		isQueue = isQueue[1:]
+
+		if visited[is.Reference()] {
+			continue
+		}
+		visited[is.Reference()] = true
+
+		repos, isrefs, err := is.RemoteRepositoriesForManifest(ctx, dgst)
+		if err != nil {
+			if err.Code() == imagestream.ErrImageStreamNotFoundCode {
+				dcontext.GetLogger(ctx).Infof("Unable to get remote repositories for manifest %s (imagestream %s): %v", dgst.String(), m.imageStream.Reference(), err)
+			} else {
+				dcontext.GetLogger(ctx).Errorf("Unable to get remote repositories for manifest %s (imagestream %s): %v", dgst.String(), m.imageStream.Reference(), err)
 			}
-		case imagestream.ErrImageStreamForbiddenCode:
-			dcontext.GetLogger(ctx).Errorf("remoteGet: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), rErr)
-			return nil, distribution.ErrAccessDenied
 		}
-		return nil, rErr
-	}
 
-	ref, err := imageapi.ParseDockerImageReference(image.DockerImageReference)
-	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s@%s: %v", image.DockerImageReference, m.imageStream.Reference(), dgst.String(), err)
-		return nil, err
-	}
-	ref = ref.DockerClientDefaults()
+		for _, repo := range repos {
+			ref, err := imageapi.ParseDockerImageReference(repo.DockerImageReference)
+			if err != nil {
+				dcontext.GetLogger(ctx).Infof("Unable to parse image reference %q (imagestream %s): %v", repo.DockerImageReference, is.Reference(), err)
+				continue
+			}
+			ref = ref.DockerClientDefaults()
 
-	// don't attempt to pullthrough from ourself
-	if ref.Registry == m.registryAddr {
-		return nil, distribution.ErrManifestUnknownRevision{
-			Name:     m.imageStream.Reference(),
-			Revision: dgst,
+			repo, err := m.getRemoteRepositoryClient(ctx, &ref, dgst, options...)
+			if err != nil {
+				if firstPullthroughError == nil {
+					firstPullthroughError = errors.ErrorCodePullthroughManifest.WithArgs(ref.Exact(), err)
+				}
+				dcontext.GetLogger(ctx).Errorf("Error getting manifest %s from remote repository %s (imagestream %s): %v", dgst, ref.AsRepository().Exact(), is.Reference(), err)
+				continue
+			}
+
+			pullthroughManifestService, err := repo.Manifests(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			manifest, err := pullthroughManifestService.Get(ctx, dgst)
+			if err != nil {
+				if firstPullthroughError == nil {
+					firstPullthroughError = errors.ErrorCodePullthroughManifest.WithArgs(ref.Exact(), err)
+				}
+				dcontext.GetLogger(ctx).Errorf("Error getting manifest %s from remote repository %s (imagestream %s): %v", dgst, ref.AsRepository().Exact(), is.Reference(), err)
+				continue
+			}
+
+			if m.mirror {
+				if mirrorErr := m.mirrorManifest(ctx, manifest); mirrorErr != nil {
+					errors.Handle(ctx, fmt.Sprintf("failed to mirror manifest from %s", ref.Exact()), mirrorErr)
+				}
+			}
+
+			// FIXME(dmage): restore or remove?
+			//RememberLayersOfImage(ctx, m.cache, image, ref.Exact())
+
+			return manifest, err
+		}
+
+		for _, isref := range isrefs {
+			isQueue = append(isQueue, is.Clone(isref.Namespace, isref.Name))
 		}
 	}
 
-	repo, err := m.getRemoteRepositoryClient(ctx, &ref, dgst, options...)
-	if err != nil {
-		return nil, errors.ErrorCodePullthroughManifest.WithArgs(ref.Exact(), err)
+	if firstPullthroughError != nil {
+		return nil, firstPullthroughError
 	}
 
-	pullthroughManifestService, err := repo.Manifests(ctx)
-	if err != nil {
-		return nil, err
+	return nil, distribution.ErrManifestUnknownRevision{
+		Name:     m.imageStream.Reference(),
+		Revision: dgst,
 	}
-
-	manifest, err := pullthroughManifestService.Get(ctx, dgst)
-	if err != nil {
-		return nil, errors.ErrorCodePullthroughManifest.WithArgs(ref.Exact(), err)
-	}
-
-	if m.mirror {
-		if mirrorErr := m.mirrorManifest(ctx, manifest); mirrorErr != nil {
-			errors.Handle(ctx, fmt.Sprintf("failed to mirror manifest from %s", ref.Exact()), mirrorErr)
-		}
-	}
-
-	RememberLayersOfImage(ctx, m.cache, image, ref.Exact())
-
-	return manifest, nil
 }
 
 func (m *pullthroughManifestService) mirrorManifest(ctx context.Context, manifest distribution.Manifest) error {

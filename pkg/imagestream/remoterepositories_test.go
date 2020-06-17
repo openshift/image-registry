@@ -36,15 +36,17 @@ func TestRemoteRepositoriesForImages(t *testing.T) {
 	}
 
 	testCases := []struct {
-		name          string
-		is            *imageapiv1.ImageStream
-		images        []string
-		expectedRepos []RemoteRepository
+		name           string
+		is             *imageapiv1.ImageStream
+		images         []string
+		expectedRepos  []RemoteRepository
+		expectedISRefs []ImageStreamReference
 	}{
 		{
-			name:          "empty image stream",
-			is:            &imageapiv1.ImageStream{},
-			expectedRepos: nil,
+			name:           "empty image stream",
+			is:             &imageapiv1.ImageStream{},
+			expectedRepos:  nil,
+			expectedISRefs: nil,
 		},
 
 		{
@@ -69,6 +71,7 @@ func TestRemoteRepositoriesForImages(t *testing.T) {
 			expectedRepos: []RemoteRepository{
 				{DockerImageReference: "docker.io/busybox", Insecure: false},
 			},
+			expectedISRefs: nil,
 		},
 
 		{
@@ -122,6 +125,7 @@ func TestRemoteRepositoriesForImages(t *testing.T) {
 				{DockerImageReference: "example.org/user/app", Insecure: true},
 				{DockerImageReference: "example.org/app", Insecure: true},
 			},
+			expectedISRefs: nil,
 		},
 
 		{
@@ -174,6 +178,7 @@ func TestRemoteRepositoriesForImages(t *testing.T) {
 				{DockerImageReference: "secure.example.org/user/app", Insecure: false},
 				{DockerImageReference: "other.example.org/user/app", Insecure: true},
 			},
+			expectedISRefs: nil,
 		},
 
 		{
@@ -251,6 +256,7 @@ func TestRemoteRepositoriesForImages(t *testing.T) {
 				{DockerImageReference: "a.b/app", Insecure: true},
 				{DockerImageReference: "a.b/c", Insecure: true},
 			},
+			expectedISRefs: nil,
 		},
 
 		{
@@ -325,13 +331,78 @@ func TestRemoteRepositoriesForImages(t *testing.T) {
 				{DockerImageReference: "a.b/app", Insecure: true},
 				{DockerImageReference: "a.b/foo", Insecure: true},
 			},
+			expectedISRefs: nil,
+		},
+
+		{
+			name: "imported from other image streams",
+			is: &imageapiv1.ImageStream{
+				Status: imageapiv1.ImageStreamStatus{
+					DockerImageRepository: "localhost:5000/testns/testis",
+					Tags: []imageapiv1.NamedTagEventList{
+						{
+							Tag: "tag",
+							Items: []imageapiv1.TagEvent{
+								{
+									Created:              metav1.Time{Time: jun2},
+									Image:                shaE3,
+									DockerImageReference: "docker.io/busybox@" + shaE3,
+								},
+								{
+									Created:              metav1.Time{Time: jun1},
+									Image:                shaE3,
+									DockerImageReference: "localhost:5000/testns/anotheris@" + shaE3,
+								},
+							},
+						},
+						{
+							Tag: "foo",
+							Items: []imageapiv1.TagEvent{
+								{
+									Created:              metav1.Time{Time: jun2},
+									Image:                shaE3,
+									DockerImageReference: "localhost:5000/anotherns/foo@" + shaE3,
+								},
+							},
+						},
+						{
+							Tag: "bar",
+							Items: []imageapiv1.TagEvent{
+								{
+									Created:              metav1.Time{Time: jun3},
+									Image:                shaE3,
+									DockerImageReference: "localhost:5000/anotherns/bar1@" + shaE3,
+								},
+								{
+									Created:              metav1.Time{Time: jun2},
+									Image:                shaE3,
+									DockerImageReference: "localhost:5000/anotherns/bar2@" + shaE3,
+								},
+							},
+						},
+					},
+				},
+			},
+			images: []string{shaE3},
+			expectedRepos: []RemoteRepository{
+				{DockerImageReference: "docker.io/busybox", Insecure: false},
+			},
+			expectedISRefs: []ImageStreamReference{
+				{Namespace: "anotherns", Name: "bar1"},
+				{Namespace: "anotherns", Name: "foo"},
+				{Namespace: "anotherns", Name: "bar2"},
+				{Namespace: "testns", Name: "anotheris"},
+			},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			repos := remoteRepositoriesForImages(ctx, tc.is, tc.images)
+			repos, isrefs := remoteRepositoriesForImages(ctx, tc.is, tc.images)
 			if !reflect.DeepEqual(repos, tc.expectedRepos) {
 				t.Errorf("repos: got %v, want %v", repos, tc.expectedRepos)
+			}
+			if !reflect.DeepEqual(isrefs, tc.expectedISRefs) {
+				t.Errorf("isrefs: got %v, want %v", isrefs, tc.expectedISRefs)
 			}
 		})
 	}

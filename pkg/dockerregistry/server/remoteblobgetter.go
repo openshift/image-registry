@@ -109,7 +109,7 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 		return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
 	}
 
-	remoteRepositories, err := rbgs.imageStream.RemoteRepositoriesForBlob(ctx, dgst)
+	remoteRepositories, _, err := rbgs.imageStream.RemoteRepositoriesForBlob(ctx, dgst)
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
@@ -207,7 +207,7 @@ func (rbgs *remoteBlobGetterService) proxyStat(
 	dcontext.GetLogger(ctx).Infof("Trying to stat %q from %q%s", dgst, ref.AsRepository().Exact(), insecureNote)
 	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), insecure)
 	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("Error getting remote repository for image %q: %v", ref.AsRepository().Exact(), err)
+		dcontext.GetLogger(ctx).Errorf("Error getting remote repository for image %s: %v", ref.AsRepository().Exact(), err)
 		return distribution.Descriptor{}, nil, err
 	}
 
@@ -215,7 +215,7 @@ func (rbgs *remoteBlobGetterService) proxyStat(
 	desc, err := pullthroughBlobStore.Stat(ctx, dgst)
 	if err != nil {
 		if err != distribution.ErrBlobUnknown {
-			dcontext.GetLogger(ctx).Errorf("Error statting blob %s in remote repository %q: %v", dgst, ref.AsRepository().Exact(), err)
+			dcontext.GetLogger(ctx).Errorf("Error statting blob %s in remote repository %s: %v", dgst, ref.AsRepository().Exact(), err)
 		}
 		return distribution.Descriptor{}, nil, err
 	}

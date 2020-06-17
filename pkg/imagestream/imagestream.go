@@ -40,6 +40,7 @@ type ProjectObjectListStore interface {
 
 type ImageStream interface {
 	Reference() string
+	Clone(namespace, name string) ImageStream
 	Exists(ctx context.Context) (bool, rerrors.Error)
 
 	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, rerrors.Error)
@@ -47,7 +48,8 @@ type ImageStream interface {
 	ResolveImageID(ctx context.Context, dgst digest.Digest) (*imageapiv1.TagEvent, rerrors.Error)
 
 	HasBlob(ctx context.Context, dgst digest.Digest) (bool, *imageapiv1.ImageStreamLayers, *imageapiv1.Image)
-	RemoteRepositoriesForBlob(ctx context.Context, dgst digest.Digest) ([]RemoteRepository, rerrors.Error)
+	RemoteRepositoriesForBlob(ctx context.Context, dgst digest.Digest) ([]RemoteRepository, []ImageStreamReference, rerrors.Error)
+	RemoteRepositoriesForManifest(ctx context.Context, dgst digest.Digest) ([]RemoteRepository, []ImageStreamReference, rerrors.Error)
 	GetLimitRangeList(ctx context.Context, cache ProjectObjectListStore) (*corev1.LimitRangeList, rerrors.Error)
 	GetSecrets() ([]corev1.Secret, rerrors.Error)
 
@@ -69,7 +71,7 @@ type imageStream struct {
 
 var _ ImageStream = &imageStream{}
 
-func New(ctx context.Context, namespace, name string, client client.Interface) ImageStream {
+func New(namespace, name string, client client.Interface) ImageStream {
 	return &imageStream{
 		namespace:        namespace,
 		name:             name,
@@ -85,6 +87,23 @@ func New(ctx context.Context, namespace, name string, client client.Interface) I
 
 func (is *imageStream) Reference() string {
 	return fmt.Sprintf("%s/%s", is.namespace, is.name)
+}
+
+func (is *imageStream) Clone(namespace, name string) ImageStream {
+	if is.namespace == namespace && is.name == name {
+		return is
+	}
+	return &imageStream{
+		namespace:        namespace,
+		name:             name,
+		registryOSClient: is.registryOSClient,
+		imageClient:      newCachedImageGetter(is.registryOSClient),
+		imageStreamGetter: &cachedImageStreamGetter{
+			namespace:    namespace,
+			name:         name,
+			isNamespacer: is.registryOSClient,
+		},
+	}
 }
 
 // getImage retrieves the Image with digest `dgst`. No authorization check is done.
@@ -299,21 +318,21 @@ func imageBlobReferencesHasBlob(info imageapiv1.ImageBlobReferences, dgst digest
 // are hosted by the local registry, image stream references will be returned
 // instead. The repository is assumed to have the blob if its manifests use the
 // blob.
-func (is *imageStream) RemoteRepositoriesForBlob(ctx context.Context, dgst digest.Digest) ([]RemoteRepository, rerrors.Error) {
+func (is *imageStream) RemoteRepositoriesForBlob(ctx context.Context, dgst digest.Digest) ([]RemoteRepository, []ImageStreamReference, rerrors.Error) {
 	stream, err := is.imageStreamGetter.get()
 	if err != nil {
-		return nil, convertImageStreamGetterError(err, fmt.Sprintf("RemoteRepositoriesForBlob: failed to get image stream %s", is.Reference()))
+		return nil, nil, convertImageStreamGetterError(err, fmt.Sprintf("RemoteRepositoriesForBlob: failed to get image stream %s", is.Reference()))
 	}
 
 	if !imageStreamHasExternalReferences(ctx, stream) {
 		// We don't need to check layers as the image stream doesn't have
 		// external references anyway.
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	layers, err := is.imageStreamGetter.layers()
 	if err != nil {
-		return nil, convertImageStreamGetterError(err, fmt.Sprintf("RemoteRepositoriesForBlob: failed to get image stream layers %s", is.Reference()))
+		return nil, nil, convertImageStreamGetterError(err, fmt.Sprintf("RemoteRepositoriesForBlob: failed to get image stream layers %s", is.Reference()))
 	}
 
 	dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: got %s layers: %#+v", is.Reference(), layers)
@@ -327,16 +346,33 @@ func (is *imageStream) RemoteRepositoriesForBlob(ctx context.Context, dgst diges
 
 	if len(images) == 0 {
 		dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: no images found in %s with blob %s", is.Reference(), dgst)
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: found images in %s with blob %s: %v", is.Reference(), dgst, images)
 
-	repos := remoteRepositoriesForImages(ctx, stream, images)
+	repos, isrefs := remoteRepositoriesForImages(ctx, stream, images)
 
-	dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: repositories from imagestream %s for blob %s: repos=%+v", is.Reference(), dgst, repos)
+	dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForBlob: repositories from imagestream %s for blob %s: repos=%+v isrefs=%+v", is.Reference(), dgst, repos, isrefs)
 
-	return repos, nil
+	return repos, isrefs, nil
+}
+
+// RemoteRepositoriesForManifest returns a list of repositories that are
+// imported into the image stream and may have the manifest dgst. For the
+// repositories that are hosted by the local registry, image stream references
+// will be returned instead.
+func (is *imageStream) RemoteRepositoriesForManifest(ctx context.Context, dgst digest.Digest) ([]RemoteRepository, []ImageStreamReference, rerrors.Error) {
+	stream, err := is.imageStreamGetter.get()
+	if err != nil {
+		return nil, nil, convertImageStreamGetterError(err, fmt.Sprintf("RemoteRepositoriesForManifest: failed to get image stream %s", is.Reference()))
+	}
+
+	repos, isrefs := remoteRepositoriesForImages(ctx, stream, []string{dgst.String()})
+
+	dcontext.GetLogger(ctx).Debugf("RemoteRepositoriesForManifest: repositories from imagestream %s for manifest %s: repos=%+v isrefs=%+v", is.Reference(), dgst, repos, isrefs)
+
+	return repos, isrefs, nil
 }
 
 func (is *imageStream) Tags(ctx context.Context) (map[string]digest.Digest, rerrors.Error) {

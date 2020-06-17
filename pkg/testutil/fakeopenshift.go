@@ -105,6 +105,7 @@ func (fos *FakeOpenShift) CreateImageStream(namespace string, is *imageapiv1.Ima
 
 	is.Namespace = namespace
 	is.CreationTimestamp = metav1.Now()
+	is.Status.DockerImageRepository = fmt.Sprintf("localhost:5000/%s", ref)
 
 	fos.imageStreams[ref] = *is
 	fos.logger.Debugf("(*FakeOpenShift).imageStreams[%q] created", ref)
