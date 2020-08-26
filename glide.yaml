@@ -20,8 +20,8 @@ import:
   version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-apiserver
 - package: k8s.io/api
-  repo:    git@github.com:openshift/kubernetes-api
   version: release-1.9.1
+  repo: git@github.com:openshift/kubernetes-api
 - package: k8s.io/apiextensions-apiserver
   version: release-1.9.1
   repo: git@github.com:openshift/kubernetes-apiextensions-apiserver
@@ -63,6 +63,11 @@ import:
   version: 0e6d502573042a6563419fbcce4f284600bfe929
 - package: github.com/aws/aws-sdk-go
   version: 1.6.10
+- package: bitbucket.org/ww/goautoneg
+  version: 2ae31c8b6b30d2f4c8100c20d527b571e9c433bb
+  repo: https://github.com/munnerz/goautoneg.git
+- package: golang.org/x/text
+  version: 0.3.3
 
 # pin the latest tested version so you can `glide up -v` to bump only one package
 - package: github.com/certifi/gocertifi
