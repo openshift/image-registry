@@ -1,8 +1,9 @@
-hash: 21008a2176f70664dc7aff7c481e5bf04197e8b21bb87b87f132cdf8f9e8ac6b
-updated: 2020-03-18T22:09:45.293901+01:00
+hash: b3a589f330a4ca70703f1782a4324147b810424f8b762339962fb0a8f8f16e02
+updated: 2020-08-26T15:34:10.84996+02:00
 imports:
 - name: bitbucket.org/ww/goautoneg
-  version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
+  version: 2ae31c8b6b30d2f4c8100c20d527b571e9c433bb
+  repo: https://github.com/munnerz/goautoneg.git
 - name: github.com/aws/aws-sdk-go
   version: 63ce630574a5ec05ecd8e8de5cea16332a5a684d
   subpackages:
@@ -362,10 +363,12 @@ imports:
   - unix
   - windows
 - name: golang.org/x/text
-  version: b19bf474d317b857955b12035d2c5acb57ce8b01
+  version: 23ae387dee1f90d29a23c0e87ee0b46038fbed0e
   subpackages:
   - cases
   - internal
+  - internal/language
+  - internal/language/compact
   - internal/tag
   - language
   - runes
