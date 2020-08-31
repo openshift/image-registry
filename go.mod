@@ -5,8 +5,6 @@ go 1.13
 require (
 	bitbucket.org/ww/goautoneg v0.0.0-20120707110453-75cd24fc2f2c
 	github.com/Azure/azure-sdk-for-go v16.2.1+incompatible // indirect
-	github.com/Azure/go-autorest/autorest v0.9.3 // indirect
-	github.com/Azure/go-autorest/autorest/adal v0.8.1 // indirect
 	github.com/Microsoft/hcsshim v0.8.7 // indirect
 	github.com/aws/aws-sdk-go v1.28.2 // indirect
 	github.com/bshuster-repo/logrus-logstash-hook v0.4.1
@@ -19,13 +17,11 @@ require (
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 	github.com/garyburd/redigo v0.0.0-20150301180006-535138d7bcd7 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
-	github.com/golang/groupcache v0.0.0-20191002201903-404acd9df4cc // indirect
 	github.com/gorilla/context v0.0.0-20140604161150-14f550f51af5 // indirect
 	github.com/gorilla/handlers v0.0.0-20150720190736-60c7bfde3e33
 	github.com/gorilla/mux v1.4.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/imdario/mergo v0.3.8 // indirect
-	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/marstr/guid v1.1.1-0.20170427235115-8bdf7d1a087c // indirect
 	github.com/ncw/swift v1.0.49 // indirect
@@ -39,12 +35,11 @@ require (
 	github.com/prometheus/procfs v0.0.8 // indirect
 	github.com/satori/go.uuid v1.2.1-0.20180103174451-36e9d2ebbde5 // indirect
 	github.com/sirupsen/logrus v1.4.2
-	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
 	gopkg.in/yaml.v2 v2.2.8
-	k8s.io/api v0.18.0
-	k8s.io/apimachinery v0.18.0
-	k8s.io/client-go v0.18.0
+	k8s.io/api v0.19.0
+	k8s.io/apimachinery v0.19.0
+	k8s.io/client-go v0.19.0
 	k8s.io/klog v1.0.0
 )
 
