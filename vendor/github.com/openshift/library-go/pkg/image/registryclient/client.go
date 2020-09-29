@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/time/rate"
 
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/schema1"
@@ -38,10 +38,11 @@ type RepositoryRetriever interface {
 // ErrNotV2Registry is returned when the server does not report itself as a V2 Docker registry
 type ErrNotV2Registry struct {
 	Registry string
+	Status   string
 }
 
 func (e *ErrNotV2Registry) Error() string {
-	return fmt.Sprintf("endpoint %q does not support v2 API", e.Registry)
+	return fmt.Sprintf("endpoint %q does not support v2 API (got %s)", e.Registry, e.Status)
 }
 
 type AuthHandlersFunc func(transport http.RoundTripper, registry *url.URL, repoName string) []auth.AuthenticationHandler
@@ -260,7 +261,10 @@ func (c *Context) ping(registry url.URL, insecure bool, transport http.RoundTrip
 		case resp.StatusCode == http.StatusUnauthorized, resp.StatusCode == http.StatusForbidden:
 			// v2
 		default:
-			return nil, &ErrNotV2Registry{Registry: registry.String()}
+			return nil, &ErrNotV2Registry{
+				Registry: registry.String(),
+				Status:   resp.Status,
+			}
 		}
 	}
 
@@ -617,7 +621,7 @@ func VerifyManifestIntegrity(manifest distribution.Manifest, dgst digest.Digest)
 		return err
 	}
 	if contentDigest != dgst {
-		if klog.V(4) {
+		if klog.V(4).Enabled() {
 			_, payload, _ := manifest.Payload()
 			klog.Infof("Mismatched content: %s\n%s", contentDigest, string(payload))
 		}
