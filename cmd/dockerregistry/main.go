@@ -11,7 +11,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 
 	"github.com/openshift/library-go/pkg/serviceability"
 
@@ -27,13 +27,13 @@ func init() {
 }
 
 func klogLogLevel() string {
-	if klog.V(4) {
+	if klog.V(4).Enabled() {
 		return "debug"
 	}
-	if klog.V(2) {
+	if klog.V(2).Enabled() {
 		return "info"
 	}
-	if klog.V(1) {
+	if klog.V(1).Enabled() {
 		return "warn"
 	}
 	return "error"
