@@ -3,7 +3,6 @@ module github.com/openshift/image-registry
 go 1.13
 
 require (
-	bitbucket.org/ww/goautoneg v0.0.0-20120707110453-75cd24fc2f2c
 	github.com/Azure/azure-sdk-for-go v16.2.1+incompatible // indirect
 	github.com/Microsoft/hcsshim v0.8.7 // indirect
 	github.com/aws/aws-sdk-go v1.34.30 // indirect
@@ -24,6 +23,7 @@ require (
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/marstr/guid v1.1.1-0.20170427235115-8bdf7d1a087c // indirect
+	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 	github.com/ncw/swift v1.0.49 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1.0.20180430190053-c9281466c8b2
 	github.com/opencontainers/runc v1.0.0-rc5.0.20180920170208-00dc70017d22 // indirect
