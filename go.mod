@@ -21,26 +21,25 @@ require (
 	github.com/gorilla/mux v1.4.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/imdario/mergo v0.3.8 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/marstr/guid v1.1.1-0.20170427235115-8bdf7d1a087c // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 	github.com/ncw/swift v1.0.49 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1.0.20180430190053-c9281466c8b2
 	github.com/opencontainers/runc v1.0.0-rc5.0.20180920170208-00dc70017d22 // indirect
-	github.com/openshift/api v0.0.0-20200331101224-075d5bc995b6
-	github.com/openshift/client-go v0.0.0-20200326155132-2a6cd50aedd0
-	github.com/openshift/library-go v0.0.0-20200309152735-d18a5ca14d82
+	github.com/openshift/api v0.0.0-20200827090112-c05698d102cf
+	github.com/openshift/client-go v0.0.0-20200827190008-3062137373b5
+	github.com/openshift/library-go v0.0.0-20200921120329-c803a7b7bb2c
 	github.com/pborman/uuid v1.2.0
-	github.com/prometheus/client_golang v1.1.0
-	github.com/prometheus/procfs v0.0.8 // indirect
+	github.com/prometheus/client_golang v1.7.1
 	github.com/satori/go.uuid v1.2.1-0.20180103174451-36e9d2ebbde5 // indirect
-	github.com/sirupsen/logrus v1.4.2
+	github.com/sirupsen/logrus v1.6.0
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api v0.19.0
 	k8s.io/apimachinery v0.19.0
 	k8s.io/client-go v0.19.0
-	k8s.io/klog v1.0.0
+	k8s.io/klog v1.0.0 // indirect
+	k8s.io/klog/v2 v2.3.0
 )
 
 replace (
