@@ -110,7 +110,7 @@ func (ac *authChallenge) Error() string {
 }
 
 // SetHeaders sets the basic challenge header on the response.
-func (ac *authChallenge) SetHeaders(w http.ResponseWriter) {
+func (ac *authChallenge) SetHeaders(req *http.Request, w http.ResponseWriter) {
 	// WWW-Authenticate response challenge header.
 	// See https://tools.ietf.org/html/rfc6750#section-3
 	str := fmt.Sprintf("Basic realm=%s", ac.realm)
@@ -126,7 +126,7 @@ func (ac *tokenAuthChallenge) Error() string {
 }
 
 // SetHeaders sets the bearer challenge header on the response.
-func (ac *tokenAuthChallenge) SetHeaders(w http.ResponseWriter) {
+func (ac *tokenAuthChallenge) SetHeaders(req *http.Request, w http.ResponseWriter) {
 	// WWW-Authenticate response challenge header.
 	// See https://docs.docker.com/registry/spec/auth/token/#/how-to-authenticate and https://tools.ietf.org/html/rfc6750#section-3
 	str := fmt.Sprintf("Bearer realm=%q", ac.realm)

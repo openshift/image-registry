@@ -481,7 +481,7 @@ func TestAccessController(t *testing.T) {
 				}
 				if isChallenge {
 					recorder := httptest.NewRecorder()
-					challengeErr.SetHeaders(recorder)
+					challengeErr.SetHeaders(req, recorder)
 					if !reflect.DeepEqual(recorder.HeaderMap, test.expectedHeaders) {
 						t.Fatalf("expected headers %#v, got %#v", test.expectedHeaders, recorder.HeaderMap)
 					}

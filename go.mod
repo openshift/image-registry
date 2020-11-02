@@ -38,11 +38,10 @@ require (
 	k8s.io/api v0.19.0
 	k8s.io/apimachinery v0.19.0
 	k8s.io/client-go v0.19.0
-	k8s.io/klog v1.0.0 // indirect
 	k8s.io/klog/v2 v2.3.0
 )
 
 replace (
-	github.com/docker/distribution => github.com/openshift/docker-distribution v0.0.0-20200915090847-1d6fb9bf35ab
+	github.com/docker/distribution => github.com/openshift/docker-distribution v0.0.0-20201012083032-63d38f155de2
 	google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
 )
