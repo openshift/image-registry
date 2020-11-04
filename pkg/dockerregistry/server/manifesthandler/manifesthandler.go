@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/docker/distribution"
+	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/opencontainers/go-digest"
@@ -42,6 +43,8 @@ func NewManifestHandler(serverAddr string, blobStore distribution.BlobStore, man
 		return &manifestSchema1Handler{serverAddr: serverAddr, blobStore: blobStore, manifest: t}, nil
 	case *schema2.DeserializedManifest:
 		return &manifestSchema2Handler{blobStore: blobStore, manifest: t}, nil
+	case *ocischema.DeserializedManifest:
+		return &manifestOCIHandler{blobStore: blobStore, manifest: t}, nil
 	default:
 		return nil, fmt.Errorf("unsupported manifest type %T", manifest)
 	}
