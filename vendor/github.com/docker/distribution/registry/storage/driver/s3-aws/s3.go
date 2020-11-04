@@ -105,6 +105,7 @@ type DriverParameters struct {
 	SessionToken                string
 	UseDualStack                bool
 	VirtualHostedStyle          bool
+	CredentialsConfigPath       string
 }
 
 func init() {
@@ -181,6 +182,11 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 	secretKey := parameters["secretkey"]
 	if secretKey == nil {
 		secretKey = ""
+	}
+
+	credentialsConfigPath := parameters["credentialsconfigpath"]
+	if credentialsConfigPath == nil {
+		credentialsConfigPath = ""
 	}
 
 	regionEndpoint := parameters["regionendpoint"]
@@ -399,6 +405,7 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 		fmt.Sprint(sessionToken),
 		useDualStackBool,
 		virtualHostedStyleBool,
+		fmt.Sprint(credentialsConfigPath),
 	}
 
 	return New(params)
@@ -442,6 +449,12 @@ func New(params DriverParameters) (*Driver, error) {
 		return nil, fmt.Errorf("On Amazon S3 this storage driver can only be used with v4 authentication")
 	}
 
+	// Makes no sense to provide access/secret key and the location of a
+	// config file with credentials.
+	if (params.AccessKey != "" || params.SecretKey != "") && params.CredentialsConfigPath != "" {
+		return nil, fmt.Errorf("cannot set both access/secret key and credentials file path")
+	}
+
 	awsConfig := aws.NewConfig()
 	sess, err := session.NewSession()
 	if err != nil {
@@ -467,7 +480,9 @@ func New(params DriverParameters) (*Driver, error) {
 		awsConfig.WithEndpoint(params.RegionEndpoint)
 	}
 
-	awsConfig.WithCredentials(creds)
+	if params.CredentialsConfigPath == "" {
+		awsConfig.WithCredentials(creds)
+	}
 	awsConfig.WithRegion(params.Region)
 	awsConfig.WithDisableSSL(!params.Secure)
 	awsConfig.WithUseDualStack(params.UseDualStack)
@@ -490,7 +505,16 @@ func New(params DriverParameters) (*Driver, error) {
 		}
 	}
 
-	sess, err = session.NewSession(awsConfig)
+	sessionOptions := session.Options{
+		Config: *awsConfig,
+	}
+	if params.CredentialsConfigPath != "" {
+		sessionOptions.SharedConfigState = session.SharedConfigEnable
+		sessionOptions.SharedConfigFiles = []string{
+			params.CredentialsConfigPath,
+		}
+	}
+	sess, err = session.NewSessionWithOptions(sessionOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new session with aws config: %v", err)
 	}
