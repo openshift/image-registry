@@ -25,6 +25,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 	github.com/ncw/swift v1.0.49 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1.0.20180430190053-c9281466c8b2
+	github.com/opencontainers/image-spec v1.0.1
 	github.com/opencontainers/runc v1.0.0-rc5.0.20180920170208-00dc70017d22 // indirect
 	github.com/openshift/api v0.0.0-20200827090112-c05698d102cf
 	github.com/openshift/client-go v0.0.0-20200827190008-3062137373b5
