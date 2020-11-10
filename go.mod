@@ -2,6 +2,8 @@ module github.com/openshift/image-registry
 
 go 1.13
 
+replace github.com/openshift/api => github.com/alvaroaleman/api v0.0.0-20201109165148-6d5eebc3a6f4
+
 require (
 	github.com/Azure/azure-sdk-for-go v16.2.1+incompatible // indirect
 	github.com/Microsoft/hcsshim v0.8.7 // indirect
@@ -35,8 +37,8 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
 	gopkg.in/yaml.v2 v2.3.0
-	k8s.io/api v0.19.0
-	k8s.io/apimachinery v0.19.0
+	k8s.io/api v0.19.2
+	k8s.io/apimachinery v0.19.2
 	k8s.io/client-go v0.19.0
 	k8s.io/klog/v2 v2.3.0
 )
