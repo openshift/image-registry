@@ -78,6 +78,9 @@ func dockerErrorCode(err error) string {
 	if e, ok := err.(errcode.Error); ok {
 		return e.ErrorCode().String()
 	}
+	if strings.Contains(err.Error(), "no basic auth credentials") {
+		return "UNAUTHORIZED"
+	}
 	return "UNKNOWN"
 }
 

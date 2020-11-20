@@ -22,6 +22,9 @@ func (d Difference) String() string {
 
 // Counter adds integers for different keys.
 type Counter interface {
+	// Reset removes all values from the counter.
+	Reset()
+
 	// Add increments the value for key by delta.
 	Add(key interface{}, delta int)
 
@@ -44,6 +47,12 @@ func New() Counter {
 	return &counter{
 		m: make(M),
 	}
+}
+
+func (c *counter) Reset() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.m = make(M)
 }
 
 func (c *counter) Add(key interface{}, delta int) {

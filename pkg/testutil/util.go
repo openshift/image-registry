@@ -5,10 +5,12 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	mrand "math/rand"
+	"net"
 	"net/http"
 	"net/url"
 	"time"
@@ -21,24 +23,43 @@ import (
 	"github.com/docker/distribution/registry/client/transport"
 	"github.com/opencontainers/go-digest"
 
+	"k8s.io/apimachinery/pkg/util/errors"
+
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 func NewTransport(baseURL string, repoName string, creds auth.CredentialStore) (http.RoundTripper, error) {
-	if creds == nil {
-		return nil, nil
+	httpTransport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
 	}
 
 	challengeManager := challenge.NewSimpleManager()
 
-	_, err := ping(challengeManager, baseURL+"/v2/", "")
+	_, err := ping(httpTransport, challengeManager, baseURL+"/v2/", "")
 	if err != nil {
 		return nil, err
 	}
 
+	if creds == nil {
+		return httpTransport, nil
+	}
+
 	return transport.NewTransport(
-		nil,
+		httpTransport,
 		auth.NewAuthorizer(
 			challengeManager,
 			auth.NewTokenHandler(nil, creds, repoName, "pull", "push"),
@@ -57,23 +78,57 @@ func NewRepository(repoName string, baseURL string, transport http.RoundTripper)
 	return distclient.NewRepository(ref, baseURL, transport)
 }
 
+func NewInsecureRepository(imageReference string, creds auth.CredentialStore) (distribution.Repository, error) {
+	ref, err := reference.ParseNamed(imageReference)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse image reference %s: %w", imageReference, err)
+	}
+
+	pathRef, err := reference.WithName(reference.Path(ref))
+	if err != nil {
+		return nil, fmt.Errorf("unable to get path reference for %s: %w", imageReference, err)
+	}
+
+	var baseURL string
+	var transport http.RoundTripper
+	var errs []error
+	found := false
+	for _, scheme := range []string{"https", "http"} {
+		baseURL = scheme + "://" + reference.Domain(ref)
+
+		transport, err = NewTransport(baseURL, reference.Path(ref), creds)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("unable to get %s transport for %s: %w", scheme, imageReference, err))
+			continue
+		}
+
+		found = true
+		break
+	}
+	if !found {
+		return nil, errors.NewAggregate(errs)
+	}
+
+	return distclient.NewRepository(pathRef, baseURL, transport)
+}
+
 // UploadBlob uploads the blob with content to repo and verifies its digest.
 func UploadBlob(ctx context.Context, repo distribution.Repository, desc distribution.Descriptor, content []byte) error {
 	wr, err := repo.Blobs(ctx).Create(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create upload to %s: %v", repo.Named(), err)
+		return fmt.Errorf("failed to create upload to %s: %w", repo.Named(), err)
 	}
 
 	_, err = io.Copy(wr, bytes.NewReader(content))
 	if err != nil {
-		return fmt.Errorf("error uploading blob to %s: %v", repo.Named(), err)
+		return fmt.Errorf("error uploading blob to %s: %w", repo.Named(), err)
 	}
 
 	uploadDesc, err := wr.Commit(ctx, distribution.Descriptor{
 		Digest: digest.FromBytes(content),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to complete upload to %s: %v", repo.Named(), err)
+		return fmt.Errorf("failed to complete upload to %s: %w", repo.Named(), err)
 	}
 
 	// uploadDesc is checked here and is not returned, because it has invalid MediaType.
@@ -93,12 +148,12 @@ func UploadManifest(ctx context.Context, repo distribution.Repository, tag strin
 
 	ms, err := repo.Manifests(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get manifest service for %s: %v", repo.Named(), err)
+		return fmt.Errorf("failed to get manifest service for %s: %w", repo.Named(), err)
 	}
 
 	dgst, err := ms.Put(ctx, manifest, distribution.WithTag(tag))
 	if err != nil {
-		return fmt.Errorf("failed to upload manifest to %s: %v", repo.Named(), err)
+		return fmt.Errorf("failed to upload manifest to %s: %w", repo.Named(), err)
 	}
 
 	if expectedDgst := digest.FromBytes(canonical); dgst != expectedDgst {
@@ -112,7 +167,7 @@ func UploadManifest(ctx context.Context, repo distribution.Repository, tag strin
 func UploadRandomTestBlob(ctx context.Context, baseURL string, creds auth.CredentialStore, repoName string) (distribution.Descriptor, []byte, error) {
 	payload, desc, err := MakeRandomLayer()
 	if err != nil {
-		return distribution.Descriptor{}, nil, fmt.Errorf("unexpected error generating test layer file: %v", err)
+		return distribution.Descriptor{}, nil, fmt.Errorf("unexpected error generating test layer file: %w", err)
 	}
 
 	rt, err := NewTransport(baseURL, repoName, creds)
@@ -127,7 +182,7 @@ func UploadRandomTestBlob(ctx context.Context, baseURL string, creds auth.Creden
 
 	err = UploadBlob(ctx, repo, desc, payload)
 	if err != nil {
-		return distribution.Descriptor{}, nil, fmt.Errorf("upload random test blob: %s", err)
+		return distribution.Descriptor{}, nil, fmt.Errorf("upload random test blob: %w", err)
 	}
 
 	return desc, payload, nil
@@ -284,10 +339,12 @@ func (tcs *testCredentialStore) SetRefreshToken(u *url.URL, service string, toke
 
 // ping pings the provided endpoint to determine its required authorization challenges.
 // If a version header is provided, the versions will be returned.
-func ping(manager challenge.Manager, endpoint, versionHeader string) ([]auth.APIVersion, error) {
-	// #nosec
-	// Only used for testing.
-	resp, err := http.Get(endpoint)
+func ping(transport http.RoundTripper, manager challenge.Manager, endpoint, versionHeader string) ([]auth.APIVersion, error) {
+	client := &http.Client{
+		Transport: transport,
+	}
+
+	resp, err := client.Get(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +357,17 @@ func ping(manager challenge.Manager, endpoint, versionHeader string) ([]auth.API
 		return nil, err
 	}
 
-	return auth.APIVersions(resp, versionHeader), nil
+	versions := auth.APIVersions(resp, versionHeader)
+	if len(versions) == 0 {
+		ok := resp.StatusCode >= 200 && resp.StatusCode < 300 ||
+			resp.StatusCode == http.StatusUnauthorized ||
+			resp.StatusCode == http.StatusForbidden
+		if !ok {
+			return nil, fmt.Errorf("registry does not support v2 API: got %s from %s", resp.Status, endpoint)
+		}
+	}
+
+	return versions, nil
 }
 
 // UploadSchema2Image creates a random image with a schema 2 manifest and
@@ -312,11 +379,11 @@ func UploadSchema2Image(ctx context.Context, repo distribution.Repository, tag s
 	for i := range layers {
 		content, desc, err := MakeRandomLayer()
 		if err != nil {
-			return nil, fmt.Errorf("make random layer: %v", err)
+			return nil, fmt.Errorf("make random layer: %w", err)
 		}
 
 		if err := UploadBlob(ctx, repo, desc, content); err != nil {
-			return nil, fmt.Errorf("upload random blob: %v", err)
+			return nil, fmt.Errorf("upload random blob: %w", err)
 		}
 
 		layers[i] = desc
@@ -331,7 +398,7 @@ func UploadSchema2Image(ctx context.Context, repo distribution.Repository, tag s
 
 	configContent, err := json.Marshal(&cfg)
 	if err != nil {
-		return nil, fmt.Errorf("marshal image config: %v", err)
+		return nil, fmt.Errorf("marshal image config: %w", err)
 	}
 
 	config := distribution.Descriptor{
@@ -340,16 +407,16 @@ func UploadSchema2Image(ctx context.Context, repo distribution.Repository, tag s
 	}
 
 	if err := UploadBlob(ctx, repo, config, configContent); err != nil {
-		return nil, fmt.Errorf("upload image config: %v", err)
+		return nil, fmt.Errorf("upload image config: %w", err)
 	}
 
 	manifest, err := MakeSchema2Manifest(config, layers)
 	if err != nil {
-		return manifest, fmt.Errorf("make schema 2 manifest: %v", err)
+		return manifest, fmt.Errorf("make schema 2 manifest: %w", err)
 	}
 
 	if err := UploadManifest(ctx, repo, tag, manifest); err != nil {
-		return manifest, fmt.Errorf("upload schema 2 manifest: %v", err)
+		return manifest, fmt.Errorf("upload schema 2 manifest: %w", err)
 	}
 
 	return manifest, nil
@@ -381,17 +448,17 @@ func ConvertImage(image *imageapi.Image) (*imageapiv1.Image, error) {
 func VerifyRemoteImage(ctx context.Context, repo distribution.Repository, tag string) (mediatype string, dgst digest.Digest, err error) {
 	ms, err := repo.Manifests(ctx)
 	if err != nil {
-		return "", "", fmt.Errorf("verify %s:%s: get manifest service: %v", repo.Named(), tag, err)
+		return "", "", fmt.Errorf("verify %s:%s: get manifest service: %w", repo.Named(), tag, err)
 	}
 
 	m, err := ms.Get(ctx, "", distribution.WithTag(tag))
 	if err != nil {
-		return "", "", fmt.Errorf("verify %s:%s: get manifest: %v", repo.Named(), tag, err)
+		return "", "", fmt.Errorf("verify %s:%s: get manifest: %w", repo.Named(), tag, err)
 	}
 
 	mediatype, payload, err := m.Payload()
 	if err != nil {
-		return mediatype, "", fmt.Errorf("verify %s:%s: get manifest payload: %v", repo.Named(), tag, err)
+		return mediatype, "", fmt.Errorf("verify %s:%s: get manifest payload: %w", repo.Named(), tag, err)
 	}
 
 	dgst = digest.FromBytes(payload)
@@ -400,15 +467,15 @@ func VerifyRemoteImage(ctx context.Context, repo distribution.Repository, tag st
 	for _, desc := range m.References() {
 		r, err := bs.Open(ctx, desc.Digest)
 		if err != nil {
-			return mediatype, dgst, fmt.Errorf("verify %s:%s: open blob %s: %v", repo.Named(), tag, desc.Digest, err)
+			return mediatype, dgst, fmt.Errorf("verify %s:%s: open blob %s: %w", repo.Named(), tag, desc.Digest, err)
 		}
 		dgst, readErr := digest.FromReader(r)
 		closeErr := r.Close()
 		if readErr != nil {
-			return mediatype, dgst, fmt.Errorf("verify %s:%s: read blob %s: %v", repo.Named(), tag, desc.Digest, readErr)
+			return mediatype, dgst, fmt.Errorf("verify %s:%s: read blob %s: %w", repo.Named(), tag, desc.Digest, readErr)
 		}
 		if closeErr != nil {
-			return mediatype, dgst, fmt.Errorf("verify %s:%s: close blob %s: %v", repo.Named(), tag, desc.Digest, closeErr)
+			return mediatype, dgst, fmt.Errorf("verify %s:%s: close blob %s: %w", repo.Named(), tag, desc.Digest, closeErr)
 		}
 		if dgst != desc.Digest {
 			return mediatype, dgst, fmt.Errorf("verify %s:%s: blob digest mismatch: got %q, want %q", repo.Named(), tag, dgst, desc.Digest)
