@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/docker/distribution/manifest/schema1"
@@ -16,17 +15,11 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-
 	"github.com/openshift/image-registry/pkg/testframework"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
-
-// gzippedEmptyTar is a gzip-compressed version of an empty tar file
-// (1024 NULL bytes)
-var gzippedEmptyTar = []byte{
-	31, 139, 8, 0, 0, 9, 110, 136, 0, 255, 98, 24, 5, 163, 96, 20, 140, 88,
-	0, 8, 0, 0, 255, 255, 46, 175, 181, 239, 0, 4, 0, 0,
-}
 
 func testPullThroughGetManifest(baseURL string, stream *imageapiv1.ImageStreamImport, user, token, urlPart string) error {
 	url := fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, stream.Namespace, stream.Name, urlPart)
@@ -90,6 +83,11 @@ func testPullThroughStatBlob(baseURL string, stream *imageapiv1.ImageStreamImpor
 }
 
 func TestPullThroughInsecure(t *testing.T) {
+	imageData, err := testframework.NewSchema2ImageData()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	master := testframework.NewMaster(t)
 	defer master.Close()
 
@@ -103,53 +101,25 @@ func TestPullThroughInsecure(t *testing.T) {
 	isname := "test/" + reponame
 
 	descriptors := map[string]int64{
-		"sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4": 3000,
-		"sha256:86e0e091d0da6bde2456dbb48306f3956bbeb2eae1b5b9a43045843f69fe4aaa": 200,
-		"sha256:b4ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4": 10,
+		string(imageData.ConfigDigest): int64(len(imageData.Config)),
+		string(imageData.LayerDigest):  int64(len(imageData.Layer)),
 	}
 	imageSize := int64(0)
 	for _, size := range descriptors {
 		imageSize += size
 	}
 
-	ts := testframework.NewHTTPServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Logf("External registry got %s %s", r.Method, r.URL.Path)
+	remoteRegistryAddr, _, _ := testframework.CreateEphemeralRegistry(t, master.AdminKubeConfig(), namespace, nil)
 
-		w.Header().Set("Docker-Distribution-API-Version", "registry/2.0")
+	remoteRepo, err := testutil.NewInsecureRepository(remoteRegistryAddr+"/"+isname, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		switch r.URL.Path {
-		case "/v2/":
-			w.Write([]byte(`{}`))
-		case "/v2/" + isname + "/tags/list":
-			w.Write([]byte("{\"name\": \"" + isname + "\", \"tags\": [\"latest\", \"" + repotag + "\"]}"))
-		case "/v2/" + isname + "/manifests/latest", "/v2/" + isname + "/manifests/" + repotag, "/v2/" + isname + "/manifests/" + etcdDigest:
-			if r.Method == "HEAD" {
-				w.Header().Set("Content-Length", fmt.Sprintf("%d", len(etcdManifest)))
-				w.Header().Set("Docker-Content-Digest", etcdDigest)
-				w.WriteHeader(http.StatusOK)
-			} else {
-				w.Write([]byte(etcdManifest))
-			}
-		default:
-			if strings.HasPrefix(r.URL.Path, "/v2/"+isname+"/blobs/") {
-				for dgst, size := range descriptors {
-					if r.URL.Path != "/v2/"+isname+"/blobs/"+dgst {
-						continue
-					}
-					if r.Method == "HEAD" {
-						w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
-						w.Header().Set("Docker-Content-Digest", dgst)
-						w.WriteHeader(http.StatusOK)
-						return
-					}
-					w.Write(gzippedEmptyTar)
-					return
-				}
-			}
-			t.Fatalf("unexpected request %s: %#v", r.URL.Path, r)
-		}
-	}))
-	defer ts.Close()
+	_, err = testframework.PushSchema2ImageData(context.TODO(), remoteRepo, repotag, imageData)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	stream := imageapiv1.ImageStreamImport{
 		ObjectMeta: metav1.ObjectMeta{
@@ -165,7 +135,7 @@ func TestPullThroughInsecure(t *testing.T) {
 				{
 					From: corev1.ObjectReference{
 						Kind: "DockerImage",
-						Name: ts.URL.Host + "/" + isname + ":" + repotag,
+						Name: remoteRegistryAddr + "/" + isname + ":" + repotag,
 					},
 					ImportPolicy: imageapiv1.TagImportPolicy{Insecure: true},
 				},
@@ -193,8 +163,8 @@ func TestPullThroughInsecure(t *testing.T) {
 		}
 
 		// the image name is always the sha256, and size is calculated
-		if image.Image.Name != etcdDigest {
-			t.Fatalf("unexpected image %d: %#v (expect %q)", i, image.Image.Name, etcdDigest)
+		if image.Image.Name != imageData.ManifestDigest.String() {
+			t.Fatalf("unexpected image %d: %#v (expect %q)", i, image.Image.Name, imageData.ManifestDigest.String())
 		}
 	}
 
@@ -214,7 +184,7 @@ func TestPullThroughInsecure(t *testing.T) {
 	}
 
 	t.Logf("Run registry...")
-	registry := master.StartRegistry(t)
+	registry := master.StartRegistry(t, testframework.DisableMirroring{})
 	defer registry.Close()
 
 	t.Logf("Run testPullThroughGetManifest with tag...")
@@ -223,7 +193,7 @@ func TestPullThroughInsecure(t *testing.T) {
 	}
 
 	t.Logf("Run testPullThroughGetManifest with digest...")
-	if err := testPullThroughGetManifest(registry.BaseURL(), &stream, testuser.Name, testuser.Token, etcdDigest); err != nil {
+	if err := testPullThroughGetManifest(registry.BaseURL(), &stream, testuser.Name, testuser.Token, imageData.ManifestDigest.String()); err != nil {
 		t.Fatal(err)
 	}
 

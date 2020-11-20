@@ -1,12 +1,16 @@
 package testframework
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/docker/distribution"
 	"github.com/opencontainers/go-digest"
 	"github.com/pborman/uuid"
+
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
 type Schema2ImageData struct {
@@ -22,9 +26,21 @@ type Schema2ImageData struct {
 }
 
 func NewSchema2ImageData() (Schema2ImageData, error) {
+	cfg := map[string]interface{}{
+		"rootfs": map[string]interface{}{
+			"diff_ids": make([]string, 1),
+		},
+		"history": make([]struct{}, 1),
+	}
+
+	configContent, err := json.Marshal(&cfg)
+	if err != nil {
+		return Schema2ImageData{}, fmt.Errorf("marshal image config: %w", err)
+	}
+
 	data := Schema2ImageData{
 		ConfigMediaType:   "application/vnd.docker.container.image.v1+json",
-		Config:            []byte("{}"),
+		Config:            configContent,
 		LayerMediaType:    "application/vnd.docker.image.rootfs.diff.tar.gzip",
 		Layer:             []byte("image-registry-integration-test-" + uuid.NewRandom().String()),
 		ManifestMediaType: "application/vnd.docker.distribution.manifest.v2+json",
@@ -103,4 +119,35 @@ func ServeImage(w http.ResponseWriter, r *http.Request, image string, data Schem
 		return false
 	}
 	return true
+}
+
+func PushSchema2ImageData(ctx context.Context, repo distribution.Repository, tag string, data Schema2ImageData) (distribution.Manifest, error) {
+	manifest, _, err := distribution.UnmarshalManifest(data.ManifestMediaType, data.Manifest)
+	if err != nil {
+		return manifest, fmt.Errorf("parse manifest: %w", err)
+	}
+
+	layerDesc := distribution.Descriptor{
+		Digest: data.LayerDigest,
+		Size:   int64(len(data.Layer)),
+	}
+
+	if err := testutil.UploadBlob(ctx, repo, layerDesc, data.Layer); err != nil {
+		return nil, fmt.Errorf("upload layer: %w", err)
+	}
+
+	configDesc := distribution.Descriptor{
+		Digest: data.ConfigDigest,
+		Size:   int64(len(data.Config)),
+	}
+
+	if err := testutil.UploadBlob(ctx, repo, configDesc, data.Config); err != nil {
+		return nil, fmt.Errorf("upload image config: %w", err)
+	}
+
+	if err := testutil.UploadManifest(ctx, repo, tag, manifest); err != nil {
+		return manifest, fmt.Errorf("upload manifest: %w", err)
+	}
+
+	return manifest, nil
 }
