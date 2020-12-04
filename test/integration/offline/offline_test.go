@@ -3,7 +3,6 @@ package integration
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"testing"
 	"time"
 
@@ -27,35 +26,24 @@ func TestOffline(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	remoteRegistryUnavailable := false
-	ts := testframework.NewHTTPServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		req := fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-
-		t.Logf("remote registry: %s", req)
-
-		w.Header().Set("Docker-Distribution-API-Version", "registry/2.0")
-
-		if remoteRegistryUnavailable {
-			http.Error(w, "service unavailable", http.StatusServiceUnavailable)
-			return
-		}
-
-		if testframework.ServeV2(w, r) ||
-			testframework.ServeImage(w, r, "remoteimage", imageData, []string{"latest"}) {
-			return
-		}
-
-		t.Errorf("error: remote registry got unexpected request %s: %#+v", req, r)
-		http.Error(w, "unable to handle the request", http.StatusInternalServerError)
-	}))
-	defer ts.Close()
-
 	master := testframework.NewMaster(t)
 	defer master.Close()
 
 	testuser := master.CreateUser("testuser", "testp@ssw0rd")
 	testproject := master.CreateProject("test-offline-image-pullthrough", testuser.Name)
 	teststreamName := "pullthrough"
+
+	remoteRegistryAddr, _, removeRemoteRegistry := testframework.CreateEphemeralRegistry(t, master.AdminKubeConfig(), testproject.Name, nil)
+
+	remoteRepo, err := testutil.NewInsecureRepository(remoteRegistryAddr+"/remoteimage", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = testframework.PushSchema2ImageData(context.TODO(), remoteRepo, "latest", imageData)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t.Log("=== import image")
 
@@ -74,7 +62,7 @@ func TestOffline(t *testing.T) {
 				{
 					From: corev1.ObjectReference{
 						Kind: "DockerImage",
-						Name: fmt.Sprintf("%s/remoteimage:latest", ts.URL.Host),
+						Name: fmt.Sprintf("%s/remoteimage:latest", remoteRegistryAddr),
 					},
 					ImportPolicy: imageapiv1.TagImportPolicy{
 						Insecure: true,
@@ -130,7 +118,7 @@ func TestOffline(t *testing.T) {
 
 	t.Log("=== check if image pullable without remote registry")
 
-	remoteRegistryUnavailable = true
+	removeRemoteRegistry()
 
 	mediatype, dgst, err = testutil.VerifyRemoteImage(ctx, repo, "latest")
 	if err != nil {

@@ -33,6 +33,7 @@ require (
 	github.com/prometheus/client_golang v1.7.1
 	github.com/satori/go.uuid v1.2.1-0.20180103174451-36e9d2ebbde5 // indirect
 	github.com/sirupsen/logrus v1.6.0
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api v0.19.0
