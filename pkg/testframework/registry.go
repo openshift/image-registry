@@ -3,9 +3,12 @@ package testframework
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -467,10 +470,17 @@ func CreateEphemeralRegistry(t *testing.T, restConfig *rest.Config, namespace st
 			return false, nil
 		}
 		for _, ingress := range route.Status.Ingress {
-			if len(ingress.Host) > 0 {
-				host = ingress.Host
-				return true, nil
+			if len(ingress.Host) == 0 {
+				continue
 			}
+
+			if err := checkRoute(ingress.Host); err != nil {
+				lastErr = err
+				return false, nil
+			}
+
+			host = ingress.Host
+			return true, nil
 		}
 		lastErr = fmt.Errorf("route %s does not have ingress hosts", name)
 		return false, nil
@@ -481,4 +491,42 @@ func CreateEphemeralRegistry(t *testing.T, restConfig *rest.Config, namespace st
 
 	t.Logf("created ephemeral registry: %s (%s)", host, name)
 	return host, name, cleanup
+}
+
+func checkRoute(host string) error {
+	tr := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+
+	url := fmt.Sprintf("https://%s/v2/", host)
+	client := &http.Client{Transport: tr}
+	res, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	// if deployed registry leverages basic authentication a StatusUnauthorized will
+	// be returned so we consider this status as valid as well.
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusUnauthorized {
+		dt, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("service not available: %s", string(dt))
+	}
+	return nil
 }
