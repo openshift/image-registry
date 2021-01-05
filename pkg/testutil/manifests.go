@@ -10,11 +10,13 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest"
+	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/libtrust"
 	"github.com/opencontainers/go-digest"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/diff"
@@ -24,13 +26,14 @@ import (
 	util "github.com/openshift/image-registry/pkg/origin-common/util"
 )
 
-type ManifestSchemaVersion int
+type ManifestSchemaVersion string
 
 type ConfigPayload []byte
 
 const (
-	ManifestSchema1 ManifestSchemaVersion = 1
-	ManifestSchema2 ManifestSchemaVersion = 2
+	ManifestSchema1   ManifestSchemaVersion = "v1"
+	ManifestSchema2   ManifestSchemaVersion = "v2"
+	ManifestSchemaOCI ManifestSchemaVersion = "oci"
 )
 
 // MakeSchema1Manifest constructs a schema 1 manifest from a given list of digests and returns
@@ -87,12 +90,30 @@ func MakeSchema2Manifest(config distribution.Descriptor, layers []distribution.D
 	return manifest, nil
 }
 
+// MakeOCISchemaManifest constructs an OCI schema manifest from a given list of digests and returns
+// the digest of the manifest
+func MakeOCISchemaManifest(config distribution.Descriptor, layers []distribution.Descriptor) (distribution.Manifest, error) {
+	m := ocischema.Manifest{
+		Versioned: ocischema.SchemaVersion,
+		Config:    config,
+		Layers:    make([]distribution.Descriptor, 0, len(layers)),
+	}
+	m.Config.MediaType = v1.MediaTypeImageConfig
+
+	for _, layer := range layers {
+		layer.MediaType = v1.MediaTypeImageLayer
+		m.Layers = append(m.Layers, layer)
+	}
+
+	return ocischema.FromStruct(m)
+}
+
 // CanonicalManifest returns m in its canonical representation.
 func CanonicalManifest(m distribution.Manifest) ([]byte, error) {
 	switch m := m.(type) {
 	case *schema1.SignedManifest:
 		return m.Canonical, nil
-	case *schema2.DeserializedManifest:
+	case *schema2.DeserializedManifest, *ocischema.DeserializedManifest:
 		_, payload, err := m.Payload()
 		if err != nil {
 			return nil, err
@@ -182,8 +203,22 @@ func CreateAndUploadTestManifest(
 			return "", "", "", nil, fmt.Errorf("failed to make manifest schema 2: %v", err)
 		}
 		manifestConfig = string(cfgPayload)
+	case ManifestSchemaOCI:
+		cfgPayload, cfgDesc, err := MakeManifestConfig()
+		if err != nil {
+			return "", "", "", nil, err
+		}
+		err = UploadBlob(ctx, repo, cfgDesc, cfgPayload)
+		if err != nil {
+			return "", "", "", nil, fmt.Errorf("failed to upload manifest config of schema 2: %v", err)
+		}
+		manifest, err = MakeOCISchemaManifest(cfgDesc, layerDescriptors)
+		if err != nil {
+			return "", "", "", nil, fmt.Errorf("failed to make manifest schema 2: %v", err)
+		}
+		manifestConfig = string(cfgPayload)
 	default:
-		return "", "", "", nil, fmt.Errorf("unsupported manifest version %d", schemaVersion)
+		return "", "", "", nil, fmt.Errorf("unsupported manifest version %s", schemaVersion)
 	}
 
 	canonicalBytes, err := CanonicalManifest(manifest)
