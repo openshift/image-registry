@@ -27,8 +27,8 @@ require (
 	github.com/opencontainers/go-digest v1.0.0-rc1.0.20180430190053-c9281466c8b2
 	github.com/opencontainers/image-spec v1.0.1
 	github.com/opencontainers/runc v1.0.0-rc5.0.20180920170208-00dc70017d22 // indirect
-	github.com/openshift/api v0.0.0-20200827090112-c05698d102cf
-	github.com/openshift/client-go v0.0.0-20200827190008-3062137373b5
+	github.com/openshift/api v0.0.0-20201019163320-c6a5ec25f267
+	github.com/openshift/client-go v0.0.0-20201020074620-f8fd44879f7c
 	github.com/openshift/library-go v0.0.0-20200921120329-c803a7b7bb2c
 	github.com/pborman/uuid v1.2.0
 	github.com/prometheus/client_golang v1.7.1
@@ -37,13 +37,14 @@ require (
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
 	gopkg.in/yaml.v2 v2.3.0
-	k8s.io/api v0.19.0
-	k8s.io/apimachinery v0.19.0
-	k8s.io/client-go v0.19.0
+	k8s.io/api v0.19.2
+	k8s.io/apimachinery v0.19.2
+	k8s.io/client-go v0.19.2
 	k8s.io/klog/v2 v2.3.0
 )
 
 replace (
 	github.com/docker/distribution => github.com/openshift/docker-distribution v0.0.0-20201012083032-63d38f155de2
+	github.com/openshift/library-go => github.com/kevinrizza/library-go v0.0.0-20201216155812-db26a7547735
 	google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
 )
