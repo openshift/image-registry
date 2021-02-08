@@ -455,7 +455,7 @@ func New(params DriverParameters) (*Driver, error) {
 		return nil, fmt.Errorf("cannot set both access/secret key and credentials file path")
 	}
 
-	awsConfig := aws.NewConfig()
+	awsConfig := aws.NewConfig().WithLogLevel(aws.LogDebug)
 	sess, err := session.NewSession()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new session: %v", err)
