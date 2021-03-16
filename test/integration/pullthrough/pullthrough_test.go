@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/docker/distribution/manifest/schema1"
 
@@ -14,7 +15,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
+	operatorapiv1alpha1 "github.com/openshift/api/operator/v1alpha1"
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	operatorclientv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
 
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/testframework"
@@ -240,6 +243,233 @@ func TestPullThroughInsecure(t *testing.T) {
 	t.Logf("Run testPullThroughStatBlob (%s == false, spec.tags[%q].importPolicy.insecure == false)...", imageapi.InsecureRepositoryAnnotation, repotag)
 	for digest := range descriptors {
 		if err := testPullThroughStatBlob(registry.BaseURL(), &stream, testuser.Name, testuser.Token, digest); err == nil {
+			t.Fatal("unexpexted access to insecure blobs")
+		} else {
+			t.Logf("%#+v", err)
+		}
+	}
+}
+
+func TestPullThroughICSP(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	namespace := "image-registry-test-integration-icsp"
+	reponame := "testrepo"
+	repotag := "testtag"
+	isname := "test/" + reponame
+
+	master := testframework.NewMaster(t)
+	defer master.Close()
+
+	testuser := master.CreateUser("testuser", "testp@ssw0rd")
+	master.CreateProject(namespace, testuser.Name)
+
+	opclient := operatorclientv1alpha1.NewForConfigOrDie(master.AdminKubeConfig())
+	imgclient := imageclientv1.NewForConfigOrDie(testuser.KubeConfig())
+
+	imageData, err := testframework.NewSchema2ImageData()
+	if err != nil {
+		t.Fatal(err)
+	}
+	imgdgst := imageData.ManifestDigest.String()
+
+	descriptors := map[string]int64{
+		string(imageData.ConfigDigest): int64(len(imageData.Config)),
+		string(imageData.LayerDigest):  int64(len(imageData.Layer)),
+	}
+
+	remoteRegistryAddr, _, _ := testframework.CreateEphemeralRegistry(
+		t, master.AdminKubeConfig(), namespace, nil,
+	)
+
+	remoteRepo, err := testutil.NewInsecureRepository(remoteRegistryAddr+"/"+isname, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := testframework.PushSchema2ImageData(
+		ctx, remoteRepo, repotag, imageData,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	icspRule, err := opclient.ImageContentSourcePolicies().Create(
+		ctx,
+		&operatorapiv1alpha1.ImageContentSourcePolicy{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "image-registry-icsp-testing",
+			},
+			Spec: operatorapiv1alpha1.ImageContentSourcePolicySpec{
+				RepositoryDigestMirrors: []operatorapiv1alpha1.RepositoryDigestMirrors{
+					{
+						Source: "does.not.exist/repo/image",
+						Mirrors: []string{
+							"i.also.do.not.exist/repo/image",
+							remoteRegistryAddr + "/" + isname,
+						},
+					},
+				},
+			},
+		},
+		metav1.CreateOptions{},
+	)
+	if err != nil {
+		t.Fatalf("error creating ICSP rule: %s", err)
+	}
+	defer func() {
+		if err := opclient.ImageContentSourcePolicies().Delete(
+			ctx, icspRule.Name, metav1.DeleteOptions{},
+		); err != nil {
+			t.Errorf("error deleting ICSP rule: %s", err)
+		}
+	}()
+
+	imgsrc := fmt.Sprintf("does.not.exist/repo/image@%s", imgdgst)
+	isi := &imageapiv1.ImageStreamImport{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      "myimagestream",
+			Annotations: map[string]string{
+				imageapi.InsecureRepositoryAnnotation: "true",
+			},
+		},
+		Spec: imageapiv1.ImageStreamImportSpec{
+			Import: true,
+			Images: []imageapiv1.ImageImportSpec{
+				{
+					From: corev1.ObjectReference{
+						Kind: "DockerImage",
+						Name: imgsrc,
+					},
+					To: &corev1.LocalObjectReference{
+						Name: repotag,
+					},
+					ImportPolicy: imageapiv1.TagImportPolicy{
+						Insecure: true,
+					},
+				},
+			},
+		},
+	}
+
+	if isi, err = imgclient.ImageStreamImports(namespace).Create(
+		ctx, isi, metav1.CreateOptions{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(isi.Status.Images) != 1 {
+		t.Fatalf("imported unexpected number of images (%d != 1)", len(isi.Status.Images))
+	}
+	for i, image := range isi.Status.Images {
+		if image.Status.Status != metav1.StatusSuccess {
+			t.Fatalf("unexpected status %d: %#v", i, image.Status)
+		}
+
+		if image.Image == nil {
+			t.Fatalf("unexpected empty image %d", i)
+		}
+
+		if image.Image.Name != imgdgst {
+			t.Fatalf(
+				"unexpected image %d: %#v (expect %q)",
+				i, image.Image.Name, imgdgst,
+			)
+		}
+	}
+
+	istream, err := imgclient.ImageStreams(isi.Namespace).Get(
+		ctx, isi.Name, metav1.GetOptions{},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if istream.Annotations == nil {
+		istream.Annotations = make(map[string]string)
+	}
+	istream.Annotations[imageapi.InsecureRepositoryAnnotation] = "true"
+
+	istream, err = imgclient.ImageStreams(istream.Namespace).Update(
+		ctx, istream, metav1.UpdateOptions{},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Run registry...")
+	registry := master.StartRegistry(t, testframework.DisableMirroring{})
+	defer registry.Close()
+
+	t.Logf("Pulling manifest by tag...")
+	if err := testPullThroughGetManifest(
+		registry.BaseURL(), isi, testuser.Name, testuser.Token, repotag,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Pulling manifest by digest...")
+	if err := testPullThroughGetManifest(
+		registry.BaseURL(), isi, testuser.Name, testuser.Token, imgdgst,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Pulling image blobs...")
+	for digest := range descriptors {
+		if err := testPullThroughStatBlob(
+			registry.BaseURL(), isi, testuser.Name, testuser.Token, digest,
+		); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if istream, err = imgclient.ImageStreams(isi.Namespace).Get(
+		ctx, isi.Name, metav1.GetOptions{},
+	); err != nil {
+		t.Fatal(err)
+	}
+	istream.Annotations[imageapi.InsecureRepositoryAnnotation] = "false"
+
+	if _, err = imgclient.ImageStreams(istream.Namespace).Update(
+		ctx, istream, metav1.UpdateOptions{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Pulling image blobs (ImageStream insecure annotation set to false)...")
+	for digest := range descriptors {
+		if err := testPullThroughStatBlob(
+			registry.BaseURL(), isi, testuser.Name, testuser.Token, digest,
+		); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if istream, err = imgclient.ImageStreams(isi.Namespace).Get(
+		ctx, isi.Name, metav1.GetOptions{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, tag := range istream.Spec.Tags {
+		if tag.Name == repotag {
+			istream.Spec.Tags[i].ImportPolicy.Insecure = false
+			break
+		}
+	}
+	if _, err = imgclient.ImageStreams(istream.Namespace).Update(
+		ctx, istream, metav1.UpdateOptions{},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Pulling image blobs (tags importPolicy.Insecure set to false)")
+	for digest := range descriptors {
+		if err := testPullThroughStatBlob(
+			registry.BaseURL(), isi, testuser.Name, testuser.Token, digest,
+		); err == nil {
 			t.Fatal("unexpexted access to insecure blobs")
 		} else {
 			t.Logf("%#+v", err)
