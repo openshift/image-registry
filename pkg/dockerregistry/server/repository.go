@@ -11,6 +11,7 @@ import (
 
 	restclient "k8s.io/client-go/rest"
 
+	operatorv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/imagestream"
@@ -44,6 +45,7 @@ type repository struct {
 	crossmount bool
 
 	imageStream imagestream.ImageStream
+	icsp        operatorv1alpha1.ImageContentSourcePolicyInterface
 
 	// remoteBlobGetter is used to fetch blobs from remote registries if pullthrough is enabled.
 	remoteBlobGetter BlobGetterService
@@ -71,6 +73,7 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 
 		imageStream: imagestream.New(ctx, namespace, name, registryOSClient),
 		cache:       cache.NewRepositoryDigest(app.cache),
+		icsp:        registryOSClient.ImageContentSourcePolicy(),
 	}
 
 	r.remoteBlobGetter = NewBlobGetterService(
@@ -78,6 +81,7 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 		r.imageStream.GetSecrets,
 		r.cache,
 		r.app.metrics,
+		r.icsp,
 	)
 
 	repo = distribution.Repository(r)
@@ -117,6 +121,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 		mirror:       r.app.config.Pullthrough.Mirror,
 		registryAddr: r.app.config.Server.Addr,
 		metrics:      r.app.metrics,
+		icsp:         r.icsp,
 	}
 
 	ms = newPendingErrorsManifestService(ms, r)

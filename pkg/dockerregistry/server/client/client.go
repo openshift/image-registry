@@ -6,6 +6,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	operatorclientv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
 	userclientv1 "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 	"github.com/openshift/image-registry/pkg/origin-common/clientcmd"
 )
@@ -32,13 +33,15 @@ type Interface interface {
 	LocalSubjectAccessReviewsNamespacer
 	SelfSubjectAccessReviewsNamespacer
 	UsersInterfacer
+	ImageContentSourcePolicyInterfacer
 }
 
 type apiClient struct {
-	kube  coreclientv1.CoreV1Interface
-	auth  authclientv1.AuthorizationV1Interface
-	image imageclientv1.ImageV1Interface
-	user  userclientv1.UserV1Interface
+	kube     coreclientv1.CoreV1Interface
+	auth     authclientv1.AuthorizationV1Interface
+	image    imageclientv1.ImageV1Interface
+	user     userclientv1.UserV1Interface
+	operator operatorclientv1alpha1.OperatorV1alpha1Interface
 }
 
 func newAPIClient(
@@ -46,13 +49,19 @@ func newAPIClient(
 	authClient authclientv1.AuthorizationV1Interface,
 	imageClient imageclientv1.ImageV1Interface,
 	userClient userclientv1.UserV1Interface,
+	operatorClient operatorclientv1alpha1.OperatorV1alpha1Interface,
 ) Interface {
 	return &apiClient{
-		kube:  kc,
-		auth:  authClient,
-		image: imageClient,
-		user:  userClient,
+		kube:     kc,
+		auth:     authClient,
+		image:    imageClient,
+		user:     userClient,
+		operator: operatorClient,
 	}
+}
+
+func (c *apiClient) ImageContentSourcePolicy() operatorclientv1alpha1.ImageContentSourcePolicyInterface {
+	return c.operator.ImageContentSourcePolicies()
 }
 
 func (c *apiClient) Users() UserInterface {
@@ -117,6 +126,7 @@ func (c *registryClient) Client() (Interface, error) {
 		authclientv1.NewForConfigOrDie(c.kubeConfig),
 		imageclientv1.NewForConfigOrDie(c.kubeConfig),
 		userclientv1.NewForConfigOrDie(c.kubeConfig),
+		operatorclientv1alpha1.NewForConfigOrDie(c.kubeConfig),
 	), nil
 }
 

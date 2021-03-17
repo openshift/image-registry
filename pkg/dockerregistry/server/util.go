@@ -16,7 +16,9 @@ import (
 
 	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
+	operatorv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
 	"github.com/openshift/library-go/pkg/image/registryclient"
+	"github.com/openshift/library-go/pkg/image/strategy"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
@@ -50,7 +52,7 @@ func getNamespaceName(resourceName string) (string, string, error) {
 
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
-func getImportContext(ctx context.Context, ref *imageapi.DockerImageReference, secrets []corev1.Secret, m metrics.Pullthrough) (registryclient.RepositoryRetriever, error) {
+func getImportContext(ctx context.Context, ref *imageapi.DockerImageReference, secrets []corev1.Secret, m metrics.Pullthrough, icsp operatorv1alpha1.ImageContentSourcePolicyInterface) (registryclient.RepositoryRetriever, error) {
 	req, err := dcontext.GetRequest(ctx)
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("unable to get request from context: %v", err)
@@ -82,6 +84,8 @@ func getImportContext(ctx context.Context, ref *imageapi.DockerImageReference, s
 		secureTransport, insecureTransport,
 	).WithRequestModifiers(
 		requesttrace.New(ctx, req),
+	).WithAlternateBlobSourceStrategy(
+		strategy.NewSimpleLookupICSPStrategy("", icsp),
 	).WithCredentials(cred)
 
 	retriever = m.RepositoryRetriever(retriever)
