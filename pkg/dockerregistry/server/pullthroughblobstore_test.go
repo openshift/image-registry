@@ -20,6 +20,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
+	operatorfake "github.com/openshift/client-go/operator/clientset/versioned/fake"
 	"github.com/openshift/library-go/pkg/image/registryclient"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
@@ -33,6 +34,7 @@ import (
 )
 
 func TestPullthroughServeBlob(t *testing.T) {
+	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
@@ -168,6 +170,7 @@ func TestPullthroughServeBlob(t *testing.T) {
 			imageStream.GetSecrets,
 			cache,
 			metrics.NewNoopMetrics(),
+			icsp,
 		)
 
 		ptbs := &pullthroughBlobStore{
@@ -327,6 +330,7 @@ func TestPullthroughServeNotSeekableBlob(t *testing.T) {
 }
 
 func TestPullthroughServeBlobInsecure(t *testing.T) {
+	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	namespace := "user"
 	repo1 := "app1"
 	repo2 := "app2"
@@ -603,6 +607,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 				imageStream.GetSecrets,
 				cache,
 				metrics.NewNoopMetrics(),
+				icsp,
 			)
 
 			ptbs := &pullthroughBlobStore{
@@ -669,6 +674,7 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 }
 
 func TestPullthroughMetrics(t *testing.T) {
+	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
@@ -728,6 +734,7 @@ func TestPullthroughMetrics(t *testing.T) {
 		imageStream.GetSecrets,
 		cache,
 		metrics.NewMetrics(sink),
+		icsp,
 	)
 
 	ptbs := &pullthroughBlobStore{

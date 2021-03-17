@@ -157,8 +157,9 @@ func TestPullthroughBlob(t *testing.T) {
 	// TODO(dmage): remove the HEAD request
 	if diff := requestCounter.Diff(counter.M{
 		"GET /v2/": 1,
-		"HEAD /v2/remoteimage/blobs/" + imageData.LayerDigest.String(): 1,
-		"GET /v2/remoteimage/blobs/" + imageData.LayerDigest.String():  1,
+		"HEAD /v2/remoteimage/blobs/" + imageData.LayerDigest.String():       1,
+		"GET /v2/remoteimage/blobs/" + imageData.LayerDigest.String():        1,
+		"GET /v2/remoteimage/manifests/" + imageData.ManifestDigest.String(): 1,
 	}); diff != nil {
 		t.Fatalf("unexpected number of requests: %q", diff)
 	}
