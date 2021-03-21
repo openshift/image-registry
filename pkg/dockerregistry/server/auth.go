@@ -387,6 +387,31 @@ func verifyOpenShiftUser(ctx context.Context, c client.UsersInterfacer) (string,
 	return userInfo.GetName(), string(userInfo.GetUID()), nil
 }
 
+func sarStatus(sar *authorizationapi.SelfSubjectAccessReview) string {
+	var b strings.Builder
+
+	if sar.Status.Allowed {
+		b.WriteString("allowed")
+	} else if sar.Status.Denied {
+		b.WriteString("denied")
+	} else {
+		b.WriteString("no opinion")
+	}
+
+	if sar.Status.Reason != "" {
+		b.WriteString(" (")
+		b.WriteString(sar.Status.Reason)
+		b.WriteString(")")
+	}
+
+	if sar.Status.EvaluationError != "" {
+		b.WriteString(": ")
+		b.WriteString(sar.Status.EvaluationError)
+	}
+
+	return b.String()
+}
+
 func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
 	sar := authorizationapi.SelfSubjectAccessReview{
 		Spec: authorizationapi.SelfSubjectAccessReviewSpec{
@@ -409,7 +434,7 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 	}
 
 	if !response.Status.Allowed {
-		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", response.Status.Reason)
+		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", sarStatus(response))
 		return ErrOpenShiftAccessDenied
 	}
 
@@ -436,7 +461,7 @@ func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string
 		return err
 	}
 	if !response.Status.Allowed {
-		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", response.Status.Reason)
+		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", sarStatus(response))
 		return ErrOpenShiftAccessDenied
 	}
 	return nil

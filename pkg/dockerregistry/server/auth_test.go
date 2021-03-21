@@ -519,3 +519,57 @@ func simulateOpenShiftMaster(responses []response) (*httptest.Server, *[]string)
 	}))
 	return server, &actions
 }
+
+func TestSARStatus(t *testing.T) {
+	testCases := []struct {
+		sar    *authorizationapi.SelfSubjectAccessReview
+		output string
+	}{
+		{
+			sar: &authorizationapi.SelfSubjectAccessReview{
+				Status: authorizationapi.SubjectAccessReviewStatus{},
+			},
+			output: "no opinion",
+		},
+		{
+			sar: &authorizationapi.SelfSubjectAccessReview{
+				Status: authorizationapi.SubjectAccessReviewStatus{
+					Allowed: true,
+				},
+			},
+			output: "allowed",
+		},
+		{
+			sar: &authorizationapi.SelfSubjectAccessReview{
+				Status: authorizationapi.SubjectAccessReviewStatus{
+					Denied: true,
+				},
+			},
+			output: "denied",
+		},
+		{
+			sar: &authorizationapi.SelfSubjectAccessReview{
+				Status: authorizationapi.SubjectAccessReviewStatus{
+					Denied:          true,
+					EvaluationError: "webhook failed closed",
+				},
+			},
+			output: "denied: webhook failed closed",
+		},
+		{
+			sar: &authorizationapi.SelfSubjectAccessReview{
+				Status: authorizationapi.SubjectAccessReviewStatus{
+					Reason:          "Error",
+					EvaluationError: "no user on request.",
+				},
+			},
+			output: "no opinion (Error): no user on request.",
+		},
+	}
+	for _, tc := range testCases {
+		s := sarStatus(tc.sar)
+		if s != tc.output {
+			t.Errorf("got %q, want %q", s, tc.output)
+		}
+	}
+}
