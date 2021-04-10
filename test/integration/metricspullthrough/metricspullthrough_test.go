@@ -13,14 +13,16 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kubeclient "k8s.io/client-go/kubernetes"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
-	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	imageclient "github.com/openshift/client-go/image/clientset/versioned"
 
 	"github.com/openshift/image-registry/pkg/testframework"
+	"github.com/openshift/image-registry/pkg/testutil"
 )
 
-func TestPullthroughBlob(t *testing.T) {
+func TestMetricsPullthroughBlob(t *testing.T) {
 	imageData, err := testframework.NewSchema2ImageData()
 	if err != nil {
 		t.Fatal(err)
@@ -33,35 +35,42 @@ func TestPullthroughBlob(t *testing.T) {
 	testproject := master.CreateProject("testproject", testuser.Name)
 	teststreamName := "pullthrough"
 
-	// TODO(dmage): use atomic variable
-	remoteRegistryRequiresAuth := false
-	ts := testframework.NewHTTPServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		req := fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-
-		t.Logf("remote registry: %s", req)
-
-		w.Header().Set("Docker-Distribution-API-Version", "registry/2.0")
-
-		if remoteRegistryRequiresAuth {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		if testframework.ServeV2(w, r) ||
-			testframework.ServeImage(w, r, "remoteimage", imageData, []string{"latest"}) {
-			return
-		}
-
-		t.Errorf("error: remote registry got unexpected request %s: %#+v", req, r)
-		http.Error(w, "unable to handle the request", http.StatusInternalServerError)
-	}))
-	defer ts.Close()
-
-	imageClient := imageclientv1.NewForConfigOrDie(master.AdminKubeConfig())
-
 	ctx := context.Background()
+	kubeClient := kubeclient.NewForConfigOrDie(master.AdminKubeConfig())
+	imageClient := imageclient.NewForConfigOrDie(master.AdminKubeConfig())
 
-	isi, err := imageClient.ImageStreamImports(testproject.Name).Create(ctx, &imageapiv1.ImageStreamImport{
+	remoteRegistryAddr, _, _ := testframework.CreateEphemeralRegistry(t, master.AdminKubeConfig(), testproject.Name, map[string]string{
+		"remoteuser": "remotepass",
+	})
+
+	remoteRepo, err := testutil.NewInsecureRepository(remoteRegistryAddr+"/remoteimage", testutil.NewBasicCredentialStore("remoteuser", "remotepass"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = testframework.PushSchema2ImageData(context.TODO(), remoteRepo, "latest", imageData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	remoteRegistrySecret, err := testframework.MakeDockerConfigSecret("remote-registry", &testframework.DockerConfig{
+		Auths: map[string]testframework.AuthConfig{
+			remoteRegistryAddr: {
+				Username: "remoteuser",
+				Password: "remotepass",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = kubeClient.CoreV1().Secrets(testproject.Name).Create(ctx, remoteRegistrySecret, metav1.CreateOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	isi, err := imageClient.ImageV1().ImageStreamImports(testproject.Name).Create(ctx, &imageapiv1.ImageStreamImport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: teststreamName,
 		},
@@ -71,7 +80,7 @@ func TestPullthroughBlob(t *testing.T) {
 				{
 					From: corev1.ObjectReference{
 						Kind: "DockerImage",
-						Name: fmt.Sprintf("%s/remoteimage:latest", ts.URL.Host),
+						Name: fmt.Sprintf("%s/remoteimage:latest", remoteRegistryAddr),
 					},
 					ImportPolicy: imageapiv1.TagImportPolicy{
 						Insecure: true,
@@ -84,16 +93,27 @@ func TestPullthroughBlob(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	teststream, err := imageClient.ImageStreams(testproject.Name).Get(ctx, teststreamName, metav1.GetOptions{})
+	teststream, err := imageClient.ImageV1().ImageStreams(testproject.Name).Get(ctx, teststreamName, metav1.GetOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if len(teststream.Status.Tags) == 0 {
 		t.Fatalf("failed to import image: %#+v %#+v", isi, teststream)
 	}
+	for _, tag := range teststream.Status.Tags {
+		for _, cond := range tag.Conditions {
+			if cond.Type == "ImportSuccess" {
+				if cond.Status != corev1.ConditionTrue {
+					t.Fatalf("failed to import image: %s", cond.Message)
+				}
+			}
+		}
+	}
 
-	remoteRegistryRequiresAuth = true
+	err = kubeClient.CoreV1().Secrets(testproject.Name).Delete(ctx, remoteRegistrySecret.Name, metav1.DeleteOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	registry := master.StartRegistry(t, testframework.DisableMirroring{}, testframework.EnableMetrics{Secret: "MetricsSecret"})
 	defer registry.Close()

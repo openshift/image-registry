@@ -1,20 +1,27 @@
 package integration
 
 import (
+	"bufio"
 	"context"
 	"fmt"
-	"net/http"
+	"io"
+	"regexp"
 	"testing"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kubeclient "k8s.io/client-go/kubernetes"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
 
 	"github.com/openshift/image-registry/pkg/testframework"
+	"github.com/openshift/image-registry/pkg/testutil"
 	"github.com/openshift/image-registry/pkg/testutil/counter"
 )
+
+var accessLogLine = regexp.MustCompile(`^[^ ]+ - - \[[^]]*\] "([A-Z]+ [^"]+) HTTP/[0-9.]+"`)
 
 func TestPullthroughBlob(t *testing.T) {
 	imageData, err := testframework.NewSchema2ImageData()
@@ -29,24 +36,57 @@ func TestPullthroughBlob(t *testing.T) {
 	testproject := master.CreateProject("test-image-pullthrough-blob", testuser.Name)
 	teststreamName := "pullthrough"
 
+	kubeClient, err := kubeclient.NewForConfig(master.AdminKubeConfig())
+	if err != nil {
+		t.Fatalf("failed to create Kubernetes client: %s", err)
+	}
+
+	remoteRegistryAddr, remoteRegistryPodName, _ := testframework.CreateEphemeralRegistry(t, master.AdminKubeConfig(), testproject.Name, nil)
+
 	requestCounter := counter.New()
-	ts := testframework.NewHTTPServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		req := fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 
-		t.Logf("remote registry: %s", req)
-		requestCounter.Add(req, 1)
-
-		w.Header().Set("Docker-Distribution-API-Version", "registry/2.0")
-
-		if testframework.ServeV2(w, r) ||
-			testframework.ServeImage(w, r, "remoteimage", imageData, []string{"latest"}) {
+	go func() {
+		log, err := kubeClient.CoreV1().Pods(testproject.Name).GetLogs(remoteRegistryPodName, &corev1.PodLogOptions{
+			Container: "registry",
+			Follow:    true,
+		}).Stream(context.Background())
+		if err != nil {
+			t.Logf("failed to get logs for pod %s: %s", remoteRegistryPodName, err)
 			return
 		}
+		r := bufio.NewReader(log)
+		for {
+			line, readErr := r.ReadString('\n')
+			if len(line) > 0 || readErr == nil {
+				match := accessLogLine.FindStringSubmatch(line)
+				// If it's an HTTP request and it's not a health check, count it
+				if match != nil && match[1] != "GET /" {
+					requestCounter.Add(match[1], 1)
+				}
+			}
+			if readErr == io.EOF {
+				break
+			} else if readErr != nil {
+				t.Errorf("failed to read log from pod %s: %s", remoteRegistryPodName, readErr)
+				return
+			}
+		}
+	}()
 
-		t.Errorf("error: remote registry got unexpected request %s: %#+v", req, r)
-		http.Error(w, "unable to handle the request", http.StatusInternalServerError)
-	}))
-	defer ts.Close()
+	remoteRepo, err := testutil.NewInsecureRepository(remoteRegistryAddr+"/remoteimage", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = testframework.PushSchema2ImageData(context.TODO(), remoteRepo, "latest", imageData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(1 * time.Second) // give logs some time to settle down
+
+	// Step 1: Import an image
+	requestCounter.Reset()
 
 	imageClient := imageclientv1.NewForConfigOrDie(master.AdminKubeConfig())
 
@@ -62,7 +102,7 @@ func TestPullthroughBlob(t *testing.T) {
 				{
 					From: corev1.ObjectReference{
 						Kind: "DockerImage",
-						Name: fmt.Sprintf("%s/remoteimage:latest", ts.URL.Host),
+						Name: fmt.Sprintf("%s/remoteimage:latest", remoteRegistryAddr),
 					},
 					ImportPolicy: imageapiv1.TagImportPolicy{
 						Insecure: true,
@@ -83,6 +123,9 @@ func TestPullthroughBlob(t *testing.T) {
 	if len(teststream.Status.Tags) == 0 {
 		t.Fatalf("failed to import image: %#+v %#+v", isi, teststream)
 	}
+	t.Logf("failed to import image: %#+v %#+v", isi, teststream)
+
+	time.Sleep(1 * time.Second) // give logs some time to settle down
 
 	if diff := requestCounter.Diff(counter.M{
 		"GET /v2/":                             1,
@@ -92,8 +135,8 @@ func TestPullthroughBlob(t *testing.T) {
 		t.Fatalf("unexpected number of requests: %q", diff)
 	}
 
-	// Reset counter
-	requestCounter = counter.New()
+	// Step 2: Pull a blob
+	requestCounter.Reset()
 
 	registry := master.StartRegistry(t, testframework.DisableMirroring{})
 	defer registry.Close()
@@ -108,6 +151,8 @@ func TestPullthroughBlob(t *testing.T) {
 	if string(data) != string(imageData.Layer) {
 		t.Fatalf("got %q, want %q", string(data), string(imageData.Layer))
 	}
+
+	time.Sleep(1 * time.Second) // give logs some time to settle down
 
 	// TODO(dmage): remove the HEAD request
 	if diff := requestCounter.Diff(counter.M{
