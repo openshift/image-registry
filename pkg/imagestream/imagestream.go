@@ -47,6 +47,7 @@ type ImagePullthroughSpec struct {
 
 type ImageStream interface {
 	Reference() string
+	Clone(namespace, name string) ImageStream
 	Exists(ctx context.Context) (bool, rerrors.Error)
 
 	GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, rerrors.Error)
@@ -92,6 +93,23 @@ func New(ctx context.Context, namespace, name string, client client.Interface) I
 
 func (is *imageStream) Reference() string {
 	return fmt.Sprintf("%s/%s", is.namespace, is.name)
+}
+
+func (is *imageStream) Clone(namespace, name string) ImageStream {
+	if is.namespace == namespace && is.name == name {
+		return is
+	}
+	return &imageStream{
+		namespace:        namespace,
+		name:             name,
+		registryOSClient: is.registryOSClient,
+		imageClient:      newCachedImageGetter(is.registryOSClient),
+		imageStreamGetter: &cachedImageStreamGetter{
+			namespace:    namespace,
+			name:         name,
+			isNamespacer: is.registryOSClient,
+		},
+	}
 }
 
 // getImage retrieves the Image with digest `dgst`. No authorization check is done.
