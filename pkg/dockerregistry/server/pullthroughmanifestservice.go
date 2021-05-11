@@ -3,9 +3,12 @@ package server
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/registry/api/errcode"
+	"github.com/docker/distribution/registry/client"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
@@ -87,6 +90,11 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 
 	manifest, err := pullthroughManifestService.Get(ctx, dgst)
 	if err != nil {
+		if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+			if nerr.StatusCode == http.StatusTooManyRequests {
+				return nil, errcode.ErrorCodeTooManyRequests.WithMessage("unable to pullthrough manifest")
+			}
+		}
 		return nil, errors.ErrorCodePullthroughManifest.WithArgs(ref.Exact(), err)
 	}
 
