@@ -7,6 +7,8 @@ import (
 
 	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/registry/api/errcode"
+	"github.com/docker/distribution/registry/client"
 	"github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
@@ -120,8 +122,14 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
+
+	var tooManyRequests error
 	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, search, cached, dgst, secrets); err == nil {
 		return desc, bs, nil
+	} else if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+		if nerr.StatusCode == http.StatusTooManyRequests {
+			tooManyRequests = err
+		}
 	}
 
 	// look at all other repositories tagged by the server
@@ -134,9 +142,17 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	}
 	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, secondary, cached, dgst, secrets); err == nil {
 		return desc, bs, nil
+	} else if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+		if nerr.StatusCode == http.StatusTooManyRequests {
+			tooManyRequests = err
+		}
 	}
 
-	return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
+	nerr := distribution.ErrBlobUnknown
+	if tooManyRequests != nil {
+		nerr = errcode.ErrorCodeTooManyRequests.WithMessage("unable to pullthrough blob")
+	}
+	return distribution.Descriptor{}, nil, nerr
 }
 
 // Stat provides metadata about a blob identified by the digest. If the
@@ -266,6 +282,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 	// see if any of the previously located repositories containing this digest are in this
 	// image stream
+	var tooManyRequests error
 	for _, repo := range cachedRepos {
 		spec, ok := search[repo]
 		if !ok {
@@ -279,6 +296,11 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
 		if err != nil {
+			if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+				if nerr.StatusCode == http.StatusTooManyRequests {
+					tooManyRequests = nerr
+				}
+			}
 			delete(search, repo)
 			continue
 		}
@@ -300,6 +322,11 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
 		if err != nil {
+			if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+				if nerr.StatusCode == http.StatusTooManyRequests {
+					tooManyRequests = nerr
+				}
+			}
 			continue
 		}
 		_ = rbgs.cache.AddDigest(dgst, repo)
@@ -307,5 +334,9 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 		return desc, bs, nil
 	}
 
-	return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
+	err := distribution.ErrBlobUnknown
+	if tooManyRequests != nil {
+		err = tooManyRequests
+	}
+	return distribution.Descriptor{}, nil, err
 }
