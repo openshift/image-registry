@@ -145,13 +145,16 @@ var mu sync.Mutex
 // copyContent attempts to load and serve the provided blob. If req != nil and writer is an instance of http.ResponseWriter,
 // response headers will be set and range requests honored.
 func copyContent(ctx context.Context, store BlobGetterService, dgst digest.Digest, writer io.Writer, req *http.Request) (distribution.Descriptor, error) {
+	dcontext.GetLogger(ctx).Debugf("copyContent: starting with dgst=%s", dgst)
 	desc, err := store.Stat(ctx, dgst)
 	if err != nil {
+		dcontext.GetLogger(ctx).Debugf("copyContent: BlobGetterService.Stat error=%s", err)
 		return distribution.Descriptor{}, err
 	}
 
 	remoteReader, err := store.Open(ctx, dgst)
 	if err != nil {
+		dcontext.GetLogger(ctx).Debugf("copyContent: BlobGetterService.Open error=%s", err)
 		return distribution.Descriptor{}, err
 	}
 
