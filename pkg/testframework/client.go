@@ -2,9 +2,9 @@ package testframework
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
-
-	"github.com/pborman/uuid"
 
 	kerrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,6 +16,22 @@ import (
 	oauthclient "github.com/openshift/client-go/oauth/clientset/versioned"
 	userclient "github.com/openshift/client-go/user/clientset/versioned"
 )
+
+func GenerateRandomBytes(n int) []byte {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func GenerateOAuthTokenPair() (privToken, pubToken string) {
+	randomBytes := GenerateRandomBytes(8)
+	randomToken := base64.URLEncoding.EncodeToString(randomBytes)
+	hashed := sha256.Sum256([]byte(randomToken))
+	return "sha256~" + randomToken, "sha256~" + base64.RawURLEncoding.EncodeToString(hashed[:])
+}
 
 func GetClientForUser(clusterAdminConfig *restclient.Config, username string) (kclientset.Interface, *restclient.Config, error) {
 	userClient, err := userclient.NewForConfig(clusterAdminConfig)
@@ -47,14 +63,11 @@ func GetClientForUser(clusterAdminConfig *restclient.Config, username string) (k
 		return nil, nil, err
 	}
 
-	randomToken := uuid.NewRandom()
-	accesstoken := base64.RawURLEncoding.EncodeToString([]byte(randomToken))
-	// make sure the token is long enough to pass validation
-	for i := len(accesstoken); i < 32; i++ {
-		accesstoken += "A"
-	}
+	privToken, pubToken := GenerateOAuthTokenPair()
 	token := &oauthapi.OAuthAccessToken{
-		ObjectMeta:  metav1.ObjectMeta{Name: accesstoken},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: pubToken,
+		},
 		ClientName:  oauthClientObj.Name,
 		UserName:    username,
 		UserUID:     string(user.UID),
@@ -66,7 +79,7 @@ func GetClientForUser(clusterAdminConfig *restclient.Config, username string) (k
 	}
 
 	userClientConfig := restclient.AnonymousClientConfig(clusterAdminConfig)
-	userClientConfig.BearerToken = token.Name
+	userClientConfig.BearerToken = privToken
 
 	kubeClientset, err := kclientset.NewForConfig(userClientConfig)
 	if err != nil {
