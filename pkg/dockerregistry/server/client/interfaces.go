@@ -12,6 +12,7 @@ import (
 	authapiv1 "k8s.io/api/authorization/v1"
 
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
+	operatorclientv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
 	userclientv1 "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 
 	authclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -19,6 +20,10 @@ import (
 
 type UsersInterfacer interface {
 	Users() UserInterface
+}
+
+type ImageContentSourcePolicyInterfacer interface {
+	ImageContentSourcePolicy() operatorclientv1alpha1.ImageContentSourcePolicyInterface
 }
 
 type ImagesInterfacer interface {

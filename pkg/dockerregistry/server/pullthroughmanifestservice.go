@@ -8,6 +8,8 @@ import (
 	dcontext "github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 
+	operatorv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
+
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/errors"
@@ -27,6 +29,7 @@ type pullthroughManifestService struct {
 	mirror                  bool
 	registryAddr            string
 	metrics                 metrics.Pullthrough
+	icsp                    operatorv1alpha1.ImageContentSourcePolicyInterface
 }
 
 var _ distribution.ManifestService = &pullthroughManifestService{}
@@ -112,12 +115,13 @@ func (m *pullthroughManifestService) mirrorManifest(ctx context.Context, manifes
 }
 
 func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
+	dcontext.GetLogger(ctx).Debug("(*pullthroughManifestService).getRemoteRepositoryClient")
 	secrets, err := m.imageStream.GetSecrets()
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
 
-	retriever, impErr := getImportContext(ctx, ref, secrets, m.metrics)
+	retriever, impErr := getImportContext(ctx, ref, secrets, m.metrics, m.icsp)
 	if impErr != nil {
 		return nil, impErr
 	}

@@ -18,6 +18,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
+	operatorfake "github.com/openshift/client-go/operator/clientset/versioned/fake"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
@@ -54,6 +55,7 @@ func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Serve
 }
 
 func TestPullthroughManifests(t *testing.T) {
+	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	namespace := "fuser"
 	repo := "zapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
@@ -187,6 +189,7 @@ func TestPullthroughManifests(t *testing.T) {
 			cache:           cache,
 			registryAddr:    "localhost:5000",
 			metrics:         metrics.NewNoopMetrics(),
+			icsp:            icsp,
 		}
 
 		manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
@@ -225,6 +228,7 @@ func TestPullthroughManifests(t *testing.T) {
 }
 
 func TestPullthroughManifestInsecure(t *testing.T) {
+	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	namespace := "fuser"
 	repo := "zapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
@@ -428,6 +432,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 				imageStream:     imageStream,
 				cache:           cache,
 				metrics:         metrics.NewNoopMetrics(),
+				icsp:            icsp,
 			}
 
 			manifestResult, err := ptms.Get(ctx, tc.manifestDigest)
@@ -468,6 +473,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 }
 
 func TestPullthroughManifestDockerReference(t *testing.T) {
+	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	namespace := "user"
 	repo1 := "repo1"
 	repo2 := "repo2"
@@ -567,6 +573,7 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 			ManifestService: newTestManifestService(tc.repoName, nil),
 			imageStream:     imageStream,
 			metrics:         metrics.NewNoopMetrics(),
+			icsp:            icsp,
 		}
 
 		ptms.Get(ctx, digest.Digest(img.Name))
@@ -661,6 +668,7 @@ func (ms *putWaiterManifestService) Put(ctx context.Context, manifest distributi
 }
 
 func TestPullthroughManifestMirroring(t *testing.T) {
+	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	const timeout = 5 * time.Second
 
 	namespace := "myproject"
@@ -725,6 +733,7 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 		imageStream:             imageStream,
 		mirror:                  true,
 		metrics:                 metrics.NewNoopMetrics(),
+		icsp:                    icsp,
 	}
 
 	_, err = ptms.Get(ctx, digest.Digest(img.Name))
@@ -740,6 +749,7 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 }
 
 func TestPullthroughManifestMetrics(t *testing.T) {
+	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	namespace := "myproject"
 	repo := "myapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
@@ -801,6 +811,7 @@ func TestPullthroughManifestMetrics(t *testing.T) {
 		newLocalManifestService: func(ctx context.Context) (distribution.ManifestService, error) { return ms, nil },
 		imageStream:             imageStream,
 		metrics:                 metrics.NewMetrics(sink),
+		icsp:                    icsp,
 	}
 
 	_, err = ptms.Get(ctx, digest.Digest(img.Name))
