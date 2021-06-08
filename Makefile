@@ -10,6 +10,7 @@
 
 OUT_DIR = _output
 OS_OUTPUT_GOPATH ?= 1
+TESTFLAGS ?= -mod vendor
 
 export GOFLAGS
 export TESTFLAGS
