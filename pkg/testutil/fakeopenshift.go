@@ -8,7 +8,6 @@ import (
 
 	dcontext "github.com/docker/distribution/context"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -479,7 +478,7 @@ func (fos *FakeOpenShift) imageStreamsHandler(action clientgotesting.Action) (bo
 			case "secrets":
 				switch action := action.(type) {
 				case clientgotesting.GetActionImpl:
-					return true, &corev1.SecretList{}, nil
+					return true, &imageapiv1.SecretList{}, nil
 				default:
 					return fos.todo(action)
 				}
