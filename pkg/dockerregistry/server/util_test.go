@@ -163,7 +163,8 @@ func Test_getImportContext(t *testing.T) {
 				return
 			}
 
-			user, pass := regctx.Credentials.Basic(nil)
+			auth := regctx.CredentialsFactory.CredentialStoreFor(tt.ref.String())
+			user, pass := auth.Basic(nil)
 			if user != tt.user || pass != tt.pass {
 				t.Errorf("expected %q/%q, received %q,%q", tt.user, tt.pass, user, pass)
 			}

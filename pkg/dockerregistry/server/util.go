@@ -8,8 +8,6 @@ import (
 	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
-	"github.com/docker/distribution/registry/client/auth"
-	dockerregistry "github.com/docker/docker/registry"
 	"github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
@@ -73,11 +71,6 @@ func getImportContext(ctx context.Context, ref *imageapi.DockerImageReference, s
 		return nil, err
 	}
 
-	var cred auth.CredentialStore = registryclient.NoCredentials
-	if auths, _ := keyring.Lookup(ref.String()); len(auths) > 0 {
-		cred = dockerregistry.NewStaticCredentialStore(&auths[0].AuthConfig)
-	}
-
 	var retriever registryclient.RepositoryRetriever
 	retriever = registryclient.NewContext(
 		secureTransport, insecureTransport,
@@ -85,7 +78,11 @@ func getImportContext(ctx context.Context, ref *imageapi.DockerImageReference, s
 		requesttrace.New(ctx, req),
 	).WithAlternateBlobSourceStrategy(
 		NewSimpleLookupICSPStrategy(icsp),
-	).WithCredentials(cred)
+	).WithCredentialsFactory(
+		&credentialStoreFactory{
+			keyring: keyring,
+		},
+	)
 
 	retriever = m.RepositoryRetriever(retriever)
 	return retriever, nil
