@@ -52,5 +52,6 @@ require (
 
 replace (
 	github.com/docker/distribution => github.com/akhil-rane/docker-distribution v2.5.0-rc.1.0.20210714012004-a28c7cb468cd+incompatible
+	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20210622215436-a8dc77f794b6
 	google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
 )
