@@ -52,5 +52,6 @@ require (
 
 replace (
 	github.com/docker/distribution => github.com/openshift/docker-distribution v0.0.0-20210209103229-0526a4ae41e1
+	github.com/openshift/library-go => github.com/ricardomaraschini/library-go v0.0.0-20210616102632-362819ffe872
 	google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
 )
