@@ -37,9 +37,9 @@ require (
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
 	gopkg.in/yaml.v2 v2.3.0
-	k8s.io/api v0.19.0
-	k8s.io/apimachinery v0.19.0
-	k8s.io/client-go v0.19.0
+	k8s.io/api v0.19.13
+	k8s.io/apimachinery v0.19.13
+	k8s.io/client-go v0.19.13
 	k8s.io/klog/v2 v2.3.0
 )
 
