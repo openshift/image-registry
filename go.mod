@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/Azure/azure-sdk-for-go v16.2.1+incompatible // indirect
 	github.com/Microsoft/hcsshim v0.8.7 // indirect
-	github.com/aws/aws-sdk-go v1.34.30 // indirect
+	github.com/aws/aws-sdk-go v1.38.35 // indirect
 	github.com/bshuster-repo/logrus-logstash-hook v0.4.1
 	github.com/containerd/containerd v1.3.3 // indirect
 	github.com/denverdino/aliyungo v0.0.0-20161108032828-afedced274aa // indirect
