@@ -113,7 +113,7 @@ func (ac *authChallenge) Error() string {
 func (ac *authChallenge) SetHeaders(req *http.Request, w http.ResponseWriter) {
 	// WWW-Authenticate response challenge header.
 	// See https://tools.ietf.org/html/rfc6750#section-3
-	str := fmt.Sprintf("Basic realm=%s", ac.realm)
+	str := fmt.Sprintf("Bearer realm=%s", ac.realm)
 	if ac.err != nil {
 		str = fmt.Sprintf("%s,error=%q", str, ac.Error())
 	}
@@ -165,9 +165,11 @@ func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
 			tokenRealmCopy.Host = host
 		}
 		return &tokenAuthChallenge{realm: tokenRealmCopy.String(), err: err}
-	case ErrTokenInvalid, ErrOpenShiftAccessDenied:
-		// Challenge for errors that involve tokens or access denied
+	// Challenge for errors that involve tokens or access denied
+	case ErrTokenInvalid:
 		return &authChallenge{realm: ac.realm, err: err}
+	case ErrOpenShiftAccessDenied:
+		return &authChallenge{realm: ac.realm, err: errors.New("insufficient_scope")}
 	default:
 		// By default, just return the error, this gets surfaced as a bad request / internal error, but no challenge
 		return err
