@@ -17,9 +17,7 @@ require (
 	github.com/docker/go-connections v0.3.0 // indirect
 	github.com/docker/go-units v0.4.0
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/garyburd/redigo v0.0.0-20150301180006-535138d7bcd7 // indirect
-	github.com/go-openapi/spec v0.19.5 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/gorilla/context v0.0.0-20140604161150-14f550f51af5 // indirect
@@ -39,7 +37,6 @@ require (
 	github.com/pborman/uuid v1.2.0
 	github.com/prometheus/client_golang v1.11.0
 	github.com/sirupsen/logrus v1.7.0
-	go.etcd.io/etcd v0.5.0-alpha.5.0.20200910180754-dd1b699fc489 // indirect
 	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
 	gopkg.in/yaml.v2 v2.4.0
@@ -47,10 +44,9 @@ require (
 	k8s.io/apimachinery v0.22.0-rc.0
 	k8s.io/client-go v0.22.0-rc.0
 	k8s.io/klog/v2 v2.9.0
-	k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e // indirect
 )
 
 replace (
-	github.com/docker/distribution => github.com/openshift/docker-distribution v0.0.0-20210209103229-0526a4ae41e1
+	github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20210913115740-30f7a83f044a+incompatible
 	google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
 )

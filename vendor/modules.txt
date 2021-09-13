@@ -91,7 +91,7 @@ github.com/davecgh/go-spew/spew
 github.com/denverdino/aliyungo/common
 github.com/denverdino/aliyungo/oss
 github.com/denverdino/aliyungo/util
-# github.com/docker/distribution v0.0.0-20180920194744-16128bbac47f => github.com/openshift/docker-distribution v0.0.0-20210209103229-0526a4ae41e1
+# github.com/docker/distribution v0.0.0-20180920194744-16128bbac47f => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20210913115740-30f7a83f044a+incompatible
 github.com/docker/distribution
 github.com/docker/distribution/configuration
 github.com/docker/distribution/context
