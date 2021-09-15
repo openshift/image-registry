@@ -18,7 +18,6 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/manifesthandler"
 	"github.com/openshift/image-registry/pkg/imagestream"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 var _ distribution.ManifestService = &manifestService{}
@@ -148,9 +147,9 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 		ObjectMeta: metav1.ObjectMeta{
 			Name: dgst.String(),
 			Annotations: map[string]string{
-				imageapi.ManagedByOpenShiftAnnotation:      "true",
-				imageapi.ImageManifestBlobStoredAnnotation: "true",
-				imageapi.DockerImageLayersOrderAnnotation:  layerOrder,
+				imageapiv1.ManagedByOpenShiftAnnotation:      "true",
+				imageapiv1.ImageManifestBlobStoredAnnotation: "true",
+				imageapiv1.DockerImageLayersOrderAnnotation:  layerOrder,
 			},
 		},
 		DockerImageReference:         fmt.Sprintf("%s/%s@%s", m.serverAddr, m.imageStream.Reference(), dgst.String()),

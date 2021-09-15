@@ -18,9 +18,9 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	rerrors "github.com/openshift/image-registry/pkg/errors"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
-	originutil "github.com/openshift/image-registry/pkg/origin-common/util"
+	util "github.com/openshift/image-registry/pkg/origin-common/util"
+	"github.com/openshift/library-go/pkg/image/reference"
+	"github.com/openshift/library-go/pkg/quota/quotautil"
 )
 
 const (
@@ -41,7 +41,7 @@ type ProjectObjectListStore interface {
 // ImagePullthroughSpec contains a reference of remote image to pull associated with an insecure flag for the
 // corresponding registry.
 type ImagePullthroughSpec struct {
-	DockerImageReference *imageapi.DockerImageReference
+	DockerImageReference *reference.DockerImageReference
 	Insecure             bool
 }
 
@@ -125,7 +125,7 @@ func (is *imageStream) ResolveImageID(ctx context.Context, dgst digest.Digest) (
 		return nil, convertImageStreamGetterError(rErr, fmt.Sprintf("ResolveImageID: failed to get image stream %s", is.Reference()))
 	}
 
-	tagEvent, err := originutil.ResolveImageID(stream, dgst.String())
+	tagEvent, err := util.ResolveImageID(stream, dgst.String())
 	if err != nil {
 		code := ErrImageStreamUnknownErrorCode
 
@@ -210,13 +210,13 @@ func (is *imageStream) TagIsInsecure(ctx context.Context, tag string, dgst diges
 		return false, convertImageStreamGetterError(err, fmt.Sprintf("TagIsInsecure: failed to get image stream %s", is.Reference()))
 	}
 
-	if insecure, _ := stream.Annotations[imageapi.InsecureRepositoryAnnotation]; insecure == "true" {
+	if insecure := stream.Annotations[imageapiv1.InsecureRepositoryAnnotation]; insecure == "true" {
 		return true, nil
 	}
 
 	if len(tag) == 0 {
 		// if the client pulled by digest, find the corresponding tag in the image stream
-		tag, _ = originutil.LatestImageTagEvent(stream, dgst.String())
+		tag, _ = util.LatestImageTagEvent(stream, dgst.String())
 	}
 
 	if len(tag) != 0 {
@@ -249,7 +249,7 @@ func (is *imageStream) localRegistry(ctx context.Context) ([]string, rerrors.Err
 
 	var localNames []string
 
-	local, err := imageapi.ParseDockerImageReference(stream.Status.DockerImageRepository)
+	local, err := reference.Parse(stream.Status.DockerImageRepository)
 	if err != nil {
 		dcontext.GetLogger(ctx).Warnf("localRegistry: unable to parse dockerImageRepository %q", stream.Status.DockerImageRepository)
 	}
@@ -258,7 +258,7 @@ func (is *imageStream) localRegistry(ctx context.Context) ([]string, rerrors.Err
 	}
 
 	if len(stream.Status.PublicDockerImageRepository) > 0 {
-		public, err := imageapi.ParseDockerImageReference(stream.Status.PublicDockerImageRepository)
+		public, err := reference.Parse(stream.Status.PublicDockerImageRepository)
 		if err != nil {
 			dcontext.GetLogger(ctx).Warnf("localRegistry: unable to parse publicDockerImageRepository %q", stream.Status.PublicDockerImageRepository)
 		}

@@ -23,7 +23,8 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-	util "github.com/openshift/image-registry/pkg/origin-common/util"
+	"github.com/openshift/image-registry/pkg/origin-common/util"
+	"github.com/openshift/library-go/pkg/image/dockerv1client"
 )
 
 type ManifestSchemaVersion string
@@ -137,7 +138,7 @@ func MakeRandomLayer() ([]byte, distribution.Descriptor, error) {
 }
 
 func MakeManifestConfig() (ConfigPayload, distribution.Descriptor, error) {
-	cfg := imageapi.DockerImageConfig{}
+	cfg := dockerv1client.DockerImageConfig{}
 	cfgDesc := distribution.Descriptor{}
 
 	jsonBytes, err := json.Marshal(&cfg)
@@ -306,7 +307,7 @@ func NewImageForManifest(repoName string, rawManifest string, manifestConfig str
 
 	annotations := make(map[string]string)
 	if managedByOpenShift {
-		annotations[imageapi.ManagedByOpenShiftAnnotation] = "true"
+		annotations[imageapiv1.ManagedByOpenShiftAnnotation] = "true"
 	}
 
 	image := &imageapi.Image{

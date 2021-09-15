@@ -13,16 +13,16 @@ import (
 
 	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/registry/api/errcode"
-	"github.com/docker/distribution/registry/api/v2"
+	v2 "github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/handlers"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
+	gorillahandlers "github.com/gorilla/handlers"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	rerrors "github.com/openshift/image-registry/pkg/errors"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-
-	gorillahandlers "github.com/gorilla/handlers"
+	"github.com/openshift/library-go/pkg/image/imageutil"
+	imageref "github.com/openshift/library-go/pkg/image/reference"
 )
 
 const (
@@ -63,7 +63,7 @@ var (
 
 type signatureHandler struct {
 	ctx           *handlers.Context
-	reference     imageapi.DockerImageReference
+	reference     imageref.DockerImageReference
 	isImageClient client.ImageStreamImagesNamespacer
 }
 
@@ -71,7 +71,7 @@ type signatureHandler struct {
 // requests for signature endpoint.
 func NewSignatureDispatcher(isImageClient client.ImageStreamImagesNamespacer) func(*handlers.Context, *http.Request) http.Handler {
 	return func(ctx *handlers.Context, r *http.Request) http.Handler {
-		reference, _ := imageapi.ParseDockerImageReference(
+		reference, _ := imageref.Parse(
 			dcontext.GetStringValue(ctx, "vars.name") + "@" + dcontext.GetStringValue(ctx, "vars.digest"),
 		)
 		signatureHandler := &signatureHandler{
@@ -111,7 +111,7 @@ func (s *signatureHandler) Put(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(sig.Type) == 0 {
-		sig.Type = imageapi.ImageSignatureTypeAtomicImageV1
+		sig.Type = imageapiv1.ImageSignatureTypeAtomicImageV1
 	}
 	if sig.Version != defaultSchemaVersion {
 		s.handleError(s.ctx, ErrorCodeSignatureInvalid.WithDetail(errors.New("only schemaVersion=2 is currently supported")), w)
@@ -159,7 +159,7 @@ func (s *signatureHandler) Get(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	image, err := s.isImageClient.ImageStreamImages(s.reference.Namespace).Get(s.ctx, imageapi.JoinImageStreamImage(s.reference.Name, s.reference.ID), metav1.GetOptions{})
+	image, err := s.isImageClient.ImageStreamImages(s.reference.Namespace).Get(s.ctx, imageutil.JoinImageStreamImage(s.reference.Name, s.reference.ID), metav1.GetOptions{})
 	switch {
 	case err == nil:
 	case kapierrors.IsUnauthorized(err):

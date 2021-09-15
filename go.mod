@@ -26,7 +26,6 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 	github.com/ncw/swift v1.0.49 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1.0.20180430190053-c9281466c8b2
 	github.com/opencontainers/image-spec v1.0.1
@@ -41,9 +40,10 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210622215436-a8dc77f794b6 // indirect
 	google.golang.org/cloud v0.0.0-20151119220103-975617b05ea8 // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.22.0-rc.0
-	k8s.io/apimachinery v0.22.0-rc.0
-	k8s.io/client-go v0.22.0-rc.0
+	k8s.io/api v0.22.2
+	k8s.io/apimachinery v0.22.2
+	k8s.io/client-go v0.22.2
+	k8s.io/component-base v0.22.2
 	k8s.io/klog/v2 v2.9.0
 )
 

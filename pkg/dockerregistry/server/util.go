@@ -20,8 +20,8 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/kubernetes-common/credentialprovider"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/requesttrace"
+	"github.com/openshift/library-go/pkg/image/reference"
 )
 
 var (
@@ -49,7 +49,7 @@ func getNamespaceName(resourceName string) (string, string, error) {
 
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
-func getImportContext(ctx context.Context, ref *imageapi.DockerImageReference, secrets []corev1.Secret, m metrics.Pullthrough, icsp operatorv1alpha1.ImageContentSourcePolicyInterface) (registryclient.RepositoryRetriever, error) {
+func getImportContext(ctx context.Context, ref *reference.DockerImageReference, secrets []corev1.Secret, m metrics.Pullthrough, icsp operatorv1alpha1.ImageContentSourcePolicyInterface) (registryclient.RepositoryRetriever, error) {
 	req, err := dcontext.GetRequest(ctx)
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("unable to get request from context: %v", err)

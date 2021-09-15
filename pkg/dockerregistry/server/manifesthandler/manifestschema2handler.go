@@ -12,7 +12,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 var (
@@ -60,7 +59,7 @@ func (h *manifestSchema2Handler) Layers(ctx context.Context) (string, []imageapi
 		layers[i].LayerSize = layer.Size
 		layers[i].MediaType = layer.MediaType
 	}
-	return imageapi.DockerImageLayersOrderAscending, layers, nil
+	return imageapiv1.DockerImageLayersOrderAscending, layers, nil
 }
 
 func (h *manifestSchema2Handler) Payload() (mediaType string, payload []byte, canonical []byte, err error) {

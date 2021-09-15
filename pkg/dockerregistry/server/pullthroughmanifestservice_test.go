@@ -25,7 +25,6 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	metricstesting "github.com/openshift/image-registry/pkg/dockerregistry/server/metrics/testing"
 	"github.com/openshift/image-registry/pkg/imagestream"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 	"github.com/openshift/image-registry/pkg/testutil"
 	"github.com/openshift/image-registry/pkg/testutil/counter"
 )
@@ -118,7 +117,7 @@ func TestPullthroughManifests(t *testing.T) {
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
-		imageapi.InsecureRepositoryAnnotation: "true",
+		imageapiv1.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, image, namespace, repo, tag)
 	testutil.AddImage(t, fos, image2, namespace, repo, tag2)
@@ -301,7 +300,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 			manifestDigest: ms1dgst,
 			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
 				testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
-					imageapi.InsecureRepositoryAnnotation: "true",
+					imageapiv1.InsecureRepositoryAnnotation: "true",
 				})
 				testutil.AddImage(t, fos, ms1img, namespace, repo, "schema1")
 			},
@@ -316,7 +315,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 			manifestDigest: ms2dgst,
 			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
 				testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
-					imageapi.InsecureRepositoryAnnotation: "true",
+					imageapiv1.InsecureRepositoryAnnotation: "true",
 				})
 				testutil.AddImage(t, fos, ms2img, namespace, repo, "schema2")
 			},
@@ -331,7 +330,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 			manifestDigest: ms1dgst,
 			fakeOpenShiftInit: func(fos *testutil.FakeOpenShift) {
 				testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
-					imageapi.InsecureRepositoryAnnotation: "false",
+					imageapiv1.InsecureRepositoryAnnotation: "false",
 				})
 				testutil.AddImage(t, fos, ms1img, namespace, repo, "schema1")
 			},
@@ -391,7 +390,7 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 
 				testutil.AddUntaggedImage(t, fos, image)
 				testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
-					imageapi.InsecureRepositoryAnnotation: "true",
+					imageapiv1.InsecureRepositoryAnnotation: "true",
 				})
 				testutil.AddImageStreamTag(t, fos, image, namespace, repo, &imageapiv1.TagReference{
 					Name: "schema2",
@@ -536,10 +535,10 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo1, map[string]string{
-		imageapi.InsecureRepositoryAnnotation: "true",
+		imageapiv1.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImageStream(t, fos, namespace, repo2, map[string]string{
-		imageapi.InsecureRepositoryAnnotation: "true",
+		imageapiv1.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, &image1, namespace, repo1, tag)
 	testutil.AddImage(t, fos, &image2, namespace, repo2, tag)
@@ -718,7 +717,7 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
-		imageapi.InsecureRepositoryAnnotation: "true",
+		imageapiv1.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, img, namespace, repo, "latest")
 
@@ -798,7 +797,7 @@ func TestPullthroughManifestMetrics(t *testing.T) {
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, namespace, repo, map[string]string{
-		imageapi.InsecureRepositoryAnnotation: "true",
+		imageapiv1.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, img, namespace, repo, "latest")
 

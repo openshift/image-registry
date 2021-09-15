@@ -103,7 +103,7 @@ func SchemeHost(req *http.Request) (string /*scheme*/, string /*host*/) {
 	}
 
 	forwardedProto := forwarded("Proto")
-	var scheme string
+	scheme := ""
 	switch {
 	case len(forwardedProto) > 0:
 		scheme = forwardedProto

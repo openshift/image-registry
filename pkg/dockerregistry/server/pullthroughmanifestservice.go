@@ -14,7 +14,7 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/errors"
 	"github.com/openshift/image-registry/pkg/imagestream"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/library-go/pkg/image/reference"
 )
 
 // pullthroughManifestService wraps a distribution.ManifestService
@@ -63,7 +63,7 @@ func (m *pullthroughManifestService) remoteGet(ctx context.Context, dgst digest.
 		return nil, rErr
 	}
 
-	ref, err := imageapi.ParseDockerImageReference(image.DockerImageReference)
+	ref, err := reference.Parse(image.DockerImageReference)
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("bad DockerImageReference (%q) in Image %s@%s: %v", image.DockerImageReference, m.imageStream.Reference(), dgst.String(), err)
 		return nil, err
@@ -114,7 +114,7 @@ func (m *pullthroughManifestService) mirrorManifest(ctx context.Context, manifes
 	return err
 }
 
-func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *imageapi.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
+func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Context, ref *reference.DockerImageReference, dgst digest.Digest, options ...distribution.ManifestServiceOption) (distribution.Repository, error) {
 	dcontext.GetLogger(ctx).Debug("(*pullthroughManifestService).getRemoteRepositoryClient")
 	secrets, err := m.imageStream.GetSecrets()
 	if err != nil {

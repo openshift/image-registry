@@ -21,7 +21,6 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imagefakeclient "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1/fake"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
@@ -50,7 +49,7 @@ func TestSignatureGet(t *testing.T) {
 
 	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
 	testutil.AddImageStream(t, fos, "user", "app", map[string]string{
-		imageapi.InsecureRepositoryAnnotation: "true",
+		imageapiv1.InsecureRepositoryAnnotation: "true",
 	})
 	testutil.AddImage(t, fos, testImage, "user", "app", "latest")
 

@@ -18,9 +18,10 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/openshift/api/image/docker10"
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/library-go/pkg/image/imageutil"
 
 	"github.com/openshift/image-registry/pkg/testframework"
 	"github.com/openshift/image-registry/pkg/testutil"
@@ -55,7 +56,7 @@ func signedManifest(name string, blobs []digest.Digest) ([]byte, digest.Digest, 
 			SchemaVersion: 1,
 		},
 		Name:         name,
-		Tag:          imageapi.DefaultImageTag,
+		Tag:          imageapiv1.DefaultImageTag,
 		Architecture: "amd64",
 		History:      history,
 		FSLayers:     fsLayers,
@@ -138,12 +139,12 @@ func TestV2RegistryGetTags(t *testing.T) {
 	if len(tags) != 1 {
 		t.Fatalf("expected 1 tag, got %d: %v", len(tags), tags)
 	}
-	if tags[0] != imageapi.DefaultImageTag {
+	if tags[0] != imageapiv1.DefaultImageTag {
 		t.Fatalf("expected latest, got %q", tags[0])
 	}
 
 	// test get by tag
-	url := fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, namespace, stream.Name, imageapi.DefaultImageTag)
+	url := fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, namespace, stream.Name, imageapiv1.DefaultImageTag)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf("error creating request: %v", err)
@@ -168,7 +169,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 	if retrievedManifest.Name != fmt.Sprintf("%s/%s", namespace, stream.Name) {
 		t.Fatalf("unexpected manifest name: %s", retrievedManifest.Name)
 	}
-	if retrievedManifest.Tag != imageapi.DefaultImageTag {
+	if retrievedManifest.Tag != imageapiv1.DefaultImageTag {
 		t.Fatalf("unexpected manifest tag: %s", retrievedManifest.Tag)
 	}
 
@@ -197,11 +198,11 @@ func TestV2RegistryGetTags(t *testing.T) {
 	if retrievedManifest.Name != fmt.Sprintf("%s/%s", namespace, stream.Name) {
 		t.Fatalf("unexpected manifest name: %s", retrievedManifest.Name)
 	}
-	if retrievedManifest.Tag != imageapi.DefaultImageTag {
+	if retrievedManifest.Tag != imageapiv1.DefaultImageTag {
 		t.Fatalf("unexpected manifest tag: %s", retrievedManifest.Tag)
 	}
 
-	image, err := adminImageClient.ImageStreamImages(namespace).Get(context.Background(), imageapi.JoinImageStreamImage(stream.Name, dgst.String()), metav1.GetOptions{})
+	image, err := adminImageClient.ImageStreamImages(namespace).Get(context.Background(), imageutil.JoinImageStreamImage(stream.Name, dgst.String()), metav1.GetOptions{})
 	if err != nil {
 		t.Fatalf("error getting imageStreamImage: %s", err)
 	}
@@ -215,7 +216,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 		t.Errorf("image dockerImageReference: expected %q, got %q", e, a)
 	}
 
-	dockerImageMetadata := &imageapi.DockerImage{}
+	dockerImageMetadata := &docker10.DockerImage{}
 	if err := json.Unmarshal(image.Image.DockerImageMetadata.Raw, dockerImageMetadata); err != nil {
 		t.Fatal(err)
 	}
@@ -254,7 +255,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 
 	var history *imageapiv1.NamedTagEventList
 	for i := range otherStream.Status.Tags {
-		if otherStream.Status.Tags[i].Tag == imageapi.DefaultImageTag {
+		if otherStream.Status.Tags[i].Tag == imageapiv1.DefaultImageTag {
 			history = &otherStream.Status.Tags[i]
 			break
 		}
@@ -277,7 +278,7 @@ func putManifest(baseURL, namespace, name, user, token string) (digest.Digest, e
 		return "", err
 	}
 
-	putUrl := fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, namespace, name, imageapi.DefaultImageTag)
+	putUrl := fmt.Sprintf("%s/v2/%s/%s/manifests/%s", baseURL, namespace, name, imageapiv1.DefaultImageTag)
 	signedManifest, dgst, err := signedManifest(fmt.Sprintf("%s/%s", namespace, name), []digest.Digest{desc.Digest})
 	if err != nil {
 		return "", err
