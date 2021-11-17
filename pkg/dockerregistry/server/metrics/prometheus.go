@@ -5,7 +5,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	_ "github.com/openshift/image-registry/pkg/kubernetes-common/prometheus"
+	_ "k8s.io/component-base/metrics/prometheus/restclient"
 )
 
 const (

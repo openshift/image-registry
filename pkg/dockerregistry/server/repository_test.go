@@ -611,7 +611,7 @@ func storeTestImage(
 	}
 
 	if managedByOpenShift {
-		image.Annotations = map[string]string{imageapi.ManagedByOpenShiftAnnotation: "true"}
+		image.Annotations = map[string]string{imageapiv1.ManagedByOpenShiftAnnotation: "true"}
 	}
 
 	if schemaVersion == 1 {

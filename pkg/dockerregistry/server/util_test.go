@@ -13,7 +13,7 @@ import (
 	"github.com/openshift/library-go/pkg/image/registryclient"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/library-go/pkg/image/reference"
 )
 
 type mockMetricsPullThrough struct{}
@@ -48,7 +48,7 @@ func Test_getImportContext(t *testing.T) {
 		err     string
 		name    string
 		pass    string
-		ref     *imageapi.DockerImageReference
+		ref     *reference.DockerImageReference
 		req     bool
 		secrets []corev1.Secret
 		user    string
@@ -56,19 +56,19 @@ func Test_getImportContext(t *testing.T) {
 		{
 			name: "context without http request",
 			err:  "no http request in context",
-			ref:  &imageapi.DockerImageReference{},
+			ref:  &reference.DockerImageReference{},
 		},
 		{
 			name:  "invalid json",
 			creds: []byte(`<{Dd`),
-			ref:   &imageapi.DockerImageReference{},
+			ref:   &reference.DockerImageReference{},
 			req:   true,
 		},
 		{
 			name:  "credential present on node",
 			creds: []byte(`{ "auths": { "192.168.122.19:8000": { "auth": "dXNlcjpwYXNz" } } }`),
 			pass:  "pass",
-			ref: &imageapi.DockerImageReference{
+			ref: &reference.DockerImageReference{
 				Name:     "192.168.122.19:8000/test",
 				Registry: "192.168.122.19:8000/test",
 			},
@@ -78,7 +78,7 @@ func Test_getImportContext(t *testing.T) {
 		{
 			name: "broken secret",
 			err:  "invalid character '<' looking for beginning of value",
-			ref:  &imageapi.DockerImageReference{},
+			ref:  &reference.DockerImageReference{},
 			req:  true,
 			secrets: []corev1.Secret{
 				{
@@ -92,7 +92,7 @@ func Test_getImportContext(t *testing.T) {
 		{
 			name:  "secrets over node credentials priority",
 			creds: []byte(`{"auths":{"192.168.122.19:8000":{"auth":"dXNlcjpwYXNz"}}}`),
-			ref: &imageapi.DockerImageReference{
+			ref: &reference.DockerImageReference{
 				Name:     "192.168.122.19:8000/test",
 				Registry: "192.168.122.19:8000",
 			},
@@ -110,7 +110,7 @@ func Test_getImportContext(t *testing.T) {
 		},
 		{
 			name: "no credentials",
-			ref: &imageapi.DockerImageReference{
+			ref: &reference.DockerImageReference{
 				Name:     "192.168.122.19:8000/test",
 				Registry: "192.168.122.19:8000",
 			},

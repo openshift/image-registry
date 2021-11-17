@@ -11,8 +11,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	imageapiv1 "github.com/openshift/api/image/v1"
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 
 	"github.com/openshift/image-registry/pkg/testframework"
 	"github.com/openshift/image-registry/pkg/testutil"
@@ -97,8 +97,8 @@ func TestImageLayers(t *testing.T) {
 		t.Errorf("expected different media types, but got %q", schema1ISTag.Image.DockerImageManifestMediaType)
 	}
 
-	image1LayerOrder := schema1ISTag.Image.Annotations[imageapi.DockerImageLayersOrderAnnotation]
-	image2LayerOrder := schema2ISTag.Image.Annotations[imageapi.DockerImageLayersOrderAnnotation]
+	image1LayerOrder := schema1ISTag.Image.Annotations[imageapiv1.DockerImageLayersOrderAnnotation]
+	image2LayerOrder := schema2ISTag.Image.Annotations[imageapiv1.DockerImageLayersOrderAnnotation]
 	if image1LayerOrder != image2LayerOrder {
 		t.Errorf("the layer order annotations are different: schema1=%q, schema2=%q", image1LayerOrder, image2LayerOrder)
 	} else if image1LayerOrder == "" {

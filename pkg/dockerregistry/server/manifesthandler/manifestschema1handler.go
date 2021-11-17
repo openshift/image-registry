@@ -14,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 type manifestSchema1Handler struct {
@@ -97,7 +96,7 @@ func (h *manifestSchema1Handler) Layers(ctx context.Context) (string, []imageapi
 		layers[revidx].LayerSize = desc.Size
 		layers[revidx].MediaType = schema1.MediaTypeManifestLayer
 	}
-	return imageapi.DockerImageLayersOrderAscending, layers, nil
+	return imageapiv1.DockerImageLayersOrderAscending, layers, nil
 }
 
 func (h *manifestSchema1Handler) Payload() (mediaType string, payload []byte, canonical []byte, err error) {

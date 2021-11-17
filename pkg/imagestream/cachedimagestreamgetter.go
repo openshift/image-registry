@@ -11,7 +11,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	rerrors "github.com/openshift/image-registry/pkg/errors"
-	quotautil "github.com/openshift/image-registry/pkg/origin-common/quota/util"
+	"github.com/openshift/library-go/pkg/quota/quotautil"
 )
 
 const (

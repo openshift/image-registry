@@ -14,8 +14,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	rerrors "github.com/openshift/image-registry/pkg/errors"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-	util "github.com/openshift/image-registry/pkg/origin-common/util"
+	"github.com/openshift/library-go/pkg/image/imageutil"
 )
 
 const (
@@ -26,7 +25,7 @@ const (
 )
 
 func IsImageManaged(image *imageapiv1.Image) bool {
-	managed, ok := image.ObjectMeta.Annotations[imageapi.ManagedByOpenShiftAnnotation]
+	managed, ok := image.ObjectMeta.Annotations[imageapiv1.ManagedByOpenShiftAnnotation]
 	return ok && managed == "true"
 }
 
@@ -66,7 +65,7 @@ func (ig *cachedImageGetter) Get(ctx context.Context, dgst digest.Digest) (*imag
 
 	dcontext.GetLogger(ctx).Debugf("(*cachedImageGetter).Get: got image %s from server", image.Name)
 
-	if err := util.ImageWithMetadata(image); err != nil {
+	if err := imageutil.ImageWithMetadata(image); err != nil {
 		return nil, rerrors.NewError(
 			ErrImageGetterUnknownCode,
 			fmt.Sprintf("Get: unable to initialize image %s from metadata", dgst.String()),

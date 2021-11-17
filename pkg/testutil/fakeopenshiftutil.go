@@ -7,7 +7,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 // AddImageStream creates a new image stream with annotations.
@@ -58,7 +57,7 @@ func AddRandomImage(t *testing.T, fos *FakeOpenShift, namespace, name, tag strin
 	_, err = fos.GetImageStream(namespace, name)
 	if err != nil {
 		AddImageStream(t, fos, namespace, name, map[string]string{
-			imageapi.InsecureRepositoryAnnotation: "true",
+			imageapiv1.InsecureRepositoryAnnotation: "true",
 		})
 	}
 

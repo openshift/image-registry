@@ -15,9 +15,9 @@ import (
 	"github.com/docker/distribution/manifest/ocischema"
 	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
-	"github.com/openshift/image-registry/pkg/origin-common/util"
 	"github.com/openshift/image-registry/pkg/testframework"
 	"github.com/openshift/image-registry/pkg/testutil"
+	"github.com/openshift/library-go/pkg/image/imageutil"
 )
 
 func TestOCIPush(t *testing.T) {
@@ -91,7 +91,7 @@ func TestOCIPush(t *testing.T) {
 		}
 	}
 
-	if err := util.ImageWithMetadata(img); err != nil {
+	if err := imageutil.ImageWithMetadata(img); err != nil {
 		t.Fatalf("unable to parse image metadata: %s", err)
 	}
 

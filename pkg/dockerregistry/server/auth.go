@@ -16,7 +16,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	imageapi "github.com/openshift/api/image/v1"
-	"github.com/openshift/image-registry/pkg/origin-common/util/httprequest"
+	"github.com/openshift/library-go/pkg/apiserver/httprequest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"

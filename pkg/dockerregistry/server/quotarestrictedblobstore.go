@@ -22,9 +22,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
+	imageapiv1 "github.com/openshift/api/image/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
 	"github.com/openshift/image-registry/pkg/imagestream"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
 )
 
 // newQuotaEnforcingConfig creates caches for quota objects. The objects are stored with given eviction
@@ -153,7 +153,7 @@ func admitBlobWrite(ctx context.Context, repo *repository, size int64) error {
 
 // admitImage checks if the size is greater than the limit range.
 func admitImage(size int64, limit corev1.LimitRangeItem) error {
-	if limit.Type != imageapi.LimitTypeImage {
+	if limit.Type != imageapiv1.LimitTypeImage {
 		return nil
 	}
 
@@ -165,7 +165,7 @@ func admitImage(size int64, limit corev1.LimitRangeItem) error {
 	imageQuantity := resource.NewQuantity(size, resource.BinarySI)
 	if limitQuantity.Cmp(*imageQuantity) < 0 {
 		// image size is larger than the permitted limit range max size, image is forbidden
-		return fmt.Errorf("requested usage of %s exceeds the maximum limit per %s (%s > %s)", corev1.ResourceStorage, imageapi.LimitTypeImage, imageQuantity.String(), limitQuantity.String())
+		return fmt.Errorf("requested usage of %s exceeds the maximum limit per %s (%s > %s)", corev1.ResourceStorage, imageapiv1.LimitTypeImage, imageQuantity.String(), limitQuantity.String())
 	}
 	return nil
 }

@@ -5,7 +5,7 @@ import (
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
+	"github.com/openshift/library-go/pkg/image/reference"
 )
 
 type byInsecureFlag struct {
@@ -55,7 +55,7 @@ func identifyCandidateRepositories(
 	primary bool,
 ) ([]string, map[string]ImagePullthroughSpec) {
 	insecureByDefault := false
-	if insecure, ok := is.Annotations[imageapi.InsecureRepositoryAnnotation]; ok {
+	if insecure, ok := is.Annotations[imageapiv1.InsecureRepositoryAnnotation]; ok {
 		insecureByDefault = insecure == "true"
 	}
 
@@ -63,7 +63,7 @@ func identifyCandidateRepositories(
 	insecureRegistries := make(map[string]bool)
 
 	// identify the canonical location of referenced registries to search
-	search := make(map[string]*imageapi.DockerImageReference)
+	search := make(map[string]*reference.DockerImageReference)
 	for _, tagEvent := range is.Status.Tags {
 		tag := tagEvent.Tag
 		var candidates []imageapiv1.TagEvent
@@ -79,7 +79,7 @@ func identifyCandidateRepositories(
 			candidates = tagEvent.Items[1:]
 		}
 		for _, event := range candidates {
-			ref, err := imageapi.ParseDockerImageReference(event.DockerImageReference)
+			ref, err := reference.Parse(event.DockerImageReference)
 			if err != nil {
 				continue
 			}

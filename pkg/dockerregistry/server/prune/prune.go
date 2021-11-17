@@ -20,8 +20,8 @@ import (
 	imageapiv1 "github.com/openshift/api/image/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	regstorage "github.com/openshift/image-registry/pkg/dockerregistry/server/storage"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-	util "github.com/openshift/image-registry/pkg/origin-common/util"
+	"github.com/openshift/library-go/pkg/image/imageutil"
+	imageref "github.com/openshift/library-go/pkg/image/reference"
 )
 
 // Pruner defines a common set of operations for pruning
@@ -193,7 +193,7 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 		// Keep the manifest.
 		inuse[image.Name] = image.DockerImageReference
 
-		if err := util.ImageWithMetadata(&image); err != nil {
+		if err := imageutil.ImageWithMetadata(&image); err != nil {
 			return Summary{}, fmt.Errorf("error getting image metadata: %v", err)
 		}
 		// Keep the config for a schema 2 manifest.
@@ -229,7 +229,7 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 			return fmt.Errorf("failed to parse the repo name %s: %v", repoName, err)
 		}
 
-		ref, err := imageapi.ParseDockerImageReference(repoName)
+		ref, err := imageref.Parse(repoName)
 		if err != nil {
 			return fmt.Errorf("failed to parse the image reference %s: %v", repoName, err)
 		}

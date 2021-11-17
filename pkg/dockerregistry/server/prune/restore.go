@@ -21,8 +21,8 @@ import (
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/manifesthandler"
 	regstorage "github.com/openshift/image-registry/pkg/dockerregistry/server/storage"
 	"github.com/openshift/image-registry/pkg/imagestream"
-	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
-	originutil "github.com/openshift/image-registry/pkg/origin-common/util"
+	"github.com/openshift/library-go/pkg/image/imageutil"
+	imageref "github.com/openshift/library-go/pkg/image/reference"
 )
 
 // Restore defines a common set of operations for database and storage validation
@@ -132,7 +132,7 @@ func (r *Fsck) checkImage(image *imageapiv1.Image, blobStatter *statter) error {
 		return nil
 	}
 
-	if err := originutil.ImageWithMetadata(image); err != nil {
+	if err := imageutil.ImageWithMetadata(image); err != nil {
 		return fmt.Errorf("error getting image metadata: %s", err)
 	}
 
@@ -288,7 +288,7 @@ func (r *Fsck) Storage(namespace string) error {
 			return nil
 		}
 
-		ref, err := imageapi.ParseDockerImageReference(repoName)
+		ref, err := imageref.Parse(repoName)
 		if err != nil {
 			logger.Errorf("failed to parse the image reference %s: %s", repoName, err)
 			return nil
@@ -356,9 +356,9 @@ func (r *Fsck) Storage(namespace string) error {
 				ObjectMeta: metav1.ObjectMeta{
 					Name: dgst.String(),
 					Annotations: map[string]string{
-						imageapi.ManagedByOpenShiftAnnotation:      "true",
-						imageapi.ImageManifestBlobStoredAnnotation: "true",
-						imageapi.DockerImageLayersOrderAnnotation:  layerOrder,
+						imageapiv1.ManagedByOpenShiftAnnotation:      "true",
+						imageapiv1.ImageManifestBlobStoredAnnotation: "true",
+						imageapiv1.DockerImageLayersOrderAnnotation:  layerOrder,
 					},
 				},
 				DockerImageReference:         fmt.Sprintf("%s/%s@%s", r.ServerAddr, repoName, dgst.String()),
