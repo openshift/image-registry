@@ -19,7 +19,6 @@ require (
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 	github.com/garyburd/redigo v0.0.0-20150301180006-535138d7bcd7 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/gorilla/context v0.0.0-20140604161150-14f550f51af5 // indirect
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.4.0 // indirect
