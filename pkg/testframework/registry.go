@@ -320,7 +320,7 @@ func CreateEphemeralRegistry(t *testing.T, restConfig *rest.Config, namespace st
 					},
 					VolumeMounts: mounts,
 					LivenessProbe: &corev1.Probe{
-						Handler: corev1.Handler{
+						ProbeHandler: corev1.ProbeHandler{
 							HTTPGet: &corev1.HTTPGetAction{
 								Path: "/",
 								Port: intstr.FromInt(5000),
@@ -328,7 +328,7 @@ func CreateEphemeralRegistry(t *testing.T, restConfig *rest.Config, namespace st
 						},
 					},
 					ReadinessProbe: &corev1.Probe{
-						Handler: corev1.Handler{
+						ProbeHandler: corev1.ProbeHandler{
 							HTTPGet: &corev1.HTTPGetAction{
 								Path: "/",
 								Port: intstr.FromInt(5000),

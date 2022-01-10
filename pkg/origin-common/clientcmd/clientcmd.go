@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/golang/glog"
+	"k8s.io/klog/v2"
 
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -185,7 +185,7 @@ func (cfg *Config) bindEnv() error {
 func (cfg *Config) KubeConfig() *restclient.Config {
 	err := cfg.bindEnv()
 	if err != nil {
-		glog.Error(err)
+		klog.Error(err)
 	}
 
 	kaddr := cfg.KubernetesAddr

@@ -23,7 +23,7 @@ import (
 	"time"
 
 	dockertypes "github.com/docker/docker/api/types"
-	"github.com/golang/glog"
+	"k8s.io/klog/v2"
 )
 
 // DockerConfigProvider is the interface that registered extensions implement
@@ -86,7 +86,7 @@ func (d *defaultDockerConfigProvider) Provide() DockerConfig {
 	if cfg, err := ReadDockerConfigFile(); err == nil {
 		return cfg
 	} else if !os.IsNotExist(err) {
-		glog.V(4).Infof("Unable to parse Docker config file: %v", err)
+		klog.V(4).Infof("Unable to parse Docker config file: %v", err)
 	}
 	return DockerConfig{}
 }
@@ -116,7 +116,7 @@ func (d *CachingDockerConfigProvider) Provide() DockerConfig {
 		return d.cacheDockerConfig
 	}
 
-	glog.V(2).Infof("Refreshing cache for provider: %v", reflect.TypeOf(d.Provider).String())
+	klog.V(2).Infof("Refreshing cache for provider: %v", reflect.TypeOf(d.Provider).String())
 	d.cacheDockerConfig = d.Provider.Provide()
 	d.expiration = time.Now().Add(d.Lifetime)
 	return d.cacheDockerConfig
