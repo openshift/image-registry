@@ -464,8 +464,8 @@ github.com/openshift/client-go v0.0.0-20210521082421-73d9475a9142 h1:ZHRIMCFIJN1
 github.com/openshift/client-go v0.0.0-20210521082421-73d9475a9142/go.mod h1:fjS8r9mqDVsPb5td3NehsNOAWa4uiFkYEfVZioQ2gH0=
 github.com/openshift/docker-distribution v0.0.0-20210209103229-0526a4ae41e1 h1:As5NnhGhvIBITSkd+jxPtdX23R+PVY7lUQSBeRaaxH0=
 github.com/openshift/docker-distribution v0.0.0-20210209103229-0526a4ae41e1/go.mod h1:XmfFzbwryblvZ29NebonirM7RBuNEO7+yVCOapaouAk=
-github.com/openshift/library-go v0.0.0-20211008141542-50376ae9a25f h1:oD9x3b88CftfAAF23K5B0qtX8bIJMh/V/YSTFPhO8lc=
-github.com/openshift/library-go v0.0.0-20211008141542-50376ae9a25f/go.mod h1:C5DDOSPucn3EVA0T05fODKtAweTObMBrTYm/G3uUBI8=
+github.com/openshift/library-go v0.0.0-20220211152057-bc7588408098 h1:hxhKI9HKY7wQJ3tgc5soiROIdr2EelsG7hbRK9/bPIY=
+github.com/openshift/library-go v0.0.0-20220211152057-bc7588408098/go.mod h1:C5DDOSPucn3EVA0T05fODKtAweTObMBrTYm/G3uUBI8=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
