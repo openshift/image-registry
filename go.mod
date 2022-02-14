@@ -29,7 +29,7 @@ require (
 	github.com/opencontainers/runc v1.0.0-rc5.0.20180920170208-00dc70017d22 // indirect
 	github.com/openshift/api v0.0.0-20211222145011-3bf13cf5081a
 	github.com/openshift/client-go v0.0.0-20211209144617-7385dd6338e3
-	github.com/openshift/library-go v0.0.0-20211222155012-624c91f4e514
+	github.com/openshift/library-go v0.0.0-20220211142501-9f57c596fd46
 	github.com/pborman/uuid v1.2.0
 	github.com/prometheus/client_golang v1.11.0
 	github.com/sirupsen/logrus v1.8.1
