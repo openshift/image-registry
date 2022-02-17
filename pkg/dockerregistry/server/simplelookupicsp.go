@@ -78,12 +78,8 @@ func (s *simpleLookupICSP) alternativeImageSources(
 	uniqueMirrors := map[reference.DockerImageReference]bool{}
 	for _, icsp := range icspList {
 		for _, rdm := range icsp.Spec.RepositoryDigestMirrors {
-			rdmSourceRef, err := reference.Parse(rdm.Source)
-			if err != nil {
-				return nil, err
-			}
+			rdmRepo := rdm.Source
 
-			rdmRepo := rdmSourceRef.AsRepository().Exact()
 			if !isSubrepo(repo, rdmRepo) {
 				continue
 			}
