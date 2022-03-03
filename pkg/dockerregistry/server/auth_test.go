@@ -129,7 +129,7 @@ func TestAccessController(t *testing.T) {
 			basicToken:        "",
 			expectedError:     ErrTokenRequired,
 			expectedChallenge: true,
-			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="authorization header required"`, `Bearer realm="http://tokenrealm.com/openshift/token",error="authorization header required"`}},
+			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Bearer realm="http://tokenrealm.com/openshift/token"`}},
 		},
 		"no token, autodetected tokenrealm": {
 			authConfig: &configuration.Auth{
@@ -140,7 +140,7 @@ func TestAccessController(t *testing.T) {
 			basicToken:        "",
 			expectedError:     ErrTokenRequired,
 			expectedChallenge: true,
-			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="authorization header required"`, `Bearer realm="https://openshift-example.com/openshift/token",error="authorization header required"`}},
+			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Bearer realm="https://openshift-example.com/openshift/token"`}},
 		},
 		"invalid registry token": {
 			access: []auth.Access{{
@@ -149,7 +149,7 @@ func TestAccessController(t *testing.T) {
 			basicToken:        "ab-cd-ef-gh",
 			expectedError:     ErrTokenInvalid,
 			expectedChallenge: true,
-			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="failed to decode credentials"`, `Bearer realm="http://tokenrealm.com/openshift/token",error="failed to decode credentials"`}},
+			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="failed to decode credentials"`}},
 		},
 		"invalid openshift basic password": {
 			access: []auth.Access{{
@@ -158,7 +158,7 @@ func TestAccessController(t *testing.T) {
 			basicToken:        "abcdefgh",
 			expectedError:     ErrTokenInvalid,
 			expectedChallenge: true,
-			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="failed to decode credentials"`, `Bearer realm="http://tokenrealm.com/openshift/token",error="failed to decode credentials"`}},
+			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="failed to decode credentials"`}},
 		},
 		"valid openshift token but invalid namespace": {
 			access: []auth.Access{{
@@ -216,7 +216,7 @@ func TestAccessController(t *testing.T) {
 			openshiftResponses: []response{{403, ""}},
 			expectedError:      ErrOpenShiftAccessDenied,
 			expectedChallenge:  true,
-			expectedHeaders:    http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`, `Bearer realm="http://tokenrealm.com/openshift/token",error="insufficient_scope"`}},
+			expectedHeaders:    http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`}},
 			expectedActions:    []string{"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)"},
 		},
 		"docker login with valid openshift creds": {
@@ -263,7 +263,7 @@ func TestAccessController(t *testing.T) {
 			},
 			expectedError:     ErrOpenShiftAccessDenied,
 			expectedChallenge: true,
-			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`, `Bearer realm="http://tokenrealm.com/openshift/token",error="insufficient_scope"`}},
+			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`}},
 			expectedActions: []string{
 				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
@@ -287,7 +287,7 @@ func TestAccessController(t *testing.T) {
 			},
 			expectedError:     ErrOpenShiftAccessDenied,
 			expectedChallenge: true,
-			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`, `Bearer realm="http://tokenrealm.com/openshift/token",error="insufficient_scope"`}},
+			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`}},
 			expectedActions: []string{
 				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
