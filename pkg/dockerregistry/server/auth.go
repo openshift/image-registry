@@ -62,11 +62,17 @@ type AccessController struct {
 
 var _ registryauth.AccessController = &AccessController{}
 
+type authChallenge struct {
+	realm string
+	err   error
+}
+
+var _ registryauth.Challenge = &authChallenge{}
+
 type tokenAuthChallenge struct {
-	basicRealm  string
-	bearerRealm url.URL
-	service     string
-	err         error
+	realm   string
+	service string
+	err     error
 }
 
 var _ registryauth.Challenge = &tokenAuthChallenge{}
@@ -99,59 +105,69 @@ func (app *App) Auth(options map[string]interface{}) (registryauth.AccessControl
 }
 
 // Error returns the internal error string for this authChallenge.
+func (ac *authChallenge) Error() string {
+	return ac.err.Error()
+}
+
+// SetHeaders sets the basic challenge header on the response.
+func (ac *authChallenge) SetHeaders(req *http.Request, w http.ResponseWriter) {
+	// WWW-Authenticate response challenge header.
+	// See https://tools.ietf.org/html/rfc6750#section-3
+	str := fmt.Sprintf("Basic realm=%s", ac.realm)
+	if ac.err != nil {
+		str = fmt.Sprintf("%s,error=%q", str, ac.Error())
+	}
+	w.Header().Set("WWW-Authenticate", str)
+}
+
+// Error returns the internal error string for this authChallenge.
 func (ac *tokenAuthChallenge) Error() string {
 	return ac.err.Error()
 }
 
-// SetHeaders sets the basic and bearer challenge headers on the response.
+// SetHeaders sets the bearer challenge header on the response.
 func (ac *tokenAuthChallenge) SetHeaders(req *http.Request, w http.ResponseWriter) {
 	// WWW-Authenticate response challenge header.
 	// See https://docs.docker.com/registry/spec/auth/token/#/how-to-authenticate and https://tools.ietf.org/html/rfc6750#section-3
-	str := fmt.Sprintf("Basic realm=%s", ac.basicRealm)
-	if ac.err != nil {
-		str += fmt.Sprintf(",error=%q", ac.Error())
+	str := fmt.Sprintf("Bearer realm=%q", ac.realm)
+	if ac.service != "" {
+		str += fmt.Sprintf(",service=%q", ac.service)
 	}
 	w.Header().Set("WWW-Authenticate", str)
-
-	if ac.bearerRealm.String() != "" {
-		str = fmt.Sprintf("Bearer realm=%q", ac.bearerRealm.String())
-		if ac.err != nil {
-			if ac.err != ErrOpenShiftAccessDenied {
-				str += fmt.Sprintf(",error=%q", ac.Error())
-			} else {
-				str += fmt.Sprintf(",error=%q", "insufficient_scope")
-			}
-		}
-		if ac.service != "" {
-			str += fmt.Sprintf(",service=%q", ac.service)
-		}
-		w.Header().Add("WWW-Authenticate", str)
-	}
 }
 
 // wrapErr wraps errors related to authorization in an authChallenge error that will present a WWW-Authenticate challenge response
 func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
-	var tokenRealmCopy url.URL
-	if ac.tokenRealm != nil {
+	switch err {
+	case ErrTokenRequired:
+		// Challenge for errors that involve missing tokens
+		if ac.tokenRealm == nil {
+			// Send the basic challenge if we don't have a place to redirect
+			return &authChallenge{realm: ac.realm, err: err}
+		}
+
+		if len(ac.tokenRealm.Scheme) > 0 && len(ac.tokenRealm.Host) > 0 {
+			// Redirect to token auth if we've been given an absolute URL
+			return &tokenAuthChallenge{realm: ac.tokenRealm.String(), err: err}
+		}
+
 		// Auto-detect scheme/host from request
 		req, reqErr := dcontext.GetRequest(ctx)
 		if reqErr != nil {
 			return reqErr
 		}
 		scheme, host := httprequest.SchemeHost(req)
-		tokenRealmCopy = *ac.tokenRealm
+		tokenRealmCopy := *ac.tokenRealm
 		if len(tokenRealmCopy.Scheme) == 0 {
 			tokenRealmCopy.Scheme = scheme
 		}
 		if len(tokenRealmCopy.Host) == 0 {
 			tokenRealmCopy.Host = host
 		}
-	}
-
-	switch err {
-	case ErrTokenRequired, ErrTokenInvalid, ErrOpenShiftAccessDenied:
-		// Challenges for errors that involve tokens or access denied
-		return &tokenAuthChallenge{basicRealm: ac.realm, bearerRealm: tokenRealmCopy, err: err}
+		return &tokenAuthChallenge{realm: tokenRealmCopy.String(), err: err}
+	case ErrTokenInvalid, ErrOpenShiftAccessDenied:
+		// Challenge for errors that involve tokens or access denied
+		return &authChallenge{realm: ac.realm, err: err}
 	default:
 		// By default, just return the error, this gets surfaced as a bad request / internal error, but no challenge
 		return err
