@@ -44,6 +44,6 @@ require (
 )
 
 replace (
-	github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20210913115740-30f7a83f044a+incompatible
+	github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220301160838-358c338d67ed+incompatible
 	google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
 )
