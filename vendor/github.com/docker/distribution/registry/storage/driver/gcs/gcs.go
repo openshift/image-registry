@@ -154,11 +154,11 @@ func FromParameters(parameters map[string]interface{}) (storagedriver.StorageDri
 		if err != nil {
 			return nil, err
 		}
-		creds, err := google.CredentialsFromJSON(context.Background(), jsonKey, storage.ScopeFullControl)
+		jwtConf, err = google.JWTConfigFromJSON(jsonKey, storage.ScopeFullControl)
 		if err != nil {
 			return nil, err
 		}
-		ts = creds.TokenSource
+		ts = jwtConf.TokenSource(context.Background())
 	} else if credentials, ok := parameters["credentials"]; ok {
 		credentialMap, ok := credentials.(map[interface{}]interface{})
 		if !ok {
@@ -179,11 +179,11 @@ func FromParameters(parameters map[string]interface{}) (storagedriver.StorageDri
 			return nil, fmt.Errorf("Failed to marshal gcs credentials to json")
 		}
 
-		creds, err := google.CredentialsFromJSON(context.Background(), data, storage.ScopeFullControl)
+		jwtConf, err = google.JWTConfigFromJSON(data, storage.ScopeFullControl)
 		if err != nil {
 			return nil, err
 		}
-		ts = creds.TokenSource
+		ts = jwtConf.TokenSource(context.Background())
 	} else {
 		var err error
 		ts, err = google.DefaultTokenSource(context.Background(), storage.ScopeFullControl)
