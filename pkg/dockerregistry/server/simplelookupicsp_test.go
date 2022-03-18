@@ -99,6 +99,72 @@ func TestFirstRequest(t *testing.T) {
 			},
 		},
 		{
+			name: "nested repository",
+			ref:  "docker.io/library/busybox:latest",
+			res: []reference.DockerImageReference{
+				{
+					Registry:  "mirror.example.com",
+					Namespace: "dockerio-library",
+					Name:      "busybox",
+				},
+				{
+					Registry:  "docker.io",
+					Namespace: "library",
+					Name:      "busybox",
+				},
+			},
+			rules: []runtime.Object{
+				&v1alpha1.ImageContentSourcePolicy{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "icsp-rule",
+					},
+					Spec: v1alpha1.ImageContentSourcePolicySpec{
+						RepositoryDigestMirrors: []v1alpha1.RepositoryDigestMirrors{
+							{
+								Source: "docker.io/library",
+								Mirrors: []string{
+									"mirror.example.com/dockerio-library",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "mirror registry",
+			ref:  "docker.io/library/busybox:latest",
+			res: []reference.DockerImageReference{
+				{
+					Registry:  "mirror.example.com",
+					Namespace: "library",
+					Name:      "busybox",
+				},
+				{
+					Registry:  "docker.io",
+					Namespace: "library",
+					Name:      "busybox",
+				},
+			},
+			rules: []runtime.Object{
+				&v1alpha1.ImageContentSourcePolicy{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "icsp-rule",
+					},
+					Spec: v1alpha1.ImageContentSourcePolicySpec{
+						RepositoryDigestMirrors: []v1alpha1.RepositoryDigestMirrors{
+							{
+								Source: "docker.io",
+								Mirrors: []string{
+									"mirror.example.com",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "multiple unrelated rules",
 			ref:  "i.do.not.exist/repo/image:latest",
 			res: []reference.DockerImageReference{
