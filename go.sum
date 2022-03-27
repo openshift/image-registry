@@ -549,8 +549,8 @@ github.com/openshift/build-machinery-go v0.0.0-20210712174854-1bb7fd1518d3/go.mo
 github.com/openshift/build-machinery-go v0.0.0-20211213093930-7e33a7eb4ce3/go.mod h1:b1BuldmJlbA/xYtdZvKi+7j5YGB44qJUJDZ9zwiNCfE=
 github.com/openshift/client-go v0.0.0-20211209144617-7385dd6338e3 h1:SG1aqwleU6bGD0X4mhkTNupjVnByMYYuW4XbnCPavQU=
 github.com/openshift/client-go v0.0.0-20211209144617-7385dd6338e3/go.mod h1:cwhyki5lqBmrT0m8Im+9I7PGFaraOzcYPtEz93RcsGY=
-github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220301160838-358c338d67ed+incompatible h1:F3fEciQp+b0Bw/ancFh15bVk36raCH25q/1Upii4UiU=
-github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220301160838-358c338d67ed+incompatible/go.mod h1:XmfFzbwryblvZ29NebonirM7RBuNEO7+yVCOapaouAk=
+github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220324175950-edc8e1008cc5+incompatible h1:szWNPm/OnENRhWrw35KuueyGB6N3FUHWpdIO0tKXEk4=
+github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220324175950-edc8e1008cc5+incompatible/go.mod h1:XmfFzbwryblvZ29NebonirM7RBuNEO7+yVCOapaouAk=
 github.com/openshift/library-go v0.0.0-20220210170159-18f172cff934 h1:J3cN1DNqF0/R8sDkg6n56iE/tka3bm/uRUy4vmuUTdg=
 github.com/openshift/library-go v0.0.0-20220210170159-18f172cff934/go.mod h1:6AmNM4N4nHftckybV/U7bQW+5AvK5TW81ndSI6KEidw=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
