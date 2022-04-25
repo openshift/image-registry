@@ -109,6 +109,7 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 		serverAddr:    r.app.config.Server.Addr,
 		imageStream:   r.imageStream,
 		cache:         r.cache,
+		metrics:       r.app.metrics,
 		acceptSchema2: r.app.config.Compatibility.AcceptSchema2,
 	}
 

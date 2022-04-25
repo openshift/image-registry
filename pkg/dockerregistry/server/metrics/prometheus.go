@@ -13,6 +13,7 @@ const (
 
 	httpSubsystem        = "http"
 	pullthroughSubsystem = "pullthrough"
+	manifestsSubsystem   = "manifests"
 	storageSubsystem     = "storage"
 	digestCacheSubsystem = "digest_cache"
 )
@@ -132,7 +133,6 @@ var (
 		},
 		[]string{"operation", "code"},
 	)
-
 	digestCacheRequestsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: namespace,
@@ -150,6 +150,15 @@ var (
 			Help:      "Total number of scoped requests to the digest cache.",
 		},
 		[]string{"type"},
+	)
+	manifestOperationsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: namespace,
+			Subsystem: manifestsSubsystem,
+			Name:      "operations_total",
+			Help:      "A counter for manifest operations to the registry.",
+		},
+		[]string{"operation"},
 	)
 )
 
@@ -176,8 +185,17 @@ func NewPrometheusSink() Sink {
 		prometheus.MustRegister(storageErrorsTotal)
 		prometheus.MustRegister(digestCacheRequestsTotal)
 		prometheus.MustRegister(digestCacheScopedRequestsTotal)
+		prometheus.MustRegister(manifestOperationsTotal)
 	})
 	return prometheusSink{}
+}
+
+func (s prometheusSink) PushManifest() Counter {
+	return manifestOperationsTotal.WithLabelValues("push")
+}
+
+func (s prometheusSink) PullManifest() Counter {
+	return manifestOperationsTotal.WithLabelValues("pull")
 }
 
 func (s prometheusSink) RequestDuration(funcname string) Observer {

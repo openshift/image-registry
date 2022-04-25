@@ -25,6 +25,18 @@ type counterSink struct {
 
 var _ metrics.Sink = &counterSink{}
 
+func (s counterSink) PushManifest() metrics.Counter {
+	return callbackCounter(func() {
+		s.c.Add("imageregistry_manifests_operations_total:push", 1)
+	})
+}
+
+func (s counterSink) PullManifest() metrics.Counter {
+	return callbackCounter(func() {
+		s.c.Add("imageregistry_manifests_operations_total:pull", 1)
+	})
+}
+
 func (s counterSink) RequestDuration(funcname string) metrics.Observer {
 	return callbackObserver(func(float64) {
 		s.c.Add(fmt.Sprintf("request:%s", funcname), 1)

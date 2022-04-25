@@ -10,6 +10,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/imagestream"
 	"github.com/openshift/image-registry/pkg/testutil"
 )
@@ -67,6 +68,7 @@ func TestManifestServicePut(t *testing.T) {
 		manifests:     tms,
 		blobStore:     bs,
 		imageStream:   imageStream,
+		metrics:       metrics.NewNoopMetrics(),
 		acceptSchema2: true,
 	}
 
@@ -97,6 +99,7 @@ func TestManifestServicePut(t *testing.T) {
 	ms = &manifestService{
 		manifests:     tms,
 		imageStream:   imageStream,
+		metrics:       metrics.NewNoopMetrics(),
 		acceptSchema2: true,
 	}
 

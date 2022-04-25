@@ -29,6 +29,8 @@ type Counter interface {
 type Sink interface {
 	RequestDuration(funcname string) Observer
 	PullthroughBlobstoreCacheRequests(resultType string) Counter
+	PushManifest() Counter
+	PullManifest() Counter
 	PullthroughRepositoryDuration(registry, funcname string) Observer
 	PullthroughRepositoryErrors(registry, funcname, errcode string) Counter
 	StorageDuration(funcname string) Observer
@@ -41,6 +43,7 @@ type Sink interface {
 type Metrics interface {
 	Core
 	Pullthrough
+	Manifests
 	Storage
 	DigestCache
 }
@@ -59,6 +62,12 @@ type Pullthrough interface {
 	// DigestBlobStoreCache() returns an interface to count cache hits/misses
 	// for pullthrough blobstores.
 	DigestBlobStoreCache() Cache
+}
+
+// Manifests is a set of metrics for manifest operations.
+type Manifests interface {
+	Push()
+	Pull()
 }
 
 // Storage is a set of metrics for the storage subsystem.
@@ -171,6 +180,14 @@ func (m *metrics) DigestBlobStoreCache() Cache {
 	}
 }
 
+func (m *metrics) Push() {
+	m.sink.PushManifest().Inc()
+}
+
+func (m *metrics) Pull() {
+	m.sink.PullManifest().Inc()
+}
+
 func (m *metrics) StorageDriver(driver storagedriver.StorageDriver) storagedriver.StorageDriver {
 	return wrapped.NewStorageDriver(driver, func(funcname string, f func() error) error {
 		defer NewTimer(m.sink.StorageDuration(funcname)).Stop()
@@ -206,6 +223,10 @@ var _ Metrics = noopMetrics{}
 func NewNoopMetrics() Metrics {
 	return noopMetrics{}
 }
+
+func (m noopMetrics) Push() {}
+
+func (m noopMetrics) Pull() {}
 
 func (m noopMetrics) Repository(r distribution.Repository, reponame string) distribution.Repository {
 	return r

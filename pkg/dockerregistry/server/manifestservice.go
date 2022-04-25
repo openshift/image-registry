@@ -17,6 +17,7 @@ import (
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/manifesthandler"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
 	"github.com/openshift/image-registry/pkg/imagestream"
 )
 
@@ -29,6 +30,7 @@ type manifestService struct {
 	serverAddr  string
 	imageStream imagestream.ImageStream
 	cache       cache.RepositoryDigest
+	metrics     metrics.Manifests
 
 	// acceptSchema2 allows to refuse the manifest schema version 2
 	acceptSchema2 bool
@@ -86,6 +88,7 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 		return nil, err
 	}
 
+	m.metrics.Pull()
 	RememberLayersOfImage(ctx, m.cache, image, ref)
 
 	return manifest, nil
@@ -119,6 +122,8 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 	if err != nil {
 		return "", err
 	}
+
+	m.metrics.Push()
 
 	config, err := mh.Config(ctx)
 	if err != nil {
