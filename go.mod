@@ -6,7 +6,7 @@ require (
 	github.com/Azure/azure-sdk-for-go v54.0.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
 	github.com/Microsoft/hcsshim v0.8.7 // indirect
-	github.com/aws/aws-sdk-go v1.38.35 // indirect
+	github.com/aws/aws-sdk-go v1.44.4 // indirect
 	github.com/bshuster-repo/logrus-logstash-hook v0.4.1
 	github.com/containerd/containerd v1.3.3 // indirect
 	github.com/containerd/continuity v0.0.0-20190827140505-75bee3e2ccb6 // indirect
