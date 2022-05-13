@@ -7,6 +7,8 @@ import (
 
 	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/registry/api/errcode"
+	"github.com/docker/distribution/registry/client"
 	"github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"
@@ -94,6 +96,7 @@ func NewBlobGetterService(
 }
 
 func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, distribution.BlobStore, error) {
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).findBlobStore: starting with dgst=%s", dgst)
 	// look up the potential remote repositories that this blob could be part of (at this time,
 	// we don't know which image in the image stream surfaced the content).
 	ok, err := rbgs.imageStream.Exists(ctx)
@@ -124,8 +127,14 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	if err != nil {
 		return distribution.Descriptor{}, nil, err
 	}
+
+	var tooManyRequests error
 	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, search, cached, dgst, secrets); err == nil {
 		return desc, bs, nil
+	} else if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+		if nerr.StatusCode == http.StatusTooManyRequests {
+			tooManyRequests = err
+		}
 	}
 
 	// look at all other repositories tagged by the server
@@ -138,9 +147,17 @@ func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst dig
 	}
 	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, secondary, cached, dgst, secrets); err == nil {
 		return desc, bs, nil
+	} else if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+		if nerr.StatusCode == http.StatusTooManyRequests {
+			tooManyRequests = err
+		}
 	}
 
-	return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
+	nerr := distribution.ErrBlobUnknown
+	if tooManyRequests != nil {
+		nerr = errcode.ErrorCodeTooManyRequests.WithMessage("unable to pullthrough blob")
+	}
+	return distribution.Descriptor{}, nil, nerr
 }
 
 // Stat provides metadata about a blob identified by the digest. If the
@@ -263,6 +280,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 	dgst digest.Digest,
 	secrets []corev1.Secret,
 ) (distribution.Descriptor, distribution.BlobStore, error) {
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).findCandidateRepository: starting with dgst=%s", dgst)
 	// no possible remote locations to search, exit early
 	if len(search) == 0 {
 		return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
@@ -270,6 +288,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 	// see if any of the previously located repositories containing this digest are in this
 	// image stream
+	nerr := distribution.ErrBlobUnknown
 	for _, repo := range cachedRepos {
 		spec, ok := search[repo]
 		if !ok {
@@ -283,6 +302,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
 		if err != nil {
+			nerr = err
 			delete(search, repo)
 			continue
 		}
@@ -304,12 +324,12 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 
 		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
 		if err != nil {
+			nerr = err
 			continue
 		}
 		_ = rbgs.cache.AddDigest(dgst, repo)
 		dcontext.GetLogger(ctx).Infof("Found digest location by search %q in %q", dgst, repo)
 		return desc, bs, nil
 	}
-
-	return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
+	return distribution.Descriptor{}, nil, nerr
 }
