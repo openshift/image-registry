@@ -47,8 +47,11 @@ func InstrumentRoundTripperInFlight(gauge prometheus.Gauge, next http.RoundTripp
 // http.RoundTripper to observe the request result with the provided CounterVec.
 // The CounterVec must have zero, one, or two labels. The only allowed label
 // names are "code" and "method". The function panics if any other instance
-// labels are provided. Partitioning of the CounterVec happens by HTTP status
-// code and/or HTTP method if the respective instance label names are present
+// labels are provided.. For the "method" label a predefined default label value
+// set is used to filter given values. Values besides predefined values will
+// count as `unknown` method.`WithExtraMethods` can be used to add more methods
+// to the set. Partitioning of the CounterVec happens by HTTP status code
+// and/or HTTP method if the respective instance label names are present
 // in the CounterVec. For unpartitioned counting, use a CounterVec with
 // zero labels.
 //
@@ -56,13 +59,18 @@ func InstrumentRoundTripperInFlight(gauge prometheus.Gauge, next http.RoundTripp
 // is not incremented.
 //
 // See the example for ExampleInstrumentRoundTripperDuration for example usage.
-func InstrumentRoundTripperCounter(counter *prometheus.CounterVec, next http.RoundTripper) RoundTripperFunc {
+func InstrumentRoundTripperCounter(counter *prometheus.CounterVec, next http.RoundTripper, opts ...Option) RoundTripperFunc {
+	rtOpts := &option{}
+	for _, o := range opts {
+		o(rtOpts)
+	}
+
 	code, method := checkLabels(counter)
 
 	return RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		resp, err := next.RoundTrip(r)
 		if err == nil {
-			counter.With(labels(code, method, r.Method, resp.StatusCode)).Inc()
+			counter.With(labels(code, method, r.Method, resp.StatusCode, rtOpts.extraMethods...)).Inc()
 		}
 		return resp, err
 	})
@@ -72,23 +80,31 @@ func InstrumentRoundTripperCounter(counter *prometheus.CounterVec, next http.Rou
 // http.RoundTripper to observe the request duration with the provided ObserverVec.
 // The ObserverVec must have zero, one, or two labels. The only allowed label
 // names are "code" and "method". The function panics if any other instance
-// labels are provided. The Observe method of the Observer in the ObserverVec
-// is called with the request duration in seconds. Partitioning happens by HTTP
-// status code and/or HTTP method if the respective instance label names are
-// present in the ObserverVec. For unpartitioned observations, use an
-// ObserverVec with zero labels. Note that partitioning of Histograms is
-// expensive and should be used judiciously.
+// labels are provided. For the "method" label a predefined default label value
+// set is used to filter given values. Values besides
+// predefined values will count as `unknown` method. `WithExtraMethods`
+// can be used to add more methods to the set. The Observe method of the
+// Observer in the ObserverVec is called with the request duration in seconds.
+// Partitioning happens by HTTP status code and/or HTTP method if the
+// respective instance label names are present in the ObserverVec. For
+// unpartitioned observations, use an ObserverVec with zero labels. Note that
+// partitioning of Histograms is expensive and should be used judiciously.
 //
 // If the wrapped RoundTripper panics or returns a non-nil error, no values are
 // reported.
-func InstrumentRoundTripperDuration(obs prometheus.ObserverVec, next http.RoundTripper) RoundTripperFunc {
+func InstrumentRoundTripperDuration(obs prometheus.ObserverVec, next http.RoundTripper, opts ...Option) RoundTripperFunc {
+	rtOpts := &option{}
+	for _, o := range opts {
+		o(rtOpts)
+	}
+
 	code, method := checkLabels(obs)
 
 	return RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		start := time.Now()
 		resp, err := next.RoundTrip(r)
 		if err == nil {
-			obs.With(labels(code, method, r.Method, resp.StatusCode)).Observe(time.Since(start).Seconds())
+			obs.With(labels(code, method, r.Method, resp.StatusCode, rtOpts.extraMethods...)).Observe(time.Since(start).Seconds())
 		}
 		return resp, err
 	})
