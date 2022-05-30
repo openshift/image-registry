@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
@@ -56,26 +57,37 @@ func (s *simpleLookupICSP) OnFailure(
 	return nil, nil
 }
 
+func isSubrepo(repo, ancestor string) bool {
+	if repo == ancestor {
+		return true
+	}
+	if len(repo) > len(ancestor) {
+		return strings.HasPrefix(repo, ancestor) && repo[len(ancestor)] == '/'
+	}
+	return false
+}
+
 // alternativeImageSources returns unique list of DockerImageReference objects from list of
 // ImageContentSourcePolicy objects
 func (s *simpleLookupICSP) alternativeImageSources(
 	ref reference.DockerImageReference, icspList []operatorv1alpha1.ImageContentSourcePolicy,
 ) ([]reference.DockerImageReference, error) {
+	repo := ref.AsRepository().Exact()
+
 	imageSources := []reference.DockerImageReference{}
 	uniqueMirrors := map[reference.DockerImageReference]bool{}
 	for _, icsp := range icspList {
 		for _, rdm := range icsp.Spec.RepositoryDigestMirrors {
-			rdmSourceRef, err := reference.Parse(rdm.Source)
-			if err != nil {
-				return nil, err
-			}
+			rdmRepo := rdm.Source
 
-			if ref.AsRepository() != rdmSourceRef.AsRepository() {
+			if !isSubrepo(repo, rdmRepo) {
 				continue
 			}
 
+			suffix := repo[len(rdmRepo):]
+
 			for _, m := range rdm.Mirrors {
-				mRef, err := reference.Parse(m)
+				mRef, err := reference.Parse(m + suffix)
 				if err != nil {
 					return nil, err
 				}
