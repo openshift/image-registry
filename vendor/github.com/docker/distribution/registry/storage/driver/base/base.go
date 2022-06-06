@@ -162,6 +162,7 @@ func (base *Base) Stat(ctx context.Context, path string) (storagedriver.FileInfo
 	start := time.Now()
 	fi, e := base.StorageDriver.Stat(ctx, path)
 	storageAction.WithValues(base.Name(), "Stat").UpdateSince(start)
+	dcontext.GetLogger(ctx).Infof("fi: %+v, err: %+v", fi, e)
 	return fi, base.setDriverName(e)
 }
 

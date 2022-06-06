@@ -24,7 +24,7 @@ import (
 	"github.com/docker/distribution/notifications"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/api/errcode"
-	"github.com/docker/distribution/registry/api/v2"
+	v2 "github.com/docker/distribution/registry/api/v2"
 	"github.com/docker/distribution/registry/auth"
 	registrymiddleware "github.com/docker/distribution/registry/middleware/registry"
 	repositorymiddleware "github.com/docker/distribution/registry/middleware/repository"
@@ -371,7 +371,8 @@ func (app *App) RegisterHealthChecks(healthRegistries ...*health.Registry) {
 		}
 
 		storageDriverCheck := func() error {
-			_, err := app.driver.Stat(app, "/") // "/" should always exist
+			fileInfo, err := app.driver.Stat(app, "/") // "/" should always exist
+			dcontext.GetLogger(app).Infof("PM storageDriverCheck, fileInfo: %+v    err: %+v ", fileInfo, err)
 			if _, ok := err.(storagedriver.PathNotFoundError); ok {
 				err = nil // pass this through, backend is responding, but this path doesn't exist.
 			}

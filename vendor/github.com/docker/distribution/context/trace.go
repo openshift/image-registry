@@ -62,7 +62,7 @@ func WithTrace(ctx context.Context) (context.Context, func(format string, a ...i
 			"trace.func",
 			"trace.file",
 			"trace.line").
-			Debugf(format, a...)
+			Infof(format, a...)
 	}
 }
 
