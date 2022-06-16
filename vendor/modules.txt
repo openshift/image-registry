@@ -126,7 +126,7 @@ github.com/denverdino/aliyungo/oss
 github.com/denverdino/aliyungo/util
 # github.com/dnaeon/go-vcr v1.0.1
 ## explicit
-# github.com/docker/distribution v0.0.0-20180920194744-16128bbac47f => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220324175950-edc8e1008cc5+incompatible
+# github.com/docker/distribution v0.0.0-20180920194744-16128bbac47f => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220616203052-87c2f5c8ca98+incompatible
 ## explicit
 github.com/docker/distribution
 github.com/docker/distribution/configuration
@@ -847,5 +847,5 @@ sigs.k8s.io/structured-merge-diff/v4/value
 # sigs.k8s.io/yaml v1.2.0
 ## explicit; go 1.12
 sigs.k8s.io/yaml
-# github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220324175950-edc8e1008cc5+incompatible
+# github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20220616203052-87c2f5c8ca98+incompatible
 # google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
