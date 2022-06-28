@@ -188,9 +188,8 @@ func Execute(configFile io.Reader) {
 	}
 
 	// signal has been received. we will attempt to stop our http server
-	// using a timeout slightly lower than the default k8s grace period
-	// of 30 seconds.
-	ctx, cancel := context.WithTimeout(ctx, 29*time.Second)
+	// using a timeout equal to the terminationGracePeriod.
+	ctx, cancel := context.WithTimeout(ctx, 55*time.Second)
 	defer cancel()
 	dcontext.GetLogger(ctx).Infof("shutting down image registry server")
 	if err := srv.Shutdown(ctx); err != nil {
