@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -56,6 +57,7 @@ var listRepositories = flag.Bool("list-repositories", false, "shows list of repo
 var listBlobs = flag.Bool("list-blobs", false, "shows list of blob digests stored in the storage")
 var listManifests = flag.Bool("list-manifests", false, "shows list of manifest digests stored in the storage")
 var listRepositoryManifests = flag.String("list-manifests-from", "", "shows the manifest digests in the specified repository")
+var isReady int32 = 1
 
 func versionFields() map[interface{}]interface{} {
 	return map[interface{}]interface{}{
@@ -187,16 +189,23 @@ func Execute(configFile io.Reader) {
 		log.Fatal(err)
 	}
 
-	// signal has been received. we will attempt to stop our http server
-	// using a timeout slightly lower than the default k8s grace period
-	// of 30 seconds.
-	ctx, cancel := context.WithTimeout(ctx, 29*time.Second)
-	defer cancel()
+	dcontext.GetLogger(ctx).Infof("setting service to unready")
+	setReady(false)
+	time.Sleep(35 * time.Second)
+
 	dcontext.GetLogger(ctx).Infof("shutting down image registry server")
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
 	dcontext.GetLogger(ctx).Infof("server shutdown, bye.")
+}
+
+func setReady(ready bool) {
+	if ready {
+		atomic.StoreInt32(&isReady, 1)
+	} else {
+		atomic.StoreInt32(&isReady, 0)
+	}
 }
 
 func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, extraConfig *registryconfig.Configuration) (*http.Server, error) {
@@ -212,6 +221,7 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 	handler = alive("/", handler)
 	// TODO: temporarily keep for backwards compatibility; remove in the future
 	handler = alive("/healthz", handler)
+	handler = ready("/readyz", handler)
 	handler = health.Handler(handler)
 	handler = panicHandler(handler)
 	if !dockerConfig.Log.AccessLog.Disabled {
@@ -379,6 +389,23 @@ func alive(path string, handler http.Handler) http.Handler {
 		if r.URL.Path == path {
 			w.Header().Set("Cache-Control", "no-cache")
 			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		handler.ServeHTTP(w, r)
+	})
+}
+
+// ready simply wraps the handler with a route that always returns an http 200 when ready
+func ready(path string, handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == path && isReady == 1 {
+			w.Header().Set("Cache-Control", "no-cache")
+			w.WriteHeader(http.StatusOK)
+			return
+		} else if r.URL.Path == path && isReady == 0 {
+			w.Header().Set("Cache-Control", "no-cache")
+			w.WriteHeader(http.StatusServiceUnavailable)
 			return
 		}
 
