@@ -11,6 +11,7 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage/driver"
 	"github.com/opencontainers/go-digest"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -151,7 +152,7 @@ func (r *Fsck) checkImage(image *imageapiv1.Image, blobStatter *statter) error {
 		}
 	}
 
-	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest {
+	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest || image.DockerImageManifestMediaType == ociv1.MediaTypeImageManifest {
 		meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
 		if ok {
 			configDigest, err := digest.Parse(meta.ID)
