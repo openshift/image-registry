@@ -11,6 +11,7 @@ import (
 	"github.com/docker/distribution/registry/storage"
 	"github.com/docker/distribution/registry/storage/driver"
 	"github.com/opencontainers/go-digest"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -196,8 +197,8 @@ func Prune(ctx context.Context, registry distribution.Namespace, registryClient 
 		if err := imageutil.ImageWithMetadata(&image); err != nil {
 			return Summary{}, fmt.Errorf("error getting image metadata: %v", err)
 		}
-		// Keep the config for a schema 2 manifest.
-		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest {
+		// Keep the config for a schema 2 and OCI manifests.
+		if image.DockerImageManifestMediaType == schema2.MediaTypeManifest || image.DockerImageManifestMediaType == ociv1.MediaTypeImageManifest {
 			meta, ok := image.DockerImageMetadata.Object.(*dockerapiv10.DockerImage)
 			if ok {
 				inuse[meta.ID] = image.DockerImageReference
