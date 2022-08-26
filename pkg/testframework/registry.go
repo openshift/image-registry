@@ -294,6 +294,9 @@ func CreateEphemeralRegistry(t *testing.T, restConfig *rest.Config, namespace st
 		)
 	}
 
+	falseVal := false
+	trueVal := true
+
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -336,6 +339,16 @@ func CreateEphemeralRegistry(t *testing.T, restConfig *rest.Config, namespace st
 						},
 					},
 					TerminationMessagePolicy: corev1.TerminationMessageFallbackToLogsOnError,
+					SecurityContext: &corev1.SecurityContext{
+						AllowPrivilegeEscalation: &falseVal,
+						Capabilities: &corev1.Capabilities{
+							Drop: []corev1.Capability{"ALL"},
+						},
+						RunAsNonRoot: &trueVal,
+						SeccompProfile: &corev1.SeccompProfile{
+							Type: corev1.SeccompProfileTypeRuntimeDefault,
+						},
+					},
 				},
 			},
 			Volumes: volumes,
