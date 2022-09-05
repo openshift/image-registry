@@ -9,6 +9,7 @@ import (
 	dcontext "github.com/docker/distribution/context"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/opencontainers/go-digest"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -98,8 +99,8 @@ func RememberLayersOfImage(ctx context.Context, cache cache.RepositoryDigest, im
 		dcontext.GetLogger(ctx).Errorf("image %s does not have metadata", image.Name)
 		return
 	}
-	// remember reference to manifest config as well for schema 2
-	if image.DockerImageManifestMediaType == schema2.MediaTypeManifest && len(meta.ID) > 0 {
+	// remember reference to manifest config as well for schema 2 and OCI images
+	if (image.DockerImageManifestMediaType == schema2.MediaTypeManifest || image.DockerImageManifestMediaType == ociv1.MediaTypeImageManifest) && len(meta.ID) > 0 {
 		_ = cache.AddDigest(digest.Digest(meta.ID), cacheName)
 	}
 }
