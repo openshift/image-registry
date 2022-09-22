@@ -18,6 +18,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
+	cfgfake "github.com/openshift/client-go/config/clientset/versioned/fake"
 	operatorfake "github.com/openshift/client-go/operator/clientset/versioned/fake"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
@@ -55,6 +56,8 @@ func createTestRegistryServer(t *testing.T, ctx context.Context) *httptest.Serve
 
 func TestPullthroughManifests(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
+	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
+	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	namespace := "fuser"
 	repo := "zapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
@@ -188,6 +191,8 @@ func TestPullthroughManifests(t *testing.T) {
 			cache:           cache,
 			registryAddr:    "localhost:5000",
 			metrics:         metrics.NewNoopMetrics(),
+			idms:            idms,
+			itms:            itms,
 			icsp:            icsp,
 		}
 
@@ -228,6 +233,8 @@ func TestPullthroughManifests(t *testing.T) {
 
 func TestPullthroughManifestInsecure(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
+	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
+	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	namespace := "fuser"
 	repo := "zapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
@@ -431,6 +438,8 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 				imageStream:     imageStream,
 				cache:           cache,
 				metrics:         metrics.NewNoopMetrics(),
+				idms:            idms,
+				itms:            itms,
 				icsp:            icsp,
 			}
 
@@ -473,6 +482,8 @@ func TestPullthroughManifestInsecure(t *testing.T) {
 
 func TestPullthroughManifestDockerReference(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
+	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
+	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	namespace := "user"
 	repo1 := "repo1"
 	repo2 := "repo2"
@@ -572,6 +583,8 @@ func TestPullthroughManifestDockerReference(t *testing.T) {
 			ManifestService: newTestManifestService(tc.repoName, nil),
 			imageStream:     imageStream,
 			metrics:         metrics.NewNoopMetrics(),
+			idms:            idms,
+			itms:            itms,
 			icsp:            icsp,
 		}
 
@@ -668,6 +681,8 @@ func (ms *putWaiterManifestService) Put(ctx context.Context, manifest distributi
 
 func TestPullthroughManifestMirroring(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
+	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
+	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	const timeout = 5 * time.Second
 
 	namespace := "myproject"
@@ -732,6 +747,8 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 		imageStream:             imageStream,
 		mirror:                  true,
 		metrics:                 metrics.NewNoopMetrics(),
+		idms:                    idms,
+		itms:                    itms,
 		icsp:                    icsp,
 	}
 
@@ -749,6 +766,8 @@ func TestPullthroughManifestMirroring(t *testing.T) {
 
 func TestPullthroughManifestMetrics(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
+	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
+	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	namespace := "myproject"
 	repo := "myapp"
 	repoName := fmt.Sprintf("%s/%s", namespace, repo)
@@ -810,6 +829,8 @@ func TestPullthroughManifestMetrics(t *testing.T) {
 		newLocalManifestService: func(ctx context.Context) (distribution.ManifestService, error) { return ms, nil },
 		imageStream:             imageStream,
 		metrics:                 metrics.NewMetrics(sink),
+		idms:                    idms,
+		itms:                    itms,
 		icsp:                    icsp,
 	}
 
