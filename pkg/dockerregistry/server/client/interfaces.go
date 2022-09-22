@@ -15,6 +15,7 @@ import (
 	operatorclientv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
 	userclientv1 "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 
+	cfgv1 "github.com/openshift/client-go/config/clientset/versioned/typed/config/v1"
 	authclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
 
@@ -24,6 +25,8 @@ type UsersInterfacer interface {
 
 type ImageContentSourcePolicyInterfacer interface {
 	ImageContentSourcePolicy() operatorclientv1alpha1.ImageContentSourcePolicyInterface
+	ImageDigestMirrorSet() cfgv1.ImageDigestMirrorSetInterface
+	ImageTagMirrorSet() cfgv1.ImageTagMirrorSetInterface
 }
 
 type ImagesInterfacer interface {

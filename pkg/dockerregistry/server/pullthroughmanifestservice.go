@@ -11,6 +11,7 @@ import (
 	"github.com/distribution/distribution/v3/registry/client"
 	"github.com/opencontainers/go-digest"
 
+	cfgv1 "github.com/openshift/client-go/config/clientset/versioned/typed/config/v1"
 	operatorv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
@@ -32,6 +33,8 @@ type pullthroughManifestService struct {
 	mirror                  bool
 	registryAddr            string
 	metrics                 metrics.Pullthrough
+	idms                    cfgv1.ImageDigestMirrorSetInterface
+	itms                    cfgv1.ImageTagMirrorSetInterface
 	icsp                    operatorv1alpha1.ImageContentSourcePolicyInterface
 }
 
@@ -129,7 +132,7 @@ func (m *pullthroughManifestService) getRemoteRepositoryClient(ctx context.Conte
 		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
 	}
 
-	retriever, impErr := getImportContext(ctx, ref, secrets, m.metrics, m.icsp)
+	retriever, impErr := getImportContext(ctx, ref, secrets, m.metrics, m.icsp, m.idms, m.itms)
 	if impErr != nil {
 		return nil, impErr
 	}
