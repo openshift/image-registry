@@ -74,6 +74,42 @@ func NewSchema2ImageData() (Schema2ImageData, error) {
 	return data, nil
 }
 
+type ImageIndexData struct {
+	ManifestMediaType string
+	Manifest          []byte
+	ManifestDigest    digest.Digest
+}
+
+func NewImageIndexData(images ...Schema2ImageData) (ImageIndexData, error) {
+	manifests := make([]map[string]interface{}, 0, len(images))
+	for _, image := range images {
+		manifests = append(manifests, map[string]interface{}{
+			"mediaType": image.ManifestMediaType,
+			"size":      len(image.Manifest),
+			"digest":    image.ManifestDigest.String(),
+			"platform": map[string]interface{}{
+				"architecture": "amd64",
+				"os":           "linux",
+			},
+		})
+	}
+
+	manifest, err := json.Marshal(map[string]interface{}{
+		"schemaVersion": 2,
+		"mediaType":     "application/vnd.docker.distribution.manifest.list.v2+json",
+		"manifests":     manifests,
+	})
+	if err != nil {
+		return ImageIndexData{}, fmt.Errorf("unable to create image index: %v", err)
+	}
+
+	return ImageIndexData{
+		ManifestMediaType: "application/vnd.docker.distribution.manifest.list.v2+json",
+		Manifest:          manifest,
+		ManifestDigest:    digest.FromBytes(manifest),
+	}, nil
+}
+
 func ServeV2(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method == "GET" && r.URL.Path == "/v2/" {
 		_, _ = w.Write([]byte(`{}`))
@@ -143,6 +179,19 @@ func PushSchema2ImageData(ctx context.Context, repo distribution.Repository, tag
 
 	if err := testutil.UploadBlob(ctx, repo, configDesc, data.Config); err != nil {
 		return nil, fmt.Errorf("upload image config: %w", err)
+	}
+
+	if err := testutil.UploadManifest(ctx, repo, tag, manifest); err != nil {
+		return manifest, fmt.Errorf("upload manifest: %w", err)
+	}
+
+	return manifest, nil
+}
+
+func PushImageIndexData(ctx context.Context, repo distribution.Repository, tag string, data ImageIndexData) (distribution.Manifest, error) {
+	manifest, _, err := distribution.UnmarshalManifest(data.ManifestMediaType, data.Manifest)
+	if err != nil {
+		return manifest, fmt.Errorf("parse manifest: %w", err)
 	}
 
 	if err := testutil.UploadManifest(ctx, repo, tag, manifest); err != nil {

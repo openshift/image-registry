@@ -45,7 +45,10 @@ func NewError(code, msg string, err error) Error {
 }
 
 func (e registryError) Error() string {
-	return fmt.Sprintf("%s: %s: %s", e.code, e.message, e.err.Error())
+	if e.err != nil {
+		return fmt.Sprintf("%s: %s: %s", e.code, e.message, e.err.Error())
+	}
+	return fmt.Sprintf("%s: %s", e.code, e.message)
 }
 
 func (e registryError) Code() string {

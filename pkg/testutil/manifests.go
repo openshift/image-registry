@@ -10,6 +10,7 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest"
+	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
@@ -114,7 +115,7 @@ func CanonicalManifest(m distribution.Manifest) ([]byte, error) {
 	switch m := m.(type) {
 	case *schema1.SignedManifest:
 		return m.Canonical, nil
-	case *schema2.DeserializedManifest, *ocischema.DeserializedManifest:
+	case *schema2.DeserializedManifest, *ocischema.DeserializedManifest, *manifestlist.DeserializedManifestList:
 		_, payload, err := m.Payload()
 		if err != nil {
 			return nil, err
