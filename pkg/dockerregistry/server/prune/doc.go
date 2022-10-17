@@ -1,6 +1,6 @@
 // Package prune contains functions that allow you to manipulate data on the storage.
 //
-// OVERVIEW
+// # OVERVIEW
 //
 // Since the registry server stores metadata in the etcd database, there are situations
 // of the desynchronization of the database and the registry storage.
@@ -15,12 +15,12 @@
 // what images are broken so the user can attempt to recover their system. In other cases,
 // we can restore the data in the etcd database based on data from the storage.
 //
-// HARD PRUNE
+// # HARD PRUNE
 //
 // This mode allows you to delete blobs that are no longer referenced in the etcd
 // database (garbage) from storage and reduce the used space on the storage.
 //
-// RECOVERY
+// # RECOVERY
 //
 // This mode is opposite to the HARD PRUNE. In this mode, we try to restore metadata
 // from the data on the storage. There are two modes of this: check and check+recover.
@@ -41,5 +41,4 @@
 //
 // Note: labels and anotations that were assigned on the image or imagestream will not be
 // restored because they were stored only in the etcd database, but not on the storage.
-//
 package prune
