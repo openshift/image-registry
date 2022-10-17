@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/clock"
+	clock "k8s.io/utils/clock/testing"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/context"
