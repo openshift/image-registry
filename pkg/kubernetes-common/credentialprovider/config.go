@@ -75,12 +75,12 @@ func GetPreferredDockercfgPath() string {
 	return preferredPath
 }
 
-//DefaultDockercfgPaths returns default search paths of .dockercfg
+// DefaultDockercfgPaths returns default search paths of .dockercfg
 func DefaultDockercfgPaths() []string {
 	return []string{GetPreferredDockercfgPath(), workingDirPath, homeDirPath, rootDirPath}
 }
 
-//DefaultDockerConfigJSONPaths returns default search paths of .docker/config.json
+// DefaultDockerConfigJSONPaths returns default search paths of .docker/config.json
 func DefaultDockerConfigJSONPaths() []string {
 	return []string{GetPreferredDockercfgPath(), workingDirPath, homeJsonDirPath, rootJsonDirPath}
 }
@@ -143,7 +143,7 @@ func ReadDockerConfigJSONFile(searchPaths []string) (cfg DockerConfig, err error
 
 }
 
-//ReadSpecificDockerConfigJsonFile attempts to read docker configJSON from a given file path.
+// ReadSpecificDockerConfigJsonFile attempts to read docker configJSON from a given file path.
 func ReadSpecificDockerConfigJsonFile(filePath string) (cfg DockerConfig, err error) {
 	var contents []byte
 

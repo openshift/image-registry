@@ -147,8 +147,8 @@ func (is *imageStream) ResolveImageID(ctx context.Context, dgst digest.Digest) (
 // ensures that the image belongs to the image stream `is`. It uses two
 // queries to master API:
 //
-//  1st to get a corresponding image stream
-//  2nd to get the image
+//	1st to get a corresponding image stream
+//	2nd to get the image
 //
 // This allows us to cache the image stream for later use.
 //

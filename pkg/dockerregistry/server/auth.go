@@ -177,8 +177,9 @@ func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
 // Authorized handles checking whether the given request is authorized
 // for actions on resources allowed by openshift.
 // Sources of access records:
-//   origin/pkg/cmd/dockerregistry/dockerregistry.go#Execute
-//   docker/distribution/registry/handlers/app.go#appendAccessRecords
+//
+//	origin/pkg/cmd/dockerregistry/dockerregistry.go#Execute
+//	docker/distribution/registry/handlers/app.go#appendAccessRecords
 func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...registryauth.Access) (context.Context, error) {
 	req, err := dcontext.GetRequest(ctx)
 	if err != nil {

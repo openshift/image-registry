@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/golang-lru/simplelru"
-	"k8s.io/apimachinery/pkg/util/clock"
+	"k8s.io/utils/clock"
 
 	"github.com/docker/distribution"
 	"github.com/opencontainers/go-digest"
