@@ -2,8 +2,10 @@ reviewers:
   - gabemontero
   - dmage
   - adambkaplan
+  - flavianmissi
 approvers:
   - bparees
   - dmage
   - adambkaplan
+  - flavianmissi
 component: "Image Registry"
