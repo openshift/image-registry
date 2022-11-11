@@ -76,6 +76,25 @@ func (fos *FakeOpenShift) GetImage(name string) (*imageapiv1.Image, error) {
 	return &image, nil
 }
 
+func (fos *FakeOpenShift) ListImages(namespace string) (*imageapiv1.ImageList, error) {
+	fos.mu.Lock()
+	defer fos.mu.Unlock()
+
+	imageList := imageapiv1.ImageList{
+		ListMeta: metav1.ListMeta{},
+		Items:    []imageapiv1.Image{},
+	}
+
+	for _, image := range fos.images {
+		if len(namespace) != 0 && namespace != image.Namespace {
+			continue
+		}
+		imageList.Items = append(imageList.Items, image)
+	}
+
+	return &imageList, nil
+}
+
 func (fos *FakeOpenShift) UpdateImage(image *imageapiv1.Image) (*imageapiv1.Image, error) {
 	fos.mu.Lock()
 	defer fos.mu.Unlock()
@@ -446,6 +465,9 @@ func (fos *FakeOpenShift) imagesHandler(action clientgotesting.Action) (bool, ru
 			case clientgotesting.GetActionImpl:
 				image, err := fos.GetImage(action.Name)
 				return true, image, err
+			case clientgotesting.ListActionImpl:
+				images, err := fos.ListImages(action.GetNamespace())
+				return true, images, err
 			case clientgotesting.UpdateActionImpl:
 				image, err := fos.UpdateImage(
 					action.Object.(*imageapiv1.Image),
