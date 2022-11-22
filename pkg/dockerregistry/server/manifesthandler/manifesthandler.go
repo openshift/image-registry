@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/docker/distribution"
+	_ "github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
