@@ -175,15 +175,15 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 	}
 
 	if params.AuthURL == "" {
-		return nil, fmt.Errorf("No authurl parameter provided")
+		return nil, fmt.Errorf("no authurl parameter provided")
 	}
 
 	if params.Container == "" {
-		return nil, fmt.Errorf("No container parameter provided")
+		return nil, fmt.Errorf("no container parameter provided")
 	}
 
 	if params.ChunkSize < minChunkSize {
-		return nil, fmt.Errorf("The chunksize %#v parameter should be a number that is larger than or equal to %d", params.ChunkSize, minChunkSize)
+		return nil, fmt.Errorf("the chunksize %#v parameter should be a number that is larger than or equal to %d", params.ChunkSize, minChunkSize)
 	}
 
 	return New(params)
@@ -221,15 +221,15 @@ func New(params Parameters) (*Driver, error) {
 	}
 	err := ct.Authenticate()
 	if err != nil {
-		return nil, fmt.Errorf("Swift authentication failed: %s", err)
+		return nil, fmt.Errorf("swift authentication failed: %s", err)
 	}
 
 	if _, _, err := ct.Container(params.Container); err == swift.ContainerNotFound {
 		if err := ct.ContainerCreate(params.Container, nil); err != nil {
-			return nil, fmt.Errorf("Failed to create container %s (%s)", params.Container, err)
+			return nil, fmt.Errorf("failed to create container %s (%s)", params.Container, err)
 		}
 	} else if err != nil {
-		return nil, fmt.Errorf("Failed to retrieve info about container %s (%s)", params.Container, err)
+		return nil, fmt.Errorf("failed to retrieve info about container %s (%s)", params.Container, err)
 	}
 
 	d := &driver{
@@ -268,7 +268,7 @@ func New(params Parameters) (*Driver, error) {
 		if d.TempURLContainerKey {
 			_, containerHeaders, err := d.Conn.Container(d.Container)
 			if err != nil {
-				return nil, fmt.Errorf("Failed to fetch container info %s (%s)", d.Container, err)
+				return nil, fmt.Errorf("failed to fetch container info %s (%s)", d.Container, err)
 			}
 
 			d.SecretKey = containerHeaders["X-Container-Meta-Temp-Url-Key"]
@@ -283,7 +283,7 @@ func New(params Parameters) (*Driver, error) {
 			// Use the account secret key
 			_, accountHeaders, err := d.Conn.Account()
 			if err != nil {
-				return nil, fmt.Errorf("Failed to fetch account info (%s)", err)
+				return nil, fmt.Errorf("failed to fetch account info (%s)", err)
 			}
 
 			d.SecretKey = accountHeaders["X-Account-Meta-Temp-Url-Key"]
@@ -360,7 +360,7 @@ func (d *driver) Reader(ctx context.Context, path string, offset int64) (io.Read
 		}
 		if isDLO && size == 0 {
 			if time.Now().Add(waitingTime).After(endTime) {
-				return nil, fmt.Errorf("Timeout expired while waiting for segments of %s to show up", path)
+				return nil, fmt.Errorf("timeout expired while waiting for segments of %s to show up", path)
 			}
 			time.Sleep(waitingTime)
 			waitingTime *= 2
@@ -466,7 +466,7 @@ func (d *driver) Stat(ctx context.Context, path string) (storagedriver.FileInfo,
 		_, isDLO := headers["X-Object-Manifest"]
 		if isDLO && info.Bytes == 0 {
 			if time.Now().Add(waitingTime).After(endTime) {
-				return nil, fmt.Errorf("Timeout expired while waiting for segments of %s to show up", path)
+				return nil, fmt.Errorf("timeout expired while waiting for segments of %s to show up", path)
 			}
 			time.Sleep(waitingTime)
 			waitingTime *= 2
@@ -765,7 +765,7 @@ func chunkFilenames(slice []string, maxSize int) (chunks [][]string, err error) 
 			chunks = append(chunks, slice[offset:offset+chunkSize])
 		}
 	} else {
-		return nil, fmt.Errorf("Max chunk size must be > 0")
+		return nil, fmt.Errorf("max chunk size must be > 0")
 	}
 	return
 }
@@ -904,7 +904,7 @@ func (w *writer) waitForSegmentsToShowUp() error {
 			if info.Bytes == w.size {
 				break
 			}
-			err = fmt.Errorf("Timeout expired while waiting for segments of %s to show up", w.path)
+			err = fmt.Errorf("timeout expired while waiting for segments of %s to show up", w.path)
 		}
 		if time.Now().Add(waitingTime).After(endTime) {
 			break

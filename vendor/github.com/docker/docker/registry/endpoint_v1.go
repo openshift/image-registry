@@ -89,10 +89,7 @@ func trimV1Address(address string) (string, error) {
 		apiVersionStr string
 	)
 
-	if strings.HasSuffix(address, "/") {
-		address = address[:len(address)-1]
-	}
-
+	address = strings.TrimSuffix(address, "/")
 	chunks = strings.Split(address, "/")
 	apiVersionStr = chunks[len(chunks)-1]
 	if apiVersionStr == "v1" {
@@ -124,9 +121,6 @@ func newV1EndpointFromStr(address string, tlsConfig *tls.Config, userAgent strin
 	}
 
 	endpoint := newV1Endpoint(*uri, tlsConfig, userAgent, metaHeaders)
-	if err != nil {
-		return nil, err
-	}
 
 	return endpoint, nil
 }
@@ -152,7 +146,7 @@ func (e *V1Endpoint) Ping() (PingResult, error) {
 		return PingResult{Standalone: false}, nil
 	}
 
-	req, err := http.NewRequest("GET", e.Path("_ping"), nil)
+	req, err := http.NewRequest(http.MethodGet, e.Path("_ping"), nil)
 	if err != nil {
 		return PingResult{Standalone: false}, err
 	}
