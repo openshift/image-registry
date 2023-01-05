@@ -25,8 +25,9 @@ type FakeOpenShift struct {
 	logger dcontext.Logger
 	mu     sync.Mutex
 
-	images       map[string]imageapiv1.Image
-	imageStreams map[string]imageapiv1.ImageStream
+	images                 map[string]imageapiv1.Image
+	imageStreams           map[string]imageapiv1.ImageStream
+	imageStreamLayersCache map[string]map[string]bool
 }
 
 // NewFakeOpenShift constructs the fake OpenShift reactors.
@@ -34,8 +35,9 @@ func NewFakeOpenShift(ctx context.Context) *FakeOpenShift {
 	return &FakeOpenShift{
 		logger: dcontext.GetLogger(ctx),
 
-		images:       make(map[string]imageapiv1.Image),
-		imageStreams: make(map[string]imageapiv1.ImageStream),
+		images:                 make(map[string]imageapiv1.Image),
+		imageStreams:           make(map[string]imageapiv1.ImageStream),
+		imageStreamLayersCache: make(map[string]map[string]bool),
 	}
 }
 
@@ -127,6 +129,12 @@ func (fos *FakeOpenShift) CreateImageStream(namespace string, is *imageapiv1.Ima
 	fos.imageStreams[ref] = *is
 	fos.logger.Debugf("(*FakeOpenShift).imageStreams[%q] created", ref)
 
+	for _, tag := range is.Status.Tags {
+		for _, item := range tag.Items {
+			fos.cacheImageStreamLayers(namespace, is.Name, item.Image)
+		}
+	}
+
 	return is, nil
 }
 
@@ -146,6 +154,13 @@ func (fos *FakeOpenShift) UpdateImageStream(namespace string, is *imageapiv1.Ima
 
 	fos.imageStreams[ref] = *is
 	fos.logger.Debugf("(*FakeOpenShift).imageStreams[%q] updated", ref)
+
+	// now update the cache, in case new images were added
+	for _, tag := range is.Status.Tags {
+		for _, item := range tag.Items {
+			fos.cacheImageStreamLayers(namespace, is.Name, item.Image)
+		}
+	}
 
 	return is, nil
 }
@@ -370,59 +385,72 @@ func (fos *FakeOpenShift) GetImageStreamLayers(namespace, repo string) (*imageap
 	fos.mu.Lock()
 	defer fos.mu.Unlock()
 
-	ref := fmt.Sprintf("%s/%s", namespace, repo)
-
-	is, ok := fos.imageStreams[ref]
-	if !ok {
-		return nil, errors.NewNotFound(imageapiv1.Resource("imagestreams/layers"), repo)
-	}
-
 	isl := &imageapiv1.ImageStreamLayers{
 		Blobs:  map[string]imageapiv1.ImageLayerData{},
 		Images: map[string]imageapiv1.ImageBlobReferences{},
 	}
 
-	for _, tag := range is.Status.Tags {
-		for _, item := range tag.Items {
-			if _, ok := isl.Images[item.Image]; ok {
-				continue
-			}
+	ref := fmt.Sprintf("%s/%s", namespace, repo)
 
-			image, ok := fos.images[item.Image]
-			if !ok {
-				isl.Images[item.Image] = imageapiv1.ImageBlobReferences{ImageMissing: true}
-				continue
-			}
-
-			var reference imageapiv1.ImageBlobReferences
-			for _, layer := range image.DockerImageLayers {
-				reference.Layers = append(reference.Layers, layer.Name)
-				if _, ok := isl.Blobs[layer.Name]; !ok {
-					isl.Blobs[layer.Name] = imageapiv1.ImageLayerData{LayerSize: &layer.LayerSize, MediaType: layer.MediaType}
-				}
-			}
-
-			if blob := configFromImage(image); blob != nil {
-				reference.Config = &blob.Name
-				if _, ok := isl.Blobs[blob.Name]; !ok {
-					if blob.LayerSize == 0 {
-						// only send media type since we don't the size of the manifest
-						isl.Blobs[blob.Name] = imageapiv1.ImageLayerData{MediaType: blob.MediaType}
-					} else {
-						isl.Blobs[blob.Name] = imageapiv1.ImageLayerData{LayerSize: &blob.LayerSize, MediaType: blob.MediaType}
-					}
-				}
-			}
-
-			// the image manifest is always a blob - schema2 images also have a config blob referenced from the manifest
-			if _, ok := isl.Blobs[item.Image]; !ok {
-				isl.Blobs[item.Image] = imageapiv1.ImageLayerData{MediaType: mediaTypeFromImage(image)}
-			}
-			isl.Images[item.Image] = reference
+	for imageID := range fos.imageStreamLayersCache[ref] {
+		if _, ok := isl.Images[imageID]; ok {
+			continue
 		}
+
+		image, ok := fos.images[imageID]
+		if !ok {
+			isl.Images[imageID] = imageapiv1.ImageBlobReferences{ImageMissing: true}
+			continue
+		}
+
+		var reference imageapiv1.ImageBlobReferences
+		for _, layer := range image.DockerImageLayers {
+			reference.Layers = append(reference.Layers, layer.Name)
+			if _, ok := isl.Blobs[layer.Name]; !ok {
+				isl.Blobs[layer.Name] = imageapiv1.ImageLayerData{LayerSize: &layer.LayerSize, MediaType: layer.MediaType}
+			}
+		}
+
+		if blob := configFromImage(image); blob != nil {
+			reference.Config = &blob.Name
+			if _, ok := isl.Blobs[blob.Name]; !ok {
+				if blob.LayerSize == 0 {
+					// only send media type since we don't the size of the manifest
+					isl.Blobs[blob.Name] = imageapiv1.ImageLayerData{MediaType: blob.MediaType}
+				} else {
+					isl.Blobs[blob.Name] = imageapiv1.ImageLayerData{LayerSize: &blob.LayerSize, MediaType: blob.MediaType}
+				}
+			}
+		}
+
+		for _, manifest := range image.DockerImageManifests {
+			reference.Manifests = append(reference.Manifests, manifest.Digest)
+		}
+
+		// the image manifest is always a blob - schema2 images also have a config blob referenced from the manifest
+		if _, ok := isl.Blobs[imageID]; !ok {
+			isl.Blobs[imageID] = imageapiv1.ImageLayerData{MediaType: mediaTypeFromImage(image)}
+		}
+		isl.Images[imageID] = reference
 	}
 
 	return isl, nil
+}
+
+func (fos *FakeOpenShift) cacheImageStreamLayers(namespace, isName string, imageID string) {
+	ref := fmt.Sprintf("%s/%s", namespace, isName)
+	if _, ok := fos.imageStreamLayersCache[ref]; !ok {
+		fos.imageStreamLayersCache[ref] = make(map[string]bool)
+	}
+
+	fos.imageStreamLayersCache[ref][imageID] = true
+	image, ok := fos.images[imageID]
+	if !ok {
+		return
+	}
+	for _, manifest := range image.DockerImageManifests {
+		fos.imageStreamLayersCache[ref][manifest.Digest] = true
+	}
 }
 
 func (fos *FakeOpenShift) getName(action clientgotesting.Action) string {
