@@ -143,7 +143,7 @@ func (is *imageStream) ResolveImageID(ctx context.Context, dgst digest.Digest) (
 	return tagEvent, nil
 }
 
-// GetStoredImageOfImageStream retrieves the Image with digest `dgst` and
+// getStoredImageOfImageStream retrieves the Image with digest `dgst` and
 // ensures that the image belongs to the image stream `is`. It uses two
 // queries to master API:
 //
@@ -168,15 +168,7 @@ func (is *imageStream) getStoredImageOfImageStream(ctx context.Context, dgst dig
 	return image, tagEvent, nil
 }
 
-// GetImageOfImageStream retrieves the Image with digest `dgst` for the image
-// stream. The image's field DockerImageReference is modified on the fly to
-// pretend that we've got the image from the source from which the image was
-// tagged to match tag's DockerImageReference.
-//
-// NOTE: due to on the fly modification, the returned image object should
-// not be sent to the master API. If you need unmodified version of the
-// image object, please use getStoredImageOfImageStream.
-func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, rerrors.Error) {
+func (is *imageStream) getImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, rerrors.Error) {
 	image, tagEvent, err := is.getStoredImageOfImageStream(ctx, dgst)
 	if err != nil {
 		return nil, err
@@ -187,6 +179,109 @@ func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Di
 	img.DockerImageReference = tagEvent.DockerImageReference
 
 	return &img, nil
+}
+
+// GetImageOfImageStream retrieves the Image with digest `dgst` for the image
+// stream. The image's field DockerImageReference is modified on the fly to
+// pretend that we've got the image from the source from which the image was
+// tagged to match tag's DockerImageReference.
+//
+// The layers API is also searched, as a manifest which is part of a manifest
+// list in an image stream will not be available in the image stream history,
+// only its parent manifest list will be found there.
+//
+// If the Image with the given digest is not part of the image stream, a not found
+// error is returned.
+//
+// NOTE: due to on the fly modification, the returned image object should
+// not be sent to the master API. If you need unmodified version of the
+// image object, please use getStoredImageOfImageStream.
+func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, rerrors.Error) {
+	isImage, err := is.getImageOfImageStream(ctx, dgst)
+	if err == nil {
+		return isImage, nil
+	}
+
+	ref, err := is.resolveUpstreamRef(ctx, dgst)
+	if err != nil {
+		return nil, err
+	}
+
+	image, err := is.getImage(ctx, dgst)
+	if err != nil {
+		return nil, err
+	}
+
+	// We don't want to mutate the origial image object, which we've got by reference.
+	img := *image
+	img.DockerImageReference = ref.String()
+
+	return &img, nil
+}
+
+// resolveUpstreamRef returns an image reference for an image with the given
+// digest that can be used to pull the image from the upstream repository.
+//
+// It uses the image layers API to find the parent image, and then finds the
+// upstream repository for the parent image in the image stream.
+//
+// It works only for sub-manifests, for which the image stream usually does not
+// have a history entry. For the main manifest, the image stream should have a
+// history entry that can be found by ResolveImageID.
+func (is *imageStream) resolveUpstreamRef(ctx context.Context, dgst digest.Digest) (reference.DockerImageReference, rerrors.Error) {
+	layers, rErr := is.imageStreamGetter.layers()
+	if rErr != nil {
+		return reference.DockerImageReference{}, rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("resolveUpstreamRef: failed to get layers for image stream %s", is.Reference()),
+			rErr,
+		)
+	}
+
+	parent := ""
+	for image, ibr := range layers.Images {
+		found := false
+		for _, m := range ibr.Manifests {
+			if m == dgst.String() {
+				found = true
+				break
+			}
+		}
+		if found {
+			parent = image
+			break
+		}
+	}
+	if parent == "" {
+		return reference.DockerImageReference{}, rerrors.NewError(
+			ErrImageStreamImageNotFoundCode,
+			fmt.Sprintf("resolveUpstreamRef: unable to find parent for image %s in image stream %s", dgst.String(), is.Reference()),
+			nil,
+		)
+	}
+
+	parentTagEvent, rErr := is.ResolveImageID(ctx, digest.Digest(parent))
+	if rErr != nil {
+		return reference.DockerImageReference{}, rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("resolveUpstreamRef: unable to get parent event %s in image stream %s", parent, is.Reference()),
+			rErr,
+		)
+	}
+
+	ref, err := reference.Parse(parentTagEvent.DockerImageReference)
+	if err != nil {
+		return reference.DockerImageReference{}, rerrors.NewError(
+			ErrImageStreamUnknownErrorCode,
+			fmt.Sprintf("resolveUpstreamRef: unable to parse parent image reference %s in image stream %s", parentTagEvent.DockerImageReference, is.Reference()),
+			err,
+		)
+	}
+
+	ref.Tag = ""
+	ref.ID = dgst.String()
+
+	return ref, nil
 }
 
 func (is *imageStream) GetSecrets() ([]corev1.Secret, rerrors.Error) {

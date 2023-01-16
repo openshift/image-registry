@@ -90,6 +90,16 @@ func TestPullThroughInsecure(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	submanifestData, err := testframework.NewSchema2ImageData()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	imageIndexData, err := testframework.NewImageIndexData(submanifestData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	master := testframework.NewMaster(t)
 	defer master.Close()
 
@@ -100,6 +110,7 @@ func TestPullThroughInsecure(t *testing.T) {
 	// start regular HTTP server
 	reponame := "testrepo"
 	repotag := "testtag"
+	imageindextag := "manifestlist"
 	isname := "test/" + reponame
 
 	descriptors := map[string]int64{
@@ -123,6 +134,16 @@ func TestPullThroughInsecure(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	_, err = testframework.PushSchema2ImageData(context.TODO(), remoteRepo, "redundant-tag-to-make-testutil-happy", submanifestData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = testframework.PushImageIndexData(context.TODO(), remoteRepo, imageindextag, imageIndexData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	stream := imageapiv1.ImageStreamImport{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
@@ -141,6 +162,13 @@ func TestPullThroughInsecure(t *testing.T) {
 					},
 					ImportPolicy: imageapiv1.TagImportPolicy{Insecure: true},
 				},
+				{
+					From: corev1.ObjectReference{
+						Kind: "DockerImage",
+						Name: remoteRegistryAddr + "/" + isname + ":" + imageindextag,
+					},
+					ImportPolicy: imageapiv1.TagImportPolicy{Insecure: true},
+				},
 			},
 		},
 	}
@@ -152,8 +180,8 @@ func TestPullThroughInsecure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(isi.Status.Images) != 1 {
-		t.Fatalf("imported unexpected number of images (%d != 1)", len(isi.Status.Images))
+	if len(isi.Status.Images) != 2 {
+		t.Fatalf("imported unexpected number of images (%d != 2)", len(isi.Status.Images))
 	}
 	for i, image := range isi.Status.Images {
 		if image.Status.Status != metav1.StatusSuccess {
@@ -162,11 +190,6 @@ func TestPullThroughInsecure(t *testing.T) {
 
 		if image.Image == nil {
 			t.Fatalf("unexpected empty image %d", i)
-		}
-
-		// the image name is always the sha256, and size is calculated
-		if image.Image.Name != imageData.ManifestDigest.String() {
-			t.Fatalf("unexpected image %d: %#v (expect %q)", i, image.Image.Name, imageData.ManifestDigest.String())
 		}
 	}
 
@@ -199,6 +222,11 @@ func TestPullThroughInsecure(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	t.Logf("Run testPullThroughGetManifest with submanifest digest...")
+	if err := testPullThroughGetManifest(registry.BaseURL(), &stream, testuser.Name, testuser.Token, submanifestData.ManifestDigest.String()); err != nil {
+		t.Fatal(err)
+	}
+
 	t.Logf("Run testPullThroughStatBlob (%s == true, spec.tags[%q].importPolicy.insecure == true)...", imageapiv1.InsecureRepositoryAnnotation, repotag)
 	for digest := range descriptors {
 		if err := testPullThroughStatBlob(registry.BaseURL(), &stream, testuser.Name, testuser.Token, digest); err != nil {
@@ -228,11 +256,13 @@ func TestPullThroughInsecure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i, tag := range istream.Spec.Tags {
-		if tag.Name == repotag {
-			istream.Spec.Tags[i].ImportPolicy.Insecure = false
-			break
-		}
+	for i := range istream.Spec.Tags {
+		// Ideally we need to set insecure to false only for repotag.
+		// But if there is at least one tag with insecure set to true,
+		// its upstream registry is allowed to be accessed insecurely
+		// for all tags, so we set it to false for all tags to forbid
+		// insecure access.
+		istream.Spec.Tags[i].ImportPolicy.Insecure = false
 	}
 	_, err = adminImageClient.ImageStreams(istream.Namespace).Update(context.Background(), istream, metav1.UpdateOptions{})
 	if err != nil {
