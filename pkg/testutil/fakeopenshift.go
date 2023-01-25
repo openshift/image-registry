@@ -462,6 +462,9 @@ func (fos *FakeOpenShift) imagesHandler(action clientgotesting.Action) (bool, ru
 			action.GetVerb(), fos.getName(action)),
 		func() (bool, runtime.Object, error) {
 			switch action := action.(type) {
+			case clientgotesting.CreateActionImpl:
+				image, err := fos.CreateImage(action.Object.(*imageapiv1.Image))
+				return true, image, err
 			case clientgotesting.GetActionImpl:
 				image, err := fos.GetImage(action.Name)
 				return true, image, err

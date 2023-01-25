@@ -10,12 +10,12 @@ import (
 	"github.com/docker/distribution/registry/api/errcode"
 	regapi "github.com/docker/distribution/registry/api/v2"
 	"github.com/opencontainers/go-digest"
-
+	imageapiv1 "github.com/openshift/api/image/v1"
+	kapierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	imageapiv1 "github.com/openshift/api/image/v1"
-
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/manifesthandler"
 	"github.com/openshift/image-registry/pkg/imagestream"
 )
@@ -26,9 +26,10 @@ type manifestService struct {
 	manifests distribution.ManifestService
 	blobStore distribution.BlobStore
 
-	serverAddr  string
-	imageStream imagestream.ImageStream
-	cache       cache.RepositoryDigest
+	serverAddr       string
+	registryOSClient client.Interface
+	imageStream      imagestream.ImageStream
+	cache            cache.RepositoryDigest
 
 	// acceptSchema2 allows to refuse the manifest schema version 2
 	acceptSchema2 bool
@@ -60,13 +61,23 @@ func (m *manifestService) Get(ctx context.Context, dgst digest.Digest, options .
 	if rErr != nil {
 		switch rErr.Code() {
 		case imagestream.ErrImageStreamNotFoundCode, imagestream.ErrImageStreamImageNotFoundCode:
-			dcontext.GetLogger(ctx).Errorf("manifestService.Get: unable to get image %s in imagestream %s: %v", dgst.String(), m.imageStream.Reference(), rErr)
+			dcontext.GetLogger(ctx).Errorf(
+				"manifestService.Get: unable to get image %s in imagestream %s: %v",
+				dgst.String(),
+				m.imageStream.Reference(),
+				rErr,
+			)
 			return nil, distribution.ErrManifestUnknownRevision{
 				Name:     m.imageStream.Reference(),
 				Revision: dgst,
 			}
 		case imagestream.ErrImageStreamForbiddenCode:
-			dcontext.GetLogger(ctx).Errorf("manifestService.Get: unable to get access to imagestream %s to find image %s: %v", m.imageStream.Reference(), dgst.String(), rErr)
+			dcontext.GetLogger(ctx).Errorf(
+				"manifestService.Get: unable to get access to imagestream %s to find image %s: %v",
+				m.imageStream.Reference(),
+				dgst.String(),
+				rErr,
+			)
 			return nil, distribution.ErrAccessDenied
 		}
 		return nil, rErr
@@ -165,6 +176,22 @@ func (m *manifestService) Put(ctx context.Context, manifest distribution.Manifes
 			tag = opt.Tag
 			break
 		}
+	}
+
+	pushByDigest := tag == ""
+	if pushByDigest {
+		image, err := m.registryOSClient.Images().Create(ctx, image, metav1.CreateOptions{})
+		if kapierrors.IsAlreadyExists(err) {
+			return dgst, nil
+		}
+		if err != nil {
+			dcontext.GetLogger(ctx).Errorf(
+				"manifestService.Put: image creation failed for image %s: %v",
+				image.Name, err,
+			)
+			return "", err
+		}
+		return dgst, nil
 	}
 
 	rErr := m.imageStream.CreateImageStreamMapping(ctx, uclient, tag, image)

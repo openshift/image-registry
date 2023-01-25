@@ -88,6 +88,7 @@ var _ ImageInterface = imageclientv1.ImageInterface(nil)
 
 type ImageInterface interface {
 	Get(ctx context.Context, name string, opts metav1.GetOptions) (*imageapiv1.Image, error)
+	Create(ctx context.Context, image *imageapiv1.Image, opts metav1.CreateOptions) (*imageapiv1.Image, error)
 	Update(ctx context.Context, image *imageapiv1.Image, opts metav1.UpdateOptions) (*imageapiv1.Image, error)
 	List(ctx context.Context, opts metav1.ListOptions) (*imageapiv1.ImageList, error)
 }
