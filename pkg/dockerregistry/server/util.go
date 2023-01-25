@@ -25,9 +25,7 @@ import (
 	"github.com/openshift/library-go/pkg/image/reference"
 )
 
-var (
-	installCredentialsDir = "/var/lib/kubelet/"
-)
+var installCredentialsDir = "/var/lib/kubelet/"
 
 func getNamespaceName(resourceName string) (string, string, error) {
 	repoParts := strings.Split(resourceName, "/")
