@@ -6,7 +6,10 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/docker/distribution"
 	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/manifest/manifestlist"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,6 +62,29 @@ func (fos *FakeOpenShift) CreateImage(image *imageapiv1.Image) (*imageapiv1.Imag
 	_, ok := fos.images[image.Name]
 	if ok {
 		return nil, errors.NewAlreadyExists(imageapiv1.Resource("images"), image.Name)
+	}
+
+	if image.DockerImageManifestMediaType == manifestlist.MediaTypeManifestList || image.DockerImageManifestMediaType == v1.MediaTypeImageIndex {
+		manifest, _, err := distribution.UnmarshalManifest(
+			image.DockerImageManifestMediaType,
+			[]byte(image.DockerImageManifest),
+		)
+		if err != nil {
+			return nil, err
+		}
+		subManifests := []imageapiv1.ImageManifest{}
+		for _, desc := range manifest.References() {
+			subMan := imageapiv1.ImageManifest{
+				Digest:       desc.Digest.String(),
+				MediaType:    desc.MediaType,
+				ManifestSize: desc.Size,
+				Architecture: "",
+				OS:           "",
+			}
+			subManifests = append(subManifests, subMan)
+		}
+
+		image.DockerImageManifests = subManifests
 	}
 
 	fos.images[image.Name] = *image
