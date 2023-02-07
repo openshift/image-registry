@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/docker/distribution"
-	_ "github.com/docker/distribution/manifest/manifestlist"
+	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
@@ -46,6 +46,8 @@ func NewManifestHandler(serverAddr string, blobStore distribution.BlobStore, man
 		return &manifestSchema2Handler{blobStore: blobStore, manifest: t}, nil
 	case *ocischema.DeserializedManifest:
 		return &manifestOCIHandler{blobStore: blobStore, manifest: t}, nil
+	case *manifestlist.DeserializedManifestList:
+		return &manifestListHandler{manifest: t}, nil
 	default:
 		return nil, fmt.Errorf("unsupported manifest type %T", manifest)
 	}

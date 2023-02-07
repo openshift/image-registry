@@ -103,13 +103,19 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 		return nil, err
 	}
 
+	registryOSClient, err := r.app.registryClient.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	ms = &manifestService{
-		manifests:     ms,
-		blobStore:     r.Blobs(ctx),
-		serverAddr:    r.app.config.Server.Addr,
-		imageStream:   r.imageStream,
-		cache:         r.cache,
-		acceptSchema2: r.app.config.Compatibility.AcceptSchema2,
+		manifests:        ms,
+		blobStore:        r.Blobs(ctx),
+		serverAddr:       r.app.config.Server.Addr,
+		imageStream:      r.imageStream,
+		registryOSClient: registryOSClient,
+		cache:            r.cache,
+		acceptSchema2:    r.app.config.Compatibility.AcceptSchema2,
 	}
 
 	ms = &pullthroughManifestService{

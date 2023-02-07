@@ -70,7 +70,9 @@ type imageStream struct {
 
 	imageClient imageGetter
 
-	// imageStreamGetter fetches and caches an image stream. The image stream stays cached for the entire time of handling single repository-scoped request.
+	// imageStreamGetter fetches and caches an image stream.
+	// The image stream stays cached for the entire time of handling single
+	// repository-scoped request.
 	imageStreamGetter *cachedImageStreamGetter
 }
 
@@ -181,7 +183,7 @@ func (is *imageStream) getImageOfImageStream(ctx context.Context, dgst digest.Di
 	return &img, nil
 }
 
-// GetImageOfImageStream retrieves the Image with digest `dgst` for the image
+// GetImageOfImageStream retrieves the Image with the given digest for the image
 // stream. The image's field DockerImageReference is modified on the fly to
 // pretend that we've got the image from the source from which the image was
 // tagged to match tag's DockerImageReference.
@@ -300,7 +302,6 @@ func (is *imageStream) GetSecrets() ([]corev1.Secret, rerrors.Error) {
 // insecure transport.
 func (is *imageStream) TagIsInsecure(ctx context.Context, tag string, dgst digest.Digest) (bool, rerrors.Error) {
 	stream, err := is.imageStreamGetter.get()
-
 	if err != nil {
 		return false, convertImageStreamGetterError(err, fmt.Sprintf("TagIsInsecure: failed to get image stream %s", is.Reference()))
 	}

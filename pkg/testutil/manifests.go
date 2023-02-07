@@ -163,9 +163,7 @@ func CreateAndUploadTestManifest(
 	creds auth.CredentialStore,
 	repoName, tag string,
 ) (dgst digest.Digest, canonical, manifestConfig string, manifest distribution.Manifest, err error) {
-	var (
-		layerDescriptors = make([]distribution.Descriptor, 0, layerCount)
-	)
+	layerDescriptors := make([]distribution.Descriptor, 0, layerCount)
 
 	for i := 0; i < layerCount; i++ {
 		ds, _, err := UploadRandomTestBlob(ctx, serverURL.String(), creds, repoName)
@@ -333,5 +331,4 @@ func NewImageForManifest(repoName string, rawManifest string, manifestConfig str
 	}
 
 	return newImage, nil
-
 }
