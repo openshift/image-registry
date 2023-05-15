@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/distribution"
-	"github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/registry/api/errcode"
-	"github.com/docker/distribution/registry/api/v2"
-	registryauth "github.com/docker/distribution/registry/auth"
+	"github.com/distribution/distribution/v3"
+	"github.com/distribution/distribution/v3/configuration"
+	"github.com/distribution/distribution/v3/registry/api/errcode"
+	"github.com/distribution/distribution/v3/registry/api/v2"
+	registryauth "github.com/distribution/distribution/v3/registry/auth"
 	"github.com/opencontainers/go-digest"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"

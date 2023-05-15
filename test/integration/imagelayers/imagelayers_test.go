@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/docker/distribution"
-	"github.com/docker/distribution/context"
+	"github.com/distribution/distribution/v3"
+	"github.com/distribution/distribution/v3/context"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 

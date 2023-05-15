@@ -3,8 +3,8 @@ package wrapped
 import (
 	"context"
 
-	"github.com/docker/distribution"
-	"github.com/docker/distribution/reference"
+	"github.com/distribution/distribution/v3"
+	"github.com/distribution/distribution/v3/reference"
 )
 
 type repository struct {

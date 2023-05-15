@@ -5,7 +5,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/docker/distribution/registry/handlers"
+	"github.com/distribution/distribution/v3/registry/handlers"
 
 	gorillahandlers "github.com/gorilla/handlers"
 )
