@@ -12,7 +12,7 @@ import (
 	dockerapiv10 "github.com/openshift/api/image/docker10"
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
 
-	"github.com/docker/distribution/manifest/ocischema"
+	"github.com/distribution/distribution/v3/manifest/ocischema"
 	imgspecv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/openshift/image-registry/pkg/testframework"

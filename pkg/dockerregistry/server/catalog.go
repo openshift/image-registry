@@ -7,7 +7,7 @@ import (
 	"io"
 	"time"
 
-	dcontext "github.com/docker/distribution/context"
+	dcontext "github.com/distribution/distribution/v3/context"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

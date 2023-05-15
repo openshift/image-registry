@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/docker/distribution/reference"
+	"github.com/distribution/distribution/v3/reference"
 )
 
 // NamedDockerImageReference points to a Docker image.

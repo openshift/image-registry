@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	dcontext "github.com/docker/distribution/context"
+	dcontext "github.com/distribution/distribution/v3/context"
 	"github.com/sirupsen/logrus"
 )
 

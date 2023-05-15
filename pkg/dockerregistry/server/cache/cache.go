@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/golang-lru/simplelru"
 	"k8s.io/utils/clock"
 
-	"github.com/docker/distribution"
+	"github.com/distribution/distribution/v3"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/textproto"
 
-	dcontext "github.com/docker/distribution/context"
+	dcontext "github.com/distribution/distribution/v3/context"
 )
 
 const (

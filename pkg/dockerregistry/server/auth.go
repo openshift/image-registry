@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strings"
 
-	dcontext "github.com/docker/distribution/context"
-	registryauth "github.com/docker/distribution/registry/auth"
+	dcontext "github.com/distribution/distribution/v3/context"
+	registryauth "github.com/distribution/distribution/v3/registry/auth"
 
 	authorizationapi "k8s.io/api/authorization/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -179,7 +179,7 @@ func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
 // Sources of access records:
 //
 //	origin/pkg/cmd/dockerregistry/dockerregistry.go#Execute
-//	docker/distribution/registry/handlers/app.go#appendAccessRecords
+//	distribution/distribution/registry/handlers/app.go#appendAccessRecords
 func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...registryauth.Access) (context.Context, error) {
 	req, err := dcontext.GetRequest(ctx)
 	if err != nil {
