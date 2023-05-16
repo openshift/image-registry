@@ -88,7 +88,7 @@ func newTestRegistry(
 		storage.EnableRedirect,
 	}
 	if useBlobDescriptorCacheProvider {
-		cacheProvider := dockercache.BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider())
+		cacheProvider := dockercache.BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider(-1))
 		opts = append(opts, storage.BlobDescriptorCacheProvider(cacheProvider))
 	}
 
