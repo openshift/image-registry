@@ -1,6 +1,8 @@
 package wrapped
 
 import (
+	"context"
+
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
 )
 
@@ -37,9 +39,9 @@ func (w *fileWriter) Close() error {
 	})
 }
 
-func (w *fileWriter) Cancel() error {
+func (w *fileWriter) Cancel(ctx context.Context) error {
 	return w.wrapper("FileWriter.Cancel", func() error {
-		return w.fileWriter.Cancel()
+		return w.fileWriter.Cancel(ctx)
 	})
 }
 
