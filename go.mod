@@ -3,7 +3,7 @@ module github.com/openshift/image-registry
 go 1.19
 
 require (
-	github.com/bshuster-repo/logrus-logstash-hook v1.0.0
+	github.com/bshuster-repo/logrus-logstash-hook v1.1.0
 	github.com/distribution/distribution/v3 v3.0.0+incompatible
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/docker/go-units v0.5.0
