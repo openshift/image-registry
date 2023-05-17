@@ -48,14 +48,16 @@ import (
 	"github.com/openshift/image-registry/pkg/version"
 )
 
-var experimental = flag.Bool("experimental", false, "enable experimental features")
-var pruneMode = flag.String("prune", "", "prune blobs from the storage and exit (check, delete)")
-var restoreMode = flag.String("restore-mode", "", "check data corruption or recover storage data if possible (valid values: check, check-database, check-storage, recover)")
-var restoreNamespace = flag.String("restore-namespace", "", "check and recover only specified namespace")
-var listRepositories = flag.Bool("list-repositories", false, "shows list of repositories")
-var listBlobs = flag.Bool("list-blobs", false, "shows list of blob digests stored in the storage")
-var listManifests = flag.Bool("list-manifests", false, "shows list of manifest digests stored in the storage")
-var listRepositoryManifests = flag.String("list-manifests-from", "", "shows the manifest digests in the specified repository")
+var (
+	experimental            = flag.Bool("experimental", false, "enable experimental features")
+	pruneMode               = flag.String("prune", "", "prune blobs from the storage and exit (check, delete)")
+	restoreMode             = flag.String("restore-mode", "", "check data corruption or recover storage data if possible (valid values: check, check-database, check-storage, recover)")
+	restoreNamespace        = flag.String("restore-namespace", "", "check and recover only specified namespace")
+	listRepositories        = flag.Bool("list-repositories", false, "shows list of repositories")
+	listBlobs               = flag.Bool("list-blobs", false, "shows list of blob digests stored in the storage")
+	listManifests           = flag.Bool("list-manifests", false, "shows list of manifest digests stored in the storage")
+	listRepositoryManifests = flag.String("list-manifests-from", "", "shows the manifest digests in the specified repository")
+)
 
 func versionFields() map[interface{}]interface{} {
 	return map[interface{}]interface{}{
