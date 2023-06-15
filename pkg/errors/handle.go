@@ -3,8 +3,8 @@ package errors
 import (
 	"context"
 
-	dcontext "github.com/docker/distribution/context"
-	errcode "github.com/docker/distribution/registry/api/errcode"
+	dcontext "github.com/distribution/distribution/v3/context"
+	errcode "github.com/distribution/distribution/v3/registry/api/errcode"
 )
 
 type errMessageKey struct{}

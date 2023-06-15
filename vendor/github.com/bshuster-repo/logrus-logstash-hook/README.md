@@ -1,30 +1,35 @@
-# Logstash hook for logrus <img src="http://i.imgur.com/hTeVwmJ.png" width="40" height="40" alt=":walrus:" class="emoji" title=":walrus:" /> [![Build Status](https://travis-ci.org/bshuster-repo/logrus-logstash-hook.svg?branch=master)](https://travis-ci.org/bshuster-repo/logrus-logstash-hook)
-Use this hook to send the logs to [Logstash](https://www.elastic.co/products/logstash) over both UDP and TCP.
+# Logstash hook for logrus <img src="http://i.imgur.com/hTeVwmJ.png" width="40" height="40" alt=":walrus:" class="emoji" title=":walrus:" />
+[![Build Status](https://travis-ci.org/bshuster-repo/logrus-logstash-hook.svg?branch=master)](https://travis-ci.org/bshuster-repo/logrus-logstash-hook)
+[![Go Report Status](https://goreportcard.com/badge/github.com/bshuster-repo/logrus-logstash-hook)](https://goreportcard.com/report/github.com/bshuster-repo/logrus-logstash-hook)
 
-## Usage
+Use this hook to send the logs to [Logstash](https://www.elastic.co/products/logstash).
+
+# Usage
 
 ```go
 package main
 
 import (
-        "github.com/sirupsen/logrus"
         "github.com/bshuster-repo/logrus-logstash-hook"
+        "github.com/sirupsen/logrus"
+        "net"
 )
 
 func main() {
         log := logrus.New()
-        hook, err := logrustash.NewHook("tcp", "172.17.0.2:9999", "myappName")
-
+        conn, err := net.Dial("tcp", "logstash.mycompany.net:8911")
         if err != nil {
                 log.Fatal(err)
         }
+        hook := logrustash.New(conn, logrustash.DefaultFormatter(logrus.Fields{"type": "myappName"}))
+
         log.Hooks.Add(hook)
         ctx := log.WithFields(logrus.Fields{
-          "method": "main",
+                "method": "main",
         })
-        ...
         ctx.Info("Hello World!")
 }
+
 ```
 
 This is how it will look like:
@@ -41,65 +46,19 @@ This is how it will look like:
           "type" => "myappName"
 }
 ```
-## Hook Fields
-Fields can be added to the hook, which will always be in the log context.
-This can be done when creating the hook:
 
-```go
+# FAQ
+Q: I would like to add characters to each line before sending to Logstash?
+A: Logrustash gives you the ability to mutate the message before sending it to Logstash. Just follow [this example](https://github.com/bshuster-repo/logrus-logstash-hook/issues/60#issuecomment-604948272).
 
-hook, err := logrustash.NewHookWithFields("tcp", "172.17.0.2:9999", "myappName", logrus.Fields{
-        "hostname":    os.Hostname(),
-        "serviceName": "myServiceName",
-})
-```
+Q: Is there a way to maintain the connection when it drops
+A: It's recommended to use [GoAutoSocket](https://github.com/firstrow/goautosocket) for that. See [here](https://github.com/bshuster-repo/logrus-logstash-hook/issues/48#issuecomment-361938249) how it can be done.
 
-Or afterwards:
+# Maintainers
 
-```go
-
-hook.WithFields(logrus.Fields{
-        "hostname":    os.Hostname(),
-        "serviceName": "myServiceName",
-})
-```
-This allows you to set up the hook so logging is available immediately, and add important fields as they become available.
-
-Single fields can be added/updated using 'WithField':
-
-```go
-
-hook.WithField("status", "running")
-```
-
-
-
-## Field prefix
-
-The hook allows you to send logging to logstash and also retain the default std output in text format.
-However to keep this console output readable some fields might need to be omitted from the default non-hooked log output.
-Each hook can be configured with a prefix used to identify fields which are only to be logged to the logstash connection.
-For example if you don't want to see the hostname and serviceName on each log line in the console output you can add a prefix:
-
-```go
-
-
-hook, err := logrustash.NewHookWithFields("tcp", "172.17.0.2:9999", "myappName", logrus.Fields{
-        "_hostname":    os.Hostname(),
-        "_serviceName": "myServiceName",
-})
-...
-hook.WithPrefix("_")
-```
-
-There are also constructors available which allow you to specify the prefix from the start.
-The std-out will not have the '\_hostname' and '\_servicename' fields, and the logstash output will, but the prefix will be dropped from the name.
-
-
-# Authors
-
-Name         | Github    | Twitter    |
------------- | --------- | ---------- |
-Boaz Shuster | ripcurld0 | @ripcurld0 |
+Name         | Github    |
+------------ | --------- |
+Boaz Shuster | boaz0     |
 
 # License
 

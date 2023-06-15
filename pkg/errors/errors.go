@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	errcode "github.com/docker/distribution/registry/api/errcode"
+	errcode "github.com/distribution/distribution/v3/registry/api/errcode"
 )
 
 const errGroup = "openshift"
