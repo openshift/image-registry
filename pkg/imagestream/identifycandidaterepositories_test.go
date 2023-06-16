@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
+	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/diff"

@@ -3,8 +3,8 @@ package manifesthandler
 import (
 	"context"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/manifest/manifestlist"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/opencontainers/go-digest"
 	imageapiv1 "github.com/openshift/api/image/v1"
 )

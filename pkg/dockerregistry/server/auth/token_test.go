@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/distribution/distribution/v3/context"
-	"github.com/distribution/distribution/v3/registry/auth"
+	"github.com/docker/distribution/context"
+	"github.com/docker/distribution/registry/auth"
 )
 
 func checkResolveScopeSpecifiers(t *testing.T, scopes []string, expectedAuth []auth.Access) {

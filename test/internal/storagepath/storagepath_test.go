@@ -5,10 +5,10 @@ import (
 	"io"
 	"testing"
 
-	"github.com/distribution/distribution/v3/reference"
-	"github.com/distribution/distribution/v3/registry/storage"
-	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
-	"github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
+	"github.com/docker/distribution/reference"
+	"github.com/docker/distribution/registry/storage"
+	storagedriver "github.com/docker/distribution/registry/storage/driver"
+	"github.com/docker/distribution/registry/storage/driver/inmemory"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/testutil/logger"

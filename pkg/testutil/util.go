@@ -15,12 +15,12 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/reference"
-	distclient "github.com/distribution/distribution/v3/registry/client"
-	"github.com/distribution/distribution/v3/registry/client/auth"
-	"github.com/distribution/distribution/v3/registry/client/auth/challenge"
-	"github.com/distribution/distribution/v3/registry/client/transport"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/reference"
+	distclient "github.com/docker/distribution/registry/client"
+	"github.com/docker/distribution/registry/client/auth"
+	"github.com/docker/distribution/registry/client/auth/challenge"
+	"github.com/docker/distribution/registry/client/transport"
 	"github.com/opencontainers/go-digest"
 
 	"k8s.io/apimachinery/pkg/util/errors"
@@ -190,7 +190,7 @@ func UploadRandomTestBlob(ctx context.Context, baseURL string, creds auth.Creden
 
 // CreateRandomTarFile creates a random tarfile and returns its content.
 // An error is returned if there is a problem generating valid content.
-// Inspired by github.com/distribution/distribution/testutil/tarfile.go.
+// Inspired by github.com/docker/distribution/testutil/tarfile.go.
 func CreateRandomTarFile() ([]byte, error) {
 	nFiles := 2 // random enough
 

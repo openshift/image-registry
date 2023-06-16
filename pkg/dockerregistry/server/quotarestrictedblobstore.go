@@ -1,4 +1,4 @@
-// Package server wraps repository and blob store objects of distribution/distribution upstream. Most significantly,
+// Package server wraps repository and blob store objects of docker/distribution upstream. Most significantly,
 // the wrappers cause manifests to be stored in OpenShift's etcd store instead of registry's storage.
 // Registry's middleware API is utilized to register the object factories.
 //
@@ -16,8 +16,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/distribution/distribution/v3"
-	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/docker/distribution"
+	dcontext "github.com/docker/distribution/context"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

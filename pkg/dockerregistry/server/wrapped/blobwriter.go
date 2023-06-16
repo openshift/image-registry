@@ -3,7 +3,7 @@ package wrapped
 import (
 	"context"
 
-	"github.com/distribution/distribution/v3"
+	"github.com/docker/distribution"
 )
 
 // blobWriter wraps a distribution.BlobWriter.

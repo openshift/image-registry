@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/distribution/distribution/v3/configuration"
+	"github.com/docker/distribution/configuration"
 	"golang.org/x/crypto/bcrypt"
 
 	corev1 "k8s.io/api/core/v1"

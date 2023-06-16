@@ -6,16 +6,16 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/configuration"
-	"github.com/distribution/distribution/v3/registry/auth"
-	"github.com/distribution/distribution/v3/registry/handlers"
-	registrymw "github.com/distribution/distribution/v3/registry/middleware/registry"
-	repositorymw "github.com/distribution/distribution/v3/registry/middleware/repository"
-	"github.com/distribution/distribution/v3/registry/storage/cache"
-	cacheprovider "github.com/distribution/distribution/v3/registry/storage/cache/provider"
-	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
-	storagemw "github.com/distribution/distribution/v3/registry/storage/driver/middleware"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/configuration"
+	"github.com/docker/distribution/registry/auth"
+	"github.com/docker/distribution/registry/handlers"
+	registrymw "github.com/docker/distribution/registry/middleware/registry"
+	repositorymw "github.com/docker/distribution/registry/middleware/repository"
+	"github.com/docker/distribution/registry/storage/cache"
+	cacheprovider "github.com/docker/distribution/registry/storage/cache/provider"
+	storagedriver "github.com/docker/distribution/registry/storage/driver"
+	storagemw "github.com/docker/distribution/registry/storage/driver/middleware"
 )
 
 // Name is the name which is used to register middlewares.

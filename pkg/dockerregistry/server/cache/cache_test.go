@@ -8,7 +8,7 @@ import (
 
 	clock "k8s.io/utils/clock/testing"
 
-	"github.com/distribution/distribution/v3"
+	"github.com/docker/distribution"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"

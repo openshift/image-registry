@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/distribution/distribution/v3"
-	dcontext "github.com/distribution/distribution/v3/context"
-	registrystorage "github.com/distribution/distribution/v3/registry/storage"
+	"github.com/docker/distribution"
+	dcontext "github.com/docker/distribution/context"
+	registrystorage "github.com/docker/distribution/registry/storage"
 
 	restclient "k8s.io/client-go/rest"
 

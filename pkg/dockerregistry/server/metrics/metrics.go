@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/registry/api/errcode"
-	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/registry/api/errcode"
+	storagedriver "github.com/docker/distribution/registry/storage/driver"
 
 	"github.com/openshift/library-go/pkg/image/registryclient"
 

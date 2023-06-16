@@ -3,7 +3,7 @@ package server
 import (
 	"strings"
 
-	"github.com/distribution/distribution/v3/registry/client/auth"
+	"github.com/docker/distribution/registry/client/auth"
 	dockerregistry "github.com/docker/docker/registry"
 	"github.com/openshift/library-go/pkg/image/registryclient"
 

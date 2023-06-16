@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/distribution/distribution/v3"
-	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/docker/distribution"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/maxconnections"

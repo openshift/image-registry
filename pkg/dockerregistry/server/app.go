@@ -7,11 +7,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/configuration"
-	dcontext "github.com/distribution/distribution/v3/context"
-	registrycache "github.com/distribution/distribution/v3/registry/storage/cache"
-	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/configuration"
+	dcontext "github.com/docker/distribution/context"
+	registrycache "github.com/docker/distribution/registry/storage/cache"
+	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	kubecache "k8s.io/apimachinery/pkg/util/cache"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
@@ -45,13 +45,13 @@ type App struct {
 	writeLimiter   maxconnections.Limiter
 
 	// driver gives access to the blob store.
-	// This variable holds the object created by distribution/distribution. We
+	// This variable holds the object created by docker/distribution. We
 	// import it into our namespace because there are no other ways to access
 	// it. In other cases it is hidden from us.
 	driver storagedriver.StorageDriver
 
 	// registry represents a collection of repositories, addressable by name.
-	// This variable holds the object created by distribution/distribution. We
+	// This variable holds the object created by docker/distribution. We
 	// import it into our namespace because there are no other ways to access
 	// it. In other cases it is hidden from us.
 	registry distribution.Namespace

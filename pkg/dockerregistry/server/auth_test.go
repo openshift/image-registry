@@ -11,10 +11,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/distribution/distribution/v3"
-	dockercfg "github.com/distribution/distribution/v3/configuration"
-	dcontext "github.com/distribution/distribution/v3/context"
-	"github.com/distribution/distribution/v3/registry/auth"
+	"github.com/docker/distribution"
+	dockercfg "github.com/docker/distribution/configuration"
+	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/registry/auth"
 
 	authorizationapi "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

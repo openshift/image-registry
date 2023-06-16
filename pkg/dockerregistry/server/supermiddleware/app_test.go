@@ -11,13 +11,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/configuration"
-	"github.com/distribution/distribution/v3/reference"
-	"github.com/distribution/distribution/v3/registry/auth"
-	"github.com/distribution/distribution/v3/registry/storage/cache"
-	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/configuration"
+	"github.com/docker/distribution/reference"
+	"github.com/docker/distribution/registry/auth"
+	"github.com/docker/distribution/registry/storage/cache"
+	storagedriver "github.com/docker/distribution/registry/storage/driver"
+	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
 )

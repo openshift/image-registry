@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	dcontext "github.com/distribution/distribution/v3/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/auth"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 

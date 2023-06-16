@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/distribution/distribution/v3"
-	dcontext "github.com/distribution/distribution/v3/context"
-	"github.com/distribution/distribution/v3/manifest/schema2"
-	"github.com/distribution/distribution/v3/reference"
-	"github.com/distribution/distribution/v3/registry/storage"
-	"github.com/distribution/distribution/v3/registry/storage/driver"
+	"github.com/docker/distribution"
+	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/manifest/schema2"
+	"github.com/docker/distribution/reference"
+	"github.com/docker/distribution/registry/storage"
+	"github.com/docker/distribution/registry/storage/driver"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
@@ -173,7 +173,7 @@ type Summary struct {
 // On error, the Summary will contain what was deleted so far.
 //
 // TODO(dmage): remove layer links to a blob if the blob is removed or it doesn't belong to the ImageStream.
-// TODO(dmage): keep young blobs (distribution/distribution#2297).
+// TODO(dmage): keep young blobs (docker/distribution#2297).
 func Prune(ctx context.Context, registry distribution.Namespace, registryClient client.RegistryClient, pruner Pruner) (Summary, error) {
 	logger := dcontext.GetLogger(ctx)
 

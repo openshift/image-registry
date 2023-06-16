@@ -6,9 +6,9 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/distribution/distribution/v3"
-	dcontext "github.com/distribution/distribution/v3/context"
-	"github.com/distribution/distribution/v3/manifest/manifestlist"
+	"github.com/docker/distribution"
+	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/manifest/manifestlist"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"k8s.io/apimachinery/pkg/api/errors"

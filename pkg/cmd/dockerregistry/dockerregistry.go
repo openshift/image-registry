@@ -18,24 +18,24 @@ import (
 	logrus_logstash "github.com/bshuster-repo/logrus-logstash-hook"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/distribution/distribution/v3/configuration"
-	dcontext "github.com/distribution/distribution/v3/context"
-	"github.com/distribution/distribution/v3/health"
-	"github.com/distribution/distribution/v3/uuid"
-	distversion "github.com/distribution/distribution/v3/version"
+	"github.com/docker/distribution/configuration"
+	dcontext "github.com/docker/distribution/context"
+	"github.com/docker/distribution/health"
+	"github.com/docker/distribution/uuid"
+	distversion "github.com/docker/distribution/version"
 
-	_ "github.com/distribution/distribution/v3/registry/auth/htpasswd"
-	_ "github.com/distribution/distribution/v3/registry/auth/token"
+	_ "github.com/docker/distribution/registry/auth/htpasswd"
+	_ "github.com/docker/distribution/registry/auth/token"
 
-	_ "github.com/distribution/distribution/v3/registry/proxy"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/azure"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/filesystem"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/gcs"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/middleware/cloudfront"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/oss"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/s3-aws"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/swift"
+	_ "github.com/docker/distribution/registry/proxy"
+	_ "github.com/docker/distribution/registry/storage/driver/azure"
+	_ "github.com/docker/distribution/registry/storage/driver/filesystem"
+	_ "github.com/docker/distribution/registry/storage/driver/gcs"
+	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
+	_ "github.com/docker/distribution/registry/storage/driver/middleware/cloudfront"
+	_ "github.com/docker/distribution/registry/storage/driver/oss"
+	_ "github.com/docker/distribution/registry/storage/driver/s3-aws"
+	_ "github.com/docker/distribution/registry/storage/driver/swift"
 
 	"github.com/openshift/library-go/pkg/crypto"
 
@@ -48,16 +48,14 @@ import (
 	"github.com/openshift/image-registry/pkg/version"
 )
 
-var (
-	experimental            = flag.Bool("experimental", false, "enable experimental features")
-	pruneMode               = flag.String("prune", "", "prune blobs from the storage and exit (check, delete)")
-	restoreMode             = flag.String("restore-mode", "", "check data corruption or recover storage data if possible (valid values: check, check-database, check-storage, recover)")
-	restoreNamespace        = flag.String("restore-namespace", "", "check and recover only specified namespace")
-	listRepositories        = flag.Bool("list-repositories", false, "shows list of repositories")
-	listBlobs               = flag.Bool("list-blobs", false, "shows list of blob digests stored in the storage")
-	listManifests           = flag.Bool("list-manifests", false, "shows list of manifest digests stored in the storage")
-	listRepositoryManifests = flag.String("list-manifests-from", "", "shows the manifest digests in the specified repository")
-)
+var experimental = flag.Bool("experimental", false, "enable experimental features")
+var pruneMode = flag.String("prune", "", "prune blobs from the storage and exit (check, delete)")
+var restoreMode = flag.String("restore-mode", "", "check data corruption or recover storage data if possible (valid values: check, check-database, check-storage, recover)")
+var restoreNamespace = flag.String("restore-namespace", "", "check and recover only specified namespace")
+var listRepositories = flag.Bool("list-repositories", false, "shows list of repositories")
+var listBlobs = flag.Bool("list-blobs", false, "shows list of blob digests stored in the storage")
+var listManifests = flag.Bool("list-manifests", false, "shows list of manifest digests stored in the storage")
+var listRepositoryManifests = flag.String("list-manifests-from", "", "shows the manifest digests in the specified repository")
 
 func versionFields() map[interface{}]interface{} {
 	return map[interface{}]interface{}{
@@ -305,7 +303,9 @@ func configureLogging(ctx context.Context, config *configuration.Configuration) 
 			TimestampFormat: time.RFC3339Nano,
 		})
 	case "logstash":
-		log.SetFormatter(logrus_logstash.DefaultFormatter(log.Fields{}))
+		log.SetFormatter(&logrus_logstash.LogstashFormatter{
+			TimestampFormat: time.RFC3339Nano,
+		})
 	default:
 		// just let the library use default on empty string.
 		if config.Log.Formatter != "" {
