@@ -13,44 +13,26 @@ const HeaderOSSPrefix = "x-oss-"
 
 var ossParamsToSign = map[string]bool{
 	"acl":                          true,
-	"append":                       true,
-	"bucketInfo":                   true,
-	"cname":                        true,
-	"comp":                         true,
-	"cors":                         true,
 	"delete":                       true,
-	"endTime":                      true,
-	"img":                          true,
-	"lifecycle":                    true,
-	"live":                         true,
 	"location":                     true,
 	"logging":                      true,
-	"objectMeta":                   true,
+	"notification":                 true,
 	"partNumber":                   true,
-	"position":                     true,
-	"qos":                          true,
-	"referer":                      true,
-	"replication":                  true,
-	"replicationLocation":          true,
-	"replicationProgress":          true,
+	"policy":                       true,
+	"requestPayment":               true,
+	"torrent":                      true,
+	"uploadId":                     true,
+	"uploads":                      true,
+	"versionId":                    true,
+	"versioning":                   true,
+	"versions":                     true,
+	"response-content-type":        true,
+	"response-content-language":    true,
+	"response-expires":             true,
 	"response-cache-control":       true,
 	"response-content-disposition": true,
 	"response-content-encoding":    true,
-	"response-content-language":    true,
-	"response-content-type":        true,
-	"response-expires":             true,
-	"security-token":               true,
-	"startTime":                    true,
-	"status":                       true,
-	"style":                        true,
-	"styleName":                    true,
-	"symlink":                      true,
-	"tagging":                      true,
-	"uploadId":                     true,
-	"uploads":                      true,
-	"vod":                          true,
-	"website":                      true,
-	"x-oss-process":                true,
+	"bucketInfo":                   true,
 }
 
 func (client *Client) signRequest(request *request) {
@@ -80,7 +62,7 @@ func (client *Client) signRequest(request *request) {
 	}
 
 	if len(params) > 0 {
-		resource = resource + "?" + util.EncodeWithoutEscape(params)
+		resource = resource + "?" + util.Encode(params)
 	}
 
 	canonicalizedResource := resource
@@ -92,7 +74,7 @@ func (client *Client) signRequest(request *request) {
 	//log.Println("stringToSign: ", stringToSign)
 	signature := util.CreateSignature(stringToSign, client.AccessKeySecret)
 
-	if urlSignature {
+	if query.Get("OSSAccessKeyId") != "" {
 		query.Set("Signature", signature)
 	} else {
 		headers.Set("Authorization", "OSS "+client.AccessKeyId+":"+signature)

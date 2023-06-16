@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/reference"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/reference"
 )
 
 // registry wraps upstream registry object and overrides some of its methods

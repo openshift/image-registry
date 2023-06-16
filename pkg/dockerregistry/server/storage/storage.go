@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/reference"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/reference"
 	"github.com/opencontainers/go-digest"
 )
 

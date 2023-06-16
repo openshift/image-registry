@@ -7,10 +7,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/distribution/distribution/v3/configuration"
-	"github.com/distribution/distribution/v3/context"
-	"github.com/distribution/distribution/v3/registry/storage"
-	"github.com/distribution/distribution/v3/registry/storage/driver/factory"
+	"github.com/docker/distribution/configuration"
+	"github.com/docker/distribution/context"
+	"github.com/docker/distribution/registry/storage"
+	"github.com/docker/distribution/registry/storage/driver/factory"
 	"github.com/opencontainers/go-digest"
 
 	registryconfig "github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"

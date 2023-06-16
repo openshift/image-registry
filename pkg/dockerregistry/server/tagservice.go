@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/registry/api/v2"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/registry/api/v2"
 
 	"github.com/openshift/image-registry/pkg/imagestream"
 )

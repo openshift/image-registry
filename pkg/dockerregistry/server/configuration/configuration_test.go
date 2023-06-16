@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/distribution/distribution/v3/configuration"
+	"github.com/docker/distribution/configuration"
 )
 
 var configYamlV0_1 = `

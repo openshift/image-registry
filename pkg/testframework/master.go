@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/distribution/distribution/v3"
+	"github.com/docker/distribution"
 	"github.com/pborman/uuid"
 
 	corev1 "k8s.io/api/core/v1"

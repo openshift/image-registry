@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/distribution/distribution/v3/context"
+	"github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

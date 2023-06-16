@@ -3,10 +3,10 @@ package supermiddleware
 import (
 	"context"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/reference"
-	"github.com/distribution/distribution/v3/registry/storage"
-	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/reference"
+	"github.com/docker/distribution/registry/storage"
+	storagedriver "github.com/docker/distribution/registry/storage/driver"
 )
 
 type registry struct {

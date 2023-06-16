@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	dcontext "github.com/distribution/distribution/v3/context"
+	dcontext "github.com/docker/distribution/context"
 	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"

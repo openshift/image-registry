@@ -11,10 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/configuration"
-	"github.com/distribution/distribution/v3/registry/api/errcode"
-	registryauth "github.com/distribution/distribution/v3/registry/auth"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/configuration"
+	"github.com/docker/distribution/registry/api/errcode"
+	"github.com/docker/distribution/registry/api/v2"
+	registryauth "github.com/docker/distribution/registry/auth"
 	"github.com/opencontainers/go-digest"
 
 	registryclient "github.com/openshift/image-registry/pkg/dockerregistry/server/client"
@@ -89,6 +90,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 
 	app := NewApp(ctx, registryclient.NewFakeRegistryClient(imageClient), dockercfg, cfg, nil)
 	server := httptest.NewServer(app)
+	router := v2.Router()
 
 	serverURL, err := url.Parse(server.URL)
 	if err != nil {
@@ -105,7 +107,6 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to get transport for %s: %v", repoName, err)
 	}
-
 	repo, err := testutil.NewRepository(repoName, server.URL, transport)
 	if err != nil {
 		t.Fatalf("failed to get repository %s: %v", repoName, err)
@@ -132,7 +133,14 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 	doTest := func(tc testCase) {
 		m.clearStats()
 
-		req, err := http.NewRequest(tc.method, serverURL.String()+tc.endpoint, nil)
+		route := router.GetRoute(tc.endpoint).Host(serverURL.Host)
+		u, err := route.URL(tc.vars...)
+		if err != nil {
+			t.Errorf("[%s] failed to build route: %v", tc.name, err)
+			return
+		}
+
+		req, err := http.NewRequest(tc.method, u.String(), nil)
 		if err != nil {
 			t.Errorf("[%s] failed to make request: %v", tc.name, err)
 		}
@@ -184,9 +192,13 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 
 	for _, tc := range []testCase{
 		{
-			name:           "get blob",
-			method:         http.MethodGet,
-			endpoint:       fmt.Sprintf("/v2/user/app/blobs/%s", desc.Digest.String()),
+			name:     "get blob",
+			method:   http.MethodGet,
+			endpoint: v2.RouteNameBlob,
+			vars: []string{
+				"name", "user/app",
+				"digest", desc.Digest.String(),
+			},
 			expectedStatus: http.StatusOK,
 			// 1st stat is invoked in (*distribution/registry/handlers.blobHandler).GetBlob() as a
 			//   check of blob existence
@@ -197,9 +209,13 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		},
 
 		{
-			name:           "stat blob",
-			method:         http.MethodHead,
-			endpoint:       fmt.Sprintf("/v2/user/app/blobs/%s", desc.Digest.String()),
+			name:     "stat blob",
+			method:   http.MethodHead,
+			endpoint: v2.RouteNameBlob,
+			vars: []string{
+				"name", "user/app",
+				"digest", desc.Digest.String(),
+			},
 			expectedStatus: http.StatusOK,
 			// 1st stat is invoked in (*distribution/registry/handlers.blobHandler).GetBlob() as a
 			//   check of blob existence
@@ -210,9 +226,13 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		},
 
 		{
-			name:                      "delete blob",
-			method:                    http.MethodDelete,
-			endpoint:                  fmt.Sprintf("/v2/user/app/blobs/%s", desc.Digest.String()),
+			name:     "delete blob",
+			method:   http.MethodDelete,
+			endpoint: v2.RouteNameBlob,
+			vars: []string{
+				"name", "user/app",
+				"digest", desc.Digest.String(),
+			},
 			expectedStatus:            http.StatusAccepted,
 			expectedMethodInvocations: map[string]int{"Stat": 1, "Clear": 1},
 		},
@@ -220,7 +240,11 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		{
 			name:     "delete manifest",
 			method:   http.MethodDelete,
-			endpoint: fmt.Sprintf("/v2/user/app/manifests/%s", string(manifestDigest)),
+			endpoint: v2.RouteNameManifest,
+			vars: []string{
+				"name", "user/app",
+				"reference", string(manifestDigest),
+			},
 			// we don't allow to delete layer links when they have references
 			// from the image stream (though, in this case there is no layer
 			// links)
@@ -230,7 +254,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		{
 			name:     "get manifest",
 			method:   http.MethodGet,
-			endpoint: fmt.Sprintf("/v2/user/app/manifests/latest"),
+			endpoint: v2.RouteNameManifest,
 			vars: []string{
 				"name", "user/app",
 				"reference", "latest",
@@ -378,7 +402,6 @@ func (bs *testBlobDescriptorService) Stat(ctx context.Context, dgst digest.Diges
 
 	return bs.BlobDescriptorService.Stat(ctx, dgst)
 }
-
 func (bs *testBlobDescriptorService) Clear(ctx context.Context, dgst digest.Digest) error {
 	if bs.m != nil {
 		bs.m.methodInvoked("Clear")

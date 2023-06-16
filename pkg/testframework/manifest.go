@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/distribution/distribution/v3"
+	"github.com/docker/distribution"
 	"github.com/opencontainers/go-digest"
 	"github.com/pborman/uuid"
 

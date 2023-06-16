@@ -7,8 +7,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/diff"
 
-	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/manifest/schema1"
+	"github.com/docker/distribution"
+	"github.com/docker/distribution/manifest/schema1"
 	"github.com/opencontainers/go-digest"
 )
 
