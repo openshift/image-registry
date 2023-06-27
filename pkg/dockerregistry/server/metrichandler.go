@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/docker/distribution/registry/auth"
-	"github.com/docker/distribution/registry/handlers"
+	"github.com/distribution/distribution/v3/registry/auth"
+	"github.com/distribution/distribution/v3/registry/handlers"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/api"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"

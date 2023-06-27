@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	dcontext "github.com/docker/distribution/context"
+	dcontext "github.com/distribution/distribution/v3/context"
 	"github.com/opencontainers/go-digest"
 
 	corev1 "k8s.io/api/core/v1"

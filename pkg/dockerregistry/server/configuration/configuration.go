@@ -15,8 +15,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
-	//"github.com/docker/distribution/registry/auth"
-	"github.com/docker/distribution/configuration"
+	//"github.com/distribution/distribution/registry/auth"
+	"github.com/distribution/distribution/v3/configuration"
 )
 
 // Environment variables.

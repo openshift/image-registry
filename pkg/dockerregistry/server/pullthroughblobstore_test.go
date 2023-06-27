@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/distribution"
-	dcontext "github.com/docker/distribution/context"
-	"github.com/docker/distribution/manifest/schema1"
-	_ "github.com/docker/distribution/registry/storage/driver/inmemory"
+	"github.com/distribution/distribution/v3"
+	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/distribution/distribution/v3/manifest/schema1"
+	_ "github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
 	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
@@ -263,8 +263,8 @@ func TestPullthroughServeNotSeekableBlob(t *testing.T) {
 				// In this case the docker client library will make a not
 				// truly seekable response [2].
 				//
-				// [1]: https://github.com/docker/distribution/blob/7484e51bf6af0d3b1a849644cdaced3cfcf13617/registry/client/transport/http_reader.go#L239
-				// [2]: https://github.com/docker/distribution/blob/7484e51bf6af0d3b1a849644cdaced3cfcf13617/registry/client/transport/http_reader.go#L119-L121
+				// [1]: https://github.com/distribution/distribution/blob/7484e51bf6af0d3b1a849644cdaced3cfcf13617/registry/client/transport/http_reader.go#L239
+				// [2]: https://github.com/distribution/distribution/blob/7484e51bf6af0d3b1a849644cdaced3cfcf13617/registry/client/transport/http_reader.go#L119-L121
 				w.WriteHeader(http.StatusNonAuthoritativeInfo)
 				w.Write(blob)
 			}

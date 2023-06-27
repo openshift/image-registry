@@ -7,7 +7,7 @@ import (
 )
 
 // ErrManifestBlobBadSize is returned when the blob size in a manifest does
-// not match the actual size. The docker/distribution does not check this and
+// not match the actual size. The distribution/distribution does not check this and
 // therefore does not provide an error for this.
 type ErrManifestBlobBadSize struct {
 	Digest         digest.Digest

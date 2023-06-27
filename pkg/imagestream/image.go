@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	dcontext "github.com/docker/distribution/context"
+	dcontext "github.com/distribution/distribution/v3/context"
 	"github.com/opencontainers/go-digest"
 
 	kerrors "k8s.io/apimachinery/pkg/api/errors"

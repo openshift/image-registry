@@ -6,13 +6,13 @@ import (
 
 	kubecache "k8s.io/apimachinery/pkg/util/cache"
 
-	"github.com/docker/distribution"
-	dockercfg "github.com/docker/distribution/configuration"
-	"github.com/docker/distribution/registry/storage"
-	dockercache "github.com/docker/distribution/registry/storage/cache"
-	"github.com/docker/distribution/registry/storage/cache/memory"
-	"github.com/docker/distribution/registry/storage/driver"
-	"github.com/docker/distribution/registry/storage/driver/inmemory"
+	"github.com/distribution/distribution/v3"
+	dockercfg "github.com/distribution/distribution/v3/configuration"
+	"github.com/distribution/distribution/v3/registry/storage"
+	dockercache "github.com/distribution/distribution/v3/registry/storage/cache"
+	"github.com/distribution/distribution/v3/registry/storage/cache/memory"
+	"github.com/distribution/distribution/v3/registry/storage/driver"
+	"github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
@@ -88,7 +88,7 @@ func newTestRegistry(
 		storage.EnableRedirect,
 	}
 	if useBlobDescriptorCacheProvider {
-		cacheProvider := dockercache.BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider())
+		cacheProvider := dockercache.BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider(-1))
 		opts = append(opts, storage.BlobDescriptorCacheProvider(cacheProvider))
 	}
 

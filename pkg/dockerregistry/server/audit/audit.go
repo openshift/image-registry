@@ -3,7 +3,7 @@ package audit
 import (
 	"context"
 
-	"github.com/docker/distribution"
+	"github.com/distribution/distribution/v3"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
 )
