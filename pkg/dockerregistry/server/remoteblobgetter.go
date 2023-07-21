@@ -13,6 +13,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	cfgv1 "github.com/openshift/client-go/config/clientset/versioned/typed/config/v1"
 	operatorv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
 	"github.com/openshift/library-go/pkg/image/registryclient"
 
@@ -72,6 +73,8 @@ type remoteBlobGetterService struct {
 	digestToStore *digestBlobStoreCache
 	metrics       metrics.Pullthrough
 	icsp          operatorv1alpha1.ImageContentSourcePolicyInterface
+	idms          cfgv1.ImageDigestMirrorSetInterface
+	itms          cfgv1.ImageTagMirrorSetInterface
 }
 
 var _ BlobGetterService = &remoteBlobGetterService{}
@@ -84,6 +87,8 @@ func NewBlobGetterService(
 	cache cache.RepositoryDigest,
 	m metrics.Pullthrough,
 	icsp operatorv1alpha1.ImageContentSourcePolicyInterface,
+	idms cfgv1.ImageDigestMirrorSetInterface,
+	itms cfgv1.ImageTagMirrorSetInterface,
 ) BlobGetterService {
 	return &remoteBlobGetterService{
 		imageStream:   imageStream,
@@ -92,6 +97,8 @@ func NewBlobGetterService(
 		digestToStore: newDigestBlobStoreCache(m),
 		metrics:       m,
 		icsp:          icsp,
+		idms:          idms,
+		itms:          itms,
 	}
 }
 
@@ -295,7 +302,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 			continue
 		}
 
-		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics, rbgs.icsp)
+		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics, rbgs.icsp, rbgs.idms, rbgs.itms)
 		if impErr != nil {
 			return distribution.Descriptor{}, nil, impErr
 		}
@@ -317,7 +324,7 @@ func (rbgs *remoteBlobGetterService) findCandidateRepository(
 			continue
 		}
 
-		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics, rbgs.icsp)
+		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics, rbgs.icsp, rbgs.idms, rbgs.itms)
 		if impErr != nil {
 			return distribution.Descriptor{}, nil, impErr
 		}
