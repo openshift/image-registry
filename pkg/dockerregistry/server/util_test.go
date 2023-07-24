@@ -9,7 +9,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	cfgfake "github.com/openshift/client-go/config/clientset/versioned/fake"
 	operatorfake "github.com/openshift/client-go/operator/clientset/versioned/fake"
 	"github.com/openshift/library-go/pkg/image/registryclient"
 
@@ -29,8 +28,6 @@ func (m *mockMetricsPullThrough) DigestBlobStoreCache() metrics.Cache {
 
 func Test_getImportContext(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
-	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
-	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	tmpCredDir, err := ioutil.TempDir("", "credentials")
 	if err != nil {
 		t.Fatalf("error creating temp dir: %v", err)
@@ -144,7 +141,7 @@ func Test_getImportContext(t *testing.T) {
 			}
 
 			retriever, err := getImportContext(
-				ctx, tt.ref, tt.secrets, &mockMetricsPullThrough{}, icsp, idms, itms,
+				ctx, tt.ref, tt.secrets, &mockMetricsPullThrough{}, icsp,
 			)
 			if err != nil {
 				if len(tt.err) == 0 {
