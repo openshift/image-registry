@@ -20,7 +20,6 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
-	cfgfake "github.com/openshift/client-go/config/clientset/versioned/fake"
 	operatorfake "github.com/openshift/client-go/operator/clientset/versioned/fake"
 	"github.com/openshift/library-go/pkg/image/registryclient"
 
@@ -36,8 +35,6 @@ import (
 
 func TestPullthroughServeBlob(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
-	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
-	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
@@ -174,8 +171,6 @@ func TestPullthroughServeBlob(t *testing.T) {
 			cache,
 			metrics.NewNoopMetrics(),
 			icsp,
-			idms,
-			itms,
 		)
 
 		ptbs := &pullthroughBlobStore{
@@ -336,8 +331,6 @@ func TestPullthroughServeNotSeekableBlob(t *testing.T) {
 
 func TestPullthroughServeBlobInsecure(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
-	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
-	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	namespace := "user"
 	repo1 := "app1"
 	repo2 := "app2"
@@ -615,8 +608,6 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 				cache,
 				metrics.NewNoopMetrics(),
 				icsp,
-				idms,
-				itms,
 			)
 
 			ptbs := &pullthroughBlobStore{
@@ -684,8 +675,6 @@ func TestPullthroughServeBlobInsecure(t *testing.T) {
 
 func TestPullthroughMetrics(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
-	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
-	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
 	ctx := context.Background()
 	ctx = testutil.WithTestLogger(ctx, t)
 
@@ -746,8 +735,6 @@ func TestPullthroughMetrics(t *testing.T) {
 		cache,
 		metrics.NewMetrics(sink),
 		icsp,
-		idms,
-		itms,
 	)
 
 	ptbs := &pullthroughBlobStore{
