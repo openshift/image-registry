@@ -581,13 +581,6 @@ openshift:
 		expected string
 	}{
 		{
-			setenv: []env{
-				{name: "DOCKER_REGISTRY_SERVICE_HOST", value: "DOCKER_REGISTRY_SERVICE_HOST"},
-				{name: "DOCKER_REGISTRY_SERVICE_PORT", value: "DOCKER_REGISTRY_SERVICE_PORT"},
-			},
-			expected: "DOCKER_REGISTRY_SERVICE_HOST:DOCKER_REGISTRY_SERVICE_PORT",
-		},
-		{
 			setenv:   []env{{name: "REGISTRY_OPENSHIFT_SERVER_ADDR", value: "REGISTRY_OPENSHIFT_SERVER_ADDR"}},
 			expected: "REGISTRY_OPENSHIFT_SERVER_ADDR",
 		},
@@ -598,10 +591,6 @@ openshift:
 		{
 			setenv:   []env{{name: "DOCKER_REGISTRY_URL", value: "DOCKER_REGISTRY_URL"}},
 			expected: "DOCKER_REGISTRY_URL",
-		},
-		{
-			setenv:   []env{{name: "OPENSHIFT_DEFAULT_REGISTRY", value: "OPENSHIFT_DEFAULT_REGISTRY"}},
-			expected: "OPENSHIFT_DEFAULT_REGISTRY",
 		},
 	}
 
@@ -662,10 +651,6 @@ openshift:
 		{
 			setenv:   []env{{name: "DOCKER_REGISTRY_URL", value: "DOCKER_REGISTRY_URL"}},
 			expected: "DOCKER_REGISTRY_URL",
-		},
-		{
-			setenv:   []env{{name: "OPENSHIFT_DEFAULT_REGISTRY", value: "OPENSHIFT_DEFAULT_REGISTRY"}},
-			expected: "OPENSHIFT_DEFAULT_REGISTRY",
 		},
 	}
 
