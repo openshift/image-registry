@@ -126,8 +126,11 @@ type registryClient struct {
 
 // NewRegistryClient provides a new registry client.
 func NewRegistryClient(config *clientcmd.Config) RegistryClient {
+	cfg := config.KubeConfig()
+	cfg.QPS = 100
+	cfg.Burst = 200
 	return &registryClient{
-		kubeConfig: config.KubeConfig(),
+		kubeConfig: cfg,
 	}
 }
 
