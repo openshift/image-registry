@@ -113,6 +113,6 @@ require (
 )
 
 replace (
-	github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20230317150742-a788b04c05e2+incompatible
+	github.com/docker/distribution => github.com/openshift/docker-distribution v2.5.0-rc.1.0.20230922145829-5c6ad16410eb+incompatible
 	google.golang.org/api => google.golang.org/api v0.0.0-20160322025152-9bf6e6e569ff
 )
