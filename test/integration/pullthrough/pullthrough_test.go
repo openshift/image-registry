@@ -298,15 +298,6 @@ func TestPullThroughICSP(t *testing.T) {
 
 	opclient := operatorclientv1alpha1.NewForConfigOrDie(master.AdminKubeConfig())
 	imgclient := imageclientv1.NewForConfigOrDie(testuser.KubeConfig())
-	cfgclient := cfgclientv1.NewForConfigOrDie(master.AdminKubeConfig())
-
-	idmsList, err := cfgclient.ImageDigestMirrorSets().List(ctx, metav1.ListOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(idmsList.Items) > 0 {
-		t.Skip("default IDMS mirror configuration exists, can't create ImageContentSourcePolicy when ImageDigestMirrorSet resources exist. Consider update the test")
-	}
 
 	imageData, err := testframework.NewSchema2ImageData()
 	if err != nil {
@@ -480,17 +471,8 @@ func TestPullThroughIDMS(t *testing.T) {
 	testuser := master.CreateUser("testuser", "testp@ssw0rd")
 	master.CreateProject(namespace, testuser.Name)
 
-	opclient := operatorclientv1alpha1.NewForConfigOrDie(master.AdminKubeConfig())
 	cfgclient := cfgclientv1.NewForConfigOrDie(master.AdminKubeConfig())
 	imgclient := imageclientv1.NewForConfigOrDie(testuser.KubeConfig())
-
-	icspList, err := opclient.ImageContentSourcePolicies().List(ctx, metav1.ListOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(icspList.Items) > 0 {
-		t.Skip("default ICSP mirror configuration exists, can't create ImageDigestMirrorSet when ImageContentSourcePolicy resources exist. Consider update the test")
-	}
 
 	imageData, err := testframework.NewSchema2ImageData()
 	if err != nil {
@@ -664,17 +646,8 @@ func TestPullThroughITMS(t *testing.T) {
 	testuser := master.CreateUser("testuser", "testp@ssw0rd")
 	master.CreateProject(namespace, testuser.Name)
 
-	opclient := operatorclientv1alpha1.NewForConfigOrDie(master.AdminKubeConfig())
 	cfgclient := cfgclientv1.NewForConfigOrDie(master.AdminKubeConfig())
 	imgclient := imageclientv1.NewForConfigOrDie(testuser.KubeConfig())
-
-	icspList, err := opclient.ImageContentSourcePolicies().List(ctx, metav1.ListOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(icspList.Items) > 0 {
-		t.Skip("default ICSP mirror configuration exists, can't create ImageTagMirrorSet when ImageContentSourcePolicy resources exist. Consider update the test")
-	}
 
 	imageData, err := testframework.NewSchema2ImageData()
 	if err != nil {

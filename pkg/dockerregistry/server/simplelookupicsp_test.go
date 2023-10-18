@@ -442,3 +442,122 @@ func newITMSRule(r rule) runtime.Object {
 		},
 	}
 }
+
+func TestFirstRequestICSPandIDMS(t *testing.T) {
+	for _, tt := range []struct {
+		name      string
+		icsprules []rule
+		idmsrules []rule
+		itmsrules []rule
+		ref       string
+		res       []reference.DockerImageReference
+	}{
+		{
+			name: "multiple mirrors",
+			ref:  "i.do.not.exist/repo/image:latest",
+			res: []reference.DockerImageReference{
+				{
+					Registry:  "i.exist",
+					Namespace: "ns0",
+					Name:      "img0",
+				},
+				{
+					Registry:  "i.also.exist",
+					Namespace: "ns1",
+					Name:      "img1",
+				},
+				{
+					Registry:  "i.also.exist",
+					Namespace: "ns2",
+					Name:      "img2",
+				},
+				{
+					Registry:  "me.too",
+					Namespace: "ns2",
+					Name:      "img2",
+				},
+				{
+					Registry:  "i.do.not.exist",
+					Namespace: "repo",
+					Name:      "image",
+				},
+			},
+			idmsrules: []rule{
+				{
+					name: "rule",
+					ruleElement: []element{
+						{source: "i.do.not.exist/repo/image",
+							mirrors: []string{
+								"i.also.exist/ns1/img1",
+							}},
+					},
+				},
+			},
+			icsprules: []rule{
+				{
+					name: "rule",
+					ruleElement: []element{
+						{source: "i.do.not.exist/repo/image",
+							mirrors: []string{
+								"i.exist/ns0/img0",
+							}},
+					},
+				},
+			},
+			itmsrules: []rule{
+				{
+					name: "rule",
+					ruleElement: []element{
+						{source: "i.do.not.exist/repo/image",
+							mirrors: []string{
+								"i.also.exist/ns2/img2",
+								"me.too/ns2/img2",
+							}},
+					},
+				},
+			},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			icspRules := []runtime.Object{}
+			for _, rule := range tt.icsprules {
+				icspRules = append(icspRules, newICSPRule(rule))
+			}
+
+			cli := fake.NewSimpleClientset(icspRules...)
+
+			idmsRules := []runtime.Object{}
+			for _, rule := range tt.idmsrules {
+				idmsRules = append(idmsRules, newIDMSRule(rule))
+			}
+
+			itmsRules := []runtime.Object{}
+			for _, rule := range tt.itmsrules {
+				itmsRules = append(itmsRules, newITMSRule(rule))
+			}
+
+			cfgcli := cfgfake.NewSimpleClientset(append(idmsRules, itmsRules...)...)
+
+			lookup := NewSimpleLookupImageMirrorSetsStrategy(
+				cli.OperatorV1alpha1().ImageContentSourcePolicies(),
+				cfgcli.ConfigV1().ImageDigestMirrorSets(),
+				cfgcli.ConfigV1().ImageTagMirrorSets(),
+			)
+
+			ref, err := reference.Parse(tt.ref)
+			if err != nil {
+				t.Fatalf("unexpected error parsing reference: %s", err)
+			}
+
+			alternates, err := lookup.FirstRequest(context.Background(), ref)
+			if err != nil {
+				t.Fatalf("FirstRequest does not return error, received: %s", err)
+			}
+
+			if !reflect.DeepEqual(alternates, tt.res) {
+				t.Errorf("expected %+v, received %+v", tt.res, alternates)
+			}
+		})
+
+	}
+}
