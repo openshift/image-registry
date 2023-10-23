@@ -105,7 +105,7 @@ func testConfigurationOverwriteEnv(t *testing.T, config string) {
 }
 
 func TestConfigurationOverwriteEnv(t *testing.T) {
-	var configYaml = `
+	configYaml := `
 version: 0.1
 storage:
   inmemory: {}
@@ -121,7 +121,7 @@ openshift:
 }
 
 func TestConfigurationWithEmptyOpenshiftOverwriteEnv(t *testing.T) {
-	var configYaml = `
+	configYaml := `
 version: 0.1
 storage:
   inmemory: {}
@@ -130,7 +130,7 @@ storage:
 }
 
 func TestDockerConfigurationError(t *testing.T) {
-	var badDockerConfigYamlV0_1 = `
+	badDockerConfigYamlV0_1 := `
 version: 0.1
 http:
   addr: :5000
@@ -147,7 +147,7 @@ storage:
 }
 
 func TestExtraConfigurationError(t *testing.T) {
-	var badExtraConfigYaml = `
+	badExtraConfigYaml := `
 version: 0.1
 http:
   addr: :5000
@@ -167,7 +167,7 @@ openshift:
 }
 
 func TestEmptyExtraConfigurationError(t *testing.T) {
-	var emptyExtraConfigYaml = `
+	emptyExtraConfigYaml := `
 version: 0.1
 http:
   addr: :5000
@@ -186,7 +186,7 @@ storage:
 }
 
 func TestExtraConfigurationVersionError(t *testing.T) {
-	var badExtraConfigYaml = `
+	badExtraConfigYaml := `
 version: 0.1
 http:
   addr: :5000
@@ -458,7 +458,7 @@ middleware:
 }
 
 func TestMiddlewareMigration(t *testing.T) {
-	var inputConfigYaml = `
+	inputConfigYaml := `
 version: 0.1
 log:
   level: debug
@@ -492,7 +492,7 @@ openshift:
   server:
     addr: :5000
 `
-	var expectConfigYaml = `
+	expectConfigYaml := `
 version: 0.1
 log:
   level: debug
@@ -563,7 +563,7 @@ openshift:
 }
 
 func TestServerAddrEnvOrder(t *testing.T) {
-	var configYaml = `
+	configYaml := `
 version: 0.1
 http:
   addr: :5000
@@ -581,13 +581,6 @@ openshift:
 		expected string
 	}{
 		{
-			setenv: []env{
-				{name: "DOCKER_REGISTRY_SERVICE_HOST", value: "DOCKER_REGISTRY_SERVICE_HOST"},
-				{name: "DOCKER_REGISTRY_SERVICE_PORT", value: "DOCKER_REGISTRY_SERVICE_PORT"},
-			},
-			expected: "DOCKER_REGISTRY_SERVICE_HOST:DOCKER_REGISTRY_SERVICE_PORT",
-		},
-		{
 			setenv:   []env{{name: "REGISTRY_OPENSHIFT_SERVER_ADDR", value: "REGISTRY_OPENSHIFT_SERVER_ADDR"}},
 			expected: "REGISTRY_OPENSHIFT_SERVER_ADDR",
 		},
@@ -598,10 +591,6 @@ openshift:
 		{
 			setenv:   []env{{name: "DOCKER_REGISTRY_URL", value: "DOCKER_REGISTRY_URL"}},
 			expected: "DOCKER_REGISTRY_URL",
-		},
-		{
-			setenv:   []env{{name: "OPENSHIFT_DEFAULT_REGISTRY", value: "OPENSHIFT_DEFAULT_REGISTRY"}},
-			expected: "OPENSHIFT_DEFAULT_REGISTRY",
 		},
 	}
 
@@ -621,7 +610,7 @@ openshift:
 }
 
 func TestServerAddrConfigPriority(t *testing.T) {
-	var configYaml = `
+	configYaml := `
 version: 0.1
 http:
   addr: :5000
@@ -663,10 +652,6 @@ openshift:
 			setenv:   []env{{name: "DOCKER_REGISTRY_URL", value: "DOCKER_REGISTRY_URL"}},
 			expected: "DOCKER_REGISTRY_URL",
 		},
-		{
-			setenv:   []env{{name: "OPENSHIFT_DEFAULT_REGISTRY", value: "OPENSHIFT_DEFAULT_REGISTRY"}},
-			expected: "OPENSHIFT_DEFAULT_REGISTRY",
-		},
 	}
 
 	for _, test := range testCases {
@@ -685,7 +670,7 @@ openshift:
 }
 
 func TestAudit(t *testing.T) {
-	var configYaml = `
+	configYaml := `
 version: 0.1
 http:
   addr: :5000
@@ -716,7 +701,7 @@ openshift:
 }
 
 func testDisableInmemoryCacheName(t *testing.T, field string) {
-	var configYaml = `
+	configYaml := `
 version: 0.1
 http:
   addr: :5000
@@ -747,7 +732,7 @@ func testDisableInmemoryCache(t *testing.T) {
 }
 
 func testPreserveRedisCacheName(t *testing.T, field string) {
-	var configYaml = `
+	configYaml := `
 version: 0.1
 http:
   addr: :5000
@@ -784,7 +769,7 @@ func TestPreserveRedisCache(t *testing.T) {
 }
 
 func TestDisabledMiddleware(t *testing.T) {
-	var inputConfigYaml = `
+	inputConfigYaml := `
 version: 0.1
 storage:
   inmemory: {}
@@ -801,7 +786,7 @@ openshift:
   server:
     addr: "localhost:5000"
 `
-	var expectConfigYaml = `
+	expectConfigYaml := `
 version: 0.1
 storage:
   inmemory: {}

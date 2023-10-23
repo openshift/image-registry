@@ -31,11 +31,6 @@ const (
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_SERVER_ADDR instead.
 	openShiftDockerRegistryURLEnvVar = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_DOCKERREGISTRYURL"
 
-	// openShiftDefaultRegistryEnvVar overrides the dockerRegistryURLEnvVar as in OpenShift the
-	// default registry URL is controlled by this environment variable.
-	// DEPRECATED: Use the REGISTRY_OPENSHIFT_SERVER_ADDR instead.
-	openShiftDefaultRegistryEnvVar = "OPENSHIFT_DEFAULT_REGISTRY"
-
 	// enforceQuotaEnvVar is a boolean environment variable that allows to turn quota enforcement on or off.
 	// By default, quota enforcement is off. It overrides openshift middleware configuration option.
 	// Recognized values are "true" and "false".
@@ -325,13 +320,6 @@ func getServerAddr(options configuration.Parameters, cfgValue string) (registryA
 	var found bool
 
 	if len(registryAddr) == 0 {
-		registryAddr, found = os.LookupEnv(openShiftDefaultRegistryEnvVar)
-		if found {
-			log.Infof("DEPRECATED: %q is deprecated, use the 'REGISTRY_OPENSHIFT_SERVER_ADDR' instead", openShiftDefaultRegistryEnvVar)
-		}
-	}
-
-	if len(registryAddr) == 0 {
 		registryAddr, found = os.LookupEnv(dockerRegistryURLEnvVar)
 		if found {
 			log.Infof("DEPRECATED: %q is deprecated, use the 'REGISTRY_OPENSHIFT_SERVER_ADDR' instead", dockerRegistryURLEnvVar)
@@ -348,12 +336,6 @@ func getServerAddr(options configuration.Parameters, cfgValue string) (registryA
 
 	if len(registryAddr) == 0 && len(cfgValue) > 0 {
 		registryAddr = cfgValue
-	}
-
-	// TODO: This is a fallback to assuming there is a service named 'docker-registry'. This
-	// might change in the future and we should make this configurable.
-	if len(registryAddr) == 0 && len(os.Getenv("DOCKER_REGISTRY_SERVICE_HOST")) > 0 && len(os.Getenv("DOCKER_REGISTRY_SERVICE_PORT")) > 0 {
-		registryAddr = os.Getenv("DOCKER_REGISTRY_SERVICE_HOST") + ":" + os.Getenv("DOCKER_REGISTRY_SERVICE_PORT")
 	}
 
 	if len(registryAddr) == 0 {
