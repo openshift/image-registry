@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +25,7 @@ type simpleLookupImageMirrorSets struct {
 }
 
 // NewSimpleLookupImageMirrorSetsStrategy returns a new entity of simpleLookupImageMirrorSets using provided client
-// to obtain cluster wide ICSP or IDMS and ITMS configuration.
+// to obtain cluster wide ICSP, IDMS and ITMS configuration.
 func NewSimpleLookupImageMirrorSetsStrategy(
 	icspcli operatorv1alpha1client.ImageContentSourcePolicyInterface,
 	idmscli cfgv1client.ImageDigestMirrorSetInterface,
@@ -63,16 +62,6 @@ func (s *simpleLookupImageMirrorSets) FirstRequest(
 		return []reference.DockerImageReference{ref.AsRepository()}, nil
 	}
 
-	if len(icspList.Items) > 0 && len(idmsList.Items) > 0 {
-		err := fmt.Errorf("found both ICSP and IDMS resources, but only one or the other is supported")
-		return []reference.DockerImageReference{ref.AsRepository()}, err
-	}
-
-	if len(icspList.Items) > 0 && len(itmsList.Items) > 0 {
-		err := fmt.Errorf("found both ICSP and ITMS resources, but only one or the other is supported")
-		return []reference.DockerImageReference{ref.AsRepository()}, err
-	}
-
 	imageRefList, err := s.alternativeImageSources(ref, icspList.Items, idmsList.Items, itmsList.Items)
 	if err != nil {
 		klog.Errorf("error looking for alternate repositories: %s", err)
@@ -105,7 +94,7 @@ type mirrorSource struct {
 }
 
 // alternativeImageSources returns unique list of DockerImageReference objects from list of
-// ImageContentSourcePolicy or ImageDigestMirrorSet, ImageTagMirrorSet objects
+// ImageContentSourcePolicy, ImageDigestMirrorSet, and ImageTagMirrorSet objects
 func (s *simpleLookupImageMirrorSets) alternativeImageSources(
 	ref reference.DockerImageReference, icspList []operatorv1alpha1.ImageContentSourcePolicy,
 	idmsList []cfgv1.ImageDigestMirrorSet, itmsList []cfgv1.ImageTagMirrorSet,
