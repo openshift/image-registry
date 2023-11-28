@@ -1,9 +1,9 @@
-FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.20-openshift-4.15 AS builder
+FROM registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.20-openshift-4.15 AS builder
 WORKDIR /go/src/github.com/openshift/image-registry
 COPY . .
 RUN hack/build-go.sh
 
-FROM registry.ci.openshift.org/ocp/4.15:base
+FROM registry.ci.openshift.org/ocp/4.15:base-rhel9
 RUN yum install -y rsync && yum clean all && rm -rf /var/cache/yum
 COPY --from=builder /go/src/github.com/openshift/image-registry/_output/local/bin/dockerregistry /usr/bin/
 COPY images/dockerregistry/config.yml /
