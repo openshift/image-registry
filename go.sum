@@ -300,8 +300,8 @@ github.com/openshift/api v0.0.0-20230503133300-8bbcb7ca7183 h1:t/CahSnpqY46sQR01
 github.com/openshift/api v0.0.0-20230503133300-8bbcb7ca7183/go.mod h1:4VWG+W22wrB4HfBL88P40DxLEpSOaiBVxUnfalfJo9k=
 github.com/openshift/client-go v0.0.0-20230503144108-75015d2347cb h1:Nij5OnaECrkmcRQMAE9LMbQXPo95aqFnf+12B7SyFVI=
 github.com/openshift/client-go v0.0.0-20230503144108-75015d2347cb/go.mod h1:Rhb3moCqeiTuGHAbXBOlwPubUMlOZEkrEWTRjIF3jzs=
-github.com/openshift/docker-distribution/v3 v3.0.0-20230626115833-c7be7b49aed9 h1:bmU/+hEhS0ga3aQtwLt7lDUYuPB40RcHK2htDVI5+WY=
-github.com/openshift/docker-distribution/v3 v3.0.0-20230626115833-c7be7b49aed9/go.mod h1:+fqBJ4vPYo4Uu1ZE4d+bUtTLRXfdSL3NvCZIZ9GHv58=
+github.com/openshift/docker-distribution/v3 v3.0.0-20240216102618-dbaf4de30867 h1:+9bMWvhbxXkOnTmi8YJY3vPunpIjvzZ19oUQRwhuWPM=
+github.com/openshift/docker-distribution/v3 v3.0.0-20240216102618-dbaf4de30867/go.mod h1:+fqBJ4vPYo4Uu1ZE4d+bUtTLRXfdSL3NvCZIZ9GHv58=
 github.com/openshift/library-go v0.0.0-20230613090251-444734850f78 h1:UIrZVE9n26ueuC6TnOB5Ehk0RPeeQFCWnQTu7vgHN0k=
 github.com/openshift/library-go v0.0.0-20230613090251-444734850f78/go.mod h1:mHz+1sT3CSTZWmKdb3ZpN6EjiBr/KCXS6VaPOC+ILco=
 github.com/pborman/uuid v1.2.1 h1:+ZZIw58t/ozdjRaXh/3awHfmWRbzYxJoAdNJxe/3pvw=
