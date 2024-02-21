@@ -167,7 +167,7 @@ github.com/davecgh/go-spew/spew
 github.com/denverdino/aliyungo/common
 github.com/denverdino/aliyungo/oss
 github.com/denverdino/aliyungo/util
-# github.com/distribution/distribution/v3 v3.0.0+incompatible => github.com/openshift/docker-distribution/v3 v3.0.0-20230626115833-c7be7b49aed9
+# github.com/distribution/distribution/v3 v3.0.0+incompatible => github.com/openshift/docker-distribution/v3 v3.0.0-20240221091619-7f9ac4ff5c02
 ## explicit; go 1.18
 github.com/distribution/distribution/v3
 github.com/distribution/distribution/v3/configuration
@@ -1037,4 +1037,4 @@ sigs.k8s.io/structured-merge-diff/v4/value
 # sigs.k8s.io/yaml v1.3.0
 ## explicit; go 1.12
 sigs.k8s.io/yaml
-# github.com/distribution/distribution/v3 => github.com/openshift/docker-distribution/v3 v3.0.0-20230626115833-c7be7b49aed9
+# github.com/distribution/distribution/v3 => github.com/openshift/docker-distribution/v3 v3.0.0-20240221091619-7f9ac4ff5c02
