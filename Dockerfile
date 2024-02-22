@@ -1,9 +1,12 @@
-FROM registry.svc.ci.openshift.org/openshift/release:golang-1.15 AS builder
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest AS builder
 WORKDIR /go/src/github.com/openshift/image-registry
+RUN set -ex\
+	; microdnf -y --setopt=tsflags=nodocs install golang which git findutils\
+	; microdnf -y clean all && rm -rf /var/cache/yum
 COPY . .
 RUN hack/build-go.sh
 
-FROM registry.svc.ci.openshift.org/openshift/origin-v4.0:base
+FROM quay.io/centos/centos:stream9
 RUN yum install -y rsync && yum clean all && rm -rf /var/cache/yum
 COPY --from=builder /go/src/github.com/openshift/image-registry/_output/local/bin/dockerregistry /usr/bin/
 COPY images/dockerregistry/config.yml /
