@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -413,6 +414,25 @@ func sarStatus(sar *authorizationapi.SelfSubjectAccessReview) string {
 	return b.String()
 }
 
+func sarPrint(sar *authorizationapi.SelfSubjectAccessReview) {
+	b := strings.Builder{}
+	b.WriteString("=ibihim=start=========================\n")
+	if err := json.NewEncoder(&b).Encode(sar); err != nil {
+		b.WriteString("Error encoding SelfSubjectAccessReview: ")
+		b.WriteString(err.Error())
+	}
+	b.WriteString("=ibihim=end===========================\n")
+	fmt.Println(b.String())
+}
+
+func errPrint(err error) {
+	b := strings.Builder{}
+	b.WriteString("=ibihim=start=========================\n")
+	b.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
+	b.WriteString("=ibihim=end===========================\n")
+	fmt.Println(b.String())
+}
+
 func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
 	sar := authorizationapi.SelfSubjectAccessReview{
 		Spec: authorizationapi.SelfSubjectAccessReviewSpec{
@@ -427,6 +447,7 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 	}
 	response, err := c.SelfSubjectAccessReviews().Create(ctx, &sar, metav1.CreateOptions{})
 	if err != nil {
+		errPrint(err)
 		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
 			return ErrOpenShiftAccessDenied
@@ -435,6 +456,7 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 	}
 
 	if !response.Status.Allowed {
+		sarPrint(response)
 		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", sarStatus(response))
 		return ErrOpenShiftAccessDenied
 	}
@@ -455,6 +477,7 @@ func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string
 	}
 	response, err := c.SelfSubjectAccessReviews().Create(ctx, &sar, metav1.CreateOptions{})
 	if err != nil {
+		errPrint(err)
 		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
 			return ErrOpenShiftAccessDenied
@@ -462,6 +485,7 @@ func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string
 		return err
 	}
 	if !response.Status.Allowed {
+		sarPrint(response)
 		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", sarStatus(response))
 		return ErrOpenShiftAccessDenied
 	}
