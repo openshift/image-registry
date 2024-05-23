@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -192,6 +191,10 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 		return nil, ac.wrapErr(ctx, err)
 	}
 
+	irClient, err := ac.registryClient.Client()
+	if err != nil {
+		return nil, ac.wrapErr(ctx, err)
+	}
 	osClient, err := ac.registryClient.ClientFromToken(bearerToken)
 	if err != nil {
 		return nil, ac.wrapErr(ctx, err)
@@ -255,7 +258,7 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
 			}
 
-			if err := verifyImageStreamAccess(ctx, imageStreamNS, imageStreamName, verb, osClient); err != nil {
+			if err := verifyImageStreamAccess(ctx, imageStreamNS, imageStreamName, verb, osClient, irClient); err != nil {
 				if access.Action != "pull" {
 					return nil, ac.wrapErr(ctx, err)
 				}
@@ -269,11 +272,11 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 			}
 			switch access.Action {
 			case "get":
-				if err := verifyImageStreamAccess(ctx, namespace, name, access.Action, osClient); err != nil {
+				if err := verifyImageStreamAccess(ctx, namespace, name, access.Action, osClient, irClient); err != nil {
 					return nil, ac.wrapErr(ctx, err)
 				}
 			case "put":
-				if err := verifyImageSignatureAccess(ctx, namespace, name, osClient); err != nil {
+				if err := verifyImageSignatureAccess(ctx, namespace, name, osClient, irClient); err != nil {
 					return nil, ac.wrapErr(ctx, err)
 				}
 			default:
@@ -414,27 +417,8 @@ func sarStatus(sar *authorizationapi.SelfSubjectAccessReview) string {
 	return b.String()
 }
 
-func sarPrint(sar *authorizationapi.SelfSubjectAccessReview) {
-	b := strings.Builder{}
-	b.WriteString("=ibihim=start=========================\n")
-	if err := json.NewEncoder(&b).Encode(sar); err != nil {
-		b.WriteString("Error encoding SelfSubjectAccessReview: ")
-		b.WriteString(err.Error())
-	}
-	b.WriteString("=ibihim=end===========================\n")
-	fmt.Println(b.String())
-}
-
-func errPrint(err error) {
-	b := strings.Builder{}
-	b.WriteString("=ibihim=start=========================\n")
-	b.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
-	b.WriteString("=ibihim=end===========================\n")
-	fmt.Println(b.String())
-}
-
-func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	sar := authorizationapi.SelfSubjectAccessReview{
+func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, remoteClient client.SelfSubjectAccessReviewsNamespacer, internalClient client.SubjectAccessReviewsNamespacer) error {
+	ssar := authorizationapi.SelfSubjectAccessReview{
 		Spec: authorizationapi.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &authorizationapi.ResourceAttributes{
 				Namespace: namespace,
@@ -445,18 +429,43 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 			},
 		},
 	}
-	response, err := c.SelfSubjectAccessReviews().Create(ctx, &sar, metav1.CreateOptions{})
+	response, err := remoteClient.SelfSubjectAccessReviews().Create(ctx, &ssar, metav1.CreateOptions{})
 	if err != nil {
-		errPrint(err)
 		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
-		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
+
+		if kerrors.IsForbidden(err) {
+			response, err := internalClient.SubjectAccessReviews().Create(ctx, &authorizationapi.SubjectAccessReview{
+				Spec: authorizationapi.SubjectAccessReviewSpec{
+					User:   "system:anonymous",
+					Groups: []string{"system:unauthenticated"},
+					ResourceAttributes: &authorizationapi.ResourceAttributes{
+						Namespace: namespace,
+						Verb:      verb,
+						Group:     imageapi.GroupName,
+						Resource:  resource,
+						Name:      name,
+					},
+				},
+			}, metav1.CreateOptions{})
+			if err != nil {
+				dcontext.GetLogger(ctx).Errorf("OpenShift internal client error: %s", err)
+				return ErrOpenShiftAccessDenied
+			}
+
+			if !response.Status.Allowed {
+				return ErrOpenShiftAccessDenied
+			}
+
+			return nil
+		}
+
+		if kerrors.IsUnauthorized(err) {
 			return ErrOpenShiftAccessDenied
 		}
 		return err
 	}
 
 	if !response.Status.Allowed {
-		sarPrint(response)
 		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", sarStatus(response))
 		return ErrOpenShiftAccessDenied
 	}
@@ -477,7 +486,6 @@ func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string
 	}
 	response, err := c.SelfSubjectAccessReviews().Create(ctx, &sar, metav1.CreateOptions{})
 	if err != nil {
-		errPrint(err)
 		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
 			return ErrOpenShiftAccessDenied
@@ -485,19 +493,18 @@ func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string
 		return err
 	}
 	if !response.Status.Allowed {
-		sarPrint(response)
 		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", sarStatus(response))
 		return ErrOpenShiftAccessDenied
 	}
 	return nil
 }
 
-func verifyImageStreamAccess(ctx context.Context, namespace, imageRepo, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	return verifyWithSAR(ctx, "imagestreams/layers", namespace, imageRepo, verb, c)
+func verifyImageStreamAccess(ctx context.Context, namespace, imageRepo, verb string, remoteClient client.SelfSubjectAccessReviewsNamespacer, internalClient client.SubjectAccessReviewsNamespacer) error {
+	return verifyWithSAR(ctx, "imagestreams/layers", namespace, imageRepo, verb, remoteClient, internalClient)
 }
 
-func verifyImageSignatureAccess(ctx context.Context, namespace, imageRepo string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	return verifyWithSAR(ctx, "imagesignatures", namespace, imageRepo, "create", c)
+func verifyImageSignatureAccess(ctx context.Context, namespace, imageRepo string, remoteClient client.SelfSubjectAccessReviewsNamespacer, internalClient client.SubjectAccessReviewsNamespacer) error {
+	return verifyWithSAR(ctx, "imagesignatures", namespace, imageRepo, "create", remoteClient, internalClient)
 }
 
 func verifyPruneAccess(ctx context.Context, c client.SelfSubjectAccessReviewsNamespacer) error {
