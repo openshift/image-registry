@@ -413,19 +413,16 @@ func sarStatus(sar *authorizationapi.SelfSubjectAccessReview) string {
 	return b.String()
 }
 
-func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	sar := authorizationapi.SelfSubjectAccessReview{
+func verifyWithSAR(
+	ctx context.Context,
+	attrs *authorizationapi.ResourceAttributes,
+	c client.SelfSubjectAccessReviewsNamespacer,
+) error {
+	response, err := c.SelfSubjectAccessReviews().Create(ctx, &authorizationapi.SelfSubjectAccessReview{
 		Spec: authorizationapi.SelfSubjectAccessReviewSpec{
-			ResourceAttributes: &authorizationapi.ResourceAttributes{
-				Namespace: namespace,
-				Verb:      verb,
-				Group:     imageapi.GroupName,
-				Resource:  resource,
-				Name:      name,
-			},
+			ResourceAttributes: attrs,
 		},
-	}
-	response, err := c.SelfSubjectAccessReviews().Create(ctx, &sar, metav1.CreateOptions{})
+	}, metav1.CreateOptions{})
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
 		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
@@ -442,49 +439,73 @@ func verifyWithSAR(ctx context.Context, resource, namespace, name, verb string, 
 	return nil
 }
 
-func verifyWithGlobalSAR(ctx context.Context, resource, subresource, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	sar := authorizationapi.SelfSubjectAccessReview{
-		Spec: authorizationapi.SelfSubjectAccessReviewSpec{
-			ResourceAttributes: &authorizationapi.ResourceAttributes{
-				Verb:        verb,
-				Group:       imageapi.GroupName,
-				Resource:    resource,
-				Subresource: subresource,
-			},
-		},
+func verifyWithGlobalSAR(
+	ctx context.Context,
+	resource, subresource, verb string,
+	c client.SelfSubjectAccessReviewsNamespacer,
+) error {
+	attrs := &authorizationapi.ResourceAttributes{
+		Verb:        verb,
+		Group:       imageapi.GroupName,
+		Resource:    resource,
+		Subresource: subresource,
 	}
-	response, err := c.SelfSubjectAccessReviews().Create(ctx, &sar, metav1.CreateOptions{})
-	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
-		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
-			return ErrOpenShiftAccessDenied
-		}
-		return err
-	}
-	if !response.Status.Allowed {
-		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", sarStatus(response))
-		return ErrOpenShiftAccessDenied
-	}
-	return nil
+
+	return verifyWithSAR(ctx, attrs, c)
 }
 
-func verifyImageStreamAccess(ctx context.Context, namespace, imageRepo, verb string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	return verifyWithSAR(ctx, "imagestreams/layers", namespace, imageRepo, verb, c)
+func verifyWithLocalSAR(
+	ctx context.Context,
+	resource, namespace, name, verb string,
+	c client.SelfSubjectAccessReviewsNamespacer,
+) error {
+	attrs := &authorizationapi.ResourceAttributes{
+		Namespace: namespace,
+		Verb:      verb,
+		Group:     imageapi.GroupName,
+		Resource:  resource,
+		Name:      name,
+	}
+
+	return verifyWithSAR(ctx, attrs, c)
 }
 
-func verifyImageSignatureAccess(ctx context.Context, namespace, imageRepo string, c client.SelfSubjectAccessReviewsNamespacer) error {
-	return verifyWithSAR(ctx, "imagesignatures", namespace, imageRepo, "create", c)
+func verifyImageStreamAccess(
+	ctx context.Context,
+	namespace, imageRepo, verb string,
+	c client.SelfSubjectAccessReviewsNamespacer,
+) error {
+	return verifyWithLocalSAR(ctx, "imagestreams/layers", namespace, imageRepo, verb, c)
 }
 
-func verifyPruneAccess(ctx context.Context, c client.SelfSubjectAccessReviewsNamespacer) error {
+func verifyImageSignatureAccess(
+	ctx context.Context,
+	namespace, imageRepo string,
+	c client.SelfSubjectAccessReviewsNamespacer,
+) error {
+	return verifyWithLocalSAR(ctx, "imagesignatures", namespace, imageRepo, "create", c)
+}
+
+func verifyPruneAccess(
+	ctx context.Context,
+	c client.SelfSubjectAccessReviewsNamespacer,
+) error {
 	return verifyWithGlobalSAR(ctx, "images", "", "delete", c)
 }
 
-func verifyCatalogAccess(ctx context.Context, c client.SelfSubjectAccessReviewsNamespacer) error {
+func verifyCatalogAccess(
+	ctx context.Context,
+	c client.SelfSubjectAccessReviewsNamespacer,
+) error {
 	return verifyWithGlobalSAR(ctx, "imagestreams", "", "list", c)
 }
 
-func verifyMetricsAccess(ctx context.Context, metrics configuration.Metrics, token string, c client.SelfSubjectAccessReviewsNamespacer) error {
+func verifyMetricsAccess(
+	ctx context.Context,
+	metrics configuration.Metrics,
+	token string,
+	c client.SelfSubjectAccessReviewsNamespacer,
+) error {
 	if !metrics.Enabled {
 		return ErrOpenShiftAccessDenied
 	}
