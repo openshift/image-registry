@@ -69,6 +69,10 @@ type SelfSubjectAccessReviewsNamespacer interface {
 	SelfSubjectAccessReviews() SelfSubjectAccessReviewInterface
 }
 
+type SubjectAccessReviewsNamespacer interface {
+	SubjectAccessReviews() SubjectAccessReviewInterface
+}
+
 var _ ImageSignatureInterface = imageclientv1.ImageSignatureInterface(nil)
 
 type ImageSignatureInterface interface {
@@ -139,4 +143,10 @@ var _ SelfSubjectAccessReviewInterface = authclientv1.SelfSubjectAccessReviewInt
 
 type SelfSubjectAccessReviewInterface interface {
 	Create(ctx context.Context, selfSubjectAccessReview *authapiv1.SelfSubjectAccessReview, opts metav1.CreateOptions) (*authapiv1.SelfSubjectAccessReview, error)
+}
+
+var _ SubjectAccessReviewInterface = authclientv1.SubjectAccessReviewInterface(nil)
+
+type SubjectAccessReviewInterface interface {
+	Create(ctx context.Context, subjectAccessReview *authapiv1.SubjectAccessReview, opts metav1.CreateOptions) (*authapiv1.SubjectAccessReview, error)
 }
