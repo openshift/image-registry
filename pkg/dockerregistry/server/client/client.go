@@ -33,6 +33,7 @@ type Interface interface {
 	LimitRangesGetter
 	LocalSubjectAccessReviewsNamespacer
 	SelfSubjectAccessReviewsNamespacer
+	SubjectAccessReviewsNamespacer
 	UsersInterfacer
 	ImageContentSourcePolicyInterfacer
 }
@@ -118,6 +119,10 @@ func (c *apiClient) LocalSubjectAccessReviews(namespace string) LocalSubjectAcce
 
 func (c *apiClient) SelfSubjectAccessReviews() SelfSubjectAccessReviewInterface {
 	return c.auth.SelfSubjectAccessReviews()
+}
+
+func (c *apiClient) SubjectAccessReviews() SubjectAccessReviewInterface {
+	return c.auth.SubjectAccessReviews()
 }
 
 type registryClient struct {
