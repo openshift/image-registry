@@ -1,6 +1,6 @@
 module github.com/openshift/image-registry
 
-go 1.21
+go 1.22
 
 require (
 	github.com/bshuster-repo/logrus-logstash-hook v1.1.0
