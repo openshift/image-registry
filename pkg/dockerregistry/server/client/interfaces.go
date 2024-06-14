@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 
+	authnv1 "k8s.io/api/authentication/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreclientv1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -16,6 +17,7 @@ import (
 	userclientv1 "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 
 	cfgv1 "github.com/openshift/client-go/config/clientset/versioned/typed/config/v1"
+	authnclientv1 "k8s.io/client-go/kubernetes/typed/authentication/v1"
 	authclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
 
@@ -59,6 +61,10 @@ type ImageStreamTagsNamespacer interface {
 
 type LimitRangesGetter interface {
 	LimitRanges(namespace string) LimitRangeInterface
+}
+
+type SelfSubjectReviews interface {
+	SelfSubjectReviews() SelfSubjectReviewInterface
 }
 
 type LocalSubjectAccessReviewsNamespacer interface {
@@ -127,6 +133,12 @@ var _ LimitRangeInterface = coreclientv1.LimitRangeInterface(nil)
 
 type LimitRangeInterface interface {
 	List(ctx context.Context, opts metav1.ListOptions) (*corev1.LimitRangeList, error)
+}
+
+var _ SelfSubjectReviewInterface = authnclientv1.SelfSubjectReviewInterface(nil)
+
+type SelfSubjectReviewInterface interface {
+	Create(ctx context.Context, selfSubjectReview *authnv1.SelfSubjectReview, opts metav1.CreateOptions) (*authnv1.SelfSubjectReview, error)
 }
 
 var _ LocalSubjectAccessReviewInterface = authclientv1.LocalSubjectAccessReviewInterface(nil)
