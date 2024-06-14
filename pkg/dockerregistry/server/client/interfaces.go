@@ -9,21 +9,15 @@ import (
 	coreclientv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
-	userapiv1 "github.com/openshift/api/user/v1"
 	authapiv1 "k8s.io/api/authorization/v1"
 
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
 	operatorclientv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
-	userclientv1 "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 
 	cfgv1 "github.com/openshift/client-go/config/clientset/versioned/typed/config/v1"
 	authnclientv1 "k8s.io/client-go/kubernetes/typed/authentication/v1"
 	authclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
-
-type UsersInterfacer interface {
-	Users() UserInterface
-}
 
 type ImageContentSourcePolicyInterfacer interface {
 	ImageContentSourcePolicy() operatorclientv1alpha1.ImageContentSourcePolicyInterface
@@ -85,12 +79,6 @@ var _ ImageStreamImageInterface = imageclientv1.ImageStreamImageInterface(nil)
 
 type ImageStreamImageInterface interface {
 	Get(ctx context.Context, name string, opts metav1.GetOptions) (*imageapiv1.ImageStreamImage, error)
-}
-
-var _ UserInterface = userclientv1.UserInterface(nil)
-
-type UserInterface interface {
-	Get(ctx context.Context, name string, opts metav1.GetOptions) (*userapiv1.User, error)
 }
 
 var _ ImageInterface = imageclientv1.ImageInterface(nil)
