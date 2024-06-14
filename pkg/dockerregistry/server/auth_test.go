@@ -30,13 +30,14 @@ import (
 	"github.com/openshift/image-registry/pkg/testutil"
 )
 
-var scheme = runtime.NewScheme()
-var codecs = serializer.NewCodecFactory(scheme)
+var (
+	scheme = runtime.NewScheme()
+	codecs = serializer.NewCodecFactory(scheme)
+)
 
 func init() {
 	authorizationapi.AddToScheme(scheme)
 	userapi.AddToScheme(scheme)
-
 }
 
 func sarResponse(ns string, allowed bool, reason string) *authorizationapi.SelfSubjectAccessReview {
