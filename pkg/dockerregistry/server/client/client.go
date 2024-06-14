@@ -36,7 +36,6 @@ type Interface interface {
 	LocalSubjectAccessReviewsNamespacer
 	SelfSubjectAccessReviewsNamespacer
 	SubjectAccessReviewsNamespacer
-	UsersInterfacer
 	ImageContentSourcePolicyInterfacer
 }
 
@@ -80,10 +79,6 @@ func (c *apiClient) ImageDigestMirrorSet() cfgv1.ImageDigestMirrorSetInterface {
 
 func (c *apiClient) ImageTagMirrorSet() cfgv1.ImageTagMirrorSetInterface {
 	return c.config.ImageTagMirrorSets()
-}
-
-func (c *apiClient) Users() UserInterface {
-	return c.user.Users()
 }
 
 func (c *apiClient) Images() ImageInterface {
