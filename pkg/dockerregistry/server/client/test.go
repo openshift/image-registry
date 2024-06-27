@@ -24,11 +24,11 @@ func NewFakeRegistryClient(imageclient imageclientv1.ImageV1Interface) RegistryC
 func (c *fakeRegistryClient) Client() (Interface, error) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1()
 	cfgclient := cfgfake.NewSimpleClientset().ConfigV1()
-	return newAPIClient(nil, nil, c.images, nil, icsp, cfgclient), nil
+	return newAPIClient(nil, nil, nil, c.images, nil, icsp, cfgclient), nil
 }
 
 func NewFakeRegistryAPIClient(kc coreclientv1.CoreV1Interface, imageclient imageclientv1.ImageV1Interface) Interface {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1()
 	idms := cfgfake.NewSimpleClientset().ConfigV1()
-	return newAPIClient(nil, nil, imageclient, nil, icsp, idms)
+	return newAPIClient(nil, nil, nil, imageclient, nil, icsp, idms)
 }
