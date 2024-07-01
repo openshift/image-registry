@@ -16,13 +16,11 @@ import (
 	dcontext "github.com/distribution/distribution/v3/context"
 	"github.com/distribution/distribution/v3/registry/auth"
 
+	authenticationapi "k8s.io/api/authentication/v1"
 	authorizationapi "k8s.io/api/authorization/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	restclient "k8s.io/client-go/rest"
-
-	userapi "github.com/openshift/api/user/v1"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
@@ -30,13 +28,14 @@ import (
 	"github.com/openshift/image-registry/pkg/testutil"
 )
 
-var scheme = runtime.NewScheme()
-var codecs = serializer.NewCodecFactory(scheme)
+var (
+	scheme = runtime.NewScheme()
+	codecs = serializer.NewCodecFactory(scheme)
+)
 
 func init() {
 	authorizationapi.AddToScheme(scheme)
-	userapi.AddToScheme(scheme)
-
+	authenticationapi.AddToScheme(scheme)
 }
 
 func sarResponse(ns string, allowed bool, reason string) *authorizationapi.SelfSubjectAccessReview {
@@ -170,7 +169,7 @@ func TestAccessController(t *testing.T) {
 			}},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 			},
 			expectedError: distribution.ErrRepositoryNameInvalid{
 				Name:   "bar",
@@ -178,19 +177,19 @@ func TestAccessController(t *testing.T) {
 			},
 			expectedChallenge: false,
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 			},
 		},
 		"registry token but does not involve any repository operation": {
 			access:     []auth.Access{{}},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 			},
 			expectedError:     ErrUnsupportedResource,
 			expectedChallenge: false,
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 			},
 		},
 		"registry token but does not involve any known action": {
@@ -203,12 +202,12 @@ func TestAccessController(t *testing.T) {
 			}},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 			},
 			expectedError:     ErrUnsupportedAction,
 			expectedChallenge: false,
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 			},
 		},
 		"docker login with invalid openshift creds": {
@@ -217,16 +216,16 @@ func TestAccessController(t *testing.T) {
 			expectedError:      ErrOpenShiftAccessDenied,
 			expectedChallenge:  true,
 			expectedHeaders:    http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`}},
-			expectedActions:    []string{"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)"},
+			expectedActions:    []string{"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)"},
 		},
 		"docker login with valid openshift creds": {
 			basicToken: "dXNyMTphd2Vzb21l",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 			},
 			expectedError:     nil,
 			expectedChallenge: false,
-			expectedActions:   []string{"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)"},
+			expectedActions:   []string{"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)"},
 		},
 		"error running subject access review": {
 			access: []auth.Access{{
@@ -238,13 +237,13 @@ func TestAccessController(t *testing.T) {
 			}},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 				{500, "Uh oh"},
 			},
 			expectedError:     errors.New("an error on the server (\"unknown\") has prevented the request from succeeding (post selfsubjectaccessreviews.authorization.k8s.io)"),
 			expectedChallenge: false,
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
 			},
 		},
@@ -258,14 +257,14 @@ func TestAccessController(t *testing.T) {
 			}},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("foo", false, "not"))},
 			},
 			expectedError:     ErrOpenShiftAccessDenied,
 			expectedChallenge: true,
 			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`}},
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
 			},
 		},
@@ -279,7 +278,7 @@ func TestAccessController(t *testing.T) {
 			},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("foo", true, "authorized!"))},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("bar", true, "authorized!"))},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("", true, "authorized!"))},
@@ -289,7 +288,7 @@ func TestAccessController(t *testing.T) {
 			expectedChallenge: true,
 			expectedHeaders:   http.Header{"Www-Authenticate": []string{`Basic realm=myrealm,error="access denied"`}},
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
@@ -307,7 +306,7 @@ func TestAccessController(t *testing.T) {
 			},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("pushrepo", true, "authorized!"))},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("pushrepo", true, "authorized!"))},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("fromrepo", false, "no!"))},
@@ -316,7 +315,7 @@ func TestAccessController(t *testing.T) {
 			expectedChallenge: false,
 			expectedRepoErr:   "fromrepo/bbb",
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
@@ -332,13 +331,13 @@ func TestAccessController(t *testing.T) {
 			}},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("", true, "authorized!"))},
 			},
 			expectedError:     nil,
 			expectedChallenge: false,
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
 			},
 		},
@@ -378,13 +377,13 @@ func TestAccessController(t *testing.T) {
 			},
 			basicToken: "b3BlbnNoaWZ0OmF3ZXNvbWU=",
 			openshiftResponses: []response{
-				{200, runtime.EncodeOrDie(codecs.LegacyCodec(userapi.SchemeGroupVersion), &userapi.User{ObjectMeta: metav1.ObjectMeta{Name: "usr1"}})},
+				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authenticationapi.SchemeGroupVersion), &authenticationapi.SelfSubjectReview{Status: authenticationapi.SelfSubjectReviewStatus{UserInfo: authenticationapi.UserInfo{Username: "usr1"}}})},
 				{200, runtime.EncodeOrDie(codecs.LegacyCodec(authorizationapi.SchemeGroupVersion), sarResponse("", true, "authorized!"))},
 			},
 			expectedError:     nil,
 			expectedChallenge: false,
 			expectedActions: []string{
-				"GET /apis/user.openshift.io/v1/users/~ (Authorization=Bearer awesome)",
+				"POST /apis/authentication.k8s.io/v1/selfsubjectreviews (Authorization=Bearer awesome)",
 				"POST /apis/authorization.k8s.io/v1/selfsubjectaccessreviews (Authorization=Bearer awesome)",
 			},
 		},

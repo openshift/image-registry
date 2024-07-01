@@ -3,25 +3,21 @@ package client
 import (
 	"context"
 
+	authnv1 "k8s.io/api/authentication/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreclientv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
-	userapiv1 "github.com/openshift/api/user/v1"
 	authapiv1 "k8s.io/api/authorization/v1"
 
 	imageclientv1 "github.com/openshift/client-go/image/clientset/versioned/typed/image/v1"
 	operatorclientv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
-	userclientv1 "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 
 	cfgv1 "github.com/openshift/client-go/config/clientset/versioned/typed/config/v1"
+	authnclientv1 "k8s.io/client-go/kubernetes/typed/authentication/v1"
 	authclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
-
-type UsersInterfacer interface {
-	Users() UserInterface
-}
 
 type ImageContentSourcePolicyInterfacer interface {
 	ImageContentSourcePolicy() operatorclientv1alpha1.ImageContentSourcePolicyInterface
@@ -61,6 +57,10 @@ type LimitRangesGetter interface {
 	LimitRanges(namespace string) LimitRangeInterface
 }
 
+type SelfSubjectReviews interface {
+	SelfSubjectReviews() SelfSubjectReviewInterface
+}
+
 type LocalSubjectAccessReviewsNamespacer interface {
 	LocalSubjectAccessReviews(namespace string) LocalSubjectAccessReviewInterface
 }
@@ -79,12 +79,6 @@ var _ ImageStreamImageInterface = imageclientv1.ImageStreamImageInterface(nil)
 
 type ImageStreamImageInterface interface {
 	Get(ctx context.Context, name string, opts metav1.GetOptions) (*imageapiv1.ImageStreamImage, error)
-}
-
-var _ UserInterface = userclientv1.UserInterface(nil)
-
-type UserInterface interface {
-	Get(ctx context.Context, name string, opts metav1.GetOptions) (*userapiv1.User, error)
 }
 
 var _ ImageInterface = imageclientv1.ImageInterface(nil)
@@ -127,6 +121,12 @@ var _ LimitRangeInterface = coreclientv1.LimitRangeInterface(nil)
 
 type LimitRangeInterface interface {
 	List(ctx context.Context, opts metav1.ListOptions) (*corev1.LimitRangeList, error)
+}
+
+var _ SelfSubjectReviewInterface = authnclientv1.SelfSubjectReviewInterface(nil)
+
+type SelfSubjectReviewInterface interface {
+	Create(ctx context.Context, selfSubjectReview *authnv1.SelfSubjectReview, opts metav1.CreateOptions) (*authnv1.SelfSubjectReview, error)
 }
 
 var _ LocalSubjectAccessReviewInterface = authclientv1.LocalSubjectAccessReviewInterface(nil)

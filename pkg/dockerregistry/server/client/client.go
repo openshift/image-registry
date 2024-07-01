@@ -1,6 +1,7 @@
 package client
 
 import (
+	authnv1 "k8s.io/client-go/kubernetes/typed/authentication/v1"
 	authclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	coreclientv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
@@ -31,15 +32,16 @@ type Interface interface {
 	ImageStreamsNamespacer
 	ImageStreamTagsNamespacer
 	LimitRangesGetter
+	SelfSubjectReviews
 	LocalSubjectAccessReviewsNamespacer
 	SelfSubjectAccessReviewsNamespacer
-	UsersInterfacer
 	ImageContentSourcePolicyInterfacer
 }
 
 type apiClient struct {
 	kube     coreclientv1.CoreV1Interface
 	auth     authclientv1.AuthorizationV1Interface
+	authn    authnv1.AuthenticationV1Interface
 	image    imageclientv1.ImageV1Interface
 	user     userclientv1.UserV1Interface
 	operator operatorclientv1alpha1.OperatorV1alpha1Interface
@@ -49,6 +51,7 @@ type apiClient struct {
 func newAPIClient(
 	kc coreclientv1.CoreV1Interface,
 	authClient authclientv1.AuthorizationV1Interface,
+	authnClient authnv1.AuthenticationV1Interface,
 	imageClient imageclientv1.ImageV1Interface,
 	userClient userclientv1.UserV1Interface,
 	operatorClient operatorclientv1alpha1.OperatorV1alpha1Interface,
@@ -57,6 +60,7 @@ func newAPIClient(
 	return &apiClient{
 		kube:     kc,
 		auth:     authClient,
+		authn:    authnClient,
 		image:    imageClient,
 		user:     userClient,
 		operator: operatorClient,
@@ -74,10 +78,6 @@ func (c *apiClient) ImageDigestMirrorSet() cfgv1.ImageDigestMirrorSetInterface {
 
 func (c *apiClient) ImageTagMirrorSet() cfgv1.ImageTagMirrorSetInterface {
 	return c.config.ImageTagMirrorSets()
-}
-
-func (c *apiClient) Users() UserInterface {
-	return c.user.Users()
 }
 
 func (c *apiClient) Images() ImageInterface {
@@ -112,6 +112,10 @@ func (c *apiClient) LimitRanges(namespace string) LimitRangeInterface {
 	return c.kube.LimitRanges(namespace)
 }
 
+func (c *apiClient) SelfSubjectReviews() SelfSubjectReviewInterface {
+	return c.authn.SelfSubjectReviews()
+}
+
 func (c *apiClient) LocalSubjectAccessReviews(namespace string) LocalSubjectAccessReviewInterface {
 	return c.auth.LocalSubjectAccessReviews(namespace)
 }
@@ -139,6 +143,7 @@ func (c *registryClient) Client() (Interface, error) {
 	return newAPIClient(
 		coreclientv1.NewForConfigOrDie(c.kubeConfig),
 		authclientv1.NewForConfigOrDie(c.kubeConfig),
+		authnv1.NewForConfigOrDie(c.kubeConfig),
 		imageclientv1.NewForConfigOrDie(c.kubeConfig),
 		userclientv1.NewForConfigOrDie(c.kubeConfig),
 		operatorclientv1alpha1.NewForConfigOrDie(c.kubeConfig),

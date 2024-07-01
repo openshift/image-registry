@@ -11,6 +11,7 @@ import (
 	dcontext "github.com/distribution/distribution/v3/context"
 	registryauth "github.com/distribution/distribution/v3/registry/auth"
 
+	authnv1 "k8s.io/api/authentication/v1"
 	authorizationapi "k8s.io/api/authorization/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,10 +29,12 @@ type deferredErrors map[string]error
 func (d deferredErrors) Add(ref string, err error) {
 	d[ref] = err
 }
+
 func (d deferredErrors) Get(ref string) (error, bool) {
 	err, exists := d[ref]
 	return err, exists
 }
+
 func (d deferredErrors) Empty() bool {
 	return len(d) == 0
 }
@@ -200,6 +203,9 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 	if len(bearerToken) > 0 && !isMetricsBearerToken(ac.metricsConfig, bearerToken) {
 		user, userid, err := verifyOpenShiftUser(ctx, osClient)
 		if err != nil {
+			if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
+				return nil, ac.wrapErr(ctx, ErrOpenShiftAccessDenied)
+			}
 			return nil, ac.wrapErr(ctx, err)
 		}
 		ctx = WithUserInfoLogger(ctx, user, userid)
@@ -375,17 +381,15 @@ func getOpenShiftAPIToken(req *http.Request) (string, error) {
 	return token, nil
 }
 
-func verifyOpenShiftUser(ctx context.Context, c client.UsersInterfacer) (string, string, error) {
-	userInfo, err := c.Users().Get(ctx, "~", metav1.GetOptions{})
+func verifyOpenShiftUser(ctx context.Context, c client.SelfSubjectReviews) (string, string, error) {
+	ssr := &authnv1.SelfSubjectReview{}
+	response, err := c.SelfSubjectReviews().Create(ctx, ssr, metav1.CreateOptions{})
 	if err != nil {
-		dcontext.GetLogger(ctx).Errorf("Get user failed with error: %s", err)
-		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
-			return "", "", ErrOpenShiftAccessDenied
-		}
+		dcontext.GetLogger(ctx).Errorf("Self subject review failed with error: %s", err)
 		return "", "", err
 	}
-
-	return userInfo.GetName(), string(userInfo.GetUID()), nil
+	userInfo := response.Status.UserInfo
+	return userInfo.Username, userInfo.UID, nil
 }
 
 func sarStatus(sar *authorizationapi.SelfSubjectAccessReview) string {
