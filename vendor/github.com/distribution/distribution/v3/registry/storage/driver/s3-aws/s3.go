@@ -21,10 +21,11 @@ import (
 	"math"
 	"net/http"
 	"path/filepath"
-	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -105,7 +106,7 @@ type DriverParameters struct {
 	Secure                      bool
 	SkipVerify                  bool
 	V4Auth                      bool
-	ChunkSize                   int64
+	ChunkSize                   int
 	MultipartCopyChunkSize      int64
 	MultipartCopyMaxConcurrency int64
 	MultipartCopyThresholdSize  int64
@@ -156,7 +157,7 @@ func (factory *s3DriverFactory) Create(parameters map[string]interface{}) (stora
 type driver struct {
 	S3                          *s3.S3
 	Bucket                      string
-	ChunkSize                   int64
+	ChunkSize                   int
 	Encrypt                     bool
 	KeyID                       string
 	MultipartCopyChunkSize      int64
@@ -166,6 +167,7 @@ type driver struct {
 	RootDirectory               string
 	StorageClass                string
 	ObjectACL                   string
+	pool                        *sync.Pool
 }
 
 type baseEmbed struct {
@@ -315,22 +317,22 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 		keyID = ""
 	}
 
-	chunkSize, err := getParameterAsInt64(parameters, "chunksize", defaultChunkSize, minChunkSize, maxChunkSize)
+	chunkSize, err := getParameterAsInteger(parameters, "chunksize", defaultChunkSize, minChunkSize, maxChunkSize)
 	if err != nil {
 		return nil, err
 	}
 
-	multipartCopyChunkSize, err := getParameterAsInt64(parameters, "multipartcopychunksize", defaultMultipartCopyChunkSize, minChunkSize, maxChunkSize)
+	multipartCopyChunkSize, err := getParameterAsInteger[int64](parameters, "multipartcopychunksize", defaultMultipartCopyChunkSize, minChunkSize, maxChunkSize)
 	if err != nil {
 		return nil, err
 	}
 
-	multipartCopyMaxConcurrency, err := getParameterAsInt64(parameters, "multipartcopymaxconcurrency", defaultMultipartCopyMaxConcurrency, 1, math.MaxInt64)
+	multipartCopyMaxConcurrency, err := getParameterAsInteger[int64](parameters, "multipartcopymaxconcurrency", defaultMultipartCopyMaxConcurrency, 1, math.MaxInt64)
 	if err != nil {
 		return nil, err
 	}
 
-	multipartCopyThresholdSize, err := getParameterAsInt64(parameters, "multipartcopythresholdsize", defaultMultipartCopyThresholdSize, 0, maxChunkSize)
+	multipartCopyThresholdSize, err := getParameterAsInteger[int64](parameters, "multipartcopythresholdsize", defaultMultipartCopyThresholdSize, 0, maxChunkSize)
 	if err != nil {
 		return nil, err
 	}
@@ -460,63 +462,59 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 	}
 
 	params := DriverParameters{
-		fmt.Sprint(accessKey),
-		fmt.Sprint(secretKey),
-		fmt.Sprint(bucket),
-		region,
-		fmt.Sprint(regionEndpoint),
-		forcePathStyleBool,
-		encryptBool,
-		fmt.Sprint(keyID),
-		secureBool,
-		skipVerifyBool,
-		v4Bool,
-		chunkSize,
-		multipartCopyChunkSize,
-		multipartCopyMaxConcurrency,
-		multipartCopyThresholdSize,
-		mutlipartCombineSmallPart,
-		fmt.Sprint(rootDirectory),
-		storageClass,
-		fmt.Sprint(userAgent),
-		objectACL,
-		fmt.Sprint(sessionToken),
-		useDualStackBool,
-		accelerateBool,
-		virtualHostedStyleBool,
-		fmt.Sprint(credentialsConfigPath),
+		AccessKey:                   fmt.Sprint(accessKey),
+		SecretKey:                   fmt.Sprint(secretKey),
+		Bucket:                      fmt.Sprint(bucket),
+		Region:                      region,
+		RegionEndpoint:              fmt.Sprint(regionEndpoint),
+		ForcePathStyle:              forcePathStyleBool,
+		Encrypt:                     encryptBool,
+		KeyID:                       fmt.Sprint(keyID),
+		Secure:                      secureBool,
+		SkipVerify:                  skipVerifyBool,
+		V4Auth:                      v4Bool,
+		ChunkSize:                   chunkSize,
+		MultipartCopyChunkSize:      multipartCopyChunkSize,
+		MultipartCopyMaxConcurrency: multipartCopyMaxConcurrency,
+		MultipartCopyThresholdSize:  multipartCopyThresholdSize,
+		MultipartCombineSmallPart:   mutlipartCombineSmallPart,
+		RootDirectory:               fmt.Sprint(rootDirectory),
+		StorageClass:                storageClass,
+		UserAgent:                   fmt.Sprint(userAgent),
+		ObjectACL:                   objectACL,
+		SessionToken:                fmt.Sprint(sessionToken),
+		UseDualStack:                useDualStackBool,
+		Accelerate:                  accelerateBool,
+		VirtualHostedStyle:          virtualHostedStyleBool,
+		CredentialsConfigPath:       fmt.Sprint(credentialsConfigPath),
 	}
 
 	return New(params)
 }
 
-// getParameterAsInt64 converts parameters[name] to an int64 value (using
-// defaultt if nil), verifies it is no smaller than min, and returns it.
-func getParameterAsInt64(parameters map[string]interface{}, name string, defaultt int64, min int64, max int64) (int64, error) {
-	rv := defaultt
-	param := parameters[name]
-	switch v := param.(type) {
-	case string:
-		vv, err := strconv.ParseInt(v, 0, 64)
-		if err != nil {
-			return 0, fmt.Errorf("%s parameter must be an integer, %v invalid", name, param)
+type integer interface{ signed | unsigned }
+
+type signed interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64
+}
+
+type unsigned interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
+}
+
+// getParameterAsInteger converts parameters[name] to T (using defaultValue if
+// nil) and ensures it is in the range of min and max.
+func getParameterAsInteger[T integer](parameters map[string]any, name string, defaultValue, min, max T) (T, error) {
+	v := defaultValue
+	if p := parameters[name]; p != nil {
+		if _, err := fmt.Sscanf(fmt.Sprint(p), "%d", &v); err != nil {
+			return 0, fmt.Errorf("%s parameter must be an integer, %v invalid", name, p)
 		}
-		rv = vv
-	case int64:
-		rv = v
-	case int, uint, int32, uint32, uint64:
-		rv = reflect.ValueOf(v).Convert(reflect.TypeOf(rv)).Int()
-	case nil:
-		// do nothing
-	default:
-		return 0, fmt.Errorf("invalid value for %s: %#v", name, param)
 	}
-
-	if rv < min || rv > max {
-		return 0, fmt.Errorf("the %s %#v parameter should be a number between %d and %d (inclusive)", name, rv, min, max)
+	if v < min || v > max {
+		return 0, fmt.Errorf("the %s %#v parameter should be a number between %d and %d (inclusive)", name, v, min, max)
 	}
-
-	return rv, nil
+	return v, nil
 }
 
 // New constructs a new Driver with the given AWS credentials, region, encryption flag, and
@@ -620,6 +618,9 @@ func New(params DriverParameters) (*Driver, error) {
 		RootDirectory:               params.RootDirectory,
 		StorageClass:                params.StorageClass,
 		ObjectACL:                   params.ObjectACL,
+		pool: &sync.Pool{
+			New: func() any { return &bytes.Buffer{} },
+		},
 	}
 
 	return &Driver{
@@ -697,7 +698,7 @@ func (d *driver) Writer(ctx context.Context, path string, appendParam bool) (sto
 		if err != nil {
 			return nil, err
 		}
-		return d.newWriter(key, *resp.UploadId, nil), nil
+		return d.newWriter(ctx, key, *resp.UploadId, nil), nil
 	}
 
 	listMultipartUploadsInput := &s3.ListMultipartUploadsInput{
@@ -744,7 +745,7 @@ func (d *driver) Writer(ctx context.Context, path string, appendParam bool) (sto
 				}
 				allParts = append(allParts, partsList.Parts...)
 			}
-			return d.newWriter(key, *multi.UploadId, allParts), nil
+			return d.newWriter(ctx, key, *multi.UploadId, allParts), nil
 		}
 
 		// resp.NextUploadIdMarker must have at least one element or we would have returned not found
@@ -859,7 +860,7 @@ func (d *driver) List(ctx context.Context, opath string) ([]string, error) {
 
 // Move moves an object stored at sourcePath to destPath, removing the original
 // object.
-func (d *driver) Move(ctx context.Context, sourcePath string, destPath string) error {
+func (d *driver) Move(ctx context.Context, sourcePath, destPath string) error {
 	/* This is terrible, but aws doesn't have an actual move. */
 	if err := d.copy(ctx, sourcePath, destPath); err != nil {
 		return err
@@ -868,7 +869,7 @@ func (d *driver) Move(ctx context.Context, sourcePath string, destPath string) e
 }
 
 // copy copies an object stored at sourcePath to destPath.
-func (d *driver) copy(ctx context.Context, sourcePath string, destPath string) error {
+func (d *driver) copy(ctx context.Context, sourcePath, destPath string) error {
 	// S3 can copy objects up to 5 GB in size with a single PUT Object - Copy
 	// operation. For larger objects, the multipart upload API must be used.
 	//
@@ -1232,14 +1233,8 @@ func directoryDiff(prev, current string) []string {
 		}
 		paths = append(paths, parent)
 	}
-	reverse(paths)
+	slices.Reverse(paths)
 	return paths
-}
-
-func reverse(s []string) {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
-	}
 }
 
 func (d *driver) s3Path(path string) string {
@@ -1291,11 +1286,13 @@ func (d *driver) getStorageClass() *string {
 	return aws.String(d.StorageClass)
 }
 
-// writer attempts to upload parts to S3 in a buffered fashion where the last
-// part is at least as large as the chunksize, so the multipart upload could be
-// cleanly resumed in the future. This is violated if Close is called after less
-// than a full chunk is written.
+// writer uploads parts to S3 in a buffered fashion where the length of each
+// part is [writer.driver.ChunkSize], excluding the last part which may be
+// smaller than the configured chunk size and never larger. This allows the
+// multipart upload to be cleanly resumed in future. This is violated if
+// [writer.Close] is called before at least one chunk is written.
 type writer struct {
+	ctx         context.Context
 	driver      *driver
 	key         string
 	uploadID    string
@@ -1303,22 +1300,25 @@ type writer struct {
 	size        int64
 	readyPart   []byte
 	pendingPart []byte
+	buf         *bytes.Buffer
 	closed      bool
 	committed   bool
 	cancelled   bool
 }
 
-func (d *driver) newWriter(key, uploadID string, parts []*s3.Part) storagedriver.FileWriter {
+func (d *driver) newWriter(ctx context.Context, key, uploadID string, parts []*s3.Part) storagedriver.FileWriter {
 	var size int64
 	for _, part := range parts {
 		size += *part.Size
 	}
 	return &writer{
+		ctx:      ctx,
 		driver:   d,
 		key:      key,
 		uploadID: uploadID,
 		parts:    parts,
 		size:     size,
+		buf:      d.pool.Get().(*bytes.Buffer),
 	}
 }
 
@@ -1329,12 +1329,8 @@ func (a completedParts) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a completedParts) Less(i, j int) bool { return *a[i].PartNumber < *a[j].PartNumber }
 
 func (w *writer) Write(p []byte) (int, error) {
-	if w.closed {
-		return 0, fmt.Errorf("already closed")
-	} else if w.committed {
-		return 0, fmt.Errorf("already committed")
-	} else if w.cancelled {
-		return 0, fmt.Errorf("already cancelled")
+	if err := w.done(); err != nil {
+		return 0, err
 	}
 
 	// If the last written part is smaller than minChunkSize, we need to make a
@@ -1391,9 +1387,8 @@ func (w *writer) Write(p []byte) (int, error) {
 				return 0, err
 			}
 			defer resp.Body.Close()
-			w.parts = nil
-			w.readyPart, err = io.ReadAll(resp.Body)
-			if err != nil {
+			w.reset()
+			if _, err := io.Copy(w.buf, resp.Body); err != nil {
 				return 0, err
 			}
 		} else {
@@ -1418,40 +1413,13 @@ func (w *writer) Write(p []byte) (int, error) {
 		}
 	}
 
-	var n int
+	n, _ := w.buf.Write(p)
 
-	for len(p) > 0 {
-		// If no parts are ready to write, fill up the first part
-		if neededBytes := int(w.driver.ChunkSize) - len(w.readyPart); neededBytes > 0 {
-			if len(p) >= neededBytes {
-				w.readyPart = append(w.readyPart, p[:neededBytes]...)
-				n += neededBytes
-				p = p[neededBytes:]
-			} else {
-				w.readyPart = append(w.readyPart, p...)
-				n += len(p)
-				p = nil
-			}
-		}
-
-		if neededBytes := int(w.driver.ChunkSize) - len(w.pendingPart); neededBytes > 0 {
-			if len(p) >= neededBytes {
-				w.pendingPart = append(w.pendingPart, p[:neededBytes]...)
-				n += neededBytes
-				p = p[neededBytes:]
-				err := w.flushPart()
-				if err != nil {
-					w.size += int64(n)
-					return n, err
-				}
-			} else {
-				w.pendingPart = append(w.pendingPart, p...)
-				n += len(p)
-				p = nil
-			}
+	for w.buf.Len() >= w.driver.ChunkSize {
+		if err := w.flush(); err != nil {
+			return 0, fmt.Errorf("flush: %w", err)
 		}
 	}
-	w.size += int64(n)
 	return n, nil
 }
 
@@ -1459,19 +1427,33 @@ func (w *writer) Size() int64 {
 	return w.size
 }
 
+// Close flushes any remaining data in the buffer and releases the buffer back
+// to the pool.
 func (w *writer) Close() error {
 	if w.closed {
 		return fmt.Errorf("already closed")
 	}
 	w.closed = true
-	return w.flushPart()
+	defer w.releaseBuffer()
+	return w.flush()
 }
 
+func (w *writer) reset() {
+	w.buf.Reset()
+	w.parts = nil
+	w.size = 0
+}
+
+// releaseBuffer resets the buffer and returns it to the pool.
+func (w *writer) releaseBuffer() {
+	w.buf.Reset()
+	w.driver.pool.Put(w.buf)
+}
+
+// Cancel aborts the multipart upload and closes the writer.
 func (w *writer) Cancel(ctx context.Context) error {
-	if w.closed {
-		return fmt.Errorf("already closed")
-	} else if w.committed {
-		return fmt.Errorf("already committed")
+	if err := w.done(); err != nil {
+		return err
 	}
 	w.cancelled = true
 	_, err := w.driver.S3.AbortMultipartUpload(&s3.AbortMultipartUploadInput{
@@ -1482,16 +1464,13 @@ func (w *writer) Cancel(ctx context.Context) error {
 	return err
 }
 
+// Commit flushes any remaining data in the buffer and completes the multipart
+// upload.
 func (w *writer) Commit() error {
-	if w.closed {
-		return fmt.Errorf("already closed")
-	} else if w.committed {
-		return fmt.Errorf("already committed")
-	} else if w.cancelled {
-		return fmt.Errorf("already cancelled")
+	if err := w.done(); err != nil {
+		return err
 	}
-	err := w.flushPart()
-	if err != nil {
+	if err := w.flush(); err != nil {
 		return err
 	}
 	w.committed = true
@@ -1530,56 +1509,70 @@ func (w *writer) Commit() error {
 
 	sort.Sort(completedUploadedParts)
 
-	_, err = w.driver.S3.CompleteMultipartUpload(&s3.CompleteMultipartUploadInput{
+	if _, err := w.driver.S3.CompleteMultipartUploadWithContext(w.ctx, &s3.CompleteMultipartUploadInput{
 		Bucket:   aws.String(w.driver.Bucket),
 		Key:      aws.String(w.key),
 		UploadId: aws.String(w.uploadID),
 		MultipartUpload: &s3.CompletedMultipartUpload{
 			Parts: completedUploadedParts,
 		},
-	})
-	if err != nil {
-		w.driver.S3.AbortMultipartUpload(&s3.AbortMultipartUploadInput{
+	}); err != nil {
+		if _, aErr := w.driver.S3.AbortMultipartUploadWithContext(w.ctx, &s3.AbortMultipartUploadInput{
 			Bucket:   aws.String(w.driver.Bucket),
 			Key:      aws.String(w.key),
 			UploadId: aws.String(w.uploadID),
-		})
+		}); aErr != nil {
+			return errors.Join(err, aErr)
+		}
 		return err
 	}
 	return nil
 }
 
-// flushPart flushes buffers to write a part to S3.
-// Only called by Write (with both buffers full) and Close/Commit (always)
-func (w *writer) flushPart() error {
-	if len(w.readyPart) == 0 && len(w.pendingPart) == 0 {
-		// nothing to write
+// flush writes at most [w.driver.ChunkSize] of the buffer to S3. flush is only
+// called by [writer.Write] if the buffer is full, and always by [writer.Close]
+// and [writer.Commit].
+func (w *writer) flush() error {
+	if w.buf.Len() == 0 {
 		return nil
 	}
-	if w.driver.MultipartCombineSmallPart && len(w.pendingPart) < int(w.driver.ChunkSize) {
-		// closing with a small pending part
-		// combine ready and pending to avoid writing a small part
-		w.readyPart = append(w.readyPart, w.pendingPart...)
-		w.pendingPart = nil
-	}
 
-	partNumber := aws.Int64(int64(len(w.parts) + 1))
-	resp, err := w.driver.S3.UploadPart(&s3.UploadPartInput{
+	r := bytes.NewReader(w.buf.Next(w.driver.ChunkSize))
+
+	partSize := r.Len()
+	partNumber := aws.Int64(int64(len(w.parts)) + 1)
+
+	resp, err := w.driver.S3.UploadPartWithContext(w.ctx, &s3.UploadPartInput{
 		Bucket:     aws.String(w.driver.Bucket),
 		Key:        aws.String(w.key),
 		PartNumber: partNumber,
 		UploadId:   aws.String(w.uploadID),
-		Body:       bytes.NewReader(w.readyPart),
+		Body:       r,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("upload part: %w", err)
 	}
+
 	w.parts = append(w.parts, &s3.Part{
 		ETag:       resp.ETag,
 		PartNumber: partNumber,
-		Size:       aws.Int64(int64(len(w.readyPart))),
+		Size:       aws.Int64(int64(partSize)),
 	})
-	w.readyPart = w.pendingPart
-	w.pendingPart = nil
+
+	w.size += int64(partSize)
+
+	return nil
+}
+
+// done returns an error if the writer is in an invalid state.
+func (w *writer) done() error {
+	switch {
+	case w.closed:
+		return fmt.Errorf("already closed")
+	case w.committed:
+		return fmt.Errorf("already committed")
+	case w.cancelled:
+		return fmt.Errorf("already cancelled")
+	}
 	return nil
 }
