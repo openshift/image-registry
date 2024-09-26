@@ -557,9 +557,8 @@ func New(params DriverParameters) (*Driver, error) {
 	awsConfig.WithUseDualStack(params.UseDualStack)
 
 	if params.SkipVerify {
-		httpTransport := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
+		httpTransport := http.DefaultTransport.(*http.Transport).Clone()
+		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		awsConfig.WithHTTPClient(&http.Client{
 			Transport: httpTransport,
 		})
