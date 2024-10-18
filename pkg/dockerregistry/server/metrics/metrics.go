@@ -122,20 +122,6 @@ func storageSentinelError(err error) bool {
 	return false
 }
 
-func storageErrorCode(err error) string {
-	switch err.(type) {
-	case storagedriver.ErrUnsupportedMethod:
-		return "UNSUPPORTED_METHOD"
-	case storagedriver.PathNotFoundError:
-		return "PATH_NOT_FOUND"
-	case storagedriver.InvalidPathError:
-		return "INVALID_PATH"
-	case storagedriver.InvalidOffsetError:
-		return "INVALID_OFFSET"
-	}
-	return "UNKNOWN"
-}
-
 type metrics struct {
 	sink Sink
 }
@@ -196,8 +182,7 @@ func (m *metrics) DigestCacheScoped() Cache {
 	}
 }
 
-type noopMetrics struct {
-}
+type noopMetrics struct{}
 
 var _ Metrics = noopMetrics{}
 
