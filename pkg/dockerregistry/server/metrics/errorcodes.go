@@ -9,14 +9,44 @@ import (
 )
 
 const (
+	// errCodeUnsupportedMethod happens when a storage driver does not offer
+	// support for a determine http method, or when it doesn't support url
+	// redirects. this error usually bubbles up back to clients, making it
+	// easy to detect. fixing it might simply involve disabling redirects
+	// the image registry.
 	errCodeUnsupportedMethod = "UNSUPPORTED_METHOD"
-	errCodePathNotFound      = "PATH_NOT_FOUND"
-	errCodeInvalidPath       = "INVALID_PATH"
-	errCodeInvalidOffset     = "INVALID_OFFSET"
-	errCodeReadOnlyFS        = "READ_ONLY_FILESYSTEM"
-	errCodeFileTooLarge      = "FILE_TOO_LARGE"
-	errCodeDeviceOutOfSpace  = "DEVICE_OUT_OF_SPACE"
-	errCodeUnknown           = "UNKNOWN"
+
+	// errCodePathNotFound indicates that a given path does not exist in
+	// the underlying storage. it usually indicates a user error and should
+	// not be considered high severity.
+	errCodePathNotFound = "PATH_NOT_FOUND"
+
+	// errCodeInvalidPath indicates the provided path does not comform to
+	// the upstream distribution standards.
+	// see https://github.com/distribution/distribution/blob/bce9fcd135940c4be187f6fc98c2e27dad9ddcea/registry/storage/driver/storagedriver.go?plain=1#L134-L139
+	// for details.
+	errCodeInvalidPath = "INVALID_PATH"
+
+	// errCodeInvalidOffset indicates an attempt to read/write at an invalid
+	// offset. A valid offset is contextual. Storage drivers usually specify
+	// non-zero offsets when reading a stream of bytes from storage, or
+	// during chunked blob uploads.
+	errCodeInvalidOffset = "INVALID_OFFSET"
+
+	// errCodeReadOnlyFS indicates the filesystem the registry is trying to
+	// write is read-only. this is a catastrophic error and needs admin
+	// intervention for recovery. however, clients will only notice if they
+	// try to push directly into the registry. pull-through will transparently
+	// fail and failures will only be visible in logs and metrics/alerts.
+	errCodeReadOnlyFS = "READ_ONLY_FILESYSTEM"
+
+	// errCodeFileTooLarge indicates the file being uploaded is too large.
+	errCodeFileTooLarge = "FILE_TOO_LARGE"
+
+	// errCodeDeviceOutOfSpace indicates the storage device is out of space.
+	errCodeDeviceOutOfSpace = "DEVICE_OUT_OF_SPACE"
+
+	errCodeUnknown = "UNKNOWN"
 
 	// errnoEFBIG represents a file too large error.
 	// See `man errno` for more.
