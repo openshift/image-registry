@@ -120,4 +120,4 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace github.com/distribution/distribution/v3 => github.com/openshift/docker-distribution/v3 v3.0.0-20241023082416-9b9c54dbc086
+replace github.com/distribution/distribution/v3 => github.com/openshift/docker-distribution/v3 v3.0.0-20250120104846-a24972526437
