@@ -226,12 +226,12 @@ github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.0.2 h1:9yCKha/T5XdGtO0q9Q9a6T5NUCsTn/DrBg0D7ufOcFM=
 github.com/opencontainers/image-spec v1.0.2/go.mod h1:BtxoFyWECRxE4U/7sNtV5W15zMzWCbyJoFRP3s7yZA0=
+github.com/openshift-cherrypick-robot/docker-distribution/v3 v3.0.0-20250115160812-3c9baa24eada h1:oiiS/ybe9j4YLHmFnn0t0eGyERRZyD4EAGVaqdlMmNU=
+github.com/openshift-cherrypick-robot/docker-distribution/v3 v3.0.0-20250115160812-3c9baa24eada/go.mod h1:+fqBJ4vPYo4Uu1ZE4d+bUtTLRXfdSL3NvCZIZ9GHv58=
 github.com/openshift/api v0.0.0-20240613141850-76a71dac36a0 h1:Kn16YZDBGwetg+pMQ0u0/3aOxRXQJi/1lu6rIlK+1So=
 github.com/openshift/api v0.0.0-20240613141850-76a71dac36a0/go.mod h1:OOh6Qopf21pSzqNVCB5gomomBXb8o5sGKZxG2KNpaXM=
 github.com/openshift/client-go v0.0.0-20240528061634-b054aa794d87 h1:JtLhaGpSEconE+1IKmIgCOof/Len5ceG6H1pk43yv5U=
 github.com/openshift/client-go v0.0.0-20240528061634-b054aa794d87/go.mod h1:3IPD4U0qyovZS4EFady2kqY32m8lGcbs/Wx+yprg9z8=
-github.com/openshift/docker-distribution/v3 v3.0.0-20241023082416-9b9c54dbc086 h1:kM30ruFjxZiMWDYPcqWn3wc2YmDufuhBcBGMrTuCEXc=
-github.com/openshift/docker-distribution/v3 v3.0.0-20241023082416-9b9c54dbc086/go.mod h1:+fqBJ4vPYo4Uu1ZE4d+bUtTLRXfdSL3NvCZIZ9GHv58=
 github.com/openshift/library-go v0.0.0-20240607134135-aed018c215a1 h1:jLERUXwvYY9+9oCz66oQ/XTZzeyH8RmCpxiImYVYnmA=
 github.com/openshift/library-go v0.0.0-20240607134135-aed018c215a1/go.mod h1:PdASVamWinll2BPxiUpXajTwZxV8A1pQbWEsCN1od7I=
 github.com/pborman/uuid v1.2.1 h1:+ZZIw58t/ozdjRaXh/3awHfmWRbzYxJoAdNJxe/3pvw=
