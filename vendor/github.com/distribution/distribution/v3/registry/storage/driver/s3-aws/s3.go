@@ -42,6 +42,17 @@ import (
 	"github.com/distribution/distribution/v3/registry/storage/driver/factory"
 )
 
+// additionalRegions is a slice with regions not listed among the default
+// regions supported by aws-sdk-go v1. the v1 of the sdk is in maintenance
+// therefore it does not receive new regions as aws infrastructure grows.
+var additionalRegions = []string{
+	"ap-southeast-5", // Asia Pacific (Malaysia)
+	"ap-southeast-7", // Asia Pacific (Thailand)
+	"ca-west-1",      // Canada West (Calgary)
+	"il-central-1",   // Israel (Tel Aviv)
+	"mx-central-1",   // Mexico (Central)
+}
+
 const driverName = "s3aws"
 
 // minChunkSize defines the minimum multipart upload chunk size
@@ -128,6 +139,10 @@ func init() {
 		for region := range p.Regions() {
 			validRegions[region] = struct{}{}
 		}
+	}
+
+	for _, region := range additionalRegions {
+		validRegions[region] = struct{}{}
 	}
 
 	for _, objectACL := range []string{
