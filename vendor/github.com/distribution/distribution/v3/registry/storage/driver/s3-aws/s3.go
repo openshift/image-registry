@@ -31,7 +31,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -41,17 +40,6 @@ import (
 	"github.com/distribution/distribution/v3/registry/storage/driver/base"
 	"github.com/distribution/distribution/v3/registry/storage/driver/factory"
 )
-
-// additionalRegions is a slice with regions not listed among the default
-// regions supported by aws-sdk-go v1. the v1 of the sdk is in maintenance
-// therefore it does not receive new regions as aws infrastructure grows.
-var additionalRegions = []string{
-	"ap-southeast-5", // Asia Pacific (Malaysia)
-	"ap-southeast-7", // Asia Pacific (Thailand)
-	"ca-west-1",      // Canada West (Calgary)
-	"il-central-1",   // Israel (Tel Aviv)
-	"mx-central-1",   // Mexico (Central)
-}
 
 const driverName = "s3aws"
 
@@ -98,9 +86,6 @@ var s3StorageClasses = []string{
 	s3.StorageClassGlacierIr,
 }
 
-// validRegions maps known s3 region identifiers to region descriptors
-var validRegions = map[string]struct{}{}
-
 // validObjectACLs contains known s3 object Acls
 var validObjectACLs = map[string]struct{}{}
 
@@ -134,17 +119,6 @@ type DriverParameters struct {
 }
 
 func init() {
-	partitions := endpoints.DefaultPartitions()
-	for _, p := range partitions {
-		for region := range p.Regions() {
-			validRegions[region] = struct{}{}
-		}
-	}
-
-	for _, region := range additionalRegions {
-		validRegions[region] = struct{}{}
-	}
-
 	for _, objectACL := range []string{
 		s3.ObjectCannedACLPrivate,
 		s3.ObjectCannedACLPublicRead,
@@ -247,12 +221,6 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 		return nil, fmt.Errorf("no region parameter provided")
 	}
 	region := fmt.Sprint(regionName)
-	// Don't check the region value if a custom endpoint is provided.
-	if regionEndpoint == "" {
-		if _, ok := validRegions[region]; !ok {
-			return nil, fmt.Errorf("invalid region provided: %v", region)
-		}
-	}
 
 	bucket := parameters["bucket"]
 	if bucket == nil || fmt.Sprint(bucket) == "" {
