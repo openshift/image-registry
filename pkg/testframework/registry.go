@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	kubeclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/utils/ptr"
 
 	routev1 "github.com/openshift/api/route/v1"
 	routeclient "github.com/openshift/client-go/route/clientset/versioned"
@@ -348,6 +349,7 @@ func CreateEphemeralRegistry(t *testing.T, restConfig *rest.Config, namespace st
 						SeccompProfile: &corev1.SeccompProfile{
 							Type: corev1.SeccompProfileTypeRuntimeDefault,
 						},
+						ReadOnlyRootFilesystem: ptr.To(true),
 					},
 				},
 			},
