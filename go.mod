@@ -85,7 +85,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/ncw/swift v1.0.49 // indirect
+	github.com/ncw/swift/v2 v2.0.4 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/profile v1.3.0 // indirect
@@ -120,7 +120,7 @@ require (
 )
 
 replace (
-	github.com/distribution/distribution/v3 => github.com/openshift/docker-distribution/v3 v3.0.0-20250403075108-ac5742e896d4
+	github.com/distribution/distribution/v3 => github.com/shiftstack/docker-distribution/v3 v3.0.0-20250714163213-1da5a63cfd82
 
 	// CVE-2025-30204
 	github.com/golang-jwt/jwt/v4 => github.com/golang-jwt/jwt/v4 v4.5.2
