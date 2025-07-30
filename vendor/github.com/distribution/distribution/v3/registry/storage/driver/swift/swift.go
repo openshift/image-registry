@@ -32,7 +32,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/ncw/swift"
+	"github.com/ncw/swift/v2"
 
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
 	"github.com/distribution/distribution/v3/registry/storage/driver/base"
@@ -64,6 +64,7 @@ type Parameters struct {
 	ApplicationCredentialID     string
 	ApplicationCredentialName   string
 	ApplicationCredentialSecret string
+	TokenID                     string
 	AuthURL                     string
 	Tenant                      string
 	TenantID                    string
@@ -161,16 +162,12 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 		return nil, err
 	}
 
-	if params.Username == "" {
-		if params.ApplicationCredentialID == "" && params.ApplicationCredentialName == "" {
-			return nil, fmt.Errorf("no username or application-credential provided")
-		}
+	if params.Username == "" && params.TokenID == "" && params.ApplicationCredentialID == "" && params.ApplicationCredentialName == "" {
+		return nil, fmt.Errorf("no username, tokenID, or application-credential provided")
 	}
 
-	if params.Password == "" {
-		if params.ApplicationCredentialID == "" {
-			return nil, fmt.Errorf("no password or application-credential-secret parameter provided")
-		}
+	if params.Password == "" && params.TokenID == "" && params.ApplicationCredentialID == "" {
+		return nil, fmt.Errorf("no password, tokenID, or application-credential-secret parameter provided")
 	}
 
 	if params.AuthURL == "" {
@@ -190,6 +187,7 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 
 // New constructs a new Driver with the given Openstack Swift credentials and container name
 func New(params Parameters) (*Driver, error) {
+	ctx := context.Background()
 	transport := &http.Transport{
 		Proxy:               http.ProxyFromEnvironment,
 		MaxIdleConnsPerHost: 2048,
@@ -202,6 +200,7 @@ func New(params Parameters) (*Driver, error) {
 		ApplicationCredentialId:     params.ApplicationCredentialID,
 		ApplicationCredentialName:   params.ApplicationCredentialName,
 		ApplicationCredentialSecret: params.ApplicationCredentialSecret,
+		Token:                       params.TokenID,
 		AuthUrl:                     params.AuthURL,
 		Region:                      params.Region,
 		AuthVersion:                 params.AuthVersion,
@@ -218,13 +217,13 @@ func New(params Parameters) (*Driver, error) {
 		ConnectTimeout:              60 * time.Second,
 		Timeout:                     15 * 60 * time.Second,
 	}
-	err := ct.Authenticate()
+	err := ct.Authenticate(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("swift authentication failed: %s", err)
 	}
 
-	if _, _, err := ct.Container(params.Container); err == swift.ContainerNotFound {
-		if err := ct.ContainerCreate(params.Container, nil); err != nil {
+	if _, _, err := ct.Container(ctx, params.Container); err == swift.ContainerNotFound {
+		if err := ct.ContainerCreate(ctx, params.Container, nil); err != nil {
 			return nil, fmt.Errorf("failed to create container %s (%s)", params.Container, err)
 		}
 	} else if err != nil {
@@ -241,7 +240,7 @@ func New(params Parameters) (*Driver, error) {
 	}
 
 	info := swiftInfo{}
-	if config, err := d.Conn.QueryInfo(); err == nil {
+	if config, err := d.Conn.QueryInfo(ctx); err == nil {
 		_, d.BulkDeleteSupport = config["bulk_delete"]
 
 		if err := mapstructure.Decode(config, &info); err == nil {
@@ -265,7 +264,7 @@ func New(params Parameters) (*Driver, error) {
 		// Since Swift 2.2.2, we can now set secret keys on containers
 		// in addition to the account secret keys. Use them in preference.
 		if d.TempURLContainerKey {
-			_, containerHeaders, err := d.Conn.Container(d.Container)
+			_, containerHeaders, err := d.Conn.Container(ctx, d.Container)
 			if err != nil {
 				return nil, fmt.Errorf("failed to fetch container info %s (%s)", d.Container, err)
 			}
@@ -274,13 +273,13 @@ func New(params Parameters) (*Driver, error) {
 			if d.SecretKey == "" || (params.SecretKey != "" && d.SecretKey != params.SecretKey) {
 				m := swift.Metadata{}
 				m["temp-url-key"] = secretKey
-				if d.Conn.ContainerUpdate(d.Container, m.ContainerHeaders()); err == nil {
+				if d.Conn.ContainerUpdate(ctx, d.Container, m.ContainerHeaders()); err == nil {
 					d.SecretKey = secretKey
 				}
 			}
 		} else {
 			// Use the account secret key
-			_, accountHeaders, err := d.Conn.Account()
+			_, accountHeaders, err := d.Conn.Account(ctx)
 			if err != nil {
 				return nil, fmt.Errorf("failed to fetch account info (%s)", err)
 			}
@@ -289,7 +288,7 @@ func New(params Parameters) (*Driver, error) {
 			if d.SecretKey == "" || (params.SecretKey != "" && d.SecretKey != params.SecretKey) {
 				m := swift.Metadata{}
 				m["temp-url-key"] = secretKey
-				if err := d.Conn.AccountUpdate(m.AccountHeaders()); err == nil {
+				if err := d.Conn.AccountUpdate(ctx, m.AccountHeaders()); err == nil {
 					d.SecretKey = secretKey
 				}
 			}
@@ -313,7 +312,7 @@ func (d *driver) Name() string {
 
 // GetContent retrieves the content stored at "path" as a []byte.
 func (d *driver) GetContent(ctx context.Context, path string) ([]byte, error) {
-	content, err := d.Conn.ObjectGetBytes(d.Container, d.swiftPath(path))
+	content, err := d.Conn.ObjectGetBytes(ctx, d.Container, d.swiftPath(path))
 	if err == swift.ObjectNotFound {
 		return nil, storagedriver.PathNotFoundError{Path: path}
 	}
@@ -322,7 +321,7 @@ func (d *driver) GetContent(ctx context.Context, path string) ([]byte, error) {
 
 // PutContent stores the []byte content at a location designated by "path".
 func (d *driver) PutContent(ctx context.Context, path string, contents []byte) error {
-	err := d.Conn.ObjectPutBytes(d.Container, d.swiftPath(path), contents, contentType)
+	err := d.Conn.ObjectPutBytes(ctx, d.Container, d.swiftPath(path), contents, contentType)
 	if err == swift.ObjectNotFound {
 		return storagedriver.PathNotFoundError{Path: path}
 	}
@@ -339,7 +338,7 @@ func (d *driver) Reader(ctx context.Context, path string, offset int64) (io.Read
 	endTime := time.Now().Add(readAfterWriteTimeout)
 
 	for {
-		file, headers, err := d.Conn.ObjectOpen(d.Container, d.swiftPath(path), false, headers)
+		file, headers, err := d.Conn.ObjectOpen(ctx, d.Container, d.swiftPath(path), false, headers)
 		if err != nil {
 			if err == swift.ObjectNotFound {
 				return nil, storagedriver.PathNotFoundError{Path: path}
@@ -353,7 +352,7 @@ func (d *driver) Reader(ctx context.Context, path string, offset int64) (io.Read
 		// if this is a DLO and it is clear that segments are still missing,
 		// wait until they show up
 		_, isDLO := headers["X-Object-Manifest"]
-		size, err := file.Length()
+		size, err := file.Length(ctx)
 		if err != nil {
 			return file, err
 		}
@@ -386,7 +385,7 @@ func (d *driver) Writer(ctx context.Context, path string, append bool) (storaged
 			return nil, err
 		}
 	} else {
-		info, headers, err := d.Conn.Object(d.Container, d.swiftPath(path))
+		info, headers, err := d.Conn.Object(ctx, d.Container, d.swiftPath(path))
 		if err == swift.ObjectNotFound {
 			return nil, storagedriver.PathNotFoundError{Path: path}
 		} else if err != nil {
@@ -398,13 +397,13 @@ func (d *driver) Writer(ctx context.Context, path string, append bool) (storaged
 			if err != nil {
 				return nil, err
 			}
-			if err := d.Conn.ObjectMove(d.Container, d.swiftPath(path), d.Container, getSegmentPath(segmentsPath, len(segments))); err != nil {
+			if err := d.Conn.ObjectMove(ctx, d.Container, d.swiftPath(path), d.Container, getSegmentPath(segmentsPath, len(segments))); err != nil {
 				return nil, err
 			}
 			segments = []swift.Object{info}
 		} else {
 			_, segmentsPath = parseManifest(manifest)
-			if segments, err = d.getAllSegments(segmentsPath); err != nil {
+			if segments, err = d.getAllSegments(ctx, segmentsPath); err != nil {
 				return nil, err
 			}
 		}
@@ -422,7 +421,7 @@ func (d *driver) Stat(ctx context.Context, path string) (storagedriver.FileInfo,
 		Delimiter: '/',
 	}
 
-	objects, err := d.Conn.ObjectsAll(d.Container, opts)
+	objects, err := d.Conn.ObjectsAll(ctx, d.Container, opts)
 	if err != nil {
 		if err == swift.ContainerNotFound {
 			return nil, storagedriver.PathNotFoundError{Path: path}
@@ -452,7 +451,7 @@ func (d *driver) Stat(ctx context.Context, path string) (storagedriver.FileInfo,
 	endTime := time.Now().Add(readAfterWriteTimeout)
 
 	for {
-		info, headers, err := d.Conn.Object(d.Container, swiftPath)
+		info, headers, err := d.Conn.Object(ctx, d.Container, swiftPath)
 		if err != nil {
 			if err == swift.ObjectNotFound {
 				return nil, storagedriver.PathNotFoundError{Path: path}
@@ -494,7 +493,7 @@ func (d *driver) List(ctx context.Context, path string) ([]string, error) {
 		Delimiter: '/',
 	}
 
-	objects, err := d.Conn.ObjectsAll(d.Container, opts)
+	objects, err := d.Conn.ObjectsAll(ctx, d.Container, opts)
 	for _, obj := range objects {
 		files = append(files, strings.TrimPrefix(strings.TrimSuffix(obj.Name, "/"), d.swiftPath("/")))
 	}
@@ -508,15 +507,15 @@ func (d *driver) List(ctx context.Context, path string) ([]string, error) {
 // Move moves an object stored at sourcePath to destPath, removing the original
 // object.
 func (d *driver) Move(ctx context.Context, sourcePath string, destPath string) error {
-	_, headers, err := d.Conn.Object(d.Container, d.swiftPath(sourcePath))
+	_, headers, err := d.Conn.Object(ctx, d.Container, d.swiftPath(sourcePath))
 	if err == nil {
 		if manifest, ok := headers["X-Object-Manifest"]; ok {
-			if err = d.createManifest(destPath, manifest); err != nil {
+			if err = d.createManifest(ctx, destPath, manifest); err != nil {
 				return err
 			}
-			err = d.Conn.ObjectDelete(d.Container, d.swiftPath(sourcePath))
+			err = d.Conn.ObjectDelete(ctx, d.Container, d.swiftPath(sourcePath))
 		} else {
-			err = d.Conn.ObjectMove(d.Container, d.swiftPath(sourcePath), d.Container, d.swiftPath(destPath))
+			err = d.Conn.ObjectMove(ctx, d.Container, d.swiftPath(sourcePath), d.Container, d.swiftPath(destPath))
 		}
 	}
 	if err == swift.ObjectNotFound {
@@ -531,7 +530,7 @@ func (d *driver) Delete(ctx context.Context, path string) error {
 		Prefix: d.swiftPath(path) + "/",
 	}
 
-	objects, err := d.Conn.ObjectsAll(d.Container, &opts)
+	objects, err := d.Conn.ObjectsAll(ctx, d.Container, &opts)
 	if err != nil {
 		if err == swift.ContainerNotFound {
 			return storagedriver.PathNotFoundError{Path: path}
@@ -543,11 +542,11 @@ func (d *driver) Delete(ctx context.Context, path string) error {
 		if obj.PseudoDirectory {
 			continue
 		}
-		if _, headers, err := d.Conn.Object(d.Container, obj.Name); err == nil {
+		if _, headers, err := d.Conn.Object(ctx, d.Container, obj.Name); err == nil {
 			manifest, ok := headers["X-Object-Manifest"]
 			if ok {
 				_, prefix := parseManifest(manifest)
-				segments, err := d.getAllSegments(prefix)
+				segments, err := d.getAllSegments(ctx, prefix)
 				if err != nil {
 					return err
 				}
@@ -572,7 +571,7 @@ func (d *driver) Delete(ctx context.Context, path string) error {
 			return err
 		}
 		for _, chunk := range chunks {
-			_, err := d.Conn.BulkDelete(d.Container, chunk)
+			_, err := d.Conn.BulkDelete(ctx, d.Container, chunk)
 			// Don't fail on ObjectNotFound because eventual consistency
 			// makes this situation normal.
 			if err != nil && err != swift.Forbidden && err != swift.ObjectNotFound {
@@ -584,7 +583,7 @@ func (d *driver) Delete(ctx context.Context, path string) error {
 		}
 	} else {
 		for _, obj := range objects {
-			if err := d.Conn.ObjectDelete(d.Container, obj.Name); err != nil {
+			if err := d.Conn.ObjectDelete(ctx, d.Container, obj.Name); err != nil {
 				if err == swift.ObjectNotFound {
 					return storagedriver.PathNotFoundError{Path: obj.Name}
 				}
@@ -593,9 +592,9 @@ func (d *driver) Delete(ctx context.Context, path string) error {
 		}
 	}
 
-	_, _, err = d.Conn.Object(d.Container, d.swiftPath(path))
+	_, _, err = d.Conn.Object(ctx, d.Container, d.swiftPath(path))
 	if err == nil {
-		if err := d.Conn.ObjectDelete(d.Container, d.swiftPath(path)); err != nil {
+		if err := d.Conn.ObjectDelete(ctx, d.Container, d.swiftPath(path)); err != nil {
 			if err == swift.ObjectNotFound {
 				return storagedriver.PathNotFoundError{Path: path}
 			}
@@ -689,9 +688,9 @@ func (d *driver) swiftSegmentPath(path string) (string, error) {
 	return strings.TrimLeft(strings.TrimRight(d.Prefix+"/segments/"+path[0:3]+"/"+path[3:], "/"), "/"), nil
 }
 
-func (d *driver) getAllSegments(path string) ([]swift.Object, error) {
+func (d *driver) getAllSegments(ctx context.Context, path string) ([]swift.Object, error) {
 	// a simple container listing works 99.9% of the time
-	segments, err := d.Conn.ObjectsAll(d.Container, &swift.ObjectsOpts{Prefix: path})
+	segments, err := d.Conn.ObjectsAll(ctx, d.Container, &swift.ObjectsOpts{Prefix: path})
 	if err != nil {
 		if err == swift.ContainerNotFound {
 			return nil, storagedriver.PathNotFoundError{Path: path}
@@ -722,7 +721,7 @@ func (d *driver) getAllSegments(path string) ([]swift.Object, error) {
 		// guaranteed to return the correct metadata, except for the pathological
 		// case of an outage of large parts of the Swift cluster or its network,
 		// since every segment is only written once.)
-		segment, _, err := d.Conn.Object(d.Container, segmentPath)
+		segment, _, err := d.Conn.Object(ctx, d.Container, segmentPath)
 		switch err {
 		case nil:
 			// found new segment -> keep going, more might be missing
@@ -738,10 +737,10 @@ func (d *driver) getAllSegments(path string) ([]swift.Object, error) {
 	}
 }
 
-func (d *driver) createManifest(path string, segments string) error {
+func (d *driver) createManifest(ctx context.Context, path string, segments string) error {
 	headers := make(swift.Headers)
 	headers["X-Object-Manifest"] = segments
-	manifest, err := d.Conn.ObjectCreate(d.Container, d.swiftPath(path), false, "", contentType, headers)
+	manifest, err := d.Conn.ObjectCreate(ctx, d.Container, d.swiftPath(path), false, "", contentType, headers)
 	if err != nil {
 		if err == swift.ObjectNotFound {
 			return storagedriver.PathNotFoundError{Path: path}
@@ -839,6 +838,7 @@ func (w *writer) Size() int64 {
 }
 
 func (w *writer) Close() error {
+	ctx := context.Background()
 	if w.closed {
 		return fmt.Errorf("already closed")
 	}
@@ -848,10 +848,10 @@ func (w *writer) Close() error {
 	}
 
 	if !w.committed && !w.cancelled {
-		if err := w.driver.createManifest(w.path, w.driver.Container+"/"+w.segmentsPath); err != nil {
+		if err := w.driver.createManifest(ctx, w.path, w.driver.Container+"/"+w.segmentsPath); err != nil {
 			return err
 		}
-		if err := w.waitForSegmentsToShowUp(); err != nil {
+		if err := w.waitForSegmentsToShowUp(ctx); err != nil {
 			return err
 		}
 	}
@@ -871,6 +871,7 @@ func (w *writer) Cancel(ctx context.Context) error {
 }
 
 func (w *writer) Commit() error {
+	ctx := context.Background()
 	if w.closed {
 		return fmt.Errorf("already closed")
 	} else if w.committed {
@@ -883,22 +884,22 @@ func (w *writer) Commit() error {
 		return err
 	}
 
-	if err := w.driver.createManifest(w.path, w.driver.Container+"/"+w.segmentsPath); err != nil {
+	if err := w.driver.createManifest(ctx, w.path, w.driver.Container+"/"+w.segmentsPath); err != nil {
 		return err
 	}
 
 	w.committed = true
-	return w.waitForSegmentsToShowUp()
+	return w.waitForSegmentsToShowUp(ctx)
 }
 
-func (w *writer) waitForSegmentsToShowUp() error {
+func (w *writer) waitForSegmentsToShowUp(ctx context.Context) error {
 	var err error
 	waitingTime := readAfterWriteWait
 	endTime := time.Now().Add(readAfterWriteTimeout)
 
 	for {
 		var info swift.Object
-		if info, _, err = w.driver.Conn.Object(w.driver.Container, w.driver.swiftPath(w.path)); err == nil {
+		if info, _, err = w.driver.Conn.Object(ctx, w.driver.Container, w.driver.swiftPath(w.path)); err == nil {
 			if info.Bytes == w.size {
 				break
 			}
@@ -923,13 +924,14 @@ type segmentWriter struct {
 }
 
 func (sw *segmentWriter) Write(p []byte) (int, error) {
+	ctx := context.Background()
 	n := 0
 	for offset := 0; offset < len(p); offset += sw.maxChunkSize {
 		chunkSize := sw.maxChunkSize
 		if offset+chunkSize > len(p) {
 			chunkSize = len(p) - offset
 		}
-		_, err := sw.conn.ObjectPut(sw.container, getSegmentPath(sw.segmentsPath, sw.segmentNumber), bytes.NewReader(p[offset:offset+chunkSize]), false, "", contentType, nil)
+		_, err := sw.conn.ObjectPut(ctx, sw.container, getSegmentPath(sw.segmentsPath, sw.segmentNumber), bytes.NewReader(p[offset:offset+chunkSize]), false, "", contentType, nil)
 		if err != nil {
 			return n, err
 		}

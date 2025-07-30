@@ -213,8 +213,8 @@ github.com/morikuni/aec v1.0.0/go.mod h1:BbKIizmSmc5MMPqRYbxO4ZU0S0+P200+tUnFx7P
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
-github.com/ncw/swift v1.0.49 h1:eQaKIjSt/PXLKfYgzg01nevmO+CMXfXGRhB1gOhDs7E=
-github.com/ncw/swift v1.0.49/go.mod h1:23YIA4yWVnGwv2dQlN4bB7egfYX6YLn0Yo/S6zZO/ZM=
+github.com/ncw/swift/v2 v2.0.4 h1:hHWVFxn5/YaTWAASmn4qyq2p6OyP/Hm3vMLzkjEqR7w=
+github.com/ncw/swift/v2 v2.0.4/go.mod h1:cbAO76/ZwcFrFlHdXPjaqWZ9R7Hdar7HpjRXBfbjigk=
 github.com/onsi/ginkgo/v2 v2.15.0 h1:79HwNRBAZHOEwrczrgSOPy+eFTTlIGELKy5as+ClttY=
 github.com/onsi/ginkgo/v2 v2.15.0/go.mod h1:HlxMHtYF57y6Dpf+mc5529KKmSq9h2FpCF+/ZkwUxKM=
 github.com/onsi/gomega v1.31.0 h1:54UJxxj6cPInHS3a35wm6BK/F9nHYueZ1NVujHDrnXE=
@@ -227,8 +227,8 @@ github.com/openshift/api v0.0.0-20240613141850-76a71dac36a0 h1:Kn16YZDBGwetg+pMQ
 github.com/openshift/api v0.0.0-20240613141850-76a71dac36a0/go.mod h1:OOh6Qopf21pSzqNVCB5gomomBXb8o5sGKZxG2KNpaXM=
 github.com/openshift/client-go v0.0.0-20240528061634-b054aa794d87 h1:JtLhaGpSEconE+1IKmIgCOof/Len5ceG6H1pk43yv5U=
 github.com/openshift/client-go v0.0.0-20240528061634-b054aa794d87/go.mod h1:3IPD4U0qyovZS4EFady2kqY32m8lGcbs/Wx+yprg9z8=
-github.com/openshift/docker-distribution/v3 v3.0.0-20250403075108-ac5742e896d4 h1:3XXG3G/T2H6WsLG0x8/AdeVwJboFCddDSD3u0/lMr+I=
-github.com/openshift/docker-distribution/v3 v3.0.0-20250403075108-ac5742e896d4/go.mod h1:+fqBJ4vPYo4Uu1ZE4d+bUtTLRXfdSL3NvCZIZ9GHv58=
+github.com/openshift/docker-distribution/v3 v3.0.0-20250730075113-f365bc3b1cc3 h1:9C0uygVEO734aZTmQa1N+n1QlD1NIVAGnBBSpUq/ESo=
+github.com/openshift/docker-distribution/v3 v3.0.0-20250730075113-f365bc3b1cc3/go.mod h1:tUOEMWtC6LKrpwAWIA1jiABz6FJU0jnC+irv2xGcYeM=
 github.com/openshift/golang-oauth2 v0.26.1-0.20250310184649-06a918c6239d h1:iQfTKBmMcwFTxxVWV7U/C6GqgIIWTKD8l5HXslvn53s=
 github.com/openshift/golang-oauth2 v0.26.1-0.20250310184649-06a918c6239d/go.mod h1:XYTD2NtWslqkgxebSiOHnXEap4TF09sJSc7H1sXbhtI=
 github.com/openshift/library-go v0.0.0-20240607134135-aed018c215a1 h1:jLERUXwvYY9+9oCz66oQ/XTZzeyH8RmCpxiImYVYnmA=
