@@ -120,7 +120,7 @@ require (
 )
 
 replace (
-	github.com/distribution/distribution/v3 => github.com/openshift/docker-distribution/v3 v3.0.0-20250131085920-07b230952f5e
+	github.com/distribution/distribution/v3 => github.com/openshift/docker-distribution/v3 v3.0.0-20250806112144-7577cb885173
 
 	// CVE-2025-30204
 	github.com/golang-jwt/jwt/v4 => github.com/golang-jwt/jwt/v4 v4.5.2
