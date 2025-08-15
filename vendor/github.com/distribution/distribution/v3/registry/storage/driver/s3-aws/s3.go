@@ -1168,6 +1168,16 @@ func (d *driver) doWalk(parentCtx context.Context, objectCount *int64, path, pre
 				}
 			}
 
+			// in some cases the _uploads dir might be empty. when this happens, it would
+			// be appended twice to the walkInfos slice, once as [...]/_uploads and
+			// once more erroneously as [...]/_uploads/. the easiest way to avoid this is
+			// to skip appending filePath to walkInfos if it ends in "/". the loop through
+			// dirs will already have handled it in that case, so it's safe to continue this
+			// loop.
+			if strings.HasSuffix(filePath, "/") {
+				continue
+			}
+
 			walkInfos = append(walkInfos, storagedriver.FileInfoInternal{
 				FileInfoFields: storagedriver.FileInfoFields{
 					IsDir:   false,
@@ -1442,8 +1452,6 @@ func (w *writer) Size() int64 {
 	return w.size
 }
 
-// Close flushes any remaining data in the buffer and releases the buffer back
-// to the pool.
 func (w *writer) Close() error {
 	if w.closed {
 		return fmt.Errorf("already closed")
