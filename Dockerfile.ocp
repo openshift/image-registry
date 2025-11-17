@@ -5,8 +5,19 @@ RUN hack/build-go.sh
 
 FROM registry.ci.openshift.org/ocp/4.21:base-rhel9
 RUN yum install -y rsync && yum clean all && rm -rf /var/cache/yum
+
+# Copy both registry binaries:
+# - dockerregistry: OpenShift-integrated registry with authentication, quotas, and mirroring
+# - distribution: Generic distribution/distribution registry for standalone use
 COPY --from=builder /go/src/github.com/openshift/image-registry/_output/local/bin/dockerregistry /usr/bin/
+COPY --from=builder /go/src/github.com/openshift/image-registry/_output/local/bin/distribution /usr/bin/
+
+# Copy configuration files:
+# - /config.yml: OpenShift-specific config for dockerregistry binary (default via REGISTRY_CONFIGURATION_PATH)
+# - /etc/registry/config.yaml: Generic config for distribution binary (standard distribution location)
 COPY images/dockerregistry/config.yml /
+RUN mkdir -p /etc/registry
+COPY images/registry/config.yaml /etc/registry/config.yaml
 ADD images/dockerregistry/writable-extracted.tar.gz /etc/pki/ca-trust/extracted
 USER 1001
 EXPOSE 5000
