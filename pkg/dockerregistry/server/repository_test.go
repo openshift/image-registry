@@ -21,10 +21,10 @@ import (
 	"github.com/distribution/distribution/v3/registry/storage/driver"
 	"github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
 	"github.com/docker/libtrust"
+	"github.com/google/go-cmp/cmp"
 	"github.com/opencontainers/go-digest"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/diff"
 	clientgotesting "k8s.io/client-go/testing"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
@@ -337,10 +337,10 @@ func TestRepositoryBlobStat(t *testing.T) {
 				t.Fatalf("got unexpected non-error")
 			}
 			if !reflect.DeepEqual(err, tc.expectedError) {
-				t.Fatalf("got unexpected error: %s", diff.ObjectGoPrintDiff(err, tc.expectedError))
+				t.Fatalf("got unexpected error: %s", cmp.Diff(err, tc.expectedError))
 			}
 			if tc.expectedError == nil && !reflect.DeepEqual(desc, tc.expectedDescriptor) {
-				t.Fatalf("got unexpected descriptor: %s", diff.ObjectGoPrintDiff(desc, tc.expectedDescriptor))
+				t.Fatalf("got unexpected descriptor: %s", cmp.Diff(desc, tc.expectedDescriptor))
 			}
 
 			compareActions(t, tc.name, imageClient.Actions(), tc.expectedActions)

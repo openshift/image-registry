@@ -107,7 +107,7 @@ func startProfiler() {
 			runtime.SetBlockProfileRate(1)
 			profilePort := env("OPENSHIFT_PROFILE_PORT", "6060")
 			profileHost := env("OPENSHIFT_PROFILE_HOST", "127.0.0.1")
-			log.Infof(fmt.Sprintf("Starting profiling endpoint at http://%s:%s/debug/pprof/", profileHost, profilePort))
+			log.Infof("Starting profiling endpoint at http://%s:%s/debug/pprof/", profileHost, profilePort)
 			log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", profileHost, profilePort), nil))
 		}()
 	}

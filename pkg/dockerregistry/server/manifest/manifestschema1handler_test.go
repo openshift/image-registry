@@ -5,10 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/diff"
-
 	"github.com/distribution/distribution/v3"
 	"github.com/distribution/distribution/v3/manifest/schema1"
+	"github.com/google/go-cmp/cmp"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -137,15 +136,15 @@ func TestUnmarshalManifestSchema1(t *testing.T) {
 			}
 
 			if sm.Name != tc.expectedName {
-				t.Errorf("got unexpected image name: %s", diff.ObjectGoPrintDiff(sm.Name, tc.expectedName))
+				t.Errorf("got unexpected image name: %s", cmp.Diff(sm.Name, tc.expectedName))
 			}
 			if sm.Tag != tc.expectedTag {
-				t.Errorf("got unexpected image tag: %s", diff.ObjectGoPrintDiff(sm.Tag, tc.expectedTag))
+				t.Errorf("got unexpected image tag: %s", cmp.Diff(sm.Tag, tc.expectedTag))
 			}
 
 			refs := manifest.References()
 			if !reflect.DeepEqual(refs, tc.expectedReferences) {
-				t.Errorf("got unexpected image references: %s", diff.ObjectGoPrintDiff(refs, tc.expectedReferences))
+				t.Errorf("got unexpected image references: %s", cmp.Diff(refs, tc.expectedReferences))
 			}
 
 			signatures, err := sm.Signatures()
@@ -153,7 +152,7 @@ func TestUnmarshalManifestSchema1(t *testing.T) {
 				t.Fatalf("failed to get manifest signatures: %v", err)
 			}
 			if !reflect.DeepEqual(signatures, tc.expectedSignatures) {
-				t.Errorf("got unexpected image signatures: %s", diff.ObjectGoPrintDiff(signatures, tc.expectedSignatures))
+				t.Errorf("got unexpected image signatures: %s", cmp.Diff(signatures, tc.expectedSignatures))
 				for i, sig := range signatures {
 					t.Logf("signature #%d: %#v", i, string(sig))
 

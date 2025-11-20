@@ -8,6 +8,7 @@ require (
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/docker/go-units v0.5.0
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
+	github.com/google/go-cmp v0.7.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/opencontainers/go-digest v1.0.0
@@ -77,7 +78,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/gomodule/redigo v1.8.2 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
-	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
