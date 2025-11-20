@@ -5,10 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/diff"
-
 	"github.com/distribution/distribution/v3"
 	"github.com/distribution/distribution/v3/manifest/schema2"
+	"github.com/google/go-cmp/cmp"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -65,12 +64,12 @@ func TestUnmarshalManifestSchema2(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(dm.Config, tc.expectedConfig) {
-				t.Errorf("got unexpected image config descriptor: %s", diff.ObjectGoPrintDiff(dm.Config, tc.expectedConfig))
+				t.Errorf("got unexpected image config descriptor: %s", cmp.Diff(dm.Config, tc.expectedConfig))
 			}
 
 			refs := dm.References()
 			if !reflect.DeepEqual(refs, tc.expectedReferences) {
-				t.Errorf("got unexpected image references: %s", diff.ObjectGoPrintDiff(refs, tc.expectedReferences))
+				t.Errorf("got unexpected image references: %s", cmp.Diff(refs, tc.expectedReferences))
 			}
 		})
 	}

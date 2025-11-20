@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	_ "github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
+	"github.com/google/go-cmp/cmp"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/diff"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 
@@ -222,7 +222,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 
 		if !reflect.DeepEqual(repositories, tc.expectedRepositories) {
 			if len(repositories) != 0 || len(tc.expectedRepositories) != 0 {
-				t.Errorf("[%s] got unexpected repositories: %s", tc.name, diff.ObjectGoPrintDiff(repositories, tc.expectedRepositories))
+				t.Errorf("[%s] got unexpected repositories: %s", tc.name, cmp.Diff(repositories, tc.expectedRepositories))
 			}
 		}
 
@@ -230,7 +230,7 @@ func TestIdentifyCandidateRepositories(t *testing.T) {
 			if expSpec, exists := tc.expectedSearch[repo]; !exists {
 				t.Errorf("[%s] got unexpected repository among results: %q: %#+v", tc.name, repo, spec)
 			} else if !reflect.DeepEqual(spec, expSpec) {
-				t.Errorf("[%s] got unexpected pull spec for repo %q: %s", tc.name, repo, diff.ObjectGoPrintDiff(spec, expSpec))
+				t.Errorf("[%s] got unexpected pull spec for repo %q: %s", tc.name, repo, cmp.Diff(spec, expSpec))
 			}
 		}
 		for expRepo, expSpec := range tc.expectedSearch {
