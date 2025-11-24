@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -150,7 +150,7 @@ func TestBlobDescriptorServiceIsApplied(t *testing.T) {
 		}
 
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-			content, err := ioutil.ReadAll(resp.Body)
+			content, err := io.ReadAll(resp.Body)
 			if err != nil {
 				t.Errorf("[%s] failed to read body: %v", tc.name, err)
 			} else if len(content) > 0 {

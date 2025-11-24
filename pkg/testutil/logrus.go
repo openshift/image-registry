@@ -2,7 +2,7 @@ package testutil
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"strings"
 	"testing"
 
@@ -35,7 +35,7 @@ func (h *logrusHook) Fire(e *logrus.Entry) error {
 func WithTestLogger(parent context.Context, t *testing.T) context.Context {
 	log := logrus.New()
 	log.Level = logrus.DebugLevel
-	log.Out = ioutil.Discard
+	log.Out = io.Discard
 	log.Hooks.Add(&logrusHook{t: t})
 	return dcontext.WithLogger(parent, logrus.NewEntry(log))
 }

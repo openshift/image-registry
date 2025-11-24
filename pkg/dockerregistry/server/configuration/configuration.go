@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"reflect"
@@ -181,7 +180,7 @@ type versionInfo struct {
 // openshift specific configuration.
 // Environment variables may be used to override configuration parameters.
 func Parse(rd io.Reader) (*configuration.Configuration, *Configuration, error) {
-	in, err := ioutil.ReadAll(rd)
+	in, err := io.ReadAll(rd)
 	if err != nil {
 		return nil, nil, err
 	}
