@@ -6,7 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"sync/atomic"
@@ -535,7 +535,7 @@ func checkRoute(host string) error {
 	// if deployed registry leverages basic authentication a StatusUnauthorized will
 	// be returned so we consider this status as valid as well.
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusUnauthorized {
-		dt, err := ioutil.ReadAll(res.Body)
+		dt, err := io.ReadAll(res.Body)
 		if err != nil {
 			return err
 		}
