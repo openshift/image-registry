@@ -107,6 +107,7 @@ test-integration:
 # Example:
 #   make clean
 clean:
+	chmod -R u+w $(OUT_DIR) 2>/dev/null || true
 	rm -rf $(OUT_DIR)
 .PHONY: clean
 
