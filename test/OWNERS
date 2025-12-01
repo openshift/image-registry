@@ -1,6 +1,9 @@
 reviewers:
-  - dmage
-  - legionus
+- flavianmissi
+- ricardomaraschini
+- xiuwang
 approvers:
-  - dmage
-  - legionus
+- ricardomaraschini
+- flavianmissi
+- xiuwang
+component: "Image Registry"

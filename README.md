@@ -18,3 +18,36 @@ Installation and configuration instructions can be found in the
 * Role-based access control (RBAC).
 * Audit log.
 * Prometheus metrics.
+
+## Tests
+
+This repository is compatible with the [OpenShift Tests Extension (OTE)](https://github.com/openshift-eng/openshift-tests-extension) framework.
+
+### Building the test binary
+
+```bash
+make build
+```
+
+### Running test suites and tests
+
+```bash
+# Run a specific test suite or test
+./dockerregistry-tests-ext run-suite openshift/image-registry/all
+./dockerregistry-tests-ext run-test "test-name"
+
+# Run with JUnit output
+./dockerregistry-tests-ext run-suite openshift/image-registry/all --junit-path /tmp/junit.xml
+```
+
+### Listing available tests and suites
+
+```bash
+# List all test suites
+./dockerregistry-tests-ext list suites
+
+# List tests in a suite
+./dockerregistry-tests-ext list tests --suite=openshift/image-registry/all
+```
+
+For more information about the OTE framework, see the [openshift-tests-extension documentation](https://github.com/openshift-eng/openshift-tests-extension).

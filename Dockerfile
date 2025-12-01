@@ -1,11 +1,13 @@
 FROM registry.svc.ci.openshift.org/openshift/release:golang-1.15 AS builder
 WORKDIR /go/src/github.com/openshift/image-registry
 COPY . .
-RUN hack/build-go.sh
+RUN hack/build-go.sh \
+    && gzip _output/local/bin/dockerregistry-tests-ext 
 
 FROM registry.svc.ci.openshift.org/openshift/origin-v4.0:base
 RUN yum install -y rsync && yum clean all && rm -rf /var/cache/yum
 COPY --from=builder /go/src/github.com/openshift/image-registry/_output/local/bin/dockerregistry /usr/bin/
+COPY --from=builder /go/src/github.com/openshift/image-registry/_output/local/bin/dockerregistry-tests-ext.gz /usr/bin/
 COPY images/dockerregistry/config.yml /
 ADD images/dockerregistry/writable-extracted.tar.gz /etc/pki/ca-trust/extracted
 USER 1001
