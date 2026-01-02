@@ -16,11 +16,11 @@ import (
 	"github.com/distribution/distribution/v3/manifest/schema2"
 	"github.com/distribution/distribution/v3/registry/client/auth"
 	"github.com/docker/libtrust"
+	"github.com/google/go-cmp/cmp"
 	"github.com/opencontainers/go-digest"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/diff"
 
 	imageapiv1 "github.com/openshift/api/image/v1"
 	imageapi "github.com/openshift/image-registry/pkg/origin-common/image/apis/image"
@@ -264,7 +264,7 @@ func AssertManifestsEqual(t *testing.T, description string, ma distribution.Mani
 	}
 
 	if !reflect.DeepEqual(va, vb) {
-		t.Fatalf("[%s] manifests are of different version: %s", description, diff.ObjectGoPrintDiff(va, vb))
+		t.Fatalf("[%s] manifests are of different version: %s", description, cmp.Diff(va, vb))
 	}
 
 	switch va.SchemaVersion {
@@ -278,12 +278,12 @@ func AssertManifestsEqual(t *testing.T, description string, ma distribution.Mani
 			t.Fatalf("[%s] failed to convert first manifest (%T) to schema1.SignedManifest", description, mb)
 		}
 		if !reflect.DeepEqual(ms1a.Manifest, ms1b.Manifest) {
-			t.Fatalf("[%s] manifests don't match: %s", description, diff.ObjectGoPrintDiff(ms1a.Manifest, ms1b.Manifest))
+			t.Fatalf("[%s] manifests don't match: %s", description, cmp.Diff(ms1a.Manifest, ms1b.Manifest))
 		}
 
 	case 2:
 		if !reflect.DeepEqual(ma, mb) {
-			t.Fatalf("[%s] manifests don't match: %s", description, diff.ObjectGoPrintDiff(ma, mb))
+			t.Fatalf("[%s] manifests don't match: %s", description, cmp.Diff(ma, mb))
 		}
 
 	default:

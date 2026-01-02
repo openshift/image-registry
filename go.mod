@@ -10,6 +10,7 @@ require (
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/docker/go-units v0.5.0
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
+	github.com/google/go-cmp v0.7.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/opencontainers/go-digest v1.0.0
