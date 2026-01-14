@@ -233,7 +233,7 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 				return nil, fmt.Errorf("invalid TLS version %q specified in REGISTRY_HTTP_TLS_MINVERSION: %v (valid values are %q)", s, err, crypto.ValidTLSVersions())
 			}
 		}
-		if s := os.Getenv("REGISTRY_HTTP_TLS_CIPHERSUITES"); len(s) > 0 {
+		if s := os.Getenv("OPENSHIFT_REGISTRY_HTTP_TLS_CIPHERSUITES"); len(s) > 0 {
 			for _, cipher := range strings.Split(s, ",") {
 				cipherSuite, err := crypto.CipherSuite(cipher)
 				if err != nil {
