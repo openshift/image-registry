@@ -264,7 +264,7 @@ func AssertManifestsEqual(t *testing.T, description string, ma distribution.Mani
 	}
 
 	if !reflect.DeepEqual(va, vb) {
-		t.Fatalf("[%s] manifests are of different version: %s", description, diff.ObjectGoPrintDiff(va, vb))
+		t.Fatalf("[%s] manifests are of different version: %s", description, diff.ObjectGoPrintSideBySide(va, vb))
 	}
 
 	switch va.SchemaVersion {
@@ -278,12 +278,12 @@ func AssertManifestsEqual(t *testing.T, description string, ma distribution.Mani
 			t.Fatalf("[%s] failed to convert first manifest (%T) to schema1.SignedManifest", description, mb)
 		}
 		if !reflect.DeepEqual(ms1a.Manifest, ms1b.Manifest) {
-			t.Fatalf("[%s] manifests don't match: %s", description, diff.ObjectGoPrintDiff(ms1a.Manifest, ms1b.Manifest))
+			t.Fatalf("[%s] manifests don't match: %s", description, diff.ObjectGoPrintSideBySide(ms1a.Manifest, ms1b.Manifest))
 		}
 
 	case 2:
 		if !reflect.DeepEqual(ma, mb) {
-			t.Fatalf("[%s] manifests don't match: %s", description, diff.ObjectGoPrintDiff(ma, mb))
+			t.Fatalf("[%s] manifests don't match: %s", description, diff.ObjectGoPrintSideBySide(ma, mb))
 		}
 
 	default:
