@@ -65,12 +65,12 @@ func TestUnmarshalManifestSchema2(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(dm.Config, tc.expectedConfig) {
-				t.Errorf("got unexpected image config descriptor: %s", diff.ObjectGoPrintDiff(dm.Config, tc.expectedConfig))
+				t.Errorf("got unexpected image config descriptor: %s", diff.ObjectGoPrintSideBySide(dm.Config, tc.expectedConfig))
 			}
 
 			refs := dm.References()
 			if !reflect.DeepEqual(refs, tc.expectedReferences) {
-				t.Errorf("got unexpected image references: %s", diff.ObjectGoPrintDiff(refs, tc.expectedReferences))
+				t.Errorf("got unexpected image references: %s", diff.ObjectGoPrintSideBySide(refs, tc.expectedReferences))
 			}
 		})
 	}

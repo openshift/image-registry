@@ -137,15 +137,15 @@ func TestUnmarshalManifestSchema1(t *testing.T) {
 			}
 
 			if sm.Name != tc.expectedName {
-				t.Errorf("got unexpected image name: %s", diff.ObjectGoPrintDiff(sm.Name, tc.expectedName))
+				t.Errorf("got unexpected image name: %s", diff.ObjectGoPrintSideBySide(sm.Name, tc.expectedName))
 			}
 			if sm.Tag != tc.expectedTag {
-				t.Errorf("got unexpected image tag: %s", diff.ObjectGoPrintDiff(sm.Tag, tc.expectedTag))
+				t.Errorf("got unexpected image tag: %s", diff.ObjectGoPrintSideBySide(sm.Tag, tc.expectedTag))
 			}
 
 			refs := manifest.References()
 			if !reflect.DeepEqual(refs, tc.expectedReferences) {
-				t.Errorf("got unexpected image references: %s", diff.ObjectGoPrintDiff(refs, tc.expectedReferences))
+				t.Errorf("got unexpected image references: %s", diff.ObjectGoPrintSideBySide(refs, tc.expectedReferences))
 			}
 
 			signatures, err := sm.Signatures()
@@ -153,7 +153,7 @@ func TestUnmarshalManifestSchema1(t *testing.T) {
 				t.Fatalf("failed to get manifest signatures: %v", err)
 			}
 			if !reflect.DeepEqual(signatures, tc.expectedSignatures) {
-				t.Errorf("got unexpected image signatures: %s", diff.ObjectGoPrintDiff(signatures, tc.expectedSignatures))
+				t.Errorf("got unexpected image signatures: %s", diff.ObjectGoPrintSideBySide(signatures, tc.expectedSignatures))
 				for i, sig := range signatures {
 					t.Logf("signature #%d: %#v", i, string(sig))
 

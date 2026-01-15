@@ -234,10 +234,10 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 			}
 		}
 		if s := os.Getenv("OPENSHIFT_REGISTRY_HTTP_TLS_CIPHERSUITES"); len(s) > 0 {
-			for _, cipher := range strings.Split(s, ",") {
+			for cipher := range strings.SplitSeq(s, ",") {
 				cipherSuite, err := crypto.CipherSuite(cipher)
 				if err != nil {
-					return nil, fmt.Errorf("invalid cipher suite %q specified in REGISTRY_HTTP_TLS_CIPHERSUITES: %v (valid suites are %q)", s, err, crypto.ValidCipherSuites())
+					return nil, fmt.Errorf("invalid cipher suite %q specified in OPENSHIFT_REGISTRY_HTTP_TLS_CIPHERSUITES: %v (valid suites are %q)", cipher, err, crypto.ValidCipherSuites())
 				}
 				cipherSuites = append(cipherSuites, cipherSuite)
 			}
