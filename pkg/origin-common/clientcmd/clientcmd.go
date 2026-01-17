@@ -2,7 +2,6 @@ package clientcmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -146,7 +145,7 @@ func (cfg *Config) bindEnv() error {
 		cfg.CommonConfig.BearerToken = value
 	}
 	if value, ok := getEnv("BEARER_TOKEN_FILE"); ok && len(cfg.CommonConfig.BearerToken) == 0 {
-		if tokenData, tokenErr := ioutil.ReadFile(value); tokenErr == nil {
+		if tokenData, tokenErr := os.ReadFile(value); tokenErr == nil {
 			cfg.CommonConfig.BearerToken = strings.TrimSpace(string(tokenData))
 			if len(cfg.CommonConfig.BearerToken) == 0 {
 				err = fmt.Errorf("BEARER_TOKEN_FILE %q was empty", value)

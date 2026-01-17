@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
@@ -31,7 +30,7 @@ func Test_getImportContext(t *testing.T) {
 	icsp := operatorfake.NewSimpleClientset().OperatorV1alpha1().ImageContentSourcePolicies()
 	idms := cfgfake.NewSimpleClientset().ConfigV1().ImageDigestMirrorSets()
 	itms := cfgfake.NewSimpleClientset().ConfigV1().ImageTagMirrorSets()
-	tmpCredDir, err := ioutil.TempDir("", "credentials")
+	tmpCredDir, err := os.MkdirTemp("", "credentials")
 	if err != nil {
 		t.Fatalf("error creating temp dir: %v", err)
 	}
@@ -129,7 +128,7 @@ func Test_getImportContext(t *testing.T) {
 			}
 
 			if len(tt.creds) > 0 {
-				if err := ioutil.WriteFile(
+				if err := os.WriteFile(
 					tmpCredDir+"/config.json", tt.creds, 0644,
 				); err != nil {
 					t.Errorf("error writing config.json: %v", err)
