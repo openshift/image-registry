@@ -337,10 +337,10 @@ func TestRepositoryBlobStat(t *testing.T) {
 				t.Fatalf("got unexpected non-error")
 			}
 			if !reflect.DeepEqual(err, tc.expectedError) {
-				t.Fatalf("got unexpected error: %s", diff.ObjectGoPrintDiff(err, tc.expectedError))
+				t.Fatalf("got unexpected error: %s", diff.ObjectGoPrintSideBySide(err, tc.expectedError))
 			}
 			if tc.expectedError == nil && !reflect.DeepEqual(desc, tc.expectedDescriptor) {
-				t.Fatalf("got unexpected descriptor: %s", diff.ObjectGoPrintDiff(desc, tc.expectedDescriptor))
+				t.Fatalf("got unexpected descriptor: %s", diff.ObjectGoPrintSideBySide(desc, tc.expectedDescriptor))
 			}
 
 			compareActions(t, tc.name, imageClient.Actions(), tc.expectedActions)
