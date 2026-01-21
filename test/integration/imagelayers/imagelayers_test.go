@@ -2,7 +2,7 @@ package integration
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -35,7 +35,7 @@ func getSchema1Manifest(repo *testframework.Repository, tag string) (distributio
 		return nil, fmt.Errorf("get manifest %s:%s: %s", repo.RepoName(), tag, resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read manifest %s:%s: %v", repo.RepoName(), tag, err)
 	}

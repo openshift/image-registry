@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
@@ -252,7 +251,7 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 			pool := x509.NewCertPool()
 
 			for _, ca := range dockerConfig.HTTP.TLS.ClientCAs {
-				caPem, err := ioutil.ReadFile(ca)
+				caPem, err := os.ReadFile(ca)
 				if err != nil {
 					return nil, err
 				}
