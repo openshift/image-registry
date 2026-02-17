@@ -19,7 +19,7 @@ require (
 	github.com/openshift/library-go v0.0.0-20240607134135-aed018c215a1
 	github.com/pborman/uuid v1.2.1
 	github.com/prometheus/client_golang v1.16.0
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.1
 	golang.org/x/crypto v0.21.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.30.1
