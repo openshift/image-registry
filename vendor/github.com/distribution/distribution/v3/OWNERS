@@ -1,9 +1,4 @@
-approvers:
-  - adambkaplan
-  - dmage
-  - bparees
-  - flavianmissi
 reviewers:
-  - adambkaplan
-  - dmage
-  - flavianmissi
+- control-plane-approvers
+approvers:
+- control-plane-approvers
