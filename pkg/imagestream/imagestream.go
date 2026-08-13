@@ -233,10 +233,9 @@ func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Di
 func (is *imageStream) resolveUpstreamRef(ctx context.Context, dgst digest.Digest) (reference.DockerImageReference, rerrors.Error) {
 	layers, rErr := is.imageStreamGetter.layers()
 	if rErr != nil {
-		return reference.DockerImageReference{}, rerrors.NewError(
-			ErrImageStreamUnknownErrorCode,
-			fmt.Sprintf("resolveUpstreamRef: failed to get layers for image stream %s", is.Reference()),
+		return reference.DockerImageReference{}, convertImageStreamGetterError(
 			rErr,
+			fmt.Sprintf("resolveUpstreamRef: failed to get layers for image stream %s", is.Reference()),
 		)
 	}
 
