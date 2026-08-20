@@ -199,6 +199,13 @@ func (is *imageStream) getImageOfImageStream(ctx context.Context, dgst digest.Di
 // not be sent to the master API. If you need unmodified version of the
 // image object, please use getStoredImageOfImageStream.
 func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Digest) (*imageapiv1.Image, rerrors.Error) {
+	if _, rErr := is.imageStreamGetter.get(); rErr != nil {
+		return nil, convertImageStreamGetterError(
+			rErr,
+			fmt.Sprintf("GetImageOfImageStream: image stream %s not found", is.Reference()),
+		)
+	}
+
 	isImage, err := is.getImageOfImageStream(ctx, dgst)
 	if err == nil {
 		return isImage, nil
@@ -233,10 +240,9 @@ func (is *imageStream) GetImageOfImageStream(ctx context.Context, dgst digest.Di
 func (is *imageStream) resolveUpstreamRef(ctx context.Context, dgst digest.Digest) (reference.DockerImageReference, rerrors.Error) {
 	layers, rErr := is.imageStreamGetter.layers()
 	if rErr != nil {
-		return reference.DockerImageReference{}, rerrors.NewError(
-			ErrImageStreamUnknownErrorCode,
-			fmt.Sprintf("resolveUpstreamRef: failed to get layers for image stream %s", is.Reference()),
+		return reference.DockerImageReference{}, convertImageStreamGetterError(
 			rErr,
+			fmt.Sprintf("resolveUpstreamRef: failed to get layers for image stream %s", is.Reference()),
 		)
 	}
 
