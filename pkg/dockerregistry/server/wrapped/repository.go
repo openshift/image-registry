@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/reference"
+	"github.com/distribution/reference"
 )
 
 type repository struct {
