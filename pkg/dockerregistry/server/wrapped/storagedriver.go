@@ -3,6 +3,7 @@ package wrapped
 import (
 	"context"
 	"io"
+	"net/http"
 
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
 )
@@ -96,16 +97,16 @@ func (d *storageDriver) Delete(ctx context.Context, path string) error {
 	})
 }
 
-func (d *storageDriver) URLFor(ctx context.Context, path string, options map[string]interface{}) (url string, err error) {
-	err = d.wrapper("StorageDriver.URLFor", func() error {
-		url, err = d.storageDriver.URLFor(ctx, path, options)
+func (d *storageDriver) RedirectURL(r *http.Request, path string) (url string, err error) {
+	err = d.wrapper("StorageDriver.RedirectURL", func() error {
+		url, err = d.storageDriver.RedirectURL(r, path)
 		return err
 	})
 	return
 }
 
-func (d *storageDriver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
+func (d *storageDriver) Walk(ctx context.Context, path string, f storagedriver.WalkFn, options ...func(*storagedriver.WalkOptions)) error {
 	return d.wrapper("StorageDriver.Walk", func() error {
-		return d.storageDriver.Walk(ctx, path, f)
+		return d.storageDriver.Walk(ctx, path, f, options...)
 	})
 }

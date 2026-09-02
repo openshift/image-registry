@@ -45,8 +45,8 @@ func (w *fileWriter) Cancel(ctx context.Context) error {
 	})
 }
 
-func (w *fileWriter) Commit() error {
+func (w *fileWriter) Commit(ctx context.Context) error {
 	return w.wrapper("FileWriter.Commit", func() error {
-		return w.fileWriter.Commit()
+		return w.fileWriter.Commit(ctx)
 	})
 }

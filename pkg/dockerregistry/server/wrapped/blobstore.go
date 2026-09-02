@@ -2,6 +2,7 @@ package wrapped
 
 import (
 	"context"
+	"io"
 	"net/http"
 
 	"github.com/distribution/distribution/v3"
@@ -40,7 +41,7 @@ func (bs *blobStore) Get(ctx context.Context, dgst digest.Digest) (p []byte, err
 	return
 }
 
-func (bs *blobStore) Open(ctx context.Context, dgst digest.Digest) (r distribution.ReadSeekCloser, err error) {
+func (bs *blobStore) Open(ctx context.Context, dgst digest.Digest) (r io.ReadSeekCloser, err error) {
 	err = bs.wrapper(ctx, "BlobStore.Open", func(ctx context.Context) error {
 		r, err = bs.blobStore.Open(ctx, dgst)
 		return err

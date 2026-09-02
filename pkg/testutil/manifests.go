@@ -17,6 +17,7 @@ import (
 	"github.com/distribution/distribution/v3/registry/client/auth"
 	"github.com/docker/libtrust"
 	"github.com/opencontainers/go-digest"
+	"github.com/opencontainers/image-spec/specs-go"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -73,7 +74,8 @@ func MakeSchema1Manifest(name, tag string, layers []distribution.Descriptor) (di
 // the digest of the manifest
 func MakeSchema2Manifest(config distribution.Descriptor, layers []distribution.Descriptor) (distribution.Manifest, error) {
 	m := schema2.Manifest{
-		Versioned: schema2.SchemaVersion,
+		Versioned: specs.Versioned{SchemaVersion: 2},
+		MediaType: schema2.MediaTypeManifest,
 		Config:    config,
 		Layers:    make([]distribution.Descriptor, 0, len(layers)),
 	}
@@ -96,7 +98,8 @@ func MakeSchema2Manifest(config distribution.Descriptor, layers []distribution.D
 // the digest of the manifest
 func MakeOCISchemaManifest(config distribution.Descriptor, layers []distribution.Descriptor) (distribution.Manifest, error) {
 	m := ocischema.Manifest{
-		Versioned: ocischema.SchemaVersion,
+		Versioned: specs.Versioned{SchemaVersion: 2},
+		MediaType: v1.MediaTypeImageManifest,
 		Config:    config,
 		Layers:    make([]distribution.Descriptor, 0, len(layers)),
 	}

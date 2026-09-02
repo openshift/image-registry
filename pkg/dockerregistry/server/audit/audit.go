@@ -2,6 +2,7 @@ package audit
 
 import (
 	"context"
+	"io"
 
 	"github.com/distribution/distribution/v3"
 
@@ -13,7 +14,12 @@ func newWrapper(ctx context.Context) wrapped.Wrapper {
 	return func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
 		logger.Log(funcname)
 		err := f(ctx)
-		logger.LogResult(err, funcname)
+		if err == io.EOF {
+			// TagService.List ends a successful listing with io.EOF.
+			logger.LogResult(nil, funcname)
+		} else {
+			logger.LogResult(err, funcname)
+		}
 		return err
 	}
 }
