@@ -50,7 +50,7 @@ func getNamespaceName(resourceName string) (string, string, error) {
 // getImportContext loads secrets and returns a context for getting
 // distribution clients to remote repositories.
 func getImportContext(ctx context.Context, ref *reference.DockerImageReference, secrets []corev1.Secret, m metrics.Pullthrough, icsp operatorv1alpha1.ImageContentSourcePolicyInterface, idms apicfgv1.ImageDigestMirrorSetInterface, itms apicfgv1.ImageTagMirrorSetInterface) (registryclient.RepositoryRetriever, error) {
-	req, err := dcontext.GetRequest(ctx)
+	req, err := requestFrom(ctx)
 	if err != nil {
 		dcontext.GetLogger(ctx).Errorf("unable to get request from context: %v", err)
 		return nil, err
