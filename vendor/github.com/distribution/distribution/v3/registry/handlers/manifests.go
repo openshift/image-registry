@@ -2,33 +2,34 @@ package handlers
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"mime"
 	"net/http"
+	"slices"
 	"strings"
+	"sync"
 
 	"github.com/distribution/distribution/v3"
-	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/distribution/distribution/v3/internal/dcontext"
 	"github.com/distribution/distribution/v3/manifest/manifestlist"
 	"github.com/distribution/distribution/v3/manifest/ocischema"
-	"github.com/distribution/distribution/v3/manifest/schema1" //nolint:staticcheck // Ignore SA1019: "github.com/distribution/distribution/v3/manifest/schema1" is deprecated, as it's used for backward compatibility.
+	"github.com/distribution/distribution/v3/manifest/schema1" //nolint:staticcheck // schema1 support is retained for backward compatibility.
 	"github.com/distribution/distribution/v3/manifest/schema2"
-	"github.com/distribution/distribution/v3/reference"
 	"github.com/distribution/distribution/v3/registry/api/errcode"
-	v2 "github.com/distribution/distribution/v3/registry/api/v2"
-	"github.com/distribution/distribution/v3/registry/auth"
+	"github.com/distribution/distribution/v3/registry/storage"
 	"github.com/distribution/distribution/v3/registry/storage/driver"
+	"github.com/distribution/reference"
 	"github.com/gorilla/handlers"
 	"github.com/opencontainers/go-digest"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"golang.org/x/sync/errgroup"
 )
 
-// These constants determine which architecture and OS to choose from a
-// manifest list when downconverting it to a schema1 manifest.
 const (
 	defaultArch         = "amd64"
 	defaultOS           = "linux"
-	maxManifestBodySize = 4 << 20
+	maxManifestBodySize = 4 * 1024 * 1024
 	imageClass          = "image"
 )
 
@@ -98,11 +99,14 @@ func (imh *manifestHandler) GetManifest(w http.ResponseWriter, r *http.Request) 
 
 		// we need to split each header value on "," to get the full list of "Accept" values (per RFC 2616)
 		// https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.1
-		for _, mediaType := range strings.Split(acceptHeader, ",") {
+		for mediaType := range strings.SplitSeq(acceptHeader, ",") {
 			if mediaType, _, err = mime.ParseMediaType(mediaType); err != nil {
 				continue
 			}
 
+			if mediaType == schema1.MediaTypeManifest || mediaType == schema1.MediaTypeSignedManifest { //nolint:staticcheck // schema1 support is retained for backward compatibility.
+				supports[manifestSchema1] = true
+			}
 			if mediaType == schema2.MediaTypeManifest {
 				supports[manifestSchema2] = true
 			}
@@ -123,7 +127,7 @@ func (imh *manifestHandler) GetManifest(w http.ResponseWriter, r *http.Request) 
 		desc, err := tags.Get(imh, imh.Tag)
 		if err != nil {
 			if _, ok := err.(distribution.ErrTagUnknown); ok {
-				imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+				imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnknown.WithDetail(err))
 			} else {
 				imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
 			}
@@ -144,13 +148,13 @@ func (imh *manifestHandler) GetManifest(w http.ResponseWriter, r *http.Request) 
 	manifest, err := manifests.Get(imh, imh.Digest, options...)
 	if err != nil {
 		if _, ok := err.(distribution.ErrManifestUnknownRevision); ok {
-			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnknown.WithDetail(err))
 		} else {
 			imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
 		}
 		return
 	}
-	// determine the type of the returned manifest
+	// Determine the type of the returned manifest.
 	manifestType := manifestSchema1
 	schema2Manifest, isSchema2 := manifest.(*schema2.DeserializedManifest)
 	manifestList, isManifestList := manifest.(*manifestlist.DeserializedManifestList)
@@ -159,38 +163,34 @@ func (imh *manifestHandler) GetManifest(w http.ResponseWriter, r *http.Request) 
 	} else if _, isOCImanifest := manifest.(*ocischema.DeserializedManifest); isOCImanifest {
 		manifestType = ociSchema
 	} else if isManifestList {
-		if manifestList.MediaType == manifestlist.MediaTypeManifestList {
+		switch manifestList.MediaType {
+		case manifestlist.MediaTypeManifestList:
 			manifestType = manifestlistSchema
-		} else if manifestList.MediaType == v1.MediaTypeImageIndex {
+		case v1.MediaTypeImageIndex:
 			manifestType = ociImageIndexSchema
 		}
 	}
 
 	if manifestType == ociSchema && !supports[ociSchema] {
-		imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithMessage("OCI manifest found, but accept header does not support OCI manifests"))
+		imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnknown.WithMessage("OCI manifest found, but accept header does not support OCI manifests"))
 		return
 	}
 	if manifestType == ociImageIndexSchema && !supports[ociImageIndexSchema] {
-		imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithMessage("OCI index found, but accept header does not support OCI indexes"))
+		imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnknown.WithMessage("OCI index found, but accept header does not support OCI indexes"))
 		return
 	}
-	// Only rewrite schema2 manifests when they are being fetched by tag.
-	// If they are being fetched by digest, we can't return something not
-	// matching the digest.
-	if imh.Tag != "" && manifestType == manifestSchema2 && !supports[manifestSchema2] {
-		// Rewrite manifest in schema1 format
-		dcontext.GetLogger(imh).Infof("rewriting manifest %s in schema1 format to support old client", imh.Digest.String())
 
+	// Only rewrite manifests fetched by tag. A response fetched by digest must
+	// retain the requested digest.
+	if imh.Tag != "" && manifestType == manifestSchema2 && !supports[manifestSchema2] {
+		dcontext.GetLogger(imh).Infof("rewriting manifest %s in schema1 format to support old client", imh.Digest.String())
 		manifest, err = imh.convertSchema2Manifest(schema2Manifest)
 		if err != nil {
 			return
 		}
 	} else if imh.Tag != "" && manifestType == manifestlistSchema && !supports[manifestlistSchema] {
-		// Rewrite manifest in schema1 format
 		dcontext.GetLogger(imh).Infof("rewriting manifest list %s in schema1 format to support old client", imh.Digest.String())
 
-		// Find the image manifest corresponding to the default
-		// platform
 		var manifestDigest digest.Digest
 		for _, manifestDescriptor := range manifestList.Manifests {
 			if manifestDescriptor.Platform.Architecture == defaultArch && manifestDescriptor.Platform.OS == defaultOS {
@@ -198,23 +198,21 @@ func (imh *manifestHandler) GetManifest(w http.ResponseWriter, r *http.Request) 
 				break
 			}
 		}
-
 		if manifestDigest == "" {
-			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown)
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnknown)
 			return
 		}
 
 		manifest, err = manifests.Get(imh, manifestDigest)
 		if err != nil {
 			if _, ok := err.(distribution.ErrManifestUnknownRevision); ok {
-				imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+				imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnknown.WithDetail(err))
 			} else {
 				imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
 			}
 			return
 		}
 
-		// If necessary, convert the image manifest
 		if schema2Manifest, isSchema2 := manifest.(*schema2.DeserializedManifest); isSchema2 && !supports[manifestSchema2] {
 			manifest, err = imh.convertSchema2Manifest(schema2Manifest)
 			if err != nil {
@@ -234,16 +232,23 @@ func (imh *manifestHandler) GetManifest(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Length", fmt.Sprint(len(p)))
 	w.Header().Set("Docker-Content-Digest", imh.Digest.String())
 	w.Header().Set("Etag", fmt.Sprintf(`"%s"`, imh.Digest))
-	w.Write(p)
+
+	if r.Method == http.MethodHead {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if _, err := w.Write(p); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func (imh *manifestHandler) convertSchema2Manifest(schema2Manifest *schema2.DeserializedManifest) (distribution.Manifest, error) {
 	targetDescriptor := schema2Manifest.Target()
-	blobs := imh.Repository.Blobs(imh)
-	configJSON, err := blobs.Get(imh, targetDescriptor.Digest)
+	configJSON, err := imh.Repository.Blobs(imh).Get(imh, targetDescriptor.Digest)
 	if err != nil {
 		if err == distribution.ErrBlobUnknown {
-			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestInvalid.WithDetail(err))
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestInvalid.WithDetail(err))
 		} else {
 			imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
 		}
@@ -251,30 +256,29 @@ func (imh *manifestHandler) convertSchema2Manifest(schema2Manifest *schema2.Dese
 	}
 
 	ref := imh.Repository.Named()
-
 	if imh.Tag != "" {
 		ref, err = reference.WithTag(ref, imh.Tag)
 		if err != nil {
-			imh.Errors = append(imh.Errors, v2.ErrorCodeTagInvalid.WithDetail(err))
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeTagInvalid.WithDetail(err))
 			return nil, err
 		}
 	}
 
-	builder := schema1.NewConfigManifestBuilder(imh.Repository.Blobs(imh), imh.Context.App.trustKey, ref, configJSON) //nolint:staticcheck // Ignore SA1019: "github.com/distribution/distribution/v3/manifest/schema1" is deprecated, as it's used for backward compatibility.
-	for _, d := range schema2Manifest.Layers {
-		if err := builder.AppendReference(d); err != nil {
-			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestInvalid.WithDetail(err))
+	builder := schema1.NewConfigManifestBuilder(imh.Repository.Blobs(imh), imh.App.trustKey, ref, configJSON) //nolint:staticcheck // schema1 support is retained for backward compatibility.
+	for _, descriptor := range schema2Manifest.Layers {
+		if err := builder.AppendReference(descriptor); err != nil {
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestInvalid.WithDetail(err))
 			return nil, err
 		}
 	}
-	manifest, err := builder.Build(imh)
+
+	converted, err := builder.Build(imh)
 	if err != nil {
-		imh.Errors = append(imh.Errors, v2.ErrorCodeManifestInvalid.WithDetail(err))
+		imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestInvalid.WithDetail(err))
 		return nil, err
 	}
-	imh.Digest = digest.FromBytes(manifest.(*schema1.SignedManifest).Canonical) //nolint:staticcheck // Ignore SA1019: "github.com/distribution/distribution/v3/manifest/schema1" is deprecated, as it's used for backward compatibility.
-
-	return manifest, nil
+	imh.Digest = digest.FromBytes(converted.(*schema1.SignedManifest).Canonical) //nolint:staticcheck // schema1 support is retained for backward compatibility.
+	return converted, nil
 }
 
 func etagMatch(r *http.Request, etag string) bool {
@@ -298,27 +302,27 @@ func (imh *manifestHandler) PutManifest(w http.ResponseWriter, r *http.Request) 
 	var jsonBuf bytes.Buffer
 	if err := copyFullPayload(imh, w, r, &jsonBuf, maxManifestBodySize, "image manifest PUT"); err != nil {
 		// copyFullPayload reports the error if necessary
-		imh.Errors = append(imh.Errors, v2.ErrorCodeManifestInvalid.WithDetail(err.Error()))
+		imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestInvalid.WithDetail(err.Error()))
 		return
 	}
 
 	mediaType := r.Header.Get("Content-Type")
 	manifest, desc, err := distribution.UnmarshalManifest(mediaType, jsonBuf.Bytes())
 	if err != nil {
-		imh.Errors = append(imh.Errors, v2.ErrorCodeManifestInvalid.WithDetail(err))
+		imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestInvalid.WithDetail(err))
 		return
 	}
 
 	if imh.Digest != "" {
 		if desc.Digest != imh.Digest {
 			dcontext.GetLogger(imh).Errorf("payload digest does not match: %q != %q", desc.Digest, imh.Digest)
-			imh.Errors = append(imh.Errors, v2.ErrorCodeDigestInvalid)
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeDigestInvalid)
 			return
 		}
 	} else if imh.Tag != "" {
 		imh.Digest = desc.Digest
 	} else {
-		imh.Errors = append(imh.Errors, v2.ErrorCodeTagInvalid.WithDetail("no tag or digest specified"))
+		imh.Errors = append(imh.Errors, errcode.ErrorCodeTagInvalid.WithDetail("no tag or digest specified"))
 		return
 	}
 
@@ -357,14 +361,14 @@ func (imh *manifestHandler) PutManifest(w http.ResponseWriter, r *http.Request) 
 			for _, verificationError := range err {
 				switch verificationError := verificationError.(type) {
 				case distribution.ErrManifestBlobUnknown:
-					imh.Errors = append(imh.Errors, v2.ErrorCodeManifestBlobUnknown.WithDetail(verificationError.Digest))
+					imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestBlobUnknown.WithDetail(verificationError.Digest))
 				case distribution.ErrManifestNameInvalid:
-					imh.Errors = append(imh.Errors, v2.ErrorCodeNameInvalid.WithDetail(err))
+					imh.Errors = append(imh.Errors, errcode.ErrorCodeNameInvalid.WithDetail(err))
 				case distribution.ErrManifestUnverified:
-					imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnverified)
+					imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnverified)
 				default:
 					if verificationError == digest.ErrDigestInvalidFormat {
-						imh.Errors = append(imh.Errors, v2.ErrorCodeDigestInvalid)
+						imh.Errors = append(imh.Errors, errcode.ErrorCodeDigestInvalid)
 					} else {
 						imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown, verificationError)
 					}
@@ -421,7 +425,7 @@ func (imh *manifestHandler) applyResourcePolicy(manifest distribution.Manifest) 
 
 	var class string
 	switch m := manifest.(type) {
-	case *schema1.SignedManifest: //nolint:staticcheck // Ignore SA1019: "github.com/distribution/distribution/v3/manifest/schema1" is deprecated, as it's used for backward compatibility.
+	case *schema1.SignedManifest: //nolint:staticcheck // schema1 support is retained for backward compatibility.
 		class = imageClass
 	case *schema2.DeserializedManifest:
 		switch m.Config.MediaType {
@@ -447,17 +451,14 @@ func (imh *manifestHandler) applyResourcePolicy(manifest distribution.Manifest) 
 
 	// Check to see if class is allowed in registry
 	var allowedClass bool
-	for _, c := range allowedClasses {
-		if class == c {
-			allowedClass = true
-			break
-		}
+	if slices.Contains(allowedClasses, class) {
+		allowedClass = true
 	}
 	if !allowedClass {
 		return errcode.ErrorCodeDenied.WithMessage(fmt.Sprintf("registry does not allow %s manifest", class))
 	}
 
-	resources := auth.AuthorizedResources(imh)
+	resources := authorizedResources(imh)
 	n := imh.Repository.Named().Name()
 
 	var foundResource bool
@@ -490,13 +491,22 @@ func (imh *manifestHandler) DeleteManifest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if !imh.App.deleteEnabled {
+		imh.Errors = append(imh.Errors, errcode.ErrorCodeUnsupported)
+		return
+	}
+
 	if imh.Tag != "" {
 		dcontext.GetLogger(imh).Debug("DeleteImageTag")
 		tagService := imh.Repository.Tags(imh.Context)
 		if err := tagService.Untag(imh.Context, imh.Tag); err != nil {
+			if errors.Is(err, distribution.ErrUnsupported) {
+				imh.Errors = append(imh.Errors, errcode.ErrorCodeUnsupported.WithDetail(err))
+				return
+			}
 			switch err.(type) {
 			case distribution.ErrTagUnknown, driver.PathNotFoundError:
-				imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown.WithDetail(err))
+				imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnknown.WithDetail(err))
 			default:
 				imh.Errors = append(imh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
 			}
@@ -517,10 +527,10 @@ func (imh *manifestHandler) DeleteManifest(w http.ResponseWriter, r *http.Reques
 		switch err {
 		case digest.ErrDigestUnsupported:
 		case digest.ErrDigestInvalidFormat:
-			imh.Errors = append(imh.Errors, v2.ErrorCodeDigestInvalid)
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeDigestInvalid)
 			return
 		case distribution.ErrBlobUnknown:
-			imh.Errors = append(imh.Errors, v2.ErrorCodeManifestUnknown)
+			imh.Errors = append(imh.Errors, errcode.ErrorCodeManifestUnknown)
 			return
 		case distribution.ErrUnsupported:
 			imh.Errors = append(imh.Errors, errcode.ErrorCodeUnsupported)
@@ -532,18 +542,31 @@ func (imh *manifestHandler) DeleteManifest(w http.ResponseWriter, r *http.Reques
 	}
 
 	tagService := imh.Repository.Tags(imh)
-	referencedTags, err := tagService.Lookup(imh, distribution.Descriptor{Digest: imh.Digest})
+	referencedTags, err := tagService.Lookup(imh, v1.Descriptor{Digest: imh.Digest})
 	if err != nil {
 		imh.Errors = append(imh.Errors, err)
 		return
 	}
 
+	var (
+		errs []error
+		mu   sync.Mutex
+	)
+	g := errgroup.Group{}
+	g.SetLimit(storage.DefaultConcurrencyLimit)
 	for _, tag := range referencedTags {
-		if err := tagService.Untag(imh, tag); err != nil {
-			imh.Errors = append(imh.Errors, err)
-			return
-		}
+
+		g.Go(func() error {
+			if err := tagService.Untag(imh, tag); err != nil {
+				mu.Lock()
+				errs = append(errs, err)
+				mu.Unlock()
+			}
+			return nil
+		})
 	}
+	_ = g.Wait() // imh will record all errors, so ignore the error of Wait()
+	imh.Errors = errs
 
 	w.WriteHeader(http.StatusAccepted)
 }

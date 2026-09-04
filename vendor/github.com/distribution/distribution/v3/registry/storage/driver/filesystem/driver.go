@@ -4,12 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
+	"github.com/distribution/distribution/v3/internal/uuid"
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
 	"github.com/distribution/distribution/v3/registry/storage/driver/base"
 	"github.com/distribution/distribution/v3/registry/storage/driver/factory"
@@ -40,7 +43,7 @@ func init() {
 // filesystemDriverFactory implements the factory.StorageDriverFactory interface
 type filesystemDriverFactory struct{}
 
-func (factory *filesystemDriverFactory) Create(parameters map[string]interface{}) (storagedriver.StorageDriver, error) {
+func (factory *filesystemDriverFactory) Create(ctx context.Context, parameters map[string]any) (storagedriver.StorageDriver, error) {
 	return FromParameters(parameters)
 }
 
@@ -62,7 +65,7 @@ type Driver struct {
 // Optional Parameters:
 // - rootdirectory
 // - maxthreads
-func FromParameters(parameters map[string]interface{}) (*Driver, error) {
+func FromParameters(parameters map[string]any) (*Driver, error) {
 	params, err := fromParametersImpl(parameters)
 	if err != nil || params == nil {
 		return nil, err
@@ -70,7 +73,7 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 	return New(*params), nil
 }
 
-func fromParametersImpl(parameters map[string]interface{}) (*DriverParameters, error) {
+func fromParametersImpl(parameters map[string]any) (*DriverParameters, error) {
 	var (
 		err           error
 		maxThreads    = defaultMaxThreads
@@ -132,17 +135,55 @@ func (d *driver) GetContent(ctx context.Context, path string) ([]byte, error) {
 
 // PutContent stores the []byte content at a location designated by "path".
 func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte) error {
-	writer, err := d.Writer(ctx, subPath, false)
+	tempPath := fmt.Sprintf("%s.%s.tmp", subPath, uuid.NewString())
+
+	// Write to a temporary file to prevent partial writes.
+	writer, err := d.Writer(ctx, tempPath, false)
 	if err != nil {
 		return err
 	}
 	defer writer.Close()
+
 	_, err = io.Copy(writer, bytes.NewReader(contents))
 	if err != nil {
-		writer.Cancel(ctx)
+		if cErr := writer.Cancel(ctx); cErr != nil {
+			return errors.Join(err, cErr)
+		}
+		// Attempt to clean up the temporary file on error.
+		dErr := d.Delete(ctx, tempPath)
+		return errors.Join(err, dErr)
+	}
+
+	if err := writer.Commit(ctx); err != nil {
 		return err
 	}
-	return writer.Commit()
+
+	// Atomically replace the target file with the temporary file.
+	if err := d.Move(ctx, tempPath, subPath); err != nil {
+		// Clean up the temporary file if rename fails.
+		dErr := d.Delete(ctx, tempPath)
+		return errors.Join(err, dErr)
+	}
+	return syncDir(filepath.Dir(d.fullPath(subPath)))
+}
+
+func syncDir(dir string) (retErr error) {
+	dirF, err := os.Open(dir)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return fmt.Errorf("sync dir: %w", err)
+	}
+	defer func() {
+		if err := dirF.Close(); err != nil {
+			retErr = errors.Join(retErr, fmt.Errorf("failed to close dir: %w", err))
+		}
+	}()
+	if err := dirF.Sync(); err != nil {
+		return fmt.Errorf("sync dir: %w", err)
+	}
+	return nil
 }
 
 // Reader retrieves an io.ReadCloser for the content stored at "path" with a
@@ -171,7 +212,7 @@ func (d *driver) Reader(ctx context.Context, path string, offset int64) (io.Read
 
 func (d *driver) Writer(ctx context.Context, subPath string, append bool) (storagedriver.FileWriter, error) {
 	fullPath := d.fullPath(subPath)
-	parentDir := path.Dir(fullPath)
+	parentDir := filepath.Dir(fullPath)
 	if err := os.MkdirAll(parentDir, 0o777); err != nil {
 		return nil, err
 	}
@@ -243,7 +284,7 @@ func (d *driver) List(ctx context.Context, subPath string) ([]string, error) {
 
 	keys := make([]string, 0, len(fileNames))
 	for _, fileName := range fileNames {
-		keys = append(keys, path.Join(subPath, fileName))
+		keys = append(keys, filepath.Join(subPath, fileName))
 	}
 
 	return keys, nil
@@ -259,7 +300,7 @@ func (d *driver) Move(ctx context.Context, sourcePath string, destPath string) e
 		return storagedriver.PathNotFoundError{Path: sourcePath}
 	}
 
-	if err := os.MkdirAll(path.Dir(dest), 0o777); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dest), 0o777); err != nil {
 		return err
 	}
 
@@ -282,21 +323,20 @@ func (d *driver) Delete(ctx context.Context, subPath string) error {
 	return err
 }
 
-// URLFor returns a URL which may be used to retrieve the content stored at the given path.
-// May return an UnsupportedMethodErr in certain StorageDriver implementations.
-func (d *driver) URLFor(ctx context.Context, path string, options map[string]interface{}) (string, error) {
-	return "", storagedriver.ErrUnsupportedMethod{}
+// RedirectURL returns a URL which may be used to retrieve the content stored at the given path.
+func (d *driver) RedirectURL(*http.Request, string) (string, error) {
+	return "", nil
 }
 
 // Walk traverses a filesystem defined within driver, starting
 // from the given path, calling f on each file and directory
-func (d *driver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
-	return storagedriver.WalkFallback(ctx, d, path, f)
+func (d *driver) Walk(ctx context.Context, path string, f storagedriver.WalkFn, options ...func(*storagedriver.WalkOptions)) error {
+	return storagedriver.WalkFallback(ctx, d, path, f, options...)
 }
 
 // fullPath returns the absolute path of a key within the Driver's storage.
 func (d *driver) fullPath(subPath string) string {
-	return path.Join(d.rootDirectory, subPath)
+	return filepath.Join(d.rootDirectory, subPath)
 }
 
 type fileInfo struct {
@@ -367,24 +407,27 @@ func (fw *fileWriter) Size() int64 {
 	return fw.size
 }
 
-func (fw *fileWriter) Close() error {
+func (fw *fileWriter) Close() (retErr error) {
 	if fw.closed {
 		return fmt.Errorf("already closed")
+	}
+	fw.closed = true
+	defer func() {
+		if err := fw.file.Close(); err != nil {
+			retErr = errors.Join(retErr, err)
+		}
+	}()
+
+	if fw.committed {
+		// Already flushed and synced
+		return nil
 	}
 
 	if err := fw.bw.Flush(); err != nil {
 		return err
 	}
 
-	if err := fw.file.Sync(); err != nil {
-		return err
-	}
-
-	if err := fw.file.Close(); err != nil {
-		return err
-	}
-	fw.closed = true
-	return nil
+	return fw.file.Sync()
 }
 
 func (fw *fileWriter) Cancel(ctx context.Context) error {
@@ -393,11 +436,12 @@ func (fw *fileWriter) Cancel(ctx context.Context) error {
 	}
 
 	fw.cancelled = true
-	fw.file.Close()
+	fw.closed = true
+	_ = fw.file.Close()
 	return os.Remove(fw.file.Name())
 }
 
-func (fw *fileWriter) Commit() error {
+func (fw *fileWriter) Commit(ctx context.Context) error {
 	if fw.closed {
 		return fmt.Errorf("already closed")
 	} else if fw.committed {

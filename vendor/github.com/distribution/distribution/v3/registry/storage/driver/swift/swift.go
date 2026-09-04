@@ -106,7 +106,7 @@ func init() {
 // swiftDriverFactory implements the factory.StorageDriverFactory interface
 type swiftDriverFactory struct{}
 
-func (factory *swiftDriverFactory) Create(parameters map[string]interface{}) (storagedriver.StorageDriver, error) {
+func (factory *swiftDriverFactory) Create(ctx context.Context, parameters map[string]any) (storagedriver.StorageDriver, error) {
 	return FromParameters(parameters)
 }
 
@@ -139,7 +139,7 @@ type Driver struct {
 // - password
 // - authurl
 // - container
-func FromParameters(parameters map[string]interface{}) (*Driver, error) {
+func FromParameters(parameters map[string]any) (*Driver, error) {
 	params := Parameters{
 		ChunkSize:          defaultChunkSize,
 		InsecureSkipVerify: false,
@@ -204,7 +204,7 @@ func New(params Parameters) (*Driver, error) {
 		AuthUrl:                     params.AuthURL,
 		Region:                      params.Region,
 		AuthVersion:                 params.AuthVersion,
-		UserAgent:                   "distribution/" + version.Version,
+		UserAgent:                   "distribution/" + version.Version(),
 		Tenant:                      params.Tenant,
 		TenantId:                    params.TenantID,
 		Domain:                      params.Domain,
@@ -481,8 +481,6 @@ func (d *driver) Stat(ctx context.Context, path string) (storagedriver.FileInfo,
 
 // List returns a list of the objects that are direct descendants of the given path.
 func (d *driver) List(ctx context.Context, path string) ([]string, error) {
-	var files []string
-
 	prefix := d.swiftPath(path)
 	if prefix != "" {
 		prefix += "/"
@@ -494,6 +492,7 @@ func (d *driver) List(ctx context.Context, path string) ([]string, error) {
 	}
 
 	objects, err := d.Conn.ObjectsAll(ctx, d.Container, opts)
+	files := make([]string, 0, len(objects))
 	for _, obj := range objects {
 		files = append(files, strings.TrimPrefix(strings.TrimSuffix(obj.Name, "/"), d.swiftPath("/")))
 	}
@@ -593,35 +592,33 @@ func (d *driver) Delete(ctx context.Context, path string) error {
 	}
 
 	_, _, err = d.Conn.Object(ctx, d.Container, d.swiftPath(path))
-	if err == nil {
+	switch err {
+	case nil:
 		if err := d.Conn.ObjectDelete(ctx, d.Container, d.swiftPath(path)); err != nil {
 			if err == swift.ObjectNotFound {
 				return storagedriver.PathNotFoundError{Path: path}
 			}
 			return err
 		}
-	} else if err == swift.ObjectNotFound {
+	case swift.ObjectNotFound:
 		if len(objects) == 0 {
 			return storagedriver.PathNotFoundError{Path: path}
 		}
-	} else {
+	default:
 		return err
 	}
 	return nil
 }
 
-// URLFor returns a URL which may be used to retrieve the content stored at the given path.
-func (d *driver) URLFor(ctx context.Context, path string, options map[string]interface{}) (string, error) {
+// RedirectURL returns a URL which may be used to retrieve the content stored at the given path.
+func (d *driver) RedirectURL(r *http.Request, path string) (string, error) {
 	if d.SecretKey == "" {
 		return "", storagedriver.ErrUnsupportedMethod{}
 	}
 
 	methodString := http.MethodGet
-	method, ok := options["method"]
-	if ok {
-		if methodString, ok = method.(string); !ok {
-			return "", storagedriver.ErrUnsupportedMethod{}
-		}
+	if r != nil && r.Method != "" {
+		methodString = r.Method
 	}
 
 	if methodString == http.MethodHead {
@@ -643,23 +640,19 @@ func (d *driver) URLFor(ctx context.Context, path string, options map[string]int
 	}
 
 	expiresTime := time.Now().Add(20 * time.Minute)
-	expires, ok := options["expiry"]
-	if ok {
-		et, ok := expires.(time.Time)
-		if ok {
-			expiresTime = et
-		}
-	}
 
 	tempURL := d.Conn.ObjectTempUrl(d.Container, d.swiftPath(path), d.SecretKey, methodString, expiresTime)
 
 	if d.AccessKey != "" {
 		// On HP Cloud, the signature must be in the form of tenant_id:access_key:signature
-		url, _ := url.Parse(tempURL)
-		query := url.Query()
+		parsedURL, err := url.Parse(tempURL)
+		if err != nil {
+			return "", err
+		}
+		query := parsedURL.Query()
 		query.Set("temp_url_sig", fmt.Sprintf("%s:%s:%s", d.Conn.TenantId, d.AccessKey, query.Get("temp_url_sig")))
-		url.RawQuery = query.Encode()
-		tempURL = url.String()
+		parsedURL.RawQuery = query.Encode()
+		tempURL = parsedURL.String()
 	}
 
 	return tempURL, nil
@@ -667,8 +660,8 @@ func (d *driver) URLFor(ctx context.Context, path string, options map[string]int
 
 // Walk traverses a filesystem defined within driver, starting
 // from the given path, calling f on each file and directory
-func (d *driver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
-	return storagedriver.WalkFallback(ctx, d, path, f)
+func (d *driver) Walk(ctx context.Context, path string, f storagedriver.WalkFn, options ...func(*storagedriver.WalkOptions)) error {
+	return storagedriver.WalkFallback(ctx, d, path, f, options...)
 }
 
 func (d *driver) swiftPath(path string) string {
@@ -848,7 +841,11 @@ func (w *writer) Close() error {
 	}
 
 	if !w.committed && !w.cancelled {
-		if err := w.driver.createManifest(ctx, w.path, w.driver.Container+"/"+w.segmentsPath); err != nil {
+		if w.size == 0 {
+			if err := w.driver.PutContent(ctx, w.path, nil); err != nil {
+				return err
+			}
+		} else if err := w.driver.createManifest(ctx, w.path, w.driver.Container+"/"+w.segmentsPath); err != nil {
 			return err
 		}
 		if err := w.waitForSegmentsToShowUp(ctx); err != nil {
@@ -870,8 +867,7 @@ func (w *writer) Cancel(ctx context.Context) error {
 	return w.driver.Delete(ctx, w.path)
 }
 
-func (w *writer) Commit() error {
-	ctx := context.Background()
+func (w *writer) Commit(ctx context.Context) error {
 	if w.closed {
 		return fmt.Errorf("already closed")
 	} else if w.committed {
@@ -884,7 +880,11 @@ func (w *writer) Commit() error {
 		return err
 	}
 
-	if err := w.driver.createManifest(ctx, w.path, w.driver.Container+"/"+w.segmentsPath); err != nil {
+	if w.size == 0 {
+		if err := w.driver.PutContent(ctx, w.path, nil); err != nil {
+			return err
+		}
+	} else if err := w.driver.createManifest(ctx, w.path, w.driver.Container+"/"+w.segmentsPath); err != nil {
 		return err
 	}
 
