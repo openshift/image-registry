@@ -18,7 +18,7 @@ require (
 	github.com/pborman/uuid v1.2.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/sirupsen/logrus v1.9.0
-	golang.org/x/crypto v0.14.0
+	golang.org/x/crypto v0.33.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.28.3
 	k8s.io/apimachinery v0.28.3
@@ -63,7 +63,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gomodule/redigo v1.8.2 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
@@ -92,11 +92,11 @@ require (
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/term v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/term v0.29.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.114.0 // indirect
@@ -126,3 +126,5 @@ replace (
 	// This is from tag v0.26.openshift.1
 	golang.org/x/oauth2 => github.com/openshift/golang-oauth2 v0.26.1-0.20250310184649-06a918c6239d
 )
+
+replace golang.org/x/net => github.com/openshift-sustaining/net v0.35.0-sec.3
