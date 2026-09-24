@@ -39,6 +39,7 @@ import (
 
 	"github.com/openshift/library-go/pkg/crypto"
 
+	configv1 "github.com/openshift/api/config/v1"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
@@ -225,6 +226,7 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 		var (
 			minVersion   uint16
 			cipherSuites []uint16
+			curves       []tls.CurveID
 			err          error
 		)
 		if s := os.Getenv("REGISTRY_HTTP_TLS_MINVERSION"); len(s) > 0 {
@@ -242,10 +244,21 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 				cipherSuites = append(cipherSuites, cipherSuite)
 			}
 		}
+		if g := os.Getenv("OPENSHIFT_REGISTRY_HTTP_TLS_GROUPS"); len(g) > 0 {
+			for str := range strings.SplitSeq(g, ",") {
+				group := configv1.TLSGroup(str)
+				curveID, exists := crypto.TLSGroupToCurveID(group)
+				if !exists {
+					return nil, fmt.Errorf("invalid group %q specified in OPENSHIFT_REGISTRY_HTTP_TLS_GROUPS (valid groups are %q)", group, crypto.ValidTLSGroups())
+				}
+				curves = append(curves, curveID)
+			}
+		}
 		tlsConf = crypto.SecureTLSConfig(&tls.Config{
-			ClientAuth:   tls.NoClientCert,
-			MinVersion:   minVersion,
-			CipherSuites: cipherSuites,
+			ClientAuth:       tls.NoClientCert,
+			MinVersion:       minVersion,
+			CipherSuites:     cipherSuites,
+			CurvePreferences: curves,
 		})
 
 		if len(dockerConfig.HTTP.TLS.ClientCAs) != 0 {
