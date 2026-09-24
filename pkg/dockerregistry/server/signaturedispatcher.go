@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	kapierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -100,7 +100,7 @@ func (s *signatureHandler) Put(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sig := signature{}
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		s.handleError(s.ctx, ErrorCodeSignatureInvalid.WithDetail(err.Error()), w)
 		return

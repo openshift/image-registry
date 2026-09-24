@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -158,7 +158,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("unexpected status code: %d", resp.StatusCode)
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatalf("error retrieving manifest: %v", err)
 	}
@@ -188,7 +188,7 @@ func TestV2RegistryGetTags(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("unexpected status code: %d", resp.StatusCode)
 	}
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatalf("error retrieving manifest: %v", err)
 	}
@@ -347,7 +347,7 @@ func getTags(baseURL, namespace, streamName, user, token string) ([]string, erro
 	if resp.StatusCode != http.StatusOK {
 		return []string{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return []string{}, fmt.Errorf("error retrieving manifest: %v", err)
 	}
@@ -387,7 +387,7 @@ func ping(baseURL, user, token string) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("error retrieving manifest: %v", err)
 	}
