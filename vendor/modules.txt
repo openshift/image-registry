@@ -567,8 +567,8 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-# golang.org/x/crypto v0.21.0
-## explicit; go 1.18
+# golang.org/x/crypto v0.33.0
+## explicit; go 1.20
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/chacha20
@@ -580,13 +580,14 @@ golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/pkcs12
 golang.org/x/crypto/pkcs12/internal/rc2
-# golang.org/x/net v0.23.0
+# golang.org/x/net v0.25.0 => github.com/openshift-sustaining/net v0.35.0-sec.3
 ## explicit; go 1.18
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
+golang.org/x/net/internal/httpcommon
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
 # golang.org/x/oauth2 v0.10.0 => github.com/openshift/golang-oauth2 v0.26.1-0.20250310184649-06a918c6239d
@@ -601,19 +602,19 @@ golang.org/x/oauth2/google/internal/stsexchange
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sync v0.6.0
+# golang.org/x/sync v0.11.0
 ## explicit; go 1.18
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.18.0
+# golang.org/x/sys v0.30.0
 ## explicit; go 1.18
 golang.org/x/sys/cpu
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.18.0
+# golang.org/x/term v0.29.0
 ## explicit; go 1.18
 golang.org/x/term
-# golang.org/x/text v0.14.0
+# golang.org/x/text v0.22.0
 ## explicit; go 1.18
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
@@ -1084,3 +1085,4 @@ sigs.k8s.io/yaml
 # github.com/distribution/distribution/v3 => github.com/openshift/docker-distribution/v3 v3.0.0-20250403075108-ac5742e896d4
 # github.com/golang-jwt/jwt/v4 => github.com/golang-jwt/jwt/v4 v4.5.2
 # golang.org/x/oauth2 => github.com/openshift/golang-oauth2 v0.26.1-0.20250310184649-06a918c6239d
+# golang.org/x/net => github.com/openshift-sustaining/net v0.35.0-sec.3
