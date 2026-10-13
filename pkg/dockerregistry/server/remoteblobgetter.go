@@ -1,0 +1,342 @@
+package server
+
+import (
+	"context"
+	"net/http"
+	"sync"
+
+	"github.com/distribution/distribution/v3"
+	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/distribution/distribution/v3/registry/api/errcode"
+	"github.com/distribution/distribution/v3/registry/client"
+	"github.com/opencontainers/go-digest"
+
+	corev1 "k8s.io/api/core/v1"
+
+	cfgv1 "github.com/openshift/client-go/config/clientset/versioned/typed/config/v1"
+	operatorv1alpha1 "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1alpha1"
+	"github.com/openshift/library-go/pkg/image/registryclient"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/cache"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/metrics"
+	rerrors "github.com/openshift/image-registry/pkg/errors"
+	"github.com/openshift/image-registry/pkg/imagestream"
+)
+
+// BlobGetterService combines the operations to access and read blobs.
+type BlobGetterService interface {
+	distribution.BlobStatter
+	distribution.BlobProvider
+	distribution.BlobServer
+}
+
+type secretsGetter func() ([]corev1.Secret, rerrors.Error)
+
+// digestBlobStoreCache caches BlobStores by digests. It is safe to use it
+// concurrently from different goroutines (from an HTTP handler and background
+// mirroring, for example).
+type digestBlobStoreCache struct {
+	mu      sync.RWMutex
+	data    map[string]distribution.BlobStore
+	metrics metrics.Cache
+}
+
+func newDigestBlobStoreCache(m metrics.Pullthrough) *digestBlobStoreCache {
+	return &digestBlobStoreCache{
+		data:    make(map[string]distribution.BlobStore),
+		metrics: m.DigestBlobStoreCache(),
+	}
+}
+
+func (c *digestBlobStoreCache) Get(dgst digest.Digest) (bs distribution.BlobStore, ok bool) {
+	func() {
+		c.mu.RLock()
+		defer c.mu.RUnlock()
+		bs, ok = c.data[dgst.String()]
+	}()
+	c.metrics.Request(ok)
+	return
+}
+
+func (c *digestBlobStoreCache) Put(dgst digest.Digest, bs distribution.BlobStore) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.data[dgst.String()] = bs
+}
+
+// remoteBlobGetterService implements BlobGetterService and allows to serve blobs from remote
+// repositories.
+type remoteBlobGetterService struct {
+	imageStream   imagestream.ImageStream
+	getSecrets    secretsGetter
+	cache         cache.RepositoryDigest
+	digestToStore *digestBlobStoreCache
+	metrics       metrics.Pullthrough
+	icsp          operatorv1alpha1.ImageContentSourcePolicyInterface
+	idms          cfgv1.ImageDigestMirrorSetInterface
+	itms          cfgv1.ImageTagMirrorSetInterface
+}
+
+var _ BlobGetterService = &remoteBlobGetterService{}
+
+// NewBlobGetterService returns a getter for remote blobs. Its cache will be shared among different middleware
+// wrappers, which is a must at least for stat calls made on manifest's dependencies during its verification.
+func NewBlobGetterService(
+	imageStream imagestream.ImageStream,
+	secretsGetter secretsGetter,
+	cache cache.RepositoryDigest,
+	m metrics.Pullthrough,
+	icsp operatorv1alpha1.ImageContentSourcePolicyInterface,
+	idms cfgv1.ImageDigestMirrorSetInterface,
+	itms cfgv1.ImageTagMirrorSetInterface,
+) BlobGetterService {
+	return &remoteBlobGetterService{
+		imageStream:   imageStream,
+		getSecrets:    secretsGetter,
+		cache:         cache,
+		digestToStore: newDigestBlobStoreCache(m),
+		metrics:       m,
+		icsp:          icsp,
+		idms:          idms,
+		itms:          itms,
+	}
+}
+
+func (rbgs *remoteBlobGetterService) findBlobStore(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, distribution.BlobStore, error) {
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).findBlobStore: starting with dgst=%s", dgst)
+	// look up the potential remote repositories that this blob could be part of (at this time,
+	// we don't know which image in the image stream surfaced the content).
+	ok, err := rbgs.imageStream.Exists(ctx)
+	if err != nil {
+		switch err.Code() {
+		case imagestream.ErrImageStreamNotFoundCode:
+			dcontext.GetLogger(ctx).Errorf("findBlobStore: imagestream %s not found: %v", rbgs.imageStream.Reference(), err)
+			return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
+		case imagestream.ErrImageStreamForbiddenCode:
+			dcontext.GetLogger(ctx).Errorf("findBlobStore: unable get access to imagestream %s: %v", rbgs.imageStream.Reference(), err)
+			return distribution.Descriptor{}, nil, distribution.ErrAccessDenied
+		}
+		return distribution.Descriptor{}, nil, err
+	}
+	if !ok {
+		return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
+	}
+
+	cached := rbgs.cache.Repositories(dgst)
+
+	secrets, err := rbgs.getSecrets()
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("error getting secrets: %v", err)
+	}
+
+	// look at the first level of tagged repositories first
+	repositoryCandidates, search, err := rbgs.imageStream.IdentifyCandidateRepositories(ctx, true)
+	if err != nil {
+		return distribution.Descriptor{}, nil, err
+	}
+
+	var tooManyRequests error
+	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, search, cached, dgst, secrets); err == nil {
+		return desc, bs, nil
+	} else if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+		if nerr.StatusCode == http.StatusTooManyRequests {
+			tooManyRequests = err
+		}
+	}
+
+	// look at all other repositories tagged by the server
+	repositoryCandidates, secondary, err := rbgs.imageStream.IdentifyCandidateRepositories(ctx, false)
+	if err != nil {
+		return distribution.Descriptor{}, nil, err
+	}
+	for k := range search {
+		delete(secondary, k)
+	}
+	if desc, bs, err := rbgs.findCandidateRepository(ctx, repositoryCandidates, secondary, cached, dgst, secrets); err == nil {
+		return desc, bs, nil
+	} else if nerr, ok := err.(*client.UnexpectedHTTPResponseError); ok {
+		if nerr.StatusCode == http.StatusTooManyRequests {
+			tooManyRequests = err
+		}
+	}
+
+	nerr := distribution.ErrBlobUnknown
+	if tooManyRequests != nil {
+		nerr = errcode.ErrorCodeTooManyRequests.WithMessage("unable to pullthrough blob")
+	}
+	return distribution.Descriptor{}, nil, nerr
+}
+
+// Stat provides metadata about a blob identified by the digest. If the
+// blob is unknown to the describer, ErrBlobUnknown will be returned.
+func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Stat: starting with dgst=%s", dgst)
+
+	bs, ok := rbgs.digestToStore.Get(dgst)
+	if ok {
+		desc, err := bs.Stat(ctx, dgst)
+		if err == nil {
+			return desc, nil
+		}
+
+		dcontext.GetLogger(ctx).Warnf("Stat: failed to stat blob %s in cached remote repository: %v", dgst, err)
+
+		// There are two possible scenarios:
+		//
+		//   * the blob is no longer available on the remote server,
+		//   * the registry isn't available at the moment.
+		//
+		// In both cases we can move on and hopefully we'll find another
+		// registry.
+	}
+
+	desc, bs, err := rbgs.findBlobStore(ctx, dgst)
+	if err != nil {
+		return desc, err
+	}
+
+	rbgs.digestToStore.Put(dgst, bs)
+
+	return desc, nil
+}
+
+func (rbgs *remoteBlobGetterService) Open(ctx context.Context, dgst digest.Digest) (distribution.ReadSeekCloser, error) {
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Open: starting with dgst=%s", dgst)
+	bs, ok := rbgs.digestToStore.Get(dgst)
+	if !ok {
+		var err error
+		_, bs, err = rbgs.findBlobStore(ctx, dgst)
+		if err != nil {
+			return nil, err
+		}
+		rbgs.digestToStore.Put(dgst, bs)
+	}
+
+	return bs.Open(ctx, dgst)
+}
+
+func (rbgs *remoteBlobGetterService) ServeBlob(ctx context.Context, w http.ResponseWriter, req *http.Request, dgst digest.Digest) error {
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).ServeBlob: starting with dgst=%s", dgst)
+	bs, ok := rbgs.digestToStore.Get(dgst)
+	if !ok {
+		var err error
+		_, bs, err = rbgs.findBlobStore(ctx, dgst)
+		if err != nil {
+			return err
+		}
+		rbgs.digestToStore.Put(dgst, bs)
+	}
+
+	return bs.ServeBlob(ctx, w, req, dgst)
+}
+
+// proxyStat attempts to locate the digest in the provided remote repository or returns an error. If the digest is found,
+// rbgs.digestToStore saves the store.
+func (rbgs *remoteBlobGetterService) proxyStat(
+	ctx context.Context,
+	retriever registryclient.RepositoryRetriever,
+	spec *imagestream.ImagePullthroughSpec,
+	dgst digest.Digest,
+) (distribution.Descriptor, distribution.BlobStore, error) {
+	ref := spec.DockerImageReference
+	insecureNote := ""
+	if spec.Insecure {
+		insecureNote = " with a fall-back to insecure transport"
+	}
+	dcontext.GetLogger(ctx).Infof("Trying to stat %q from %q%s", dgst, ref.AsRepository().Exact(), insecureNote)
+	repo, err := retriever.Repository(ctx, ref.RegistryURL(), ref.RepositoryName(), spec.Insecure)
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("Error getting remote repository for image %q: %v", ref.AsRepository().Exact(), err)
+		return distribution.Descriptor{}, nil, err
+	}
+
+	pullthroughBlobStore := repo.Blobs(ctx)
+	desc, err := pullthroughBlobStore.Stat(ctx, dgst)
+	if err != nil {
+		if err != distribution.ErrBlobUnknown {
+			dcontext.GetLogger(ctx).Errorf("Error statting blob %s in remote repository %q: %v", dgst, ref.AsRepository().Exact(), err)
+		}
+		return distribution.Descriptor{}, nil, err
+	}
+
+	return desc, pullthroughBlobStore, nil
+}
+
+// Get attempts to fetch the requested blob by digest using a remote proxy store if necessary.
+func (rbgs *remoteBlobGetterService) Get(ctx context.Context, dgst digest.Digest) ([]byte, error) {
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Get: starting with dgst=%s", dgst.String())
+	bs, ok := rbgs.digestToStore.Get(dgst)
+	if !ok {
+		var err error
+		_, bs, err = rbgs.findBlobStore(ctx, dgst)
+		if err != nil {
+			return nil, err
+		}
+		rbgs.digestToStore.Put(dgst, bs)
+	}
+
+	return bs.Get(ctx, dgst)
+}
+
+// findCandidateRepository looks in search for a particular blob, referring to previously cached items
+func (rbgs *remoteBlobGetterService) findCandidateRepository(
+	ctx context.Context,
+	repositoryCandidates []string,
+	search map[string]imagestream.ImagePullthroughSpec,
+	cachedRepos []string,
+	dgst digest.Digest,
+	secrets []corev1.Secret,
+) (distribution.Descriptor, distribution.BlobStore, error) {
+	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).findCandidateRepository: starting with dgst=%s", dgst)
+	// no possible remote locations to search, exit early
+	if len(search) == 0 {
+		return distribution.Descriptor{}, nil, distribution.ErrBlobUnknown
+	}
+
+	// see if any of the previously located repositories containing this digest are in this
+	// image stream
+	nerr := distribution.ErrBlobUnknown
+	for _, repo := range cachedRepos {
+		spec, ok := search[repo]
+		if !ok {
+			continue
+		}
+
+		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics, rbgs.icsp, rbgs.idms, rbgs.itms)
+		if impErr != nil {
+			return distribution.Descriptor{}, nil, impErr
+		}
+
+		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
+		if err != nil {
+			nerr = err
+			delete(search, repo)
+			continue
+		}
+		dcontext.GetLogger(ctx).Infof("Found digest location from cache %q in %q", dgst, repo)
+		return desc, bs, nil
+	}
+
+	// search the remaining registries for this digest
+	for _, repo := range repositoryCandidates {
+		spec, ok := search[repo]
+		if !ok {
+			continue
+		}
+
+		retriever, impErr := getImportContext(ctx, spec.DockerImageReference, secrets, rbgs.metrics, rbgs.icsp, rbgs.idms, rbgs.itms)
+		if impErr != nil {
+			return distribution.Descriptor{}, nil, impErr
+		}
+
+		desc, bs, err := rbgs.proxyStat(ctx, retriever, &spec, dgst)
+		if err != nil {
+			nerr = err
+			continue
+		}
+		_ = rbgs.cache.AddDigest(dgst, repo)
+		dcontext.GetLogger(ctx).Infof("Found digest location by search %q in %q", dgst, repo)
+		return desc, bs, nil
+	}
+	return distribution.Descriptor{}, nil, nerr
+}

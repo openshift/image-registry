@@ -1,0 +1,576 @@
+package server
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+
+	dcontext "github.com/distribution/distribution/v3/context"
+	registryauth "github.com/distribution/distribution/v3/registry/auth"
+
+	authnv1 "k8s.io/api/authentication/v1"
+	authorizationapi "k8s.io/api/authorization/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	imageapi "github.com/openshift/api/image/v1"
+	"github.com/openshift/library-go/pkg/apiserver/httprequest"
+
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/audit"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/client"
+	"github.com/openshift/image-registry/pkg/dockerregistry/server/configuration"
+)
+
+type deferredErrors map[string]error
+
+func (d deferredErrors) Add(ref string, err error) {
+	d[ref] = err
+}
+
+func (d deferredErrors) Get(ref string) (error, bool) {
+	err, exists := d[ref]
+	return err, exists
+}
+
+func (d deferredErrors) Empty() bool {
+	return len(d) == 0
+}
+
+const (
+	defaultUserName = "anonymous"
+)
+
+// WithUserInfoLogger creates a new context with provided user infomation.
+func WithUserInfoLogger(ctx context.Context, username, userid string) context.Context {
+	ctx = context.WithValue(ctx, audit.AuditUserEntry, username)
+	if len(userid) > 0 {
+		ctx = context.WithValue(ctx, audit.AuditUserIDEntry, userid)
+	}
+	return dcontext.WithLogger(ctx, dcontext.GetLogger(ctx,
+		audit.AuditUserEntry,
+		audit.AuditUserIDEntry,
+	))
+}
+
+type AccessController struct {
+	realm          string
+	tokenRealm     *url.URL
+	registryClient client.RegistryClient
+	auditLog       bool
+	metricsConfig  configuration.Metrics
+}
+
+var _ registryauth.AccessController = &AccessController{}
+
+type authChallenge struct {
+	realm string
+	err   error
+}
+
+var _ registryauth.Challenge = &authChallenge{}
+
+type tokenAuthChallenge struct {
+	realm   string
+	service string
+	err     error
+}
+
+var _ registryauth.Challenge = &tokenAuthChallenge{}
+
+// Errors used and exported by this package.
+var (
+	// Challenging errors
+	ErrTokenRequired         = errors.New("authorization header required")
+	ErrTokenInvalid          = errors.New("failed to decode credentials")
+	ErrOpenShiftAccessDenied = errors.New("access denied")
+
+	// Non-challenging errors
+	ErrNamespaceRequired   = errors.New("repository namespace required")
+	ErrUnsupportedAction   = errors.New("unsupported action")
+	ErrUnsupportedResource = errors.New("unsupported resource")
+)
+
+func (app *App) Auth(options map[string]interface{}) (registryauth.AccessController, error) {
+	tokenRealm, err := configuration.TokenRealm(app.config.Auth.TokenRealm)
+	if err != nil {
+		return nil, err
+	}
+	return &AccessController{
+		realm:          app.config.Auth.Realm,
+		tokenRealm:     tokenRealm,
+		registryClient: app.registryClient,
+		metricsConfig:  app.config.Metrics,
+		auditLog:       app.config.Audit.Enabled,
+	}, nil
+}
+
+// Error returns the internal error string for this authChallenge.
+func (ac *authChallenge) Error() string {
+	return ac.err.Error()
+}
+
+// SetHeaders sets the basic challenge header on the response.
+func (ac *authChallenge) SetHeaders(req *http.Request, w http.ResponseWriter) {
+	// WWW-Authenticate response challenge header.
+	// See https://tools.ietf.org/html/rfc6750#section-3
+	str := fmt.Sprintf("Basic realm=%s", ac.realm)
+	if ac.err != nil {
+		str = fmt.Sprintf("%s,error=%q", str, ac.Error())
+	}
+	w.Header().Set("WWW-Authenticate", str)
+}
+
+// Error returns the internal error string for this authChallenge.
+func (ac *tokenAuthChallenge) Error() string {
+	return ac.err.Error()
+}
+
+// SetHeaders sets the bearer challenge header on the response.
+func (ac *tokenAuthChallenge) SetHeaders(req *http.Request, w http.ResponseWriter) {
+	// WWW-Authenticate response challenge header.
+	// See https://docs.docker.com/registry/spec/auth/token/#/how-to-authenticate and https://tools.ietf.org/html/rfc6750#section-3
+	str := fmt.Sprintf("Bearer realm=%q", ac.realm)
+	if ac.service != "" {
+		str += fmt.Sprintf(",service=%q", ac.service)
+	}
+	w.Header().Set("WWW-Authenticate", str)
+}
+
+// wrapErr wraps errors related to authorization in an authChallenge error that will present a WWW-Authenticate challenge response
+func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
+	switch err {
+	case ErrTokenRequired:
+		// Challenge for errors that involve missing tokens
+		if ac.tokenRealm == nil {
+			// Send the basic challenge if we don't have a place to redirect
+			return &authChallenge{realm: ac.realm, err: err}
+		}
+
+		if len(ac.tokenRealm.Scheme) > 0 && len(ac.tokenRealm.Host) > 0 {
+			// Redirect to token auth if we've been given an absolute URL
+			return &tokenAuthChallenge{realm: ac.tokenRealm.String(), err: err}
+		}
+
+		// Auto-detect scheme/host from request
+		req, reqErr := dcontext.GetRequest(ctx)
+		if reqErr != nil {
+			return reqErr
+		}
+		scheme, host := httprequest.SchemeHost(req)
+		tokenRealmCopy := *ac.tokenRealm
+		if len(tokenRealmCopy.Scheme) == 0 {
+			tokenRealmCopy.Scheme = scheme
+		}
+		if len(tokenRealmCopy.Host) == 0 {
+			tokenRealmCopy.Host = host
+		}
+		return &tokenAuthChallenge{realm: tokenRealmCopy.String(), err: err}
+	case ErrTokenInvalid, ErrOpenShiftAccessDenied:
+		// Challenge for errors that involve tokens or access denied
+		return &authChallenge{realm: ac.realm, err: err}
+	default:
+		// By default, just return the error, this gets surfaced as a bad request / internal error, but no challenge
+		return err
+	}
+}
+
+// Authorized handles checking whether the given request is authorized
+// for actions on resources allowed by openshift.
+// Sources of access records:
+//
+//	origin/pkg/cmd/dockerregistry/dockerregistry.go#Execute
+//	distribution/distribution/registry/handlers/app.go#appendAccessRecords
+func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...registryauth.Access) (context.Context, error) {
+	req, err := dcontext.GetRequest(ctx)
+	if err != nil {
+		return nil, ac.wrapErr(ctx, err)
+	}
+
+	bearerToken, err := getOpenShiftAPIToken(req)
+	if err != nil {
+		return nil, ac.wrapErr(ctx, err)
+	}
+
+	irClient, err := ac.registryClient.Client()
+	if err != nil {
+		return nil, ac.wrapErr(ctx, err)
+	}
+	osClient, err := ac.registryClient.ClientFromToken(bearerToken)
+	if err != nil {
+		return nil, ac.wrapErr(ctx, err)
+	}
+
+	// In case of docker login, hits endpoint /v2
+	if len(bearerToken) > 0 && !isMetricsBearerToken(ac.metricsConfig, bearerToken) {
+		user, userid, err := verifyOpenShiftUser(ctx, osClient)
+		if err != nil {
+			if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
+				return nil, ac.wrapErr(ctx, ErrOpenShiftAccessDenied)
+			}
+			return nil, ac.wrapErr(ctx, err)
+		}
+		ctx = WithUserInfoLogger(ctx, user, userid)
+	} else {
+		ctx = WithUserInfoLogger(ctx, defaultUserName, "")
+	}
+
+	if ac.auditLog {
+		// TODO: setup own log formatter.
+		ctx = audit.WithLogger(ctx, audit.GetLogger(ctx))
+	}
+
+	// pushChecks remembers which ns/name pairs had push access checks done
+	pushChecks := map[string]bool{}
+	// possibleCrossMountErrors holds errors which may be related to cross mount errors
+	possibleCrossMountErrors := deferredErrors{}
+
+	verifiedPrune := false
+
+	// Validate all requested accessRecords
+	// Only return failure errors from this loop. Success should continue to validate all records
+	for _, access := range accessRecords {
+		dcontext.GetLogger(ctx).Debugf("Origin auth: checking for access to %s:%s:%s", access.Resource.Type, access.Resource.Name, access.Action)
+
+		switch access.Resource.Type {
+		case "repository":
+			imageStreamNS, imageStreamName, err := getNamespaceName(access.Resource.Name)
+			if err != nil {
+				return nil, ac.wrapErr(ctx, err)
+			}
+
+			verb := ""
+			switch access.Action {
+			case "push":
+				verb = "update"
+				pushChecks[imageStreamNS+"/"+imageStreamName] = true
+			case "pull":
+				verb = "get"
+			case "delete":
+				if strings.Contains(req.URL.Path, "/blobs/uploads/") {
+					verb = "update"
+				} else {
+					if !verifiedPrune {
+						if err := verifyPruneAccess(ctx, osClient, irClient); err != nil {
+							return nil, ac.wrapErr(ctx, err)
+						}
+						verifiedPrune = true
+					}
+					continue
+				}
+			default:
+				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+			}
+
+			if err := verifyImageStreamAccess(ctx, imageStreamNS, imageStreamName, verb, osClient, irClient); err != nil {
+				if access.Action != "pull" {
+					return nil, ac.wrapErr(ctx, err)
+				}
+				possibleCrossMountErrors.Add(imageStreamNS+"/"+imageStreamName, ac.wrapErr(ctx, err))
+			}
+
+		case "signature":
+			namespace, name, err := getNamespaceName(access.Resource.Name)
+			if err != nil {
+				return nil, ac.wrapErr(ctx, err)
+			}
+			switch access.Action {
+			case "get":
+				if err := verifyImageStreamAccess(ctx, namespace, name, access.Action, osClient, irClient); err != nil {
+					return nil, ac.wrapErr(ctx, err)
+				}
+			case "put":
+				if err := verifyImageSignatureAccess(ctx, namespace, name, osClient, irClient); err != nil {
+					return nil, ac.wrapErr(ctx, err)
+				}
+			default:
+				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+			}
+
+		case "metrics":
+			switch access.Action {
+			case "get":
+				if err := verifyMetricsAccess(ctx, ac.metricsConfig, bearerToken, osClient, irClient); err != nil {
+					return nil, ac.wrapErr(ctx, err)
+				}
+			default:
+				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+			}
+
+		case "admin":
+			switch access.Action {
+			case "prune":
+				if verifiedPrune {
+					continue
+				}
+				if err := verifyPruneAccess(ctx, osClient, irClient); err != nil {
+					return nil, ac.wrapErr(ctx, err)
+				}
+				verifiedPrune = true
+			default:
+				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+			}
+
+		case "registry":
+			switch access.Resource.Name {
+			case "catalog":
+				if access.Action != "*" {
+					return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+				}
+				if err := verifyCatalogAccess(ctx, osClient, irClient); err != nil {
+					return nil, ac.wrapErr(ctx, err)
+				}
+			default:
+				return nil, ac.wrapErr(ctx, ErrUnsupportedResource)
+			}
+
+		default:
+			return nil, ac.wrapErr(ctx, ErrUnsupportedResource)
+		}
+	}
+
+	// deal with any possible cross-mount errors
+	for namespaceAndName, err := range possibleCrossMountErrors {
+		// If we have no push requests, this can't be a cross-mount request, so error
+		if len(pushChecks) == 0 {
+			return nil, err
+		}
+		// If we also requested a push to this ns/name, this isn't a cross-mount request, so error
+		if pushChecks[namespaceAndName] {
+			return nil, err
+		}
+	}
+
+	// Conditionally add auth errors we want to handle later to the context
+	if !possibleCrossMountErrors.Empty() {
+		dcontext.GetLogger(ctx).Debugf("Origin auth: deferring errors: %#v", possibleCrossMountErrors)
+		ctx = withDeferredErrors(ctx, possibleCrossMountErrors)
+	}
+	// Always add a marker to the context so we know auth was run
+	ctx = withAuthPerformed(ctx)
+
+	return withUserClient(ctx, osClient), nil
+}
+
+func getOpenShiftAPIToken(req *http.Request) (string, error) {
+	token := ""
+
+	authParts := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
+	if len(authParts) != 2 {
+		return "", ErrTokenRequired
+	}
+
+	switch strings.ToLower(authParts[0]) {
+	case "bearer":
+		// This is either a direct API token, or a token issued by our docker token handler
+		token = authParts[1]
+		// Recognize the token issued to anonymous users by our docker token handler
+		if token == anonymousToken {
+			token = ""
+		}
+
+	case "basic":
+		_, password, ok := req.BasicAuth()
+		if !ok || len(password) == 0 {
+			return "", ErrTokenInvalid
+		}
+		token = password
+
+	default:
+		return "", ErrTokenRequired
+	}
+
+	return token, nil
+}
+
+func verifyOpenShiftUser(ctx context.Context, c client.SelfSubjectReviews) (string, string, error) {
+	ssr := &authnv1.SelfSubjectReview{}
+	response, err := c.SelfSubjectReviews().Create(ctx, ssr, metav1.CreateOptions{})
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("Self subject review failed with error: %s", err)
+		return "", "", err
+	}
+	userInfo := response.Status.UserInfo
+	return userInfo.Username, userInfo.UID, nil
+}
+
+func sarStatus(sar *authorizationapi.SelfSubjectAccessReview) string {
+	var b strings.Builder
+
+	if sar.Status.Allowed {
+		b.WriteString("allowed")
+	} else if sar.Status.Denied {
+		b.WriteString("denied")
+	} else {
+		b.WriteString("no opinion")
+	}
+
+	if sar.Status.Reason != "" {
+		b.WriteString(" (")
+		b.WriteString(sar.Status.Reason)
+		b.WriteString(")")
+	}
+
+	if sar.Status.EvaluationError != "" {
+		b.WriteString(": ")
+		b.WriteString(sar.Status.EvaluationError)
+	}
+
+	return b.String()
+}
+
+func verifyWithSAR(
+	ctx context.Context,
+	attrs *authorizationapi.ResourceAttributes,
+	remoteClient client.SelfSubjectAccessReviewsNamespacer,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	response, err := remoteClient.SelfSubjectAccessReviews().Create(ctx, &authorizationapi.SelfSubjectAccessReview{
+		Spec: authorizationapi.SelfSubjectAccessReviewSpec{
+			ResourceAttributes: attrs,
+		},
+	}, metav1.CreateOptions{})
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("OpenShift client error: %s", err)
+
+		if kerrors.IsForbidden(err) {
+			return verifyWithAnonSAR(ctx, attrs, internalClient)
+		}
+
+		if kerrors.IsUnauthorized(err) {
+			return ErrOpenShiftAccessDenied
+		}
+		return err
+	}
+
+	if !response.Status.Allowed {
+		dcontext.GetLogger(ctx).Errorf("OpenShift access denied: %s", sarStatus(response))
+		return ErrOpenShiftAccessDenied
+	}
+
+	return nil
+}
+
+func verifyWithAnonSAR(
+	ctx context.Context,
+	attrs *authorizationapi.ResourceAttributes,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	response, err := internalClient.SubjectAccessReviews().Create(ctx, &authorizationapi.SubjectAccessReview{
+		Spec: authorizationapi.SubjectAccessReviewSpec{
+			User:               "system:anonymous",
+			Groups:             []string{"system:unauthenticated"},
+			ResourceAttributes: attrs,
+		},
+	}, metav1.CreateOptions{})
+	if err != nil {
+		dcontext.GetLogger(ctx).Errorf("OpenShift internal client error: %s", err)
+		if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
+			return ErrOpenShiftAccessDenied
+		}
+		return err
+	}
+
+	if !response.Status.Allowed {
+		return ErrOpenShiftAccessDenied
+	}
+
+	return nil
+}
+
+func verifyWithGlobalSAR(
+	ctx context.Context,
+	resource, subresource, verb string,
+	remoteClient client.SelfSubjectAccessReviewsNamespacer,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	return verifyWithSAR(ctx, &authorizationapi.ResourceAttributes{
+		Verb:        verb,
+		Group:       imageapi.GroupName,
+		Resource:    resource,
+		Subresource: subresource,
+	}, remoteClient, internalClient)
+}
+
+func verifyWithLocalSAR(
+	ctx context.Context,
+	resource, namespace, name, verb string,
+	remoteClient client.SelfSubjectAccessReviewsNamespacer,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	return verifyWithSAR(ctx, &authorizationapi.ResourceAttributes{
+		Namespace: namespace,
+		Verb:      verb,
+		Group:     imageapi.GroupName,
+		Resource:  resource,
+		Name:      name,
+	}, remoteClient, internalClient)
+}
+
+func verifyImageStreamAccess(
+	ctx context.Context,
+	namespace, imageRepo, verb string,
+	remoteClient client.SelfSubjectAccessReviewsNamespacer,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	return verifyWithLocalSAR(ctx, "imagestreams/layers", namespace, imageRepo, verb, remoteClient, internalClient)
+}
+
+func verifyImageSignatureAccess(
+	ctx context.Context,
+	namespace, imageRepo string,
+	remoteClient client.SelfSubjectAccessReviewsNamespacer,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	return verifyWithLocalSAR(ctx, "imagesignatures", namespace, imageRepo, "create", remoteClient, internalClient)
+}
+
+func verifyPruneAccess(
+	ctx context.Context,
+	remoteClient client.SelfSubjectAccessReviewsNamespacer,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	return verifyWithGlobalSAR(ctx, "images", "", "delete", remoteClient, internalClient)
+}
+
+func verifyCatalogAccess(
+	ctx context.Context,
+	remoteClient client.SelfSubjectAccessReviewsNamespacer,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	return verifyWithGlobalSAR(ctx, "imagestreams", "", "list", remoteClient, internalClient)
+}
+
+func verifyMetricsAccess(
+	ctx context.Context,
+	metrics configuration.Metrics,
+	token string,
+	remoteClient client.SelfSubjectAccessReviewsNamespacer,
+	internalClient client.SubjectAccessReviewsNamespacer,
+) error {
+	if !metrics.Enabled {
+		return ErrOpenShiftAccessDenied
+	}
+
+	if len(metrics.Secret) > 0 {
+		if metrics.Secret != token {
+			return ErrOpenShiftAccessDenied
+		}
+		return nil
+	}
+
+	if err := verifyWithGlobalSAR(ctx, "registry", "metrics", "get", remoteClient, internalClient); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func isMetricsBearerToken(metrics configuration.Metrics, token string) bool {
+	if metrics.Enabled {
+		return metrics.Secret == token
+	}
+	return false
+}

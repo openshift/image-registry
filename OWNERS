@@ -1,0 +1,7 @@
+reviewers:
+  - ricardomaraschini
+  - flavianmissi
+approvers:
+  - ricardomaraschini
+  - flavianmissi
+component: "Image Registry"
