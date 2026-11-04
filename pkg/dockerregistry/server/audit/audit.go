@@ -14,7 +14,7 @@ func newWrapper(ctx context.Context) wrapped.Wrapper {
 	return func(ctx context.Context, funcname string, f func(ctx context.Context) error) error {
 		logger.Log(funcname)
 		err := f(ctx)
-		if err == io.EOF {
+		if err == io.EOF && funcname == "TagService.List" {
 			// TagService.List ends a successful listing with io.EOF.
 			logger.LogResult(nil, funcname)
 		} else {
