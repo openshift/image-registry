@@ -58,6 +58,8 @@ type repository struct {
 
 // Repository returns a new repository middleware.
 func (app *App) Repository(ctx context.Context, repo distribution.Repository, crossmount bool) (distribution.Repository, distribution.BlobDescriptorServiceFactory, error) {
+	ctx = withAuthContext(ctx)
+
 	registryOSClient, err := app.registryClient.Client()
 	if err != nil {
 		return nil, nil, err
@@ -102,6 +104,8 @@ func (app *App) Repository(ctx context.Context, repo distribution.Repository, cr
 
 // Manifests returns r, which implements distribution.ManifestService.
 func (r *repository) Manifests(ctx context.Context, options ...distribution.ManifestServiceOption) (distribution.ManifestService, error) {
+	ctx = withAuthContext(ctx)
+
 	// We do a verification of our own. We do more restrictive checks and we
 	// know about remote blobs.
 	opts := append(options, registrystorage.SkipLayerVerification())
@@ -151,6 +155,8 @@ func (r *repository) Manifests(ctx context.Context, options ...distribution.Mani
 
 // Blobs returns a blob store which can delegate to remote repositories.
 func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
+	ctx = withAuthContext(ctx)
+
 	bs := r.Repository.Blobs(ctx)
 
 	if r.app.quotaEnforcing.enforcementEnabled {
@@ -181,6 +187,8 @@ func (r *repository) Blobs(ctx context.Context) distribution.BlobStore {
 
 // Tags returns a reference to this repository tag service.
 func (r *repository) Tags(ctx context.Context) distribution.TagService {
+	ctx = withAuthContext(ctx)
+
 	ts := r.Repository.Tags(ctx)
 
 	ts = &tagService{

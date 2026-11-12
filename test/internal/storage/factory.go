@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/distribution/distribution/v3/configuration"
@@ -15,7 +16,7 @@ const Name = "integration"
 
 type storageDriverFactory struct{}
 
-func (f *storageDriverFactory) Create(parameters map[string]interface{}) (storagedriver.StorageDriver, error) {
+func (f *storageDriverFactory) Create(ctx context.Context, parameters map[string]interface{}) (storagedriver.StorageDriver, error) {
 	driver, ok := parameters["driver"].(storagedriver.StorageDriver)
 	if !ok {
 		return nil, fmt.Errorf("unable to get driver from %#+v", parameters["driver"])

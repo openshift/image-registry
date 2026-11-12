@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/reference"
 	"github.com/distribution/distribution/v3/registry/storage"
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
+	"github.com/distribution/reference"
 )
 
 type registry struct {

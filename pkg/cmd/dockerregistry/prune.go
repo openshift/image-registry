@@ -53,7 +53,7 @@ func ExecutePruner(configFile io.Reader, dryRun bool) {
 
 	registryClient := client.NewRegistryClient(clientcmd.NewConfig().BindToFile(extraConfig.KubeConfig))
 
-	storageDriver, err := factory.Create(config.Storage.Type(), config.Storage.Parameters())
+	storageDriver, err := factory.Create(ctx, config.Storage.Type(), config.Storage.Parameters())
 	if err != nil {
 		log.Fatalf("error creating storage driver: %s", err)
 	}

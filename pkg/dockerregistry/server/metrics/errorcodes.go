@@ -72,7 +72,7 @@ func storageErrorCode(err error) string {
 		return errCodeInvalidOffset
 	case storagedriver.Error:
 		var perr *fs.PathError
-		if !errors.As(actual.Enclosed, &perr) {
+		if !errors.As(actual.Detail, &perr) {
 			return errCodeUnknown
 		}
 		unwrapped := perr.Unwrap()

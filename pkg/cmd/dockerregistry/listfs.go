@@ -45,7 +45,7 @@ func ExecuteListFS(configFile io.Reader, opts *ListOptions) {
 		log.Fatalf("error configuring logging: %s", err)
 	}
 
-	storageDriver, err := factory.Create(config.Storage.Type(), config.Storage.Parameters())
+	storageDriver, err := factory.Create(ctx, config.Storage.Type(), config.Storage.Parameters())
 	if err != nil {
 		log.Fatalf("error creating storage driver: %s", err)
 	}

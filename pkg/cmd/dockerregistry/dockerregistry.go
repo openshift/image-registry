@@ -21,7 +21,6 @@ import (
 	"github.com/distribution/distribution/v3/configuration"
 	dcontext "github.com/distribution/distribution/v3/context"
 	"github.com/distribution/distribution/v3/health"
-	"github.com/distribution/distribution/v3/uuid"
 	distversion "github.com/distribution/distribution/v3/version"
 
 	_ "github.com/distribution/distribution/v3/registry/auth/htpasswd"
@@ -33,7 +32,6 @@ import (
 	_ "github.com/distribution/distribution/v3/registry/storage/driver/gcs"
 	_ "github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
 	_ "github.com/distribution/distribution/v3/registry/storage/driver/middleware/cloudfront"
-	_ "github.com/distribution/distribution/v3/registry/storage/driver/oss"
 	_ "github.com/distribution/distribution/v3/registry/storage/driver/s3-aws"
 	_ "github.com/distribution/distribution/v3/registry/storage/driver/swift"
 
@@ -157,10 +155,6 @@ func Execute(configFile io.Reader) {
 	if err != nil {
 		log.Fatalf("error configuring logger: %v", err)
 	}
-
-	// inject a logger into the uuid library. warns us if there is a problem
-	// with uuid generation under low entropy.
-	uuid.Loggerf = dcontext.GetLogger(ctx).Warnf
 
 	dcontext.GetLoggerWithFields(ctx, versionFields()).Info("start registry")
 

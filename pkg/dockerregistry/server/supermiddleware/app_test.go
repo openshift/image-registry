@@ -13,11 +13,11 @@ import (
 
 	"github.com/distribution/distribution/v3"
 	"github.com/distribution/distribution/v3/configuration"
-	"github.com/distribution/distribution/v3/reference"
 	"github.com/distribution/distribution/v3/registry/auth"
 	"github.com/distribution/distribution/v3/registry/storage/cache"
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
 	_ "github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
+	"github.com/distribution/reference"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"
 )
@@ -48,13 +48,13 @@ type testAccessController struct {
 	log *log
 }
 
-func (ac *testAccessController) Authorized(ctx context.Context, access ...auth.Access) (context.Context, error) {
+func (ac *testAccessController) Authorized(r *http.Request, access ...auth.Access) (*auth.Grant, error) {
 	var args []string
 	for _, a := range access {
 		args = append(args, fmt.Sprintf("%s:%s:%s:%s", a.Type, a.Class, a.Name, a.Action))
 	}
 	ac.log.Record("AccessController(%s)", strings.Join(args, ", "))
-	return ctx, nil
+	return &auth.Grant{}, nil
 }
 
 type testRegistry struct {

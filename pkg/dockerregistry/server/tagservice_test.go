@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"io"
 	"reflect"
 	"testing"
 
@@ -176,6 +177,72 @@ func TestTagGetAllWithoutImageStream(t *testing.T) {
 	}
 }
 
+func TestTagList(t *testing.T) {
+	namespace := "user"
+	repo := "app"
+
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+
+	fos, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+	for _, tag := range []string{"c", "a", "b"} {
+		testutil.AddRandomImage(t, fos, namespace, repo, tag)
+	}
+
+	testcases := []struct {
+		title        string
+		limit        int
+		last         string
+		expectResult []string
+		expectEOF    bool
+	}{
+		{title: "all tags", limit: -1, expectResult: []string{"a", "b", "c"}, expectEOF: true},
+		{title: "first page", limit: 2, expectResult: []string{"a", "b"}},
+		{title: "last page", limit: 2, last: "b", expectResult: []string{"c"}, expectEOF: true},
+		{title: "past the end", limit: 2, last: "c", expectResult: []string{}, expectEOF: true},
+	}
+
+	for _, tc := range testcases {
+		imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+
+		ts := &tagService{
+			TagService:  newTestTagService(nil),
+			imageStream: imageStream,
+		}
+
+		result, err := ts.List(ctx, tc.limit, tc.last)
+		if tc.expectEOF && err != io.EOF || !tc.expectEOF && err != nil {
+			t.Fatalf("[%s] unexpected error: %#+v", tc.title, err)
+		}
+
+		if !reflect.DeepEqual(result, tc.expectResult) {
+			t.Fatalf("[%s] unexpected result: %#+v", tc.title, result)
+		}
+	}
+}
+
+func TestTagListWithoutImageStream(t *testing.T) {
+	namespace := "user"
+	repo := "app"
+
+	ctx := context.Background()
+	ctx = testutil.WithTestLogger(ctx, t)
+
+	_, imageClient := testutil.NewFakeOpenShiftWithClient(ctx)
+
+	imageStream := imagestream.New(ctx, namespace, repo, registryclient.NewFakeRegistryAPIClient(nil, imageClient))
+
+	ts := &tagService{
+		TagService:  newTestTagService(nil),
+		imageStream: imageStream,
+	}
+
+	_, err := ts.List(ctx, -1, "")
+	if _, ok := err.(distribution.ErrRepositoryUnknown); !ok {
+		t.Fatalf("unexpected error: %#+v", err)
+	}
+}
+
 func TestTagLookup(t *testing.T) {
 	namespace := "user"
 	repo := "app"
@@ -306,6 +373,14 @@ func (t *testTagService) Untag(ctx context.Context, tag string) error {
 
 func (t *testTagService) All(ctx context.Context) (tags []string, err error) {
 	t.calls["All"]++
+	for tag := range t.data {
+		tags = append(tags, tag)
+	}
+	return
+}
+
+func (t *testTagService) List(ctx context.Context, limit int, last string) (tags []string, err error) {
+	t.calls["List"]++
 	for tag := range t.data {
 		tags = append(tags, tag)
 	}

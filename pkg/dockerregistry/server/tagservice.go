@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"io"
+	"slices"
 
 	"github.com/distribution/distribution/v3"
 	"github.com/distribution/distribution/v3/registry/api/v2"
@@ -58,6 +60,27 @@ func (t tagService) All(ctx context.Context) ([]string, error) {
 	}
 
 	return tagList, nil
+}
+
+// List pages the image stream tags in sorted order. Like the upstream storage
+// tag store, it returns io.EOF when the page is not full.
+func (t tagService) List(ctx context.Context, limit int, last string) ([]string, error) {
+	tags, err := t.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	slices.Sort(tags)
+	i, found := slices.BinarySearch(tags, last)
+	if found {
+		i++
+	}
+	tags = tags[i:]
+
+	if limit > 0 && len(tags) >= limit {
+		return tags[:limit], nil
+	}
+	return tags, io.EOF
 }
 
 func (t tagService) Lookup(ctx context.Context, desc distribution.Descriptor) ([]string, error) {

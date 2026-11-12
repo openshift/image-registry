@@ -155,7 +155,7 @@ func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
 		}
 
 		// Auto-detect scheme/host from request
-		req, reqErr := dcontext.GetRequest(ctx)
+		req, reqErr := requestFrom(ctx)
 		if reqErr != nil {
 			return reqErr
 		}
@@ -183,24 +183,33 @@ func (ac *AccessController) wrapErr(ctx context.Context, err error) error {
 //
 //	origin/pkg/cmd/dockerregistry/dockerregistry.go#Execute
 //	distribution/distribution/registry/handlers/app.go#appendAccessRecords
-func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...registryauth.Access) (context.Context, error) {
-	req, err := dcontext.GetRequest(ctx)
+func (ac *AccessController) Authorized(req *http.Request, accessRecords ...registryauth.Access) (*registryauth.Grant, error) {
+	ctx, username, err := ac.authorize(req.Context(), req, accessRecords...)
 	if err != nil {
-		return nil, ac.wrapErr(ctx, err)
+		return nil, err
 	}
+	storeAuthContext(req, ctx)
+	return &registryauth.Grant{User: registryauth.UserInfo{Name: username}}, nil
+}
+
+// authorize validates accessRecords for req and returns a context carrying
+// the user's client, the deferred cross-mount errors and the auth marker,
+// together with the name of the authenticated user.
+func (ac *AccessController) authorize(ctx context.Context, req *http.Request, accessRecords ...registryauth.Access) (context.Context, string, error) {
+	var username string
 
 	bearerToken, err := getOpenShiftAPIToken(req)
 	if err != nil {
-		return nil, ac.wrapErr(ctx, err)
+		return nil, "", ac.wrapErr(ctx, err)
 	}
 
 	irClient, err := ac.registryClient.Client()
 	if err != nil {
-		return nil, ac.wrapErr(ctx, err)
+		return nil, "", ac.wrapErr(ctx, err)
 	}
 	osClient, err := ac.registryClient.ClientFromToken(bearerToken)
 	if err != nil {
-		return nil, ac.wrapErr(ctx, err)
+		return nil, "", ac.wrapErr(ctx, err)
 	}
 
 	// In case of docker login, hits endpoint /v2
@@ -208,12 +217,14 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 		user, userid, err := verifyOpenShiftUser(ctx, osClient)
 		if err != nil {
 			if kerrors.IsUnauthorized(err) || kerrors.IsForbidden(err) {
-				return nil, ac.wrapErr(ctx, ErrOpenShiftAccessDenied)
+				return nil, "", ac.wrapErr(ctx, ErrOpenShiftAccessDenied)
 			}
-			return nil, ac.wrapErr(ctx, err)
+			return nil, "", ac.wrapErr(ctx, err)
 		}
+		username = user
 		ctx = WithUserInfoLogger(ctx, user, userid)
 	} else {
+		username = defaultUserName
 		ctx = WithUserInfoLogger(ctx, defaultUserName, "")
 	}
 
@@ -238,7 +249,7 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 		case "repository":
 			imageStreamNS, imageStreamName, err := getNamespaceName(access.Resource.Name)
 			if err != nil {
-				return nil, ac.wrapErr(ctx, err)
+				return nil, "", ac.wrapErr(ctx, err)
 			}
 
 			verb := ""
@@ -254,19 +265,19 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 				} else {
 					if !verifiedPrune {
 						if err := verifyPruneAccess(ctx, osClient, irClient); err != nil {
-							return nil, ac.wrapErr(ctx, err)
+							return nil, "", ac.wrapErr(ctx, err)
 						}
 						verifiedPrune = true
 					}
 					continue
 				}
 			default:
-				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+				return nil, "", ac.wrapErr(ctx, ErrUnsupportedAction)
 			}
 
 			if err := verifyImageStreamAccess(ctx, imageStreamNS, imageStreamName, verb, osClient, irClient); err != nil {
 				if access.Action != "pull" {
-					return nil, ac.wrapErr(ctx, err)
+					return nil, "", ac.wrapErr(ctx, err)
 				}
 				possibleCrossMountErrors.Add(imageStreamNS+"/"+imageStreamName, ac.wrapErr(ctx, err))
 			}
@@ -274,29 +285,29 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 		case "signature":
 			namespace, name, err := getNamespaceName(access.Resource.Name)
 			if err != nil {
-				return nil, ac.wrapErr(ctx, err)
+				return nil, "", ac.wrapErr(ctx, err)
 			}
 			switch access.Action {
 			case "get":
 				if err := verifyImageStreamAccess(ctx, namespace, name, access.Action, osClient, irClient); err != nil {
-					return nil, ac.wrapErr(ctx, err)
+					return nil, "", ac.wrapErr(ctx, err)
 				}
 			case "put":
 				if err := verifyImageSignatureAccess(ctx, namespace, name, osClient, irClient); err != nil {
-					return nil, ac.wrapErr(ctx, err)
+					return nil, "", ac.wrapErr(ctx, err)
 				}
 			default:
-				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+				return nil, "", ac.wrapErr(ctx, ErrUnsupportedAction)
 			}
 
 		case "metrics":
 			switch access.Action {
 			case "get":
 				if err := verifyMetricsAccess(ctx, ac.metricsConfig, bearerToken, osClient, irClient); err != nil {
-					return nil, ac.wrapErr(ctx, err)
+					return nil, "", ac.wrapErr(ctx, err)
 				}
 			default:
-				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+				return nil, "", ac.wrapErr(ctx, ErrUnsupportedAction)
 			}
 
 		case "admin":
@@ -306,28 +317,28 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 					continue
 				}
 				if err := verifyPruneAccess(ctx, osClient, irClient); err != nil {
-					return nil, ac.wrapErr(ctx, err)
+					return nil, "", ac.wrapErr(ctx, err)
 				}
 				verifiedPrune = true
 			default:
-				return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+				return nil, "", ac.wrapErr(ctx, ErrUnsupportedAction)
 			}
 
 		case "registry":
 			switch access.Resource.Name {
 			case "catalog":
 				if access.Action != "*" {
-					return nil, ac.wrapErr(ctx, ErrUnsupportedAction)
+					return nil, "", ac.wrapErr(ctx, ErrUnsupportedAction)
 				}
 				if err := verifyCatalogAccess(ctx, osClient, irClient); err != nil {
-					return nil, ac.wrapErr(ctx, err)
+					return nil, "", ac.wrapErr(ctx, err)
 				}
 			default:
-				return nil, ac.wrapErr(ctx, ErrUnsupportedResource)
+				return nil, "", ac.wrapErr(ctx, ErrUnsupportedResource)
 			}
 
 		default:
-			return nil, ac.wrapErr(ctx, ErrUnsupportedResource)
+			return nil, "", ac.wrapErr(ctx, ErrUnsupportedResource)
 		}
 	}
 
@@ -335,11 +346,11 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 	for namespaceAndName, err := range possibleCrossMountErrors {
 		// If we have no push requests, this can't be a cross-mount request, so error
 		if len(pushChecks) == 0 {
-			return nil, err
+			return nil, "", err
 		}
 		// If we also requested a push to this ns/name, this isn't a cross-mount request, so error
 		if pushChecks[namespaceAndName] {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
@@ -351,7 +362,7 @@ func (ac *AccessController) Authorized(ctx context.Context, accessRecords ...reg
 	// Always add a marker to the context so we know auth was run
 	ctx = withAuthPerformed(ctx)
 
-	return withUserClient(ctx, osClient), nil
+	return withUserClient(ctx, osClient), username, nil
 }
 
 func getOpenShiftAPIToken(req *http.Request) (string, error) {
