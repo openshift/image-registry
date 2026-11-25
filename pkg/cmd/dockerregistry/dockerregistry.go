@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -244,6 +245,23 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 				cipherSuites = append(cipherSuites, cipherSuite)
 			}
 		}
+		curvesSeen := map[tls.CurveID]bool{}
+		if g := os.Getenv("OPENSHIFT_REGISTRY_HTTP_TLS_CURVE_PREFERENCES"); len(g) > 0 {
+			for str := range strings.SplitSeq(g, ",") {
+				raw, err := strconv.ParseUint(str, 10, 16)
+				if err != nil {
+					return nil, fmt.Errorf("invalid CurveID specified in OPENSHIFT_REGISTRY_HTTP_TLS_CURVE_PREFERENCES: %w", err)
+				}
+
+				curveID := tls.CurveID(raw)
+				if curvesSeen[curveID] {
+					continue
+				}
+
+				curves = append(curves, curveID)
+				curvesSeen[curveID] = true
+			}
+		}
 		if g := os.Getenv("OPENSHIFT_REGISTRY_HTTP_TLS_GROUPS"); len(g) > 0 {
 			for str := range strings.SplitSeq(g, ",") {
 				group := configv1.TLSGroup(str)
@@ -251,7 +269,13 @@ func NewServer(ctx context.Context, dockerConfig *configuration.Configuration, e
 				if !exists {
 					return nil, fmt.Errorf("invalid group %q specified in OPENSHIFT_REGISTRY_HTTP_TLS_GROUPS (valid groups are %q)", group, crypto.ValidTLSGroups())
 				}
+
+				if curvesSeen[curveID] {
+					continue
+				}
+
 				curves = append(curves, curveID)
+				curvesSeen[curveID] = true
 			}
 		}
 		tlsConf = crypto.SecureTLSConfig(&tls.Config{
