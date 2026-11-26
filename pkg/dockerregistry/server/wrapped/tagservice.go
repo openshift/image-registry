@@ -56,3 +56,11 @@ func (ts *tagService) Lookup(ctx context.Context, desc distribution.Descriptor) 
 	})
 	return
 }
+
+func (ts *tagService) List(ctx context.Context, limit int, last string) (tags []string, err error) {
+	err = ts.wrapper(ctx, "TagService.List", func(ctx context.Context) error {
+		tags, err = ts.tagService.List(ctx, limit, last)
+		return err
+	})
+	return
+}

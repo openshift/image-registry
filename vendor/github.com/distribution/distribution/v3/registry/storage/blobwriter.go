@@ -9,9 +9,10 @@ import (
 	"time"
 
 	"github.com/distribution/distribution/v3"
-	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/distribution/distribution/v3/internal/dcontext"
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
 	"github.com/opencontainers/go-digest"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/sirupsen/logrus"
 )
 
@@ -54,11 +55,11 @@ func (bw *blobWriter) StartedAt() time.Time {
 
 // Commit marks the upload as completed, returning a valid descriptor. The
 // final size and digest are checked against the first descriptor provided.
-func (bw *blobWriter) Commit(ctx context.Context, desc distribution.Descriptor) (distribution.Descriptor, error) {
+func (bw *blobWriter) Commit(ctx context.Context, desc v1.Descriptor) (v1.Descriptor, error) {
 	dcontext.GetLogger(ctx).Debug("(*blobWriter).Commit")
 
-	if err := bw.fileWriter.Commit(); err != nil {
-		return distribution.Descriptor{}, err
+	if err := bw.fileWriter.Commit(ctx); err != nil {
+		return v1.Descriptor{}, err
 	}
 
 	bw.Close()
@@ -66,24 +67,24 @@ func (bw *blobWriter) Commit(ctx context.Context, desc distribution.Descriptor) 
 
 	canonical, err := bw.validateBlob(ctx, desc)
 	if err != nil {
-		return distribution.Descriptor{}, err
+		return v1.Descriptor{}, err
 	}
 
 	if err := bw.moveBlob(ctx, canonical); err != nil {
-		return distribution.Descriptor{}, err
+		return v1.Descriptor{}, err
 	}
 
 	if err := bw.blobStore.linkBlob(ctx, canonical, desc.Digest); err != nil {
-		return distribution.Descriptor{}, err
+		return v1.Descriptor{}, err
 	}
 
 	if err := bw.removeResources(ctx); err != nil {
-		return distribution.Descriptor{}, err
+		return v1.Descriptor{}, err
 	}
 
 	err = bw.blobStore.blobAccessController.SetDescriptor(ctx, canonical.Digest, canonical)
 	if err != nil {
-		return distribution.Descriptor{}, err
+		return v1.Descriptor{}, err
 	}
 
 	bw.committed = true
@@ -160,7 +161,7 @@ func (bw *blobWriter) Close() error {
 
 // validateBlob checks the data against the digest, returning an error if it
 // does not match. The canonical descriptor is returned.
-func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descriptor) (distribution.Descriptor, error) {
+func (bw *blobWriter) validateBlob(ctx context.Context, desc v1.Descriptor) (v1.Descriptor, error) {
 	var (
 		verified, fullHash bool
 		canonical          digest.Digest
@@ -169,7 +170,7 @@ func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descri
 	if desc.Digest == "" {
 		// if no descriptors are provided, we have nothing to validate
 		// against. We don't really want to support this for the registry.
-		return distribution.Descriptor{}, distribution.ErrBlobInvalidDigest{
+		return v1.Descriptor{}, distribution.ErrBlobInvalidDigest{
 			Reason: fmt.Errorf("cannot validate against empty digest"),
 		}
 	}
@@ -186,11 +187,11 @@ func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descri
 			desc.Size = 0
 		default:
 			// Any other error we want propagated up the stack.
-			return distribution.Descriptor{}, err
+			return v1.Descriptor{}, err
 		}
 	} else {
 		if fi.IsDir() {
-			return distribution.Descriptor{}, fmt.Errorf("unexpected directory at upload location %q", bw.path)
+			return v1.Descriptor{}, fmt.Errorf("unexpected directory at upload location %q", bw.path)
 		}
 
 		size = fi.Size()
@@ -198,7 +199,7 @@ func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descri
 
 	if desc.Size > 0 {
 		if desc.Size != size {
-			return distribution.Descriptor{}, distribution.ErrBlobInvalidLength
+			return v1.Descriptor{}, distribution.ErrBlobInvalidLength
 		}
 	} else {
 		// if provided 0 or negative length, we can assume caller doesn't know or
@@ -226,11 +227,11 @@ func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descri
 		// Not using resumable digests, so we need to hash the entire layer.
 		fullHash = true
 	} else {
-		return distribution.Descriptor{}, err
+		return v1.Descriptor{}, err
 	}
 
 	if fullHash {
-		// a fantastic optimization: if the the written data and the size are
+		// a fantastic optimization: if the written data and the size are
 		// the same, we don't need to read the data from the backend. This is
 		// because we've written the entire file in the lifecycle of the
 		// current instance.
@@ -249,14 +250,14 @@ func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descri
 			// Read the file from the backend driver and validate it.
 			fr, err := newFileReader(ctx, bw.driver, bw.path, desc.Size)
 			if err != nil {
-				return distribution.Descriptor{}, err
+				return v1.Descriptor{}, err
 			}
 			defer fr.Close()
 
 			tr := io.TeeReader(fr, digester.Hash())
 
 			if _, err := io.Copy(verifier, tr); err != nil {
-				return distribution.Descriptor{}, err
+				return v1.Descriptor{}, err
 			}
 
 			canonical = digester.Digest()
@@ -266,12 +267,12 @@ func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descri
 
 	if !verified {
 		dcontext.GetLoggerWithFields(ctx,
-			map[interface{}]interface{}{
+			map[any]any{
 				"canonical": canonical,
 				"provided":  desc.Digest,
 			}, "canonical", "provided").
 			Errorf("canonical digest does match provided digest")
-		return distribution.Descriptor{}, distribution.ErrBlobInvalidDigest{
+		return v1.Descriptor{}, distribution.ErrBlobInvalidDigest{
 			Digest: desc.Digest,
 			Reason: fmt.Errorf("content does not match digest"),
 		}
@@ -290,7 +291,7 @@ func (bw *blobWriter) validateBlob(ctx context.Context, desc distribution.Descri
 // moveBlob moves the data into its final, hash-qualified destination,
 // identified by dgst. The layer should be validated before commencing the
 // move.
-func (bw *blobWriter) moveBlob(ctx context.Context, desc distribution.Descriptor) error {
+func (bw *blobWriter) moveBlob(ctx context.Context, desc v1.Descriptor) error {
 	blobPath, err := pathFor(blobDataPathSpec{
 		digest: desc.Digest,
 	})

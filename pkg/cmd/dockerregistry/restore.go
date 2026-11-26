@@ -48,7 +48,7 @@ func ExecuteRestore(configFile io.Reader, mode, namespace string) {
 		log.Fatalf("error configuring logging: %s", err)
 	}
 
-	storageDriver, err := factory.Create(dockerConfig.Storage.Type(), dockerConfig.Storage.Parameters())
+	storageDriver, err := factory.Create(ctx, dockerConfig.Storage.Type(), dockerConfig.Storage.Parameters())
 	if err != nil {
 		log.Fatalf("error creating storage driver: %s", err)
 	}

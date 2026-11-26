@@ -3,12 +3,17 @@ package storage
 import (
 	"context"
 	"regexp"
+	"runtime"
 
 	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/reference"
 	"github.com/distribution/distribution/v3/registry/storage/cache"
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
+	"github.com/distribution/reference"
 	"github.com/docker/libtrust"
+)
+
+var (
+	DefaultConcurrencyLimit = runtime.GOMAXPROCS(0)
 )
 
 // registry is the top-level implementation of Registry for use in the storage
@@ -19,12 +24,16 @@ type registry struct {
 	statter                      *blobStatter // global statter service.
 	blobDescriptorCacheProvider  cache.BlobDescriptorCacheProvider
 	deleteEnabled                bool
+	tagLookupConcurrencyLimit    int
 	schema1Enabled               bool
-	resumableDigestEnabled       bool
 	schema1SigningKey            libtrust.PrivateKey
+	resumableDigestEnabled       bool
 	blobDescriptorServiceFactory distribution.BlobDescriptorServiceFactory
-	manifestURLs                 manifestURLs
 	driver                       storagedriver.StorageDriver
+
+	// Validation
+	manifestURLs         manifestURLs
+	validateImageIndexes validateImageIndexes
 }
 
 // manifestURLs holds regular expressions for controlling manifest URL whitelisting
@@ -33,14 +42,35 @@ type manifestURLs struct {
 	deny  *regexp.Regexp
 }
 
+// validateImageIndexImages holds configuration for validation of image indexes
+type validateImageIndexes struct {
+	// exist can be used to disable checking that platform images exist entirely. Default true.
+	imagesExist bool
+	// platforms can be used to only validate the existence of images for a set of platforms. The empty array means validate all platforms.
+	imagePlatforms []platform
+}
+
+// platform represents a platform to validate exists in the
+type platform struct {
+	architecture string
+	os           string
+}
+
 // RegistryOption is the type used for functional options for NewRegistry.
 type RegistryOption func(*registry) error
 
 // EnableRedirect is a functional option for NewRegistry. It causes the backend
-// blob server to attempt using (StorageDriver).URLFor to serve all blobs.
+// blob server to attempt using (StorageDriver).RedirectURL to serve all blobs.
 func EnableRedirect(registry *registry) error {
 	registry.blobServer.redirect = true
 	return nil
+}
+
+func TagLookupConcurrencyLimit(concurrencyLimit int) RegistryOption {
+	return func(registry *registry) error {
+		registry.tagLookupConcurrencyLimit = concurrencyLimit
+		return nil
+	}
 }
 
 // EnableDelete is a functional option for NewRegistry. It enables deletion on
@@ -50,7 +80,7 @@ func EnableDelete(registry *registry) error {
 	return nil
 }
 
-// EnableSchema1 is a functional option for NewRegistry. It enables pushing of
+// EnableSchema1 is a functional option for NewRegistry. It enables pushing
 // schema1 manifests.
 func EnableSchema1(registry *registry) error {
 	registry.schema1Enabled = true
@@ -80,8 +110,30 @@ func ManifestURLsDenyRegexp(r *regexp.Regexp) RegistryOption {
 	}
 }
 
-// Schema1SigningKey returns a functional option for NewRegistry. It sets the
-// key for signing  all schema1 manifests.
+// EnableValidateImageIndexImagesExist is a functional option for NewRegistry. It enables
+// validation that references exist before an image index is accepted.
+func EnableValidateImageIndexImagesExist(registry *registry) error {
+	registry.validateImageIndexes.imagesExist = true
+	return nil
+}
+
+// AddValidateImageIndexImagesExistPlatform returns a functional option for NewRegistry.
+// It adds a platform to check for existence before an image index is accepted.
+func AddValidateImageIndexImagesExistPlatform(architecture string, os string) RegistryOption {
+	return func(registry *registry) error {
+		registry.validateImageIndexes.imagePlatforms = append(
+			registry.validateImageIndexes.imagePlatforms,
+			platform{
+				architecture: architecture,
+				os:           os,
+			},
+		)
+		return nil
+	}
+}
+
+// Schema1SigningKey returns a functional option for NewRegistry that sets the
+// key used to sign schema1 manifests converted for legacy clients.
 func Schema1SigningKey(key libtrust.PrivateKey) RegistryOption {
 	return func(registry *registry) error {
 		registry.schema1SigningKey = key
@@ -121,7 +173,7 @@ func BlobDescriptorCacheProvider(blobDescriptorCacheProvider cache.BlobDescripto
 // NewRegistry creates a new registry instance from the provided driver. The
 // resulting registry may be shared by multiple goroutines but is cheap to
 // allocate. If the Redirect option is specified, the backend blob server will
-// attempt to use (StorageDriver).URLFor to serve all blobs.
+// attempt to use (StorageDriver).RedirectURL to serve all blobs.
 func NewRegistry(ctx context.Context, driver storagedriver.StorageDriver, options ...RegistryOption) (distribution.Namespace, error) {
 	// create global statter
 	statter := &blobStatter{
@@ -203,9 +255,15 @@ func (repo *repository) Named() reference.Named {
 }
 
 func (repo *repository) Tags(ctx context.Context) distribution.TagService {
+	limit := DefaultConcurrencyLimit
+	if repo.tagLookupConcurrencyLimit > 0 {
+		limit = repo.tagLookupConcurrencyLimit
+	}
 	tags := &tagStore{
-		repository: repo,
-		blobStore:  repo.registry.blobStore,
+		repository:       repo,
+		blobStore:        repo.registry.blobStore,
+		concurrencyLimit: limit,
+		deleteEnabled:    repo.registry.deleteEnabled,
 	}
 
 	return tags
@@ -221,6 +279,10 @@ func (repo *repository) Manifests(ctx context.Context, options ...distribution.M
 		blobStore:  repo.blobStore,
 		repository: repo,
 		linkPath:   manifestRevisionLinkPath,
+	}
+
+	if repo.descriptorCache != nil {
+		statter = cache.NewCachedBlobStatter(repo.descriptorCache, statter)
 	}
 
 	if repo.registry.blobDescriptorServiceFactory != nil {
@@ -240,46 +302,50 @@ func (repo *repository) Manifests(ctx context.Context, options ...distribution.M
 		linkDirectoryPathSpec: manifestDirectoryPathSpec,
 	}
 
-	var v1Handler ManifestHandler
+	schema1Handler := ManifestHandler(&v1UnsupportedHandler{
+		innerHandler: &signedManifestHandler{
+			ctx:               ctx,
+			schema1SigningKey: repo.schema1SigningKey,
+			repository:        repo,
+			blobStore:         blobStore,
+		},
+	})
 	if repo.schema1Enabled {
-		v1Handler = &signedManifestHandler{
+		schema1Handler = &signedManifestHandler{
 			ctx:               ctx,
 			schema1SigningKey: repo.schema1SigningKey,
 			repository:        repo,
 			blobStore:         blobStore,
 		}
-	} else {
-		v1Handler = &v1UnsupportedHandler{
-			innerHandler: &signedManifestHandler{
-				ctx:               ctx,
-				schema1SigningKey: repo.schema1SigningKey,
-				repository:        repo,
-				blobStore:         blobStore,
-			},
-		}
+	}
+
+	manifestListHandler := &manifestListHandler{
+		ctx:                  ctx,
+		repository:           repo,
+		blobStore:            blobStore,
+		validateImageIndexes: repo.validateImageIndexes,
 	}
 
 	ms := &manifestStore{
 		ctx:            ctx,
 		repository:     repo,
 		blobStore:      blobStore,
-		schema1Handler: v1Handler,
+		schema1Handler: schema1Handler,
 		schema2Handler: &schema2ManifestHandler{
 			ctx:          ctx,
 			repository:   repo,
 			blobStore:    blobStore,
 			manifestURLs: repo.registry.manifestURLs,
 		},
-		manifestListHandler: &manifestListHandler{
-			ctx:        ctx,
-			repository: repo,
-			blobStore:  blobStore,
-		},
+		manifestListHandler: manifestListHandler,
 		ocischemaHandler: &ocischemaManifestHandler{
 			ctx:          ctx,
 			repository:   repo,
 			blobStore:    blobStore,
 			manifestURLs: repo.registry.manifestURLs,
+		},
+		ocischemaIndexHandler: &ocischemaIndexHandler{
+			manifestListHandler: manifestListHandler,
 		},
 	}
 

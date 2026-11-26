@@ -18,9 +18,16 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/distribution/distribution/v3/internal/dcontext"
 	"github.com/distribution/distribution/v3/registry/auth"
+	"github.com/sirupsen/logrus"
 )
+
+func init() {
+	if err := auth.Register("htpasswd", auth.InitFunc(newAccessController)); err != nil {
+		logrus.Errorf("failed to register htpasswd auth: %v", err)
+	}
+}
 
 type accessController struct {
 	realm    string
@@ -28,11 +35,14 @@ type accessController struct {
 	modtime  time.Time
 	mu       sync.Mutex
 	htpasswd *htpasswd
+
+	// overrideDummyHash allows overriding the dummy-hash for testing.
+	overrideDummyHash []byte
 }
 
 var _ auth.AccessController = &accessController{}
 
-func newAccessController(options map[string]interface{}) (auth.AccessController, error) {
+func newAccessController(options map[string]any) (auth.AccessController, error) {
 	realm, present := options["realm"]
 	if _, ok := realm.(string); !present || !ok {
 		return nil, fmt.Errorf(`"realm" must be set for htpasswd access controller`)
@@ -46,15 +56,16 @@ func newAccessController(options map[string]interface{}) (auth.AccessController,
 	if err := createHtpasswdFile(path); err != nil {
 		return nil, err
 	}
-	return &accessController{realm: realm.(string), path: path}, nil
-}
-
-func (ac *accessController) Authorized(ctx context.Context, accessRecords ...auth.Access) (context.Context, error) {
-	req, err := dcontext.GetRequest(ctx)
-	if err != nil {
-		return nil, err
+	var dummyHash []byte
+	if hash, ok := options["overrideDummyHash"]; ok {
+		// override dummy hash for testing
+		dummyHash = hash.([]byte)
 	}
 
+	return &accessController{realm: realm.(string), path: path, overrideDummyHash: dummyHash}, nil
+}
+
+func (ac *accessController) Authorized(req *http.Request, accessRecords ...auth.Access) (*auth.Grant, error) {
 	username, password, ok := req.BasicAuth()
 	if !ok {
 		return nil, &challenge{
@@ -81,7 +92,7 @@ func (ac *accessController) Authorized(ctx context.Context, accessRecords ...aut
 		}
 		defer f.Close()
 
-		h, err := newHTPasswd(f)
+		h, err := newHTPasswd(f, ac.overrideDummyHash)
 		if err != nil {
 			ac.mu.Unlock()
 			return nil, err
@@ -91,15 +102,14 @@ func (ac *accessController) Authorized(ctx context.Context, accessRecords ...aut
 	localHTPasswd := ac.htpasswd
 	ac.mu.Unlock()
 
-	if err := localHTPasswd.authenticateUser(username, password); err != nil {
-		dcontext.GetLogger(ctx).Errorf("error authenticating user %q: %v", username, err)
+	if err := localHTPasswd.authenticateUser(req.Context(), username, password); err != nil {
 		return nil, &challenge{
 			realm: ac.realm,
-			err:   auth.ErrAuthenticationFailure,
+			err:   err,
 		}
 	}
 
-	return auth.WithUser(ctx, auth.UserInfo{Name: username}), nil
+	return &auth.Grant{User: auth.UserInfo{Name: username}}, nil
 }
 
 // challenge implements the auth.Challenge interface.
@@ -145,16 +155,12 @@ func createHtpasswdFile(path string) error {
 	if err != nil {
 		return err
 	}
-	if _, err := f.Write([]byte(fmt.Sprintf("docker:%s", string(encryptedPass[:])))); err != nil {
+	if _, err := fmt.Fprintf(f, "docker:%s", string(encryptedPass[:])); err != nil {
 		return err
 	}
-	dcontext.GetLoggerWithFields(context.Background(), map[interface{}]interface{}{
+	dcontext.GetLoggerWithFields(context.Background(), map[any]any{
 		"user":     "docker",
 		"password": pass,
 	}).Warnf("htpasswd is missing, provisioning with default user")
 	return nil
-}
-
-func init() {
-	auth.Register("htpasswd", auth.InitFunc(newAccessController))
 }

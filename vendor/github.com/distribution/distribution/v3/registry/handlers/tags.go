@@ -2,13 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
-	"sort"
 	"strconv"
 
 	"github.com/distribution/distribution/v3"
 	"github.com/distribution/distribution/v3/registry/api/errcode"
-	v2 "github.com/distribution/distribution/v3/registry/api/v2"
 	"github.com/gorilla/handlers"
 )
 
@@ -35,73 +34,71 @@ type tagsAPIResponse struct {
 
 // GetTags returns a json list of tags for a specific image name.
 func (th *tagsHandler) GetTags(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
+	var moreEntries = true
 
-	tagService := th.Repository.Tags(th)
-	tags, err := tagService.All(th)
-	if err != nil {
-		switch err := err.(type) {
-		case distribution.ErrRepositoryUnknown:
-			th.Errors = append(th.Errors, v2.ErrorCodeNameUnknown.WithDetail(map[string]string{"name": th.Repository.Named().Name()}))
-		case errcode.Error:
-			th.Errors = append(th.Errors, err)
-		default:
-			th.Errors = append(th.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
-		}
-		return
-	}
-
-	// do pagination if requested
 	q := r.URL.Query()
-	// get entries after latest, if any specified
-	if lastEntry := q.Get("last"); lastEntry != "" {
-		lastEntryIndex := sort.SearchStrings(tags, lastEntry)
+	lastEntry := q.Get("last")
 
-		// as`sort.SearchStrings` can return len(tags), if the
-		// specified `lastEntry` is not found, we need to
-		// ensure it does not panic when slicing.
-		if lastEntryIndex == len(tags) {
-			tags = []string{}
-		} else {
-			tags = tags[lastEntryIndex+1:]
-		}
-	}
+	limit := -1
 
-	// if no error, means that the user requested `n` entries
 	if n := q.Get("n"); n != "" {
-		maxEntries, err := strconv.Atoi(n)
-		if err != nil || maxEntries < 0 {
-			th.Errors = append(th.Errors, v2.ErrorCodePaginationNumberInvalid.WithDetail(map[string]string{"n": n}))
+		parsedMax, err := strconv.Atoi(n)
+		if err != nil || parsedMax < 0 {
+			th.Errors = append(th.Errors, errcode.ErrorCodePaginationNumberInvalid.WithDetail(map[string]int{"n": parsedMax}))
 			return
 		}
+		limit = parsedMax
+		// Per the OCI distribution-spec, a server MAY return fewer than n
+		// results when a Link header is provided for continuation. Clamp to
+		// MaxTags instead of rejecting oversized requests.
+		if maxTags := th.App.Config.Tags.MaxTags; maxTags > 0 && limit > maxTags {
+			limit = maxTags
+		}
+	}
 
-		// if there is requested more than or
-		// equal to the amount of tags we have,
-		// then set the request to equal `len(tags)`.
-		// the reason for the `=`, is so the else
-		// clause will only activate if there
-		// are tags left the user needs.
-		if maxEntries >= len(tags) {
-			maxEntries = len(tags)
-		} else if maxEntries > 0 {
-			// defined in `catalog.go`
-			urlStr, err := createLinkEntry(r.URL.String(), maxEntries, tags[maxEntries-1])
-			if err != nil {
-				th.Errors = append(th.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
+	filled := make([]string, 0)
+
+	if limit == 0 {
+		moreEntries = false
+	} else {
+		tagService := th.Repository.Tags(th)
+		// if limit is -1, we want to list all the tags, and receive a io.EOF error
+		returnedTags, err := tagService.List(th.Context, limit, lastEntry)
+		if err != nil {
+			if err != io.EOF {
+				switch err := err.(type) {
+				case distribution.ErrRepositoryUnknown:
+					th.Errors = append(th.Errors, errcode.ErrorCodeNameUnknown.WithDetail(map[string]string{"name": th.Repository.Named().Name()}))
+				case errcode.Error:
+					th.Errors = append(th.Errors, err)
+				default:
+					th.Errors = append(th.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
+				}
 				return
 			}
-			w.Header().Set("Link", urlStr)
+			// err is either io.EOF
+			moreEntries = false
 		}
-
-		tags = tags[:maxEntries]
+		filled = returnedTags
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
+	// Add a link header if there are more entries to retrieve
+	if moreEntries {
+		lastEntry = filled[len(filled)-1]
+		urlStr, err := createLinkEntry(r.URL.String(), limit, lastEntry)
+		if err != nil {
+			th.Errors = append(th.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
+			return
+		}
+		w.Header().Set("Link", urlStr)
+	}
+
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(tagsAPIResponse{
 		Name: th.Repository.Named().Name(),
-		Tags: tags,
+		Tags: filled,
 	}); err != nil {
 		th.Errors = append(th.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
 		return

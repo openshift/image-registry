@@ -26,6 +26,8 @@ const (
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_SERVER_ADDR instead.
 	dockerRegistryURLEnvVar = "DOCKER_REGISTRY_URL"
 
+	openShiftMiddlewareEnvPrefix = "REGISTRY_MIDDLEWARE_REPOSITORY_OPENSHIFT_"
+
 	// openShiftDockerRegistryURLEnvVar is an optional environment that overrides the
 	// DOCKER_REGISTRY_URL.
 	// DEPRECATED: Use the REGISTRY_OPENSHIFT_SERVER_ADDR instead.
@@ -196,6 +198,14 @@ func Parse(rd io.Reader) (*configuration.Configuration, *Configuration, error) {
 		return nil, nil, err
 	}
 
+	// The upstream parser rejects environment variables that address the
+	// middleware lists by name instead of by index, so hide our own
+	// middleware variables from it and restore them for InitExtraConfig.
+	middlewareEnv, err := popEnv(openShiftMiddlewareEnvPrefix)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	dockerConfig, err := configuration.Parse(bytes.NewBuffer(in))
 	if err != nil {
 		return nil, nil, err
@@ -236,6 +246,9 @@ func Parse(rd io.Reader) (*configuration.Configuration, *Configuration, error) {
 		return nil, nil, err
 	}
 	if err := pushEnv(dockerEnv); err != nil {
+		return nil, nil, err
+	}
+	if err := pushEnv(middlewareEnv); err != nil {
 		return nil, nil, err
 	}
 

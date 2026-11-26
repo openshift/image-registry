@@ -318,6 +318,9 @@ func (m *testBlobDescriptorManager) getStats(minimumLimits map[string]int, timeo
 	for k, v := range m.stats {
 		stats[k] = v
 	}
+	if err != nil {
+		err = fmt.Errorf("%w: want at least %v, got %v", err, minimumLimits, stats)
+	}
 
 	return stats, err
 }
@@ -411,15 +414,17 @@ type fakeAccessController struct {
 	userClient registryclient.Interface
 }
 
-func (f *fakeAccessController) Authorized(ctx context.Context, access ...registryauth.Access) (context.Context, error) {
+func (f *fakeAccessController) Authorized(r *http.Request, access ...registryauth.Access) (*registryauth.Grant, error) {
 	for _, access := range access {
 		f.t.Logf("fake authorizer: authorizing access to %s:%s:%s", access.Resource.Type, access.Resource.Name, access.Action)
 	}
 
+	ctx := r.Context()
 	if f.userClient != nil {
 		ctx = withUserClient(ctx, f.userClient)
 	}
 	ctx = withAuthPerformed(ctx)
+	storeAuthContext(r, ctx)
 
-	return ctx, nil
+	return &registryauth.Grant{}, nil
 }

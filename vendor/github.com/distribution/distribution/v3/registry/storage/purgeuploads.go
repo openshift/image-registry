@@ -3,11 +3,12 @@ package storage
 import (
 	"context"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
 	storageDriver "github.com/distribution/distribution/v3/registry/storage/driver"
-	"github.com/distribution/distribution/v3/uuid"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -70,7 +71,12 @@ func getOutstandingUploads(ctx context.Context, driver storageDriver.StorageDriv
 	err = driver.Walk(ctx, root, func(fileInfo storageDriver.FileInfo) error {
 		filePath := fileInfo.Path()
 		_, file := path.Split(filePath)
-		if file[0] == '_' {
+		// path.Split returns file == "" for paths that end in "/" (a
+		// bare directory such as the bucket root when S3 reports an
+		// empty Key / common prefix). Indexing file[0] then panics
+		// with 'index out of range [0] with length 0' and takes the
+		// whole PurgeUploads goroutine down (#4713).
+		if len(file) > 0 && file[0] == '_' {
 			// Reserved directory
 			inUploadDir = (file == "_uploads")
 
@@ -93,7 +99,7 @@ func getOutstandingUploads(ctx context.Context, driver storageDriver.StorageDriv
 			ud.containingDir = filePath
 		}
 		if file == "startedat" {
-			if t, err := readStartedAtFile(driver, filePath); err == nil {
+			if t, err := readStartedAtFile(ctx, driver, filePath); err == nil {
 				ud.startedAt = t
 			} else {
 				errors = pushError(errors, filePath, err)
@@ -115,8 +121,8 @@ func getOutstandingUploads(ctx context.Context, driver storageDriver.StorageDriv
 // directory for all upload files
 func uuidFromPath(path string) (string, bool) {
 	components := strings.Split(path, "/")
-	for i := len(components) - 1; i >= 0; i-- {
-		if u, err := uuid.Parse(components[i]); err == nil {
+	for i, v := range slices.Backward(components) {
+		if u, err := uuid.Parse(v); err == nil {
 			return u.String(), i == len(components)-1
 		}
 	}
@@ -124,9 +130,8 @@ func uuidFromPath(path string) (string, bool) {
 }
 
 // readStartedAtFile reads the date from an upload's startedAtFile
-func readStartedAtFile(driver storageDriver.StorageDriver, path string) (time.Time, error) {
-	// todo:(richardscothern) - pass in a context
-	startedAtBytes, err := driver.GetContent(context.Background(), path)
+func readStartedAtFile(ctx context.Context, driver storageDriver.StorageDriver, path string) (time.Time, error) {
+	startedAtBytes, err := driver.GetContent(ctx, path)
 	if err != nil {
 		return time.Now(), err
 	}

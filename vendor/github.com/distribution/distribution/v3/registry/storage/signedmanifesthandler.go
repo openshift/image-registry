@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/distribution/distribution/v3"
-	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/distribution/distribution/v3/internal/dcontext"
 	"github.com/distribution/distribution/v3/manifest/schema1" //nolint:staticcheck // Ignore SA1019: "github.com/distribution/distribution/v3/manifest/schema1" is deprecated, as it's used for backward compatibility.
-	"github.com/distribution/distribution/v3/reference"
+	"github.com/distribution/reference"
 	"github.com/docker/libtrust"
 	"github.com/opencontainers/go-digest"
 )
@@ -87,11 +87,11 @@ func (ms *signedManifestHandler) Put(ctx context.Context, manifest distribution.
 func (ms *signedManifestHandler) verifyManifest(ctx context.Context, mnfst schema1.SignedManifest, skipDependencyVerification bool) error { //nolint:staticcheck // Ignore SA1019: "github.com/distribution/distribution/v3/manifest/schema1" is deprecated, as it's used for backward compatibility.
 	var errs distribution.ErrManifestVerification
 
-	if len(mnfst.Name) > reference.NameTotalLengthMax {
+	if len(mnfst.Name) > reference.RepositoryNameTotalLengthMax {
 		errs = append(errs,
 			distribution.ErrManifestNameInvalid{
 				Name:   mnfst.Name,
-				Reason: fmt.Errorf("manifest name must not be more than %v characters", reference.NameTotalLengthMax),
+				Reason: fmt.Errorf("manifest name must not be more than %v characters", reference.RepositoryNameTotalLengthMax),
 			})
 	}
 

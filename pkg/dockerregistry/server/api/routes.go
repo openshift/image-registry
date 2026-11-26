@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/distribution/distribution/v3/reference"
+	"github.com/distribution/reference"
 )
 
 var (

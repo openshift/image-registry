@@ -3,12 +3,13 @@ package storagepath_test
 import (
 	"context"
 	"io"
+	"net/http"
 	"testing"
 
-	"github.com/distribution/distribution/v3/reference"
 	"github.com/distribution/distribution/v3/registry/storage"
 	storagedriver "github.com/distribution/distribution/v3/registry/storage/driver"
 	"github.com/distribution/distribution/v3/registry/storage/driver/inmemory"
+	"github.com/distribution/reference"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/testutil/logger"
@@ -66,14 +67,14 @@ func (sd *storageDriver) Delete(ctx context.Context, path string) error {
 	return sd.storageDriver.Delete(ctx, path)
 }
 
-func (sd *storageDriver) URLFor(ctx context.Context, path string, options map[string]interface{}) (string, error) {
+func (sd *storageDriver) RedirectURL(r *http.Request, path string) (string, error) {
 	sd.logger.Printf("URL %s", path)
-	return sd.storageDriver.URLFor(ctx, path, options)
+	return sd.storageDriver.RedirectURL(r, path)
 }
 
-func (sd *storageDriver) Walk(ctx context.Context, path string, f storagedriver.WalkFn) error {
+func (sd *storageDriver) Walk(ctx context.Context, path string, f storagedriver.WalkFn, options ...func(*storagedriver.WalkOptions)) error {
 	sd.logger.Printf("WALK %s", path)
-	return sd.storageDriver.Walk(ctx, path, f)
+	return sd.storageDriver.Walk(ctx, path, f, options...)
 }
 
 func TestManifest(t *testing.T) {
@@ -115,8 +116,6 @@ func TestManifest(t *testing.T) {
 
 	if err := logger.Compare([]string{
 		"GET " + storagepath.Manifest(reponame, dgst),
-		// There is an old version of Distribution that writes manifest links to a wrong place.
-		"GET " + storagepath.Layer(reponame, dgst),
 	}); err != nil {
 		t.Fatal(err)
 	}

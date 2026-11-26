@@ -113,7 +113,7 @@ func init() {
 		logrus.Fatalf("Unable to register auth middleware: %v", err)
 	}
 
-	err = storagemw.Register(Name, func(driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
+	err = storagemw.Register(Name, func(ctx context.Context, driver storagedriver.StorageDriver, options map[string]interface{}) (storagedriver.StorageDriver, error) {
 		inst := getInstance(options)
 		if inst == nil {
 			return nil, fmt.Errorf("failed to find an application instance in the storage driver middleware")
@@ -124,7 +124,7 @@ func init() {
 		logrus.Fatalf("Unable to register storage middleware: %v", err)
 	}
 
-	err = registrymw.Register(Name, func(ctx context.Context, registry distribution.Namespace, options map[string]interface{}) (distribution.Namespace, error) {
+	err = registrymw.Register(Name, func(ctx context.Context, registry distribution.Namespace, driver storagedriver.StorageDriver, options map[string]interface{}) (distribution.Namespace, error) {
 		inst := getInstance(options)
 		if inst == nil {
 			return nil, fmt.Errorf("failed to find an application instance in the registry middleware")

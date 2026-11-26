@@ -850,7 +850,7 @@ func (t *testBlobStore) Get(ctx context.Context, dgst digest.Digest) ([]byte, er
 	return content, nil
 }
 
-func (t *testBlobStore) Open(ctx context.Context, dgst digest.Digest) (distribution.ReadSeekCloser, error) {
+func (t *testBlobStore) Open(ctx context.Context, dgst digest.Digest) (io.ReadSeekCloser, error) {
 	t.calls["Open"]++
 	content, exists := t.blobs[dgst]
 	if !exists {
@@ -905,7 +905,7 @@ type testBlobFileReader struct {
 	offset  int64
 }
 
-var _ distribution.ReadSeekCloser = &testBlobFileReader{}
+var _ io.ReadSeekCloser = &testBlobFileReader{}
 
 func (fr *testBlobFileReader) Read(p []byte) (n int, err error) {
 	fr.bs.calls["ReadSeakCloser.Read"]++

@@ -6,9 +6,9 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/reference"
 	registrymw "github.com/distribution/distribution/v3/registry/middleware/registry"
 	"github.com/distribution/distribution/v3/registry/storage"
+	"github.com/distribution/reference"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/openshift/image-registry/pkg/dockerregistry/server/wrapped"

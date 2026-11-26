@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/distribution/distribution/v3"
-	"github.com/distribution/distribution/v3/context"
-	"github.com/distribution/distribution/v3/reference"
-	"github.com/distribution/distribution/v3/uuid"
+	"github.com/distribution/distribution/v3/internal/requestutil"
+	"github.com/distribution/distribution/v3/internal/uuid"
+	"github.com/distribution/reference"
 	events "github.com/docker/go-events"
 	"github.com/opencontainers/go-digest"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type bridge struct {
@@ -49,7 +50,7 @@ func NewBridge(ub URLBuilder, source SourceRecord, actor ActorRecord, request Re
 func NewRequestRecord(id string, r *http.Request) RequestRecord {
 	return RequestRecord{
 		ID:        id,
-		Addr:      context.RemoteAddr(r),
+		Addr:      requestutil.RemoteAddr(r),
 		Host:      r.Host,
 		Method:    r.Method,
 		UserAgent: r.UserAgent(),
@@ -90,15 +91,15 @@ func (b *bridge) ManifestDeleted(repo reference.Named, dgst digest.Digest) error
 	return b.createManifestDeleteEventAndWrite(EventActionDelete, repo, dgst)
 }
 
-func (b *bridge) BlobPushed(repo reference.Named, desc distribution.Descriptor) error {
+func (b *bridge) BlobPushed(repo reference.Named, desc v1.Descriptor) error {
 	return b.createBlobEventAndWrite(EventActionPush, repo, desc)
 }
 
-func (b *bridge) BlobPulled(repo reference.Named, desc distribution.Descriptor) error {
+func (b *bridge) BlobPulled(repo reference.Named, desc v1.Descriptor) error {
 	return b.createBlobEventAndWrite(EventActionPull, repo, desc)
 }
 
-func (b *bridge) BlobMounted(repo reference.Named, desc distribution.Descriptor, fromRepo reference.Named) error {
+func (b *bridge) BlobMounted(repo reference.Named, desc v1.Descriptor, fromRepo reference.Named) error {
 	event, err := b.createBlobEvent(EventActionMount, repo, desc)
 	if err != nil {
 		return err
@@ -178,7 +179,7 @@ func (b *bridge) createBlobDeleteEventAndWrite(action string, repo reference.Nam
 	return b.sink.Write(*event)
 }
 
-func (b *bridge) createBlobEventAndWrite(action string, repo reference.Named, desc distribution.Descriptor) error {
+func (b *bridge) createBlobEventAndWrite(action string, repo reference.Named, desc v1.Descriptor) error {
 	event, err := b.createBlobEvent(action, repo, desc)
 	if err != nil {
 		return err
@@ -187,7 +188,7 @@ func (b *bridge) createBlobEventAndWrite(action string, repo reference.Named, de
 	return b.sink.Write(*event)
 }
 
-func (b *bridge) createBlobEvent(action string, repo reference.Named, desc distribution.Descriptor) (*Event, error) {
+func (b *bridge) createBlobEvent(action string, repo reference.Named, desc v1.Descriptor) (*Event, error) {
 	event := b.createEvent(action)
 	event.Target.Descriptor = desc
 	event.Target.Length = desc.Size
@@ -219,7 +220,7 @@ func (b *bridge) createEvent(action string) *Event {
 // createEvent returns a new event, timestamped, with the specified action.
 func createEvent(action string) *Event {
 	return &Event{
-		ID:        uuid.Generate().String(),
+		ID:        uuid.NewString(),
 		Timestamp: time.Now(),
 		Action:    action,
 	}

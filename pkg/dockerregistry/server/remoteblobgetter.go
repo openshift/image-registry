@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"sync"
 
@@ -200,7 +201,7 @@ func (rbgs *remoteBlobGetterService) Stat(ctx context.Context, dgst digest.Diges
 	return desc, nil
 }
 
-func (rbgs *remoteBlobGetterService) Open(ctx context.Context, dgst digest.Digest) (distribution.ReadSeekCloser, error) {
+func (rbgs *remoteBlobGetterService) Open(ctx context.Context, dgst digest.Digest) (io.ReadSeekCloser, error) {
 	dcontext.GetLogger(ctx).Debugf("(*remoteBlobGetterService).Open: starting with dgst=%s", dgst)
 	bs, ok := rbgs.digestToStore.Get(dgst)
 	if !ok {

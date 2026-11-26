@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	dcontext "github.com/distribution/distribution/v3/context"
+	"github.com/distribution/distribution/v3/internal/dcontext"
 )
 
 // closeResources closes all the provided resources after running the target
@@ -50,7 +50,7 @@ func copyFullPayload(ctx context.Context, responseWriter http.ResponseWriter, r 
 			// instead of showing 0 for the HTTP status.
 			responseWriter.WriteHeader(499)
 
-			dcontext.GetLoggerWithFields(ctx, map[interface{}]interface{}{
+			dcontext.GetLoggerWithFields(ctx, map[any]any{
 				"error":         err,
 				"copied":        copied,
 				"contentLength": r.ContentLength,

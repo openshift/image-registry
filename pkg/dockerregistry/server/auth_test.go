@@ -442,7 +442,7 @@ func TestAccessController(t *testing.T) {
 				t.Fatal(err)
 			}
 			ctx = dcontext.WithRequest(ctx, req)
-			authCtx, err := accessController.Authorized(ctx, test.access...)
+			grant, err := accessController.Authorized(req.WithContext(ctx), test.access...)
 			server.Close()
 
 			expectedActions := test.expectedActions
@@ -457,13 +457,13 @@ func TestAccessController(t *testing.T) {
 				if err != test.expectedError {
 					t.Fatalf("accessController did not get expected error - got %#+v - expected %v", err, test.expectedError)
 				}
-				if authCtx == nil {
-					t.Fatalf("expected auth context but got nil")
+				if grant == nil {
+					t.Fatalf("expected auth grant but got nil")
 				}
-				if !authPerformed(authCtx) {
+				if !authPerformed(ctx) {
 					t.Fatalf("expected AuthPerformed to be true")
 				}
-				deferredErrors, hasDeferred := deferredErrorsFrom(authCtx)
+				deferredErrors, hasDeferred := deferredErrorsFrom(ctx)
 				if len(test.expectedRepoErr) > 0 {
 					if !hasDeferred || deferredErrors[test.expectedRepoErr] == nil {
 						t.Fatalf("expected deferred error for repo %s, got none", test.expectedRepoErr)
@@ -489,8 +489,8 @@ func TestAccessController(t *testing.T) {
 				if err.Error() != test.expectedError.Error() {
 					t.Fatalf("accessController did not get expected error - got %+v - expected %s", err, test.expectedError)
 				}
-				if authCtx != nil {
-					t.Fatalf("expected nil auth context but got %s", authCtx)
+				if grant != nil {
+					t.Fatalf("expected nil auth grant but got %#v", grant)
 				}
 			}
 		})
